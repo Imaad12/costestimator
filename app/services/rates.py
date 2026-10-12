@@ -199,6 +199,8 @@ def _validate_for_approval(r: dict) -> None:
         raise ValidationFailed("A valid price_date is required before approval.", code="PRICE_DATE_REQUIRED")
     if r["valid_until"] and parse_date(r["valid_until"]) and parse_date(r["valid_until"]) < parse_date(r["price_date"]):
         raise ValidationFailed("valid_until precedes price_date.")
+    if r["valid_until"] and parse_date(r["valid_until"]) < parse_date(today_iso()):
+        raise ValidationFailed("The rate's validity has already lapsed (valid_until is in the past); an expired rate cannot be approved.", code="RATE_ALREADY_EXPIRED")
     if r["rate_type"] in (RateType.VERIFIED_SUPPLIER_QUOTE.value,) and not (r["quotation_line_id"] or r["evidence"]):
         raise ValidationFailed("Verified Supplier Quote requires the originating quotation line or evidence.",
                                code="EVIDENCE_REQUIRED")

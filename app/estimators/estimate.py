@@ -66,6 +66,24 @@ def _resolve_refs(db: Database, project_id: str, obj: Any, used: list, unresolve
     return obj
 
 
+def _effective_indirects(items: list[dict], include_unapproved: bool) -> list[dict]:
+    """One row per code: the latest APPROVED version stays in force while a newer draft/pending revision awaits approval
+    (preliminary view uses the newer revision, flagged). Never both (no double count)."""
+    by: dict[str, list[dict]] = {}
+    for it in items:
+        by.setdefault(it["code"], []).append(it)
+    out = []
+    for code, versions in by.items():
+        versions.sort(key=lambda v: v["version"])
+        approved = [v for v in versions if v["status"] == Status.APPROVED.value]
+        newest = versions[-1]
+        if approved and not (include_unapproved and newest["version"] > approved[-1]["version"]):
+            out.append(approved[-1])
+        else:
+            out.append(newest)
+    return out
+
+
 def effective_duration(db: Database, project_id: str, include_unapproved: bool) -> tuple[Decimal | None, str | None, dict | None]:
     r = db.one("SELECT * FROM project_durations WHERE project_id=? AND status='Approved' ORDER BY id DESC LIMIT 1", (project_id,))
     if r is None and include_unapproved:
@@ -108,6 +126,7 @@ def compute_estimate(db: Database, project_id: str, *, include_unapproved: bool 
     ind_items = rows_to_dicts(db.all("SELECT * FROM indirect_items WHERE project_id=? AND status<>'Superseded' ORDER BY code",
                                      (project_id,)))
     wdpm, wdpw = ek_num("calendar.working_days_per_month"), ek_num("calendar.working_days_per_week")
+    ind_items = _effective_indirects(ind_items, include_unapproved)
     indirect = compute_indirects(ind_items, direct_cost_total=direct.direct_cost_total, duration_months=dur_months,
                                  duration_status=dur_status, working_days_per_month=wdpm, working_days_per_week=wdpw,
                                  money_dp=direct.money_dp, include_unapproved=include_unapproved)

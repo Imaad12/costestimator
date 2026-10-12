@@ -55,10 +55,16 @@ def detect_needs(db: Database, actor: Actor, project_id: str) -> dict:
     seen_ids: list[str] = []
     for (rid, code), a in agg.items():
         res = resources.get(rid) or dict(db.one("SELECT * FROM resources WHERE id=?", (rid,)))
-        lines = [l for l in lines_by_res.get(rid, []) if l.amount is None]
-        qty = sum((l.quantity for l in lines if l.quantity is not None), ZERO)
-        exposure = sum((l.indicative_amount for l in lines if l.indicative_amount is not None), ZERO)
-        known = any(l.indicative_amount is not None for l in lines)
+        if code == "RATE_WARNING":      # priced lines whose rate is aged / low-confidence: exposure = value resting on that rate
+            lines = list(lines_by_res.get(rid, []))
+            qty = sum((l.quantity for l in lines if l.quantity is not None), ZERO)
+            exposure = sum((l.amount for l in lines if l.amount is not None), ZERO)
+            known = bool(lines)
+        else:
+            lines = [l for l in lines_by_res.get(rid, []) if l.amount is None]
+            qty = sum((l.quantity for l in lines if l.quantity is not None), ZERO)
+            exposure = sum((l.indicative_amount for l in lines if l.indicative_amount is not None), ZERO)
+            known = any(l.indicative_amount is not None for l in lines)
         cc = res.get("cost_code") or ""
         pkg = ensure_package(db, project_id, cc, actor.username)
         item_keys = sorted(a["items"])

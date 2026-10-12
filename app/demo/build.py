@@ -52,7 +52,7 @@ def write_demo_boq(path: Path) -> Path:
 
 def _approve_rate(db, rid: str, price, unit: str, **kw) -> int:
     r = rates.propose_rate(db, SEED, rid, unit_price=price, rate_type="Synthetic Demonstration Rate", unit=unit, price_date="2026-09-01",
-                           confidence="Low", is_synthetic=True, evidence=D.TAG, submit=True, **kw)
+                           confidence="Medium", is_synthetic=True, evidence=D.TAG, submit=True, **kw)
     rates.approve_rate(db, SEED, r, comments=NOTE)
     return r
 
@@ -72,11 +72,13 @@ def seed_demo(db: Database, project_name: str = "DEMO - Synthetic Mixed-Use Buil
                 _approve_rate(db, rid, price, rate_unit or unit)
             elif state == "pending":
                 rates.propose_rate(db, SEED, rid, unit_price=price, rate_type="Synthetic Demonstration Rate", unit=unit, price_date="2026-09-01",
-                                   confidence="Low", is_synthetic=True, evidence=D.TAG, submit=True)
+                                   confidence="Medium", is_synthetic=True, evidence=D.TAG, submit=True)
             elif state == "expired":
                 r = rates.propose_rate(db, SEED, rid, unit_price=price, rate_type="Synthetic Demonstration Rate", unit=unit, price_date="2026-01-15",
-                                       valid_until="2026-03-31", confidence="Low", is_synthetic=True, evidence=D.TAG, submit=True)
+                                       valid_until="2099-01-01", confidence="Medium", is_synthetic=True, evidence=D.TAG, submit=True)
                 rates.approve_rate(db, SEED, r, comments=NOTE)
+                db.update("resource_rates", {"valid_until": "2026-03-31"}, "id=?", (r,))      # simulate time passing: validity lapsed
+                rates.expire_stale_rates(db, actor=SEED)
         for rid, d in D.LABOUR_BUILDUP.items():
             rates.create_resource(db, SEED, resource_type="labour", description=d["desc"], unit="hr", cost_code=d["cc"], id=rid, is_synthetic=True, notes=D.TAG)
             _approve_rate(db, rid, None, "hr", components=d["comps"])
@@ -136,6 +138,7 @@ def seed_demo(db: Database, project_name: str = "DEMO - Synthetic Mixed-Use Buil
             elif kind == "UNPRICED":
                 boq.set_cost_code(db, SEED, pid, key, "A.05")
             elif kind == "DUP":
+                boq.map_to_assembly(db, SEED, pid, key, "DEMO-A-CABLE", comment=NOTE)
                 boq.set_cost_code(db, SEED, pid, key, "H.06")
         registers.add_clarification(db, SEED, pid, "Item 9.1: please confirm lift speed, capacity and the number of landings; drawing reference is missing.",
                                     trade="Specialist", boq_item_key="9.1", doc_ref="(none)", reason="Missing drawing/spec reference on a high-value item",

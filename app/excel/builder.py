@@ -39,6 +39,23 @@ def cellvalue(v: Any) -> Any:
     return v
 
 
+def _typed(v: Any, col: Col) -> Any:
+    """Database TEXT decimals/dates become real numbers/dates in numeric/date columns so Excel formulas work."""
+    if not isinstance(v, str) or not col.fmt:
+        return v
+    from .spec import DATE
+    if col.fmt == DATE:
+        from ..core.timeutil import parse_date
+        d = parse_date(v)
+        return d if d else v
+    if col.fmt != "@":
+        try:
+            return float(Decimal(v.replace(",", "")))
+        except Exception:
+            return v
+    return v
+
+
 def list_ref(name: str) -> str:
     return f"=Lists!${_list_col(name)}$2:${_list_col(name)}$60"
 
@@ -112,7 +129,7 @@ def write_sheet(wb, spec: Sheet, rows: Iterable[dict] | None, *, meta: str = "",
             if col.kind == "calc" and col.formula:
                 c.value = col.formula.format(r=r)
             else:
-                c.value = cellvalue(data.get(col.key))
+                c.value = _typed(cellvalue(data.get(col.key)), col)
             c.border = BORDER
             if col.fmt:
                 c.number_format = col.fmt
