@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table %}{% block body %}
+<h1>Dataset #{{ ds.id }} — {{ ds.file_name }} {{ tag(ds.status) }}</h1><p class="muted">Rows are validated but nothing is published until you accept rows and publish. Published rates become <i>Pending Review</i>, never Approved. Conflicting rows are never merged automatically.</p>
+<table><thead><tr><th>Row</th><th>Resource</th><th>Unit</th><th>Price</th><th>Ccy</th><th>Type</th><th>Date</th><th>Issues</th><th>Decision</th></tr></thead><tbody>
+{% for r in rows %}<tr><td>{{ r.row_no }}</td><td>{{ r.resource_id }}</td><td>{{ r.unit }}</td><td>{{ r.unit_price }}</td><td>{{ r.currency }}</td><td>{{ r.rate_type }}</td><td>{{ r.price_date }}</td>
+<td>{% for i in r.issues %}<div class="{{ 'muted' if i.level == 'warning' else '' }}"><span class="tag {{ 'Open' if i.level == 'error' else 'Low' }}">{{ i.code }}</span> {{ i.message }}</div>{% endfor %}</td>
+<td>{{ r.decision }}{% if not r.blocking and r.decision == 'Pending' %}<form class="inline" method="post" action="/ui/do/decide_dataset_rows"><input type="hidden" name="_next" value="/datasets/{{ ds.id }}"><input type="hidden" name="dataset_id" value="{{ ds.id }}"><input type="hidden" name="row_ids" value="{{ r.id }}"><button class="sm" name="decision" value="Accept">Accept</button><button class="sm danger" name="decision" value="Reject">Reject</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% if ds.status == 'Staged' %}<form method="post" action="/ui/do/publish_dataset"><input type="hidden" name="_next" value="/datasets/{{ ds.id }}"><input type="hidden" name="dataset_id" value="{{ ds.id }}"><button>Publish accepted rows as Pending Review rates</button></form>{% endif %}
+{% endblock %}

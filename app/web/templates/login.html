@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block body %}
+<div class="card" style="max-width:380px;margin:40px auto"><h1>Sign in</h1>
+<p class="muted">Local application. Roles: Estimator, Procurement Reviewer, Commercial Approver, Administrator, Viewer. Permissions are enforced on the server.</p>
+<form method="post" action="/login" class="stack"><label>Username</label><input name="username" autofocus required style="width:100%">
+<label>Password</label><input type="password" name="password" required style="width:100%"><p><button>Sign in</button></p></form></div>{% endblock %}

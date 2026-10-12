@@ -1,0 +1,24 @@
+{% macro tag(v) %}{% if v is not none %}<span class="tag {{ (v|string).split(' ')[0].replace('—','') }}">{{ v }}</span>{% endif %}{% endmacro %}
+{% macro money(v, dp=2) %}{% if v is none or v == '' %}<span class="muted">—</span>{% else %}{{ ("{:,.2f}" if dp == 2 else "{:,.3f}").format(v|float) }}{% endif %}{% endmacro %}
+{% macro tabs(project, current) %}
+<div class="sub">
+{% for key, label in [('', 'Overview'), ('boq', 'BOQ import'), ('mapping', 'Mapping'), ('estimate', 'Estimate build-up'), ('assumptions', 'Assumptions'),
+ ('procurement', 'Procurement & RFQs'), ('quotes', 'Quotations'), ('commercial', 'Indirects & commercials'), ('registers', 'Clarifications & risk'),
+ ('reconciliation', 'Reconciliation'), ('reports', 'Reports & exports')] %}
+<a href="/projects/{{ project.id }}/{{ key }}" class="{{ 'on' if key == current else '' }}">{{ label }}</a>{% endfor %}</div>
+{% if project.is_demo %}<div class="synth">DEMONSTRATION PROJECT — SYNTHETIC DATA — NOT A MARKET QUOTE</div>{% endif %}
+{% if project.status == 'Archived' %}<div class="banner warn">Project is archived (read-only).</div>{% endif %}
+{% endmacro %}
+{% macro table(rows, cols, empty="No records.") %}
+{% if rows %}<table><thead><tr>{% for c in cols %}<th>{{ c[1] }}</th>{% endfor %}</tr></thead><tbody>
+{% for r in rows %}<tr>{% for c in cols %}{% set v = r[c[0]] %}<td class="{{ 'num' if c[2:3] == ('n',) else '' }}">
+{% if c[2:3] == ('t',) %}{{ tag(v) }}{% elif c[2:3] == ('n',) %}{{ money(v) }}{% else %}{{ v if v is not none else '' }}{% endif %}</td>{% endfor %}</tr>{% endfor %}
+</tbody></table>{% else %}<p class="muted">{{ empty }}</p>{% endif %}
+{% endmacro %}
+{% macro actform(action, next, fields, label, cls="", confirm=None) %}
+<form class="inline" method="post" action="/ui/do/{{ action }}" {% if confirm %}onsubmit="return confirm('{{ confirm }}')"{% endif %}>
+<input type="hidden" name="_next" value="{{ next }}">
+{% for f in fields %}{% if f|length > 2 and f[2] == 'hidden' %}<input type="hidden" name="{{ f[0] }}" value="{{ f[1] }}">
+{% else %}<input name="{{ f[0] }}" placeholder="{{ f[1] }}" value="{{ f[2] if (f|length > 2 and f[2] is not none) else '' }}" size="{{ f[3] if f|length > 3 else 14 }}">{% endif %}{% endfor %}
+<button class="sm {{ cls }}">{{ label }}</button></form>
+{% endmacro %}

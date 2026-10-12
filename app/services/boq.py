@@ -207,3 +207,23 @@ def decide_pricing(db: Database, actor: Actor, project_id: str, item_key: str, d
     approvals.record(db, actor, Entity.PRICING_DECISION.value, item_key, act, project_id=project_id,
                      approved_value={"method": it["pricing_method"], "amount": it["pricing_amount"]}, comments=comment,
                      override_reason=comment if decision == "approve_provisional" else None)
+
+
+def acknowledge_issues(db: Database, actor: Actor, project_id: str, item_key: str, comment: str) -> None:
+    """Human confirms an import flag (e.g. a duplicate code is a genuinely separate item). Does not change quantities or units."""
+    it = get_item(db, project_id, item_key)
+    approvals.authorize(actor, Entity.BOQ_UNIT.value, "approve")
+    if not comment or len(comment.strip()) < 5:
+        raise ValidationFailed("A comment explaining why the flags are acceptable is required.", code="REASON_REQUIRED")
+    issues = jload(it["issues_json"], [])
+    if any(i["code"].startswith("UNIT_") for i in issues) or it["unit_status"] in ("ambiguous", "unknown", "missing"):
+        raise ValidationFailed("Unit problems are resolved through an approved unit correction, not acknowledged.", code="UNIT_UNRESOLVED")
+    if any(i["code"] == "MISSING_DESCRIPTION" for i in issues):
+        raise ValidationFailed("Missing description: request a description change (approved) instead.", code="DESCRIPTION_REQUIRED")
+    for i in issues:
+        if i["level"] == "error":
+            i["level"] = "acknowledged"
+            i["acknowledged_by"] = actor.username
+    db.update("boq_items", {"issues_json": issues, "validation_status": "OK"}, "id=?", (it["id"],))
+    approvals.record(db, actor, Entity.BOQ_UNIT.value, item_key, "approve", project_id=project_id,
+                     previous_value=[i["code"] for i in issues if i["level"] == "acknowledged"], comments=comment)

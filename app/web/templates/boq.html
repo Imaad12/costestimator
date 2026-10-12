@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
+<h1>BOQ import — {{ project.id }}</h1>{{ tabs(project, 'boq') }}
+<div class="card"><p class="muted">Quantities are measured by the estimator outside this application and imported as-is. The application never measures drawings and never alters imported quantities; changes become pending requests that need approval.</p>
+{% if preview %}
+<h2>Preview: {{ preview_file }}</h2>
+<p>Sheets: {{ preview.sheets|join(', ') }} · detected header row: <b>{{ preview.header_row or 'none' }}</b> {% if preview.missing_required %}<span class="tag Open">missing required: {{ preview.missing_required|join(', ') }}</span>{% endif %}</p>
+{% for w in preview.warnings %}<div class="banner warn">{{ w }}</div>{% endfor %}{% for a in preview.ambiguous_columns %}<div class="banner warn">{{ a }}</div>{% endfor %}
+<form method="post" action="/projects/{{ project.id }}/boq/import" class="stack"><input type="hidden" name="stored_name" value="{{ preview_file }}"><input type="hidden" name="sheet" value="{{ preview.sheet }}"><input type="hidden" name="header_row" value="{{ preview.header_row or '' }}">
+<table><thead><tr><th>Field</th><th>Column (0-based index)</th></tr></thead><tbody>
+{% for f in fields %}<tr><td>{{ f }}</td><td><select name="map_{{ f }}"><option value="">— not mapped —</option>{% for c in preview.columns %}<option value="{{ loop.index0 }}" {% if preview.proposed_mapping[f] == loop.index0 %}selected{% endif %}>{{ loop.index0 }}: {{ c }}</option>{% endfor %}</select></td></tr>{% endfor %}</tbody></table>
+<label>Revision</label><input name="revision" value=""> <button>Import with this mapping</button></form>
+<h3>Sample rows</h3><table>{% for r in preview.sample_rows %}<tr>{% for c in r %}<td>{{ c if c is not none else '' }}</td>{% endfor %}</tr>{% endfor %}</table>
+{% else %}
+<form method="post" enctype="multipart/form-data" action="/projects/{{ project.id }}/boq/preview" class="inline"><b>Upload BOQ (.xlsx / .csv):</b> <input type="file" name="file" required> <button>Preview &amp; map columns</button></form>
+<form method="post" enctype="multipart/form-data" action="/projects/{{ project.id }}/takeoff/import" class="inline" style="margin-left:20px"><b>Resource take-off (.xlsx/.csv):</b> <input type="file" name="file" required> <button class="alt">Import</button></form>
+{% endif %}</div>
+{% if changes %}<h2>Pending change requests (need approval)</h2>
+<table><thead><tr><th>ID</th><th>Item</th><th>Field</th><th>Current</th><th>Proposed</th><th>Reason</th><th>Decision</th></tr></thead><tbody>
+{% for c in changes %}<tr><td>{{ c.id }}</td><td>{{ c.entity_id }}</td><td>{{ c.field }}</td><td>{{ c.old_value }}</td><td>{{ c.new_value }}</td><td>{{ c.reason }}</td><td>
+<form class="inline" method="post" action="/ui/do/decide_change"><input type="hidden" name="_next" value="/projects/{{ project.id }}/boq"><input type="hidden" name="change_id" value="{{ c.id }}">
+{% if c.field == 'unit' %}<input name="unit_code" placeholder="canonical unit e.g. t" size="8" value="{{ c.new_value or '' }}">{% endif %}<input name="comment" placeholder="comment" size="14">
+<button class="sm" name="decision" value="approve">Approve</button><button class="sm danger" name="decision" value="reject">Reject</button></form></td></tr>{% endfor %}</tbody></table>{% endif %}
+<h2>Imports</h2>{{ table(imports, [('id','#'),('source_file','File'),('sheet','Sheet'),('revision','Rev'),('imported_by','By'),('imported_at','At'),('sha256','SHA-256')]) }}
+{% if rejected %}<h2>Rejected rows ({{ rejected|length }})</h2>{{ table(rejected, [('source_file','File'),('source_row','Row'),('reason_code','Code'),('reason','Reason')]) }}{% endif %}
+<h2>Items ({{ items|length }})</h2>
+<form class="filter" method="get"><input name="q" value="{{ q }}" placeholder="search description / code"><button class="alt sm">Search</button></form>
+<table><thead><tr><th>Key</th><th>Description</th><th>Unit</th><th class="num">Qty (as imported)</th><th>Src row</th><th>Validation</th><th>Issues</th><th></th></tr></thead><tbody>
+{% for i in items %}<tr {% if i.item_type=='heading' %}style="background:#eef1f8;font-weight:600"{% endif %}><td>{{ i.item_key }}</td><td>{{ i.description }}</td>
+<td>{{ i.unit or '' }}{% if not i.unit and i.item_type=='item' %} <span class="tag Open">{{ i.unit_status }}: '{{ i.unit_original }}'</span>{% endif %}</td>
+<td class="num">{{ i.quantity or '' }}</td><td>{{ i.source_row }}</td><td>{{ tag(i.validation_status if i.item_type=='item' else '') }}</td>
+<td>{% for x in i.issues %}<div class="muted">{{ x.message }}</div>{% endfor %}</td>
+<td>{% if i.item_type=='item' %}<details><summary>…</summary>
+{{ actform('request_quantity_change', '/projects/'~project.id~'/boq', [('project_id', project.id, 'hidden'), ('item_key', i.item_key, 'hidden'), ('new_quantity','new qty',none,8), ('reason','reason',none,16)], 'Request qty change', 'alt') }}
+{% if i.validation_status == 'Needs Review' and i.unit %}{{ actform('acknowledge_issues', '/projects/'~project.id~'/boq', [('project_id', project.id, 'hidden'), ('item_key', i.item_key, 'hidden'), ('comment','why acceptable',none,18)], 'Acknowledge flags', 'alt') }}{% endif %}
+</details>{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% endblock %}

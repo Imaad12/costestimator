@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
+<h1>Reconciliation — {{ project.id }}</h1>{{ tabs(project, 'reconciliation') }}
+<div class="card">{{ actform('run_reconciliation', '/projects/'~project.id~'/reconciliation', [('project_id', project.id, 'hidden')], 'Run reconciliation now') }}
+<span class="muted">Critical findings block final approval and can never be waived. High findings need a documented exception by a Commercial Approver (if the rule permits).</span></div>
+{% if run %}<p>Run #{{ run.id }} at {{ run.ts }} — open by severity: <b>{{ run.summary.open_by_severity }}</b> · blocking: <b>{{ 'YES' if run.summary.blocking else 'no' }}</b> · estimate state {{ run.summary.state }}</p>
+<table><thead><tr><th>Sev.</th><th>Rule</th><th>Detail</th><th>Entity</th><th class="num">Impact SAR</th><th>Owner</th><th>Status</th><th>Exception</th></tr></thead><tbody>
+{% for f in run.findings %}<tr><td>{{ tag(f.severity) }}</td><td>{{ f.rule_code }}<div class="muted">{{ f.title }}</div></td><td>{{ f.detail }}</td><td>{{ f.entity_type }}:{{ f.entity_id }}</td><td class="num">{{ money(f.financial_impact) if f.financial_impact }}</td><td>{{ f.owner }}</td><td>{{ tag(f.status) }}</td><td>
+{% if f.status == 'Open' and f.severity != 'Critical' %}<form class="inline" method="post" action="/ui/do/accept_exception"><input type="hidden" name="_next" value="/projects/{{ project.id }}/reconciliation"><input type="hidden" name="finding_id" value="{{ f.id }}"><input name="reason" placeholder="documented reason" size="22"><button class="sm alt">Accept exception</button></form>{% elif f.exception_reason %}{{ f.exception_reason }} ({{ f.exception_by }}){% endif %}</td></tr>{% endfor %}</tbody></table>
+{% else %}<p class="muted">No run yet.</p>{% endif %}
+<h2>Final approval workflow</h2><ol class="muted"><li>Freeze an estimate version → submit for review.</li><li>Commercial Approver approves the version (blocked by Critical/High findings, preliminary state, or changed inputs).</li><li>Generate and approve the letter of offer (must match the pricing schedule).</li><li>Commercial Approver approves the tender export → export submission package (Reports &amp; exports).</li></ol>
+{{ actform('freeze_version', '/projects/'~project.id~'/reconciliation', [('project_id', project.id, 'hidden'), ('label','label',none,12)], 'Freeze estimate version') }}
+<table><thead><tr><th>#</th><th>Label</th><th>State</th><th>Status</th><th>Approved by</th><th></th></tr></thead><tbody>{% for v in versions %}<tr><td>{{ v.version_no }}</td><td>{{ v.label }}</td><td>{{ v.state }}</td><td>{{ tag(v.status) }}</td><td>{{ v.approved_by or '' }}</td><td>
+{% if v.status == 'Draft' %}{{ actform('submit_version', '/projects/'~project.id~'/reconciliation', [('version_id', v.id, 'hidden')], 'Submit for review') }}
+{% elif v.status == 'Pending Review' %}{{ actform('approve_version', '/projects/'~project.id~'/reconciliation', [('version_id', v.id, 'hidden'), ('comments','comment',none,16)], 'Approve final estimate') }}{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table, actform %}{% block body %}
+<h1>Settings &amp; data sources</h1>
+<div class="card"><b>Audit trail:</b> {{ 'hash chain intact' if audit.ok else 'CHAIN BROKEN at id ' ~ audit.first_bad_id }} ({{ audit.checked }} entries; tamper-evident only, not tamper-proof) · <b>AI:</b> {{ 'enabled' if ai_enabled else 'disabled (deterministic features unaffected)' }}</div>
+<h2>Company details (used on offers and RFQs)</h2><form class="inline" method="post" action="/ui/do/save_company_settings"><input type="hidden" name="_next" value="/settings">
+{% for k in ['name','address','cr_number','vat_number','contact_name','contact_email','contact_phone'] %}<input name="{{ k }}" placeholder="{{ k }}" value="{{ company.get(k,'') }}" size="16">{% endfor %}<button class="sm">Save (Administrator)</button></form>
+<h2>Tax categories</h2>{{ table(tax, [('code','Code'),('rate_pct','Rate %'),('valid_from','From'),('valid_to','To'),('status','Status','t'),('verification_note','Verification note')]) }}
+<h2>FX rates (approved only are used)</h2>{{ table(fx, [('id','#'),('from_ccy','From'),('to_ccy','To'),('rate','Rate'),('rate_date','Date'),('source','Source'),('status','Status','t')]) }}
+{{ actform('propose_fx', '/settings', [('from_ccy','USD',none,4), ('to_ccy','SAR',none,4), ('rate','rate',none,7), ('rate_date','YYYY-MM-DD',none,10), ('source','source (required)',none,24)], 'Propose FX rate', 'alt') }}
+<h2>Source register (provenance of public data)</h2>
+<table><thead><tr><th>ID</th><th>Name</th><th>URL</th><th>Accessed</th><th>Access status</th><th>Licence / reuse</th><th>Limitations</th><th>Data collected</th></tr></thead><tbody>
+{% for s in sources %}<tr><td>{{ s.source_id }}</td><td>{{ s.name }}<div class="muted">{{ s.organisation }}</div></td><td style="word-break:break-all">{{ s.url or '' }}</td><td>{{ s.date_accessed or '' }}</td><td>{{ s.access_status }}</td><td>{{ s.licence_reuse_conditions }}</td><td>{{ s.limitations }}</td><td>{{ s.data_collected }}</td></tr>{% endfor %}</tbody></table>
+<h2>Rate datasets (ingestion)</h2><form method="post" enctype="multipart/form-data" action="/datasets/stage" class="inline"><input type="file" name="file" required><input name="source_id" placeholder="source id e.g. SRC-004" size="14"><button class="sm">Stage &amp; validate</button></form>
+{{ table(datasets, [('id','#'),('file_name','File'),('status','Status','t'),('imported_by','By'),('imported_at','At')]) }}{% for d in datasets %}<a href="/datasets/{{ d.id }}">dataset {{ d.id }}</a> {% endfor %}
+<h2>Add cost code (taxonomy)</h2>{{ actform('add_cost_code', '/settings', [('code','code e.g. D.07.01',none,12), ('name','name',none,24), ('parent_code','parent',none,8), ('default_unit','unit',none,5)], 'Add (Administrator)', 'alt') }}
+<details><summary>Cost-code taxonomy ({{ cost_codes|length }})</summary>{{ table(cost_codes, [('code','Code'),('parent_code','Parent'),('level','Lvl'),('name','Name'),('kind','Kind')]) }}</details>
+<h2>Users</h2>{{ table(users, [('username','User'),('display_name','Name'),('role','Role'),('is_active','Active')]) }}
+<h2>Backups</h2>{{ actform('create_backup', '/settings', [], 'Create backup now (Administrator)') }}<ul>{% for b in backups %}<li>{{ b }}</li>{% endfor %}</ul><p class="muted">Restore: <code>python -m app.cli restore &lt;file&gt; --yes</code> (command line, with safety backup). See docs/BACKUP_RESTORE.md.</p>
+{% endblock %}

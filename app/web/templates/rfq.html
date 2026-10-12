@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, tabs, actform %}{% block body %}
+<h1>{{ rfq.id }} — {{ rfq.subject }}</h1>{{ tabs(project, 'procurement') }}
+<div class="card"><p>Status: {{ tag(rfq.status) }} · <a href="/rfq/{{ rfq.id }}/download/xlsx">XLSX</a> · <a href="/rfq/{{ rfq.id }}/download/docx">DOCX</a></p>
+<p class="muted">Copy the text below into your own email client. The application does not send email. After you send it, record that here.</p>
+<textarea readonly rows="22" style="font-family:monospace">Subject: {{ rfq.subject }}
+
+{{ rfq.body }}</textarea>
+<p>{{ actform('mark_rfq_issued', '/rfq/'~rfq.id, [('rfq_id', rfq.id, 'hidden')], 'I have issued this RFQ manually') }}</p></div>{% endblock %}

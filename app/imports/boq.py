@@ -64,6 +64,22 @@ class Preview:
     warnings: list[str] = field(default_factory=list)
 
 
+def mapping_from_row(cells: list[Any]) -> dict[str, int | None]:
+    """Column mapping from one explicit header row (used for re-importing generated workbooks)."""
+    mapping: dict[str, int | None] = {}
+    used: set[int] = set()
+    for f, syns in HEADER_SYNONYMS.items():
+        hit = None
+        for ci, c in enumerate(cells):
+            if ci not in used and _norm_header(c) in syns:
+                hit = ci
+                break
+        mapping[f] = hit
+        if hit is not None:
+            used.add(hit)
+    return mapping
+
+
 def detect_header(rows: list[tuple[int, list[Any]]], scan: int = 40) -> tuple[int | None, dict[str, int | None], list[str]]:
     best = (0, None, {})
     ambiguous: list[str] = []
@@ -213,6 +229,8 @@ def import_boq(db: Database, actor: Actor, project_id: str, path: Path, *, mappi
     path = Path(path)
     reg = registry(db)
     rs = read_sheet(path, sheet)
+    if header_row is not None and mapping is None:
+        mapping = mapping_from_row(next((c for rn, c in rs.rows if rn == header_row), []))
     if header_row is None or mapping is None:
         hidx, auto_map, amb = detect_header(rs.rows)
         if hidx is None and mapping is None:

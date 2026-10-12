@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
+<h1>Estimate build-up — {{ project.id }}</h1>{{ tabs(project, 'estimate') }}
+<div class="banner {{ 'ok' if est.state == 'Complete' else 'warn' }}">Estimate state: <b>{{ est.state }}</b>{% if est.flags.synthetic %} · contains SYNTHETIC data{% endif %}{% if est.flags.provisional %} · contains PROVISIONAL inputs{% endif %}{% if prelim %} · <b>PRELIMINARY VIEW: unapproved rates/assumptions are included and flagged — not for submission</b>{% endif %}</div>
+{% for b in est.blockers %}<div class="muted">• {{ b }}</div>{% endfor %}
+<div class="sub" style="margin-top:8px"><a href="?preliminary=0" class="{{ '' if prelim else 'on' }}">Strict (approved inputs only)</a><a href="?preliminary=1" class="{{ 'on' if prelim else '' }}">Preliminary view (include unapproved, flagged)</a></div>
+{% if est.commercial %}
+<div class="card"><h2 style="margin-top:0">Cost reconciliation: resources → selling price</h2><p class="muted">{{ est.commercial.method_label }}</p>
+<table><thead><tr><th>Step</th><th>Basis</th><th class="num">SAR</th></tr></thead><tbody>
+<tr><td>Direct cost (priced lines only)</td><td>sum of resource lines</td><td class="num">{{ money(est.commercial.direct) }}</td></tr>
+<tr><td>Indirect cost</td><td>approved indirect items</td><td class="num">{{ money(est.commercial.indirect) }}</td></tr>
+{% for t in est.commercial.trace %}<tr><td>{{ t.name }}</td><td>{{ t.formula }}{% if t.base_name %} (base {{ t.base_name }} = {{ money(t.base_value) }}){% endif %}</td><td class="num">{{ money(t.amount) }}</td></tr>{% endfor %}
+{% if est.schedule %}<tr><td><b>Pricing schedule total (tendered)</b></td><td>sum of rounded item amounts; rounding variance {{ money(est.schedule.rounding_variance) }}</td><td class="num"><b>{{ money(est.schedule.total_pre_tax) }}</b></td></tr>{% endif %}
+{% for k, v in est.commercial.tax_by_category.items() %}<tr><td>Tax {{ k }}</td><td>{{ v.rate_pct if v.rate_pct is not none else 'rate unresolved' }}%</td><td class="num">{{ money(v.tax) }}</td></tr>{% endfor %}
+<tr><td><b>Final payable</b></td><td></td><td class="num"><b>{{ money(est.commercial.final_payable) }}</b></td></tr></tbody></table></div>{% endif %}
+<h2>Items</h2><table><thead><tr><th>Item</th><th>Description</th><th>Method</th><th class="num">Qty</th><th>Unit</th><th class="num">Direct cost</th><th class="num">Unit cost</th><th>Status</th></tr></thead><tbody>
+{% for k, i in est.direct.items.items() %}<tr><td><a href="?item={{ k }}&preliminary={{ prelim }}">{{ k }}</a></td><td>{{ i.description }}</td><td>{{ i.pricing_method }}</td><td class="num">{{ i.quantity }}</td><td>{{ i.unit }}</td>
+<td class="num">{{ money(i.direct_cost) if i.complete or i.direct_cost else '—' }}</td><td class="num">{{ money(i.unit_cost) if i.unit_cost is not none else '—' }}</td>
+<td>{% if i.pricing_method == 'excluded' %}<span class="tag">Excluded</span>{% elif i.complete %}<span class="tag Approved">Priced</span>{% else %}<span class="tag Open">Unpriced ({{ i.unpriced_lines }} line(s){% if i.indicative_exposure %}, indicative {{ money(i.indicative_exposure) }}{% endif %})</span>{% endif %}
+{% if i.provisional %}<span class="tag Provisional">provisional</span>{% endif %}{% if i.synthetic %}<span class="tag">synthetic</span>{% endif %}</td></tr>{% endfor %}</tbody></table>
+<h2>Resource lines {% if item %}for {{ item }} <a href="?preliminary={{ prelim }}">(all)</a>{% endif %} <span class="muted">({{ total_lines }}; first 1500 shown)</span></h2>
+<table><thead><tr><th>Item</th><th>Kind</th><th>Resource</th><th class="num">Qty</th><th>Unit</th><th class="num">Rate</th><th class="num">Amount</th><th>Rate type / status</th><th>Basis</th><th>Flags</th></tr></thead><tbody>
+{% for l in lines %}<tr><td>{{ l.item_key }}</td><td>{{ l.kind }}</td><td>{{ l.resource_id or '' }} {{ l.description[:36] }}</td><td class="num">{{ '%.4f'|format(l.quantity|float) if l.quantity is not none else '' }}</td><td>{{ l.unit }}</td>
+<td class="num">{{ '%.4f'|format(l.rate|float) if l.rate is not none else '' }}</td><td class="num">{% if l.amount is none %}<span class="tag Open">UNPRICED{% if l.indicative_amount is not none %} (indicative {{ money(l.indicative_amount) }}){% endif %}</span>{% else %}{{ money(l.amount) }}{% endif %}</td>
+<td>{{ l.rate_type or '' }} {{ tag(l.rate_status) if l.rate_status }}</td><td class="muted">{{ l.basis }}</td><td>{{ l.flags|join(', ') }}</td></tr>{% endfor %}</tbody></table>
+<h2>Exceptions ({{ est.exceptions|length }})</h2>{{ table(est.exceptions[:300], [('severity','Sev','t'),('code','Code'),('message','Message'),('item_key','Item'),('resource_id','Resource')]) }}
+{% endblock %}

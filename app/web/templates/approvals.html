@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table %}{% block body %}
+<h1>Approvals</h1><p class="muted">Pending items by type. Decisions are made on the relevant page (rates → resource page; assumptions → register; quotations/selections → project Quotations; versions → Reconciliation …). AI cannot approve anything.</p>
+{% for name, rows in queue.items() %}{% if rows %}<h2>{{ name }} ({{ rows|length }})</h2><table><thead><tr>{% for k in rows[0].keys() %}<th>{{ k }}</th>{% endfor %}</tr></thead><tbody>{% for r in rows %}<tr>{% for v in r.values() %}<td>{{ v if v is not none else '' }}</td>{% endfor %}</tr>{% endfor %}</tbody></table>{% endif %}{% endfor %}
+<h2>Approval log {% if entity %}({{ entity }}){% endif %}</h2>
+<form class="filter" method="get"><input name="entity" value="{{ entity }}" placeholder="entity type e.g. rate"><button class="alt sm">Filter</button></form>
+{{ table(log, [('ts','When (UTC)'),('entity_type','Entity'),('entity_id','ID'),('version','v'),('reviewer','Reviewer'),('reviewer_role','Role'),('action','Action'),('approved_value','Approved value'),('comments','Comments'),('override_reason','Override reason')]) }}
+{% endblock %}

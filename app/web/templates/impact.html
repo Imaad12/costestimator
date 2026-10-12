@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% from "_macros.html" import money, tabs %}{% block body %}
+<h1>Assumption impact (what-if, nothing saved)</h1>{{ tabs(project, 'assumptions') }}
+<div class="card"><p>Setting <b>{{ aid }}</b> to <b>{{ value }}</b> (preliminary view, all other inputs unchanged):</p>
+<table><tr><th></th><th class="num">Current</th><th class="num">What-if</th><th class="num">Change</th></tr>
+<tr><td>Priced direct cost (SAR)</td><td class="num">{{ money(base.direct.direct_cost_total) }}</td><td class="num">{{ money(alt.direct.direct_cost_total) }}</td><td class="num"><b>{{ money(delta) }}</b></td></tr>
+{% if base.schedule and alt.schedule %}<tr><td>Pricing schedule total (SAR)</td><td class="num">{{ money(base.schedule.total_pre_tax) }}</td><td class="num">{{ money(alt.schedule.total_pre_tax) }}</td><td class="num"><b>{{ money(alt.schedule.total_pre_tax - base.schedule.total_pre_tax) }}</b></td></tr>{% endif %}</table>
+<p class="muted">This calculation is deterministic and is not saved. To adopt the value, propose an override on the assumptions page and have it approved.</p></div>{% endblock %}

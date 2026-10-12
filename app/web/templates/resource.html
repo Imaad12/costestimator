@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table, actform %}{% block body %}
+<h1>{{ r.id }} — {{ r.description }}</h1>
+{% if r.is_synthetic %}<div class="synth">SYNTHETIC / DEMO — NOT A MARKET QUOTE</div>{% endif %}
+<div class="card"><div class="grid"><div><b>Type</b><br>{{ r.resource_type }}</div><div><b>Cost code</b><br>{{ r.cost_code }}</div><div><b>Unit</b><br>{{ r.unit }}</div><div><b>Region applicability</b><br>{{ r.geographic_applicability }}</div></div>
+<p><b>Specification:</b> {{ r.specification or '—' }}</p><p><b>Brand / equivalence:</b> {{ r.brand_requirements or '—' }} · <b>Aliases:</b> {{ r.aliases or '—' }}</p><p class="muted">{{ r.notes or '' }}</p></div>
+<h2>Rate versions (approved rates are immutable; changes create a new version)</h2>
+<table><thead><tr><th>v</th><th>Type</th><th class="num">Price</th><th>Ccy</th><th>Unit</th><th>Region</th><th>Price date</th><th>Valid until</th><th>Status</th><th>Project</th><th>Evidence</th><th></th></tr></thead><tbody>
+{% for x in rates %}<tr><td>{{ x.version }}</td><td>{{ x.rate_type }}</td><td class="num">{{ x.unit_price if x.unit_price is not none else 'MISSING' }}</td><td>{{ x.currency }}</td><td>{{ x.unit }}</td><td>{{ x.region }}</td><td>{{ x.price_date or '' }}</td><td>{{ x.valid_until or '' }}</td><td>{{ tag(x.status) }}</td><td>{{ x.project_id or '' }}</td><td>{{ x.evidence or '' }}</td><td>
+{% if x.status == 'Draft' and x.unit_price is not none %}{{ actform('submit_rate', '/libraries/'~r.id, [('rate_id', x.id, 'hidden')], 'Submit') }}{% endif %}
+{% if x.status == 'Pending Review' %}{{ actform('approve_rate', '/libraries/'~r.id, [('rate_id', x.id, 'hidden'), ('evidence','evidence',none,12), ('comments','comment',none,12)], 'Approve') }}
+<form class="inline" method="post" action="/ui/do/approve_rate_provisional"><input type="hidden" name="_next" value="/libraries/{{ r.id }}"><input type="hidden" name="rate_id" value="{{ x.id }}"><select name="project_id">{% for p in projects %}<option>{{ p.id }}</option>{% endfor %}</select><input name="comments" placeholder="reason (required)" size="14"><button class="sm alt">Approve provisionally for project</button></form>
+{{ actform('reject_rate', '/libraries/'~r.id, [('rate_id', x.id, 'hidden'), ('reason','reason',none,10)], 'Reject', 'danger') }}{% endif %}</td></tr>{% endfor %}</tbody></table>
+<div class="card"><h2 style="margin-top:0">Propose a new rate</h2><p class="muted">Creates a Draft/Pending proposal. It is not used in a submission-ready estimate until a reviewer approves it. Foreign prices keep their original currency; an official index is stored as a benchmark and never used as a unit price.</p>
+<form class="inline" method="post" action="/ui/do/propose_rate"><input type="hidden" name="_next" value="/libraries/{{ r.id }}"><input type="hidden" name="resource_id" value="{{ r.id }}">
+<input name="unit_price" placeholder="unit price" size="9"><input name="currency" value="SAR" size="4"><select name="rate_type">{% for t in rate_types %}{% if t != 'Missing Rate' %}<option>{{ t }}</option>{% endif %}{% endfor %}</select>
+<input name="price_date" placeholder="price date YYYY-MM-DD" size="14"><input name="valid_until" placeholder="valid until" size="12"><input name="evidence" placeholder="source / evidence" size="26"><select name="confidence"><option>Unverified</option><option>Low</option><option>Medium</option><option>High</option></select>
+<label><input type="checkbox" name="submit" value="1" checked> submit for review</label><button class="sm">Propose</button></form></div>
+<h2>Change history</h2>{{ table(history, [('ts','When'),('actor','Who'),('action','Action'),('comment','Comment')]) }}
+{% endblock %}

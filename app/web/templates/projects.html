@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table %}{% block body %}
+<h1>Projects</h1>
+<table><thead><tr><th>ID</th><th>Name</th><th>Client</th><th>Region</th><th>Status</th><th>Demo</th></tr></thead><tbody>
+{% for p in projects %}<tr><td><a href="/projects/{{ p.id }}">{{ p.id }}</a></td><td>{{ p.name }}</td><td>{{ p.client }}</td><td>{{ p.region }}</td><td>{{ tag(p.status) }}</td><td>{{ 'SYNTHETIC' if p.is_demo else '' }}</td></tr>{% endfor %}</tbody></table>
+<div class="card" style="margin-top:14px"><h2>New project</h2>
+<form method="post" action="/ui/do/create_project" class="stack"><input type="hidden" name="_next" value="/projects/{result}">
+<div class="grid"><div><label>Name *</label><input name="name" required style="width:100%"></div><div><label>Client</label><input name="client" style="width:100%"></div>
+<div><label>Location</label><input name="location" style="width:100%"></div>
+<div><label>Region (rate applicability only)</label><select name="region">{% for r in regions %}<option value="{{ r.code }}">{{ r.code }} — {{ r.name }}</option>{% endfor %}</select></div>
+<div><label>Design stage</label><input name="design_stage" style="width:100%"></div><div><label>Tender ref</label><input name="tender_ref" style="width:100%"></div>
+<div><label>Default tax category</label><input name="tax_category" value="VAT-STD" style="width:100%"></div></div><p><button>Create project</button></p></form></div>
+{% endblock %}

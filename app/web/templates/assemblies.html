@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table, actform %}{% block body %}
+<h1>Assembly library</h1>
+<form class="filter" method="get"><input name="q" value="{{ q }}" placeholder="search code / description"><button class="alt sm">Search</button></form>
+<table><thead><tr><th>Code</th><th>Description</th><th>Unit</th><th>Cost code</th><th>v</th><th>Status</th></tr></thead><tbody>{% for a in rows %}<tr><td><a href="/assemblies?code={{ a.code }}">{{ a.code }}</a></td><td>{{ a.description }}</td><td>{{ a.unit }}</td><td>{{ a.cost_code }}</td><td>{{ a.version }}</td><td>{{ tag(a.status) }} {{ 'SYNTHETIC' if a.is_synthetic else '' }}</td></tr>{% endfor %}</tbody></table>
+{% if detail %}<div class="card"><h2 style="margin-top:0">{{ detail.a.code }} v{{ detail.a.version }} {{ tag(detail.a.status) }}</h2><p>{{ detail.a.description }} · per {{ detail.a.unit }} · source: {{ detail.a.source or '—' }}</p>
+{% for p in detail.problems %}<div class="banner warn">{{ p }}</div>{% endfor %}
+<table><thead><tr><th>#</th><th>Type</th><th>Resource / nested</th><th>Factor</th><th>Unit</th><th>Waste</th><th>Productivity</th><th>Subcontract incl.</th></tr></thead><tbody>
+{% for l in detail.lines %}<tr><td>{{ l.line_no }}</td><td>{{ l.line_type }}</td><td>{{ l.resource_id or l.child_assembly_code }}</td><td>{{ l.factor if l.factor is not none else 'REQUIRED' }}</td><td>{{ l.factor_unit or '' }}</td>
+<td>{{ 'incl. in factor' if l.factor_includes_waste else (l.waste_basis ~ ' ' ~ (l.waste_value or l.waste_ref or '')) }}</td><td>{{ l.productivity_basis or '' }} {{ l.crew_json or '' }}</td><td>{{ 'L' if l.includes_labour }}{{ 'M' if l.includes_material }}{{ 'P' if l.includes_plant }}</td></tr>{% endfor %}</tbody></table>
+<p>Versions: {% for v in detail.versions %}v{{ v.version }} {{ tag(v.status) }} {% endfor %}</p>
+<p>{% if detail.a.status == 'Draft' %}{{ actform('submit_assembly', '/assemblies?code='~detail.a.code, [('code', detail.a.code, 'hidden')], 'Submit for review') }}{% elif detail.a.status == 'Pending Review' %}{{ actform('approve_assembly', '/assemblies?code='~detail.a.code, [('code', detail.a.code, 'hidden'), ('comments','comment',none,14)], 'Approve') }}{% endif %}
+{% if detail.a.status in ('Approved','Superseded') %}{{ actform('new_assembly_version', '/assemblies?code='~detail.a.code, [('code', detail.a.code, 'hidden'), ('note','revision note',none,18)], 'Create new draft version', 'alt') }}{% endif %}
+{{ actform('clone_assembly', '/assemblies', [('code', detail.a.code, 'hidden'), ('new_code','new code',none,12)], 'Clone', 'alt') }}</p></div>{% endif %}
+{% endblock %}

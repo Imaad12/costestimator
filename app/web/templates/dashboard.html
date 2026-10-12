@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, money, table %}{% block body %}
+<h1>Dashboard</h1>
+<div class="grid">
+<div class="kpi"><b>{{ d.totals.active_estimates }}</b><span>Active estimates</span></div>
+<div class="kpi"><b>{% if d.totals.estimate_value is none %}n/a{% else %}SAR {{ money(d.totals.estimate_value) }}{% endif %}</b><span>Total tendered value (complete schedules only)</span></div>
+<div class="kpi"><b>SAR {{ money(d.totals.indicative_exposure) }}</b><span>Indicative exposure from unapproved/expired rates (not in totals)</span></div>
+<div class="kpi"><b>{{ d.totals.pending_approvals }}</b><span><a href="/approvals">Items awaiting human approval</a></span></div>
+</div>
+<h2>Estimates</h2>
+{% for p in d.projects %}
+<div class="card"><h3 style="margin:0 0 6px"><a href="/projects/{{ p.project_id }}">{{ p.project_id }} — {{ p.name }}</a>
+{{ tag(p.state) }} {% if p.demo %}<span class="tag">DEMO / SYNTHETIC</span>{% endif %} {% if p.provisional %}<span class="tag Provisional">provisional inputs</span>{% endif %}</h3>
+<div class="grid">
+<div class="kpi"><b>{% if p.estimate_value is none %}n/a{% else %}{{ money(p.estimate_value) }}{% endif %}</b><span>Tendered value (SAR){% if p.estimate_value is none %} — schedule incomplete{% endif %}</span></div>
+<div class="kpi"><b>{{ money(p.priced_direct_cost) }}</b><span>Priced direct cost (SAR, excludes unpriced)</span></div>
+<div class="kpi"><b>{{ p.missing_rate_lines }}</b><span>Unpriced lines · exposure SAR {{ money(p.indicative_exposure) }} · {{ p.unknown_exposure_lines }} unknown</span></div>
+<div class="kpi"><b>{{ p.unapproved_assumptions_in_use }}</b><span>Unapproved assumptions in use</span></div>
+<div class="kpi"><b>{{ p.pending_quotations }} / {{ p.expired_quotations }}</b><span>Pending / expired quotations</span></div>
+<div class="kpi"><b>{{ p.open_clarifications }}</b><span>Outstanding clarifications</span></div>
+<div class="kpi"><b>{% if p.critical_findings is none %}not run{% else %}{{ p.critical_findings }}{% endif %}</b><span>Critical reconciliation findings</span></div>
+<div class="kpi"><b>{{ p.approval_status }}</b><span>Approval status</span></div>
+<div class="kpi"><b>{% if p.completeness_pct is none %}n/a{% else %}{{ p.completeness_pct }}%{% endif %}</b><span>Items fully priced ({{ p.items }}) {% if p.completeness_pct is none %}— no priced scope yet{% endif %}</span></div>
+</div></div>
+{% else %}<p class="muted">No projects yet. <a href="/projects">Create one</a> or run <code>python -m app.cli demo</code> for the synthetic demonstration project.</p>{% endfor %}
+{% endblock %}

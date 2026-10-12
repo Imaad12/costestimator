@@ -105,6 +105,10 @@ def add_line(db: Database, actor: Actor, assembly_pk: int, **line) -> int:
     _require_editable(a)
     if a["status"] == Status.PENDING.value:
         db.update("assemblies", {"status": Status.DRAFT.value}, "pk=?", (assembly_pk,))
+    if line.get("crew") is not None:
+        line["crew_json"] = json.dumps(line.pop("crew"))
+    else:
+        line.pop("crew", None)
     bad = set(line) - LINE_FIELDS
     if bad:
         raise ValidationFailed(f"Unknown assembly line fields: {sorted(bad)}")
@@ -127,8 +131,6 @@ def add_line(db: Database, actor: Actor, assembly_pk: int, **line) -> int:
             raise ValidationFailed(f"Unknown resource {rid}.")
     if line.get("factor") not in (None, "") and D_opt(line["factor"]) is None:
         raise ValidationFailed("factor must be numeric.")
-    if line.get("crew") is not None:
-        line["crew_json"] = json.dumps(line.pop("crew"))
     _check_line_rules(line)
     n = (db.scalar("SELECT MAX(line_no) FROM assembly_lines WHERE assembly_pk=?", (assembly_pk,)) or 0) + 1
     lid = db.insert("assembly_lines", {**line, "assembly_pk": assembly_pk, "line_no": n})
@@ -266,6 +268,8 @@ def validate(db: Database, assembly_pk: int) -> list[str]:
             problems.append(f"{tag}: consumption factor is missing (estimator input required).")
         if l["line_type"] == "assembly" and not db.one("SELECT 1 FROM assemblies WHERE code=?", (l["child_assembly_code"],)):
             problems.append(f"{tag}: nested assembly {l['child_assembly_code']} not found.")
+        if l["line_type"] == "labour" and not l["productivity_basis"]:
+            problems.append(f"{tag}: labour line needs an explicit productivity basis.")
         if l["line_type"] in ("labour", "material", "plant") and sub_flags.get(l["line_type"]) and not l["explicitly_separate"]:
             problems.append(f"{tag}: {l['line_type']} line duplicates a subcontract line that already includes "
                             f"{l['line_type']} (set explicitly_separate only if the scope requires separate charging).")
