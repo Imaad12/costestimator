@@ -161,3 +161,30 @@ def test_ui_end_to_end_actions_for_the_demo_project(client):
     r = client.post("/ui/do/run_reconciliation", data={"project_id": pid, "_next": f"/projects/{pid}/reconciliation"}, follow_redirects=False)
     page = client.get(f"/projects/{pid}/reconciliation").text
     assert "UNPRICED_ITEM" in page and "MISSING_RATE" in page and "Critical" in page
+
+
+def test_authoring_forms_create_resource_assembly_and_policy(client):
+    c = client
+    c.post("/login", data={"username": "est", "password": "pw-est"})
+    r = c.post("/ui/do/create_resource", data={"resource_type": "material", "description": "Test grout", "unit": "kg", "cost_code": "C.07", "_next": "/libraries"}, follow_redirects=False)
+    assert "ok=" in r.headers["location"]
+    rid = get_db().scalar("SELECT id FROM resources WHERE description='Test grout'")
+    assert rid.startswith("MAT-C-")
+    r = c.post("/ui/do/create_assembly", data={"code": "UI-ASM", "description": "UI assembly", "unit": "m2", "cost_code": "C.07", "_next": "/assemblies"}, follow_redirects=False)
+    assert "ok=" in r.headers["location"]
+    r = c.post("/ui/do/add_assembly_line", data={"code": "UI-ASM", "line_type": "material", "resource_id": rid, "factor": "2", "factor_includes_waste": "1", "waste_basis": "fixed_pct", "waste_value": "5", "_next": "/assemblies"},
+               follow_redirects=False)
+    assert "DOUBLE_WASTE" in r.headers["location"]                                     # waste cannot be applied twice - rejected by the service
+    r = c.post("/ui/do/add_assembly_line", data={"code": "UI-ASM", "line_type": "material", "resource_id": rid, "factor": "2", "waste_basis": "fixed_pct", "waste_value": "5", "_next": "/assemblies"}, follow_redirects=False)
+    assert "ok=" in r.headers["location"]
+    r = c.post("/ui/do/add_assembly_line", data={"code": "UI-ASM", "line_type": "labour", "resource_id": "LAB-028", "factor": "10", "productivity_basis": "output_per_crew_shift",
+                                                  "crew": "LAB-028:2;LAB-014:1", "_next": "/assemblies"}, follow_redirects=False)
+    assert "ok=" in r.headers["location"]
+    assert "UI-ASM" in c.get("/assemblies?code=UI-ASM").text
+    pol = '{"method":"markup","markup_pct":"7","contingency":{"pct":"2","base":"direct"}}'
+    r = c.post("/ui/do/create_policy", data={"code": "UI-POL", "name": "UI policy", "config": pol, "_next": "/projects"}, follow_redirects=False)
+    assert "ok=" in r.headers["location"]
+    r = c.post("/ui/do/create_policy", data={"code": "UI-POL2", "name": "bad", "config": '{"method":"margin","margin_pct":"100"}', "_next": "/projects"}, follow_redirects=False)
+    assert "POLICY_INVALID" in r.headers["location"]
+    r = c.post("/ui/do/create_policy", data={"code": "UI-POL3", "name": "bad", "config": "not json", "_next": "/projects"}, follow_redirects=False)
+    assert "valid JSON" in r.headers["location"] or "valid%20JSON" in r.headers["location"] or "JSON" in r.headers["location"]

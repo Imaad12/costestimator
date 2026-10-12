@@ -205,7 +205,70 @@ def _(db, a, p):
     return assemblies.clone(db, a, *req(p, "code", "new_code"), project_id=opt(p, "project_id"))
 
 
+@action("create_assembly")
+def _(db, a, p):
+    return assemblies.create_assembly(db, a, code=req(p, "code")[0], description=req(p, "description")[0], unit=req(p, "unit")[0], cost_code=opt(p, "cost_code"),
+                                      specification=opt(p, "specification"), source=opt(p, "source"), project_id=opt(p, "project_id"))
+
+
+def _line_params(p: dict) -> dict:
+    out = {k: opt(p, k) for k in ("line_type", "resource_id", "child_assembly_code", "factor", "factor_unit", "waste_basis", "waste_value", "waste_ref",
+                                  "productivity_basis", "utilisation_basis", "utilisation_value", "utilisation_ref", "overtime_share_pct", "notes")
+           if opt(p, k) is not None}
+    for k in ("factor_includes_waste", "includes_labour", "includes_material", "includes_plant", "explicitly_separate"):
+        if p.get(k) not in (None, "", "0", 0, False):
+            out[k] = 1
+    crew = opt(p, "crew")
+    if crew:
+        members = []
+        for part in str(crew).split(";"):
+            if ":" in part:
+                rid, cnt = part.split(":", 1)
+                members.append({"resource_id": rid.strip(), "count": float(cnt)})
+        if members:
+            out["crew"] = members
+    return out
+
+
+@action("add_assembly_line")
+def _(db, a, p):
+    asm = assemblies.get(db, req(p, "code")[0])
+    return assemblies.add_line(db, a, asm["pk"], **_line_params(p))
+
+
+@action("update_assembly_line")
+def _(db, a, p):
+    asm = assemblies.get(db, req(p, "code")[0])
+    ch = _line_params(p)
+    ch.pop("line_type", None)
+    assemblies.update_line(db, a, asm["pk"], int(req(p, "line_no")[0]), **ch)
+
+
+@action("remove_assembly_line")
+def _(db, a, p):
+    asm = assemblies.get(db, req(p, "code")[0])
+    assemblies.remove_line(db, a, asm["pk"], int(req(p, "line_no")[0]))
+
+
 # ---------------------------------------------------------------- indirects / commercial
+@action("create_policy")
+def _(db, a, p):
+    import json
+    try:
+        cfg = json.loads(req(p, "config")[0])
+    except ValueError as e:
+        raise ValidationFailed(f"Policy configuration is not valid JSON: {e}")
+    return commercial.create_policy(db, a, code=req(p, "code")[0], name=req(p, "name")[0], config=cfg)
+
+
+@action("edit_policy")
+def _(db, a, p):
+    import json
+    try:
+        cfg = json.loads(req(p, "config")[0])
+    except ValueError as e:
+        raise ValidationFailed(f"Policy configuration is not valid JSON: {e}")
+    return commercial.edit_policy(db, a, int(req(p, "policy_id")[0]), cfg)
 @action("add_indirect")
 def _(db, a, p):
     return indirects.add_indirect(db, a, req(p, "project_id")[0], code=req(p, "code")[0], category=req(p, "category")[0], description=req(p, "description")[0],
