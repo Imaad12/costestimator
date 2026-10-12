@@ -24,6 +24,7 @@ def settings(tmp_path, monkeypatch):
     # runtime dirs under tmp so tests never write into the repo
     from dataclasses import replace
     s.__class__.projects_dir = property(lambda self: tmp_path / "projects")
+    s.workspaces_override = tmp_path / "workspaces"
     s.__class__.outputs_dir = property(lambda self: tmp_path / "outputs")
     s.__class__.backups_dir = property(lambda self: tmp_path / "backups")
     cfg.set_settings(s)

@@ -8,5 +8,8 @@
 <div><label>Location</label><input name="location" style="width:100%"></div>
 <div><label>Region (rate applicability only)</label><select name="region">{% for r in regions %}<option value="{{ r.code }}">{{ r.code }} — {{ r.name }}</option>{% endfor %}</select></div>
 <div><label>Design stage</label><input name="design_stage" style="width:100%"></div><div><label>Tender ref</label><input name="tender_ref" style="width:100%"></div>
+<div><label>Project type</label><input name="project_type" placeholder="e.g. Office fit-out" style="width:100%"></div>
+<div><label>Applicable trades (comma-separated division/trade names)</label><input name="trades" placeholder="Architectural, HVAC, Electrical" style="width:100%"></div>
+<div><label>Approved drawing revision(s)</label><input name="drawing_revision" style="width:100%"></div><div><label>Approved specification revision(s)</label><input name="spec_revision" style="width:100%"></div>
 <div><label>Default tax category</label><input name="tax_category" value="VAT-STD" style="width:100%"></div></div><p><button>Create project</button></p></form></div>
 {% endblock %}

@@ -101,7 +101,7 @@ def client_pricing_schedule(est: EstimateResult, path: Path | None = None, *, su
     ws.auto_filter.ref = f"A5:G{max(r, 6)}"
     ws.protection.sheet = True
     ws.protection.password = ""
-    out = path or (projects.output_dir(p["id"]) / f"pricing_schedule_{p['id']}{'_FINAL' if submission_ready else '_PRELIMINARY'}.xlsx")
+    out = path or (projects.output_dir(p["id"], "commercial") / f"pricing_schedule_{p['id']}{'_FINAL' if submission_ready else '_PRELIMINARY'}.xlsx")
     wb.save(out)
     return out
 
@@ -140,7 +140,7 @@ def estimate_report_docx(est: EstimateResult, path: Path | None = None, *, submi
     insert_list_after(doc, "EXCEPTIONS", exc + [f"BLOCKER: {b}" for b in est.blockers], empty_text="No exceptions.")
     insert_list_after(doc, "ASSUMPTIONS", [f"{a['id']} {a['name']}: {a['value']} {a.get('unit') or ''} [{a['status']}]" for a in (assumptions or [])],
                       empty_text="None.")
-    out = path or (projects.output_dir(p["id"]) / f"estimate_report_{p['id']}{'_FINAL' if submission_ready else '_PRELIMINARY'}.docx")
+    out = path or (projects.output_dir(p["id"], "commercial") / f"estimate_report_{p['id']}{'_FINAL' if submission_ready else '_PRELIMINARY'}.docx")
     doc.save(str(out))
     return out
 
@@ -173,6 +173,6 @@ def reconciliation_report_xlsx(run: dict, project: dict, path: Path | None = Non
         ws.column_dimensions[col].width = w
     ws.freeze_panes = "A5"
     ws.auto_filter.ref = f"A4:I{max(5, 4 + len(run['findings']))}"
-    out = path or (projects.output_dir(project["id"]) / f"reconciliation_report_{project['id']}_run{run['id']}.xlsx")
+    out = path or (projects.output_dir(project["id"], "reconciliation") / f"reconciliation_report_{project['id']}_run{run['id']}.xlsx")
     wb.save(out)
     return out

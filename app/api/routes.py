@@ -218,7 +218,7 @@ def takeoff_import(pid: str, file: UploadFile = File(...), sheet: str | None = F
 def quote_import(qid: str, file: UploadFile = File(...), actor: Actor = Depends(current_actor), db: Database = Depends(database)):
     approvals.require_author(actor)
     q = quotes.get_quotation(db, qid)
-    return ser(quotes.import_quotation_lines(db, actor, qid, save_upload(q["project_id"] or "", file)))
+    return ser(quotes.import_quotation_lines(db, actor, qid, save_upload(q["project_id"] or "", file, "procurement")))
 
 
 @router.post("/datasets/stage")
@@ -235,14 +235,14 @@ def dataset_rows(did: int, actor: Actor = Depends(current_actor), db: Database =
 @router.post("/projects/{pid}/workbook/import")
 def workbook_import(pid: str, file: UploadFile = File(...), actor: Actor = Depends(current_actor), db: Database = Depends(database)):
     approvals.require_author(actor)
-    rep = roundtrip.import_master(db, actor, pid, save_upload(pid, file))
+    rep = roundtrip.import_master(db, actor, pid, save_upload(pid, file, "estimate"))
     return ser({"created": rep.created, "ignored": rep.ignored, "errors": rep.errors, "notes": rep.notes})
 
 
 # ------------------------------------------------------------------ downloads
 @router.get("/projects/{pid}/workbook")
 def workbook_download(pid: str, actor: Actor = Depends(current_actor), db: Database = Depends(database)):
-    out = projects.output_dir(pid) / f"estimate_master_{pid}.xlsx"
+    out = projects.output_dir(pid, "estimate") / f"estimate_master_{pid}.xlsx"
     build_master(out, db, pid)
     return FileResponse(out, filename=out.name, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 

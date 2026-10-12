@@ -173,7 +173,7 @@ def export_xlsx(db: Database, rfq_id: str, path: Path | None = None) -> Path:
         ws2.cell(i, 2).fill = PatternFill("solid", fgColor="FFF2CC")
     ws2.column_dimensions["A"].width = 36
     ws2.column_dimensions["B"].width = 60
-    out = path or (projects.output_dir(r["project_id"]) / f"{rfq_id}.xlsx")
+    out = path or (projects.output_dir(r["project_id"], "procurement") / f"{rfq_id}.xlsx")
     wb.save(out)
     return out
 
@@ -185,6 +185,6 @@ def export_docx(db: Database, rfq_id: str, path: Path | None = None) -> Path:
     doc.add_heading(r["subject"], level=1)
     for line in r["body"].split("\n"):
         doc.add_paragraph(line)
-    out = path or (projects.output_dir(r["project_id"]) / f"{rfq_id}.docx")
+    out = path or (projects.output_dir(r["project_id"], "procurement") / f"{rfq_id}.docx")
     doc.save(out)
     return out

@@ -17,6 +17,7 @@ def client(tmp_path, monkeypatch):
     s.db_path = tmp_path / "var" / "app.db"
     s.data_dir = cfg.BASE_DIR / "data"
     s.secret_key = "test-secret-key"
+    s.workspaces_override = tmp_path / "workspaces"
     s.__class__.projects_dir = property(lambda self: tmp_path / "projects")
     s.__class__.outputs_dir = property(lambda self: tmp_path / "outputs")
     s.__class__.backups_dir = property(lambda self: tmp_path / "backups")
@@ -110,7 +111,8 @@ def test_uploads_preview_import_and_downloads(client, tmp_path):
     # same filename again: stored under a new name, original upload untouched
     with open(csvp, "rb") as f:
         client.post(f"/api/projects/{pid}/boq/import", files={"file": ("b.csv", f)}, headers=h)
-    ups = sorted(p.name for p in (tmp_path / "projects" / pid / "uploads").iterdir())
+    ups = sorted(p.name for p in (next((tmp_path / "workspaces").glob(pid + "-*")) / "3. BOQ & Takeoff").iterdir())
+    ups = [u for u in ups]
     assert len(ups) == 4 and any(n.startswith("b__") for n in ups)
     items = client.get(f"/api/projects/{pid}/boq", headers=h).json()
     assert {i["item_key"] for i in items if i["item_type"] == "item"} == {"1", "2"}

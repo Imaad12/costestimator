@@ -40,6 +40,7 @@ class Settings:
     ai_model: str = "claude-sonnet-5-5"
     ai_max_tokens: int = 2000
     anthropic_api_key: str | None = None
+    workspaces_override: Path | None = None
     company: dict = field(default_factory=dict)
     approval_thresholds: dict = field(default_factory=dict)
     reconciliation: dict = field(default_factory=dict)
@@ -54,6 +55,20 @@ class Settings:
         return self.data_dir / "projects"
 
     @property
+    def workspaces_dir(self) -> Path:
+        """Numbered per-project workspaces (docs/PROJECT_WORKSPACES.md). Default: <repo>/projects."""
+        return self.workspaces_override or (self.base_dir / "projects")
+
+    @property
+    def imports_dir(self) -> Path:
+        """Original public-source files + import manifests (never overwritten)."""
+        return self.data_dir / "public_data" / "imports"
+
+    @property
+    def source_cache_dir(self) -> Path:
+        return self.var_dir / "source_cache"
+
+    @property
     def outputs_dir(self) -> Path:
         return self.data_dir / "outputs"
 
@@ -66,7 +81,7 @@ class Settings:
         return self.var_dir / "backups"
 
     def ensure_dirs(self) -> None:
-        for p in (self.var_dir, self.projects_dir, self.outputs_dir, self.backups_dir):
+        for p in (self.var_dir, self.projects_dir, self.outputs_dir, self.backups_dir, self.workspaces_dir):
             p.mkdir(parents=True, exist_ok=True)
 
     def get_secret(self) -> str:
@@ -104,6 +119,7 @@ def load_settings(config_file: Path | None = None, env: dict | None = None) -> S
     s = Settings(
         db_path=_abs(pick("KSA_DB_PATH", app.get("db_path", "var/ksa_estimator.db"))),
         data_dir=_abs(pick("KSA_DATA_DIR", app.get("data_dir", "data"))),
+        workspaces_override=(_abs(pick("KSA_WORKSPACES_DIR", app.get("workspaces_dir", ""))) if pick("KSA_WORKSPACES_DIR", app.get("workspaces_dir", "")) else None),
         log_level=str(pick("KSA_LOG_LEVEL", app.get("log_level", "INFO"))),
         host=str(pick("KSA_HOST", app.get("host", "127.0.0.1"))),
         port=int(pick("KSA_PORT", app.get("port", 8000))),

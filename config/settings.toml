@@ -5,6 +5,7 @@
 [app]
 db_path = "var/ksa_estimator.db"
 data_dir = "data"
+workspaces_dir = ""               # default: <repo>/projects (numbered per-project workspaces)
 log_level = "INFO"
 host = "127.0.0.1"
 port = 8000

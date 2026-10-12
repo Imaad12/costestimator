@@ -14,3 +14,7 @@ data/outputs/*
 htmlcov/
 ~$*.xlsx
 .~lock.*
+# numbered project workspaces hold client documents - never commit them
+projects/*
+!projects/.gitkeep
+!projects/README.md

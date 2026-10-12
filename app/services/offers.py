@@ -56,7 +56,7 @@ def generate_offer(db: Database, actor: Actor, project_id: str, *, validity_days
     insert_list_after(doc, "QUALIFICATIONS", [f"{s['id']}: {s['description']}" for s in qua], empty_text="None stated.")
     insert_list_after(doc, "CLARIFICATIONS", [f"{x['id']} [{x['status']}]: {x['question']}" + (f" - Response: {x['client_response']}" if x["client_response"] else "")
                                               for x in clar], empty_text="None.")
-    out = projects.output_dir(project_id) / f"{offer_ref}.docx"
+    out = projects.output_dir(project_id, "commercial") / f"{offer_ref}.docx"
     doc.save(str(out))
     oid = db.insert("offers", dict(project_id=project_id, version_no=v, total_pre_tax=to_text(total), tax_total=to_text(tax_total),
                                    total_incl_tax=to_text(incl), validity_days=str(validity_days), payment_terms=payment_terms,

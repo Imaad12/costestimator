@@ -24,6 +24,7 @@ POLICY: dict[str, dict[str, set[str]]] = {
     Entity.SUPPLIER.value: {"approve": {P, C, A}, "reject": {P, C, A}},
     Entity.FX_RATE.value: {"approve": {P, C, A}, "reject": {P, C, A}},
     Entity.PUBLICATION.value: {"approve": {P, C, A}, "reject": {P, C, A}},
+    Entity.RATE_CANDIDATE.value: {"approve": {P, C, A}, "reject": {P, C, A}, "request_changes": {P, C, A}},
     Entity.RESOURCE.value: {"approve": {E, P, C, A}, "reject": {E, P, C, A}},
     Entity.PROJECT_DURATION.value: {"approve": {E, C, A}, "reject": {E, C, A}},
     Entity.INDIRECT.value: {"approve": {E, C, A}, "reject": {E, C, A}},

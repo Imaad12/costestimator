@@ -124,3 +124,4 @@ class Entity(str, Enum):
     AI_SUGGESTION = "ai_suggestion"
     PUBLICATION = "publication"
     OFFER = "offer"
+    RATE_CANDIDATE = "rate_candidate"

@@ -34,7 +34,8 @@ def test_backup_validate_restore_cycle(filedb):
     b = backup.create_backup(s, label="t1")
     rep = backup.validate_backup(b)
     assert rep["ok"] and rep["manifest"]["row_counts"]["projects"] == 1 and rep["audit_entries"] > 10
-    assert "projects/%s/uploads/keep.txt" % pid in rep["manifest"]["files"]
+    ws = projects.project_dir(pid).name
+    assert "workspaces/%s/3. BOQ & Takeoff/keep.txt" % ws in rep["manifest"]["files"]
     with pytest.raises(Conflict):
         backup.create_backup(s, dest=b)                                    # never overwrite a backup
     # destroy data, then restore
@@ -201,6 +202,7 @@ def test_cli_init_demo_templates_backup(tmp_path, monkeypatch, capsys):
     s = cfg.load_settings(env={})
     s.db_path = tmp_path / "var" / "cli.db"
     s.data_dir = cfg.BASE_DIR / "data"
+    s.workspaces_override = tmp_path / "workspaces"
     s.__class__.projects_dir = property(lambda self: tmp_path / "projects")
     s.__class__.outputs_dir = property(lambda self: tmp_path / "outputs")
     s.__class__.backups_dir = property(lambda self: tmp_path / "backups")

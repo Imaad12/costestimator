@@ -16,7 +16,7 @@ from ..models.actor import Actor
 from ..models.enums import Entity, Status
 from ..reconciliation.engine import final_gate, get_run
 from . import assumptions as assumption_service
-from . import audit, offers, projects
+from . import audit, offers, projects, snapshots
 
 
 def _totals_json(est: EstimateResult) -> dict:
@@ -43,6 +43,7 @@ def freeze_version(db: Database, actor: Actor, project_id: str, label: str = "",
     vid = db.insert("estimate_versions", dict(project_id=project_id, version_no=v, label=label or f"v{v}", state=est.state,
                                               status=Status.DRAFT.value, inputs_hash=est.fingerprint, totals_json=_totals_json(est),
                                               result_json=_result_json(est), created_by=actor.username, created_at=now_iso(), notes=notes))
+    snapshots.store_snapshot(db, actor, vid, est)          # reproducible record of every input used (docs/DATA_MODEL.md)
     audit.log(db, actor, "estimate_version", f"{project_id}/v{v}", "freeze", after={"state": est.state, "hash": est.fingerprint[:12]}, project_id=project_id)
     return vid
 

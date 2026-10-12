@@ -52,7 +52,10 @@ def run(db: Database, actor: Actor, name: str, params: dict) -> Any:
 def _(db, a, p):
     return projects.create_project(db, a, name=req(p, "name")[0], client=opt(p, "client") or "", location=opt(p, "location") or "",
                                    region=opt(p, "region") or "KSA-ALL", design_stage=opt(p, "design_stage") or "",
-                                   tax_category=opt(p, "tax_category") or "VAT-STD", tender_ref=opt(p, "tender_ref") or "")
+                                   tax_category=opt(p, "tax_category") or "VAT-STD", tender_ref=opt(p, "tender_ref") or "",
+                                   project_type=opt(p, "project_type") or "",
+                                   trades=[t.strip() for t in (opt(p, "trades") or "").replace(";", ",").split(",") if t.strip()],
+                                   drawing_revision=opt(p, "drawing_revision") or "", spec_revision=opt(p, "spec_revision") or "")
 
 
 @action("archive_project")

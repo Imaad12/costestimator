@@ -163,7 +163,7 @@ async def boq_do_import(pid: str, request: Request, actor: Actor = Depends(curre
 @router.post("/projects/{pid}/takeoff/import")
 async def takeoff(pid: str, file: UploadFile = File(...), actor: Actor = Depends(current_actor)):
     try:
-        r = boq_import.import_takeoff_resources(get_db(), actor, pid, save_upload(pid, file))
+        r = boq_import.import_takeoff_resources(get_db(), actor, pid, save_upload(pid, file, "estimate"))
     except AppError as e:
         return back(f"/projects/{pid}/boq", err=e.message)
     return back(f"/projects/{pid}/boq", ok=f"Takeoff resources: {r['lines_added']} lines, {len(r['rejected'])} rejected.")
@@ -255,7 +255,7 @@ async def quote_import(qid: str, file: UploadFile = File(...), actor: Actor = De
     db = get_db()
     q = quotes.get_quotation(db, qid)
     try:
-        r = quotes.import_quotation_lines(db, actor, qid, save_upload(q["project_id"], file))
+        r = quotes.import_quotation_lines(db, actor, qid, save_upload(q["project_id"], file, "procurement"))
     except AppError as e:
         return back(f"/projects/{q['project_id']}/quotes", err=e.message)
     return back(f"/projects/{q['project_id']}/quotes", ok=f"Imported {r['added']} line(s); {len(r['skipped'])} skipped.")
@@ -310,7 +310,7 @@ def project_reports(pid: str, request: Request, actor: Actor = Depends(current_a
 
 @router.get("/projects/{pid}/workbook")
 def workbook(pid: str, actor: Actor = Depends(current_actor)):
-    out = projects.output_dir(pid) / f"estimate_master_{pid}.xlsx"
+    out = projects.output_dir(pid, "estimate") / f"estimate_master_{pid}.xlsx"
     build_master(out, get_db(), pid)
     return FileResponse(out, filename=out.name)
 
@@ -319,7 +319,7 @@ def workbook(pid: str, actor: Actor = Depends(current_actor)):
 async def workbook_import(pid: str, file: UploadFile = File(...), actor: Actor = Depends(current_actor)):
     from ..excel import roundtrip
     try:
-        rep = roundtrip.import_master(get_db(), actor, pid, save_upload(pid, file))
+        rep = roundtrip.import_master(get_db(), actor, pid, save_upload(pid, file, "estimate"))
     except AppError as e:
         return back(f"/projects/{pid}/reports", err=e.message)
     msg = f"Workbook import created {rep.created}; ignored {rep.ignored}; errors: {len(rep.errors)}. " + " ".join(rep.notes + rep.errors[:5])

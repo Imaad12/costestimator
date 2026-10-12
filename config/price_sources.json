@@ -1,0 +1,4 @@
+{
+  "_comment": "Operator watchlist of PUBLIC product pages for `python -m app.cli sources refresh`. Empty on purpose: this project ships no supplier list and invents none. Add entries only for pages whose terms and robots.txt permit automated retrieval. Example entry (do not enable without checking the site): {\"url\": \"https://example.invalid/product\", \"resource_id\": \"MAT-C-001\", \"supplier\": \"Example Supplier\", \"source_type\": \"Supplier website\"}",
+  "pages": []
+}
