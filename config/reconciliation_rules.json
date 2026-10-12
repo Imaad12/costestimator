@@ -1,0 +1,193 @@
+{
+ "blocking_severities": [
+  "Critical",
+  "High"
+ ],
+ "rules": {
+  "UNPRICED_ITEM": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "BOQ item not fully priced"
+  },
+  "MISSING_RATE": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Missing / ineligible resource rate"
+  },
+  "EXPIRED_RATE": {
+   "severity": "High",
+   "exception_allowed": false,
+   "title": "Expired rate or quotation"
+  },
+  "UNAPPROVED_ASSUMPTION": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Unapproved assumption in use"
+  },
+  "UNAPPROVED_ADOPTED_ASSUMPTION": {
+   "severity": "Medium",
+   "exception_allowed": true,
+   "title": "Adopted assumption not approved"
+  },
+  "DOUBLE_COUNT": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Duplicate cost (double count)"
+  },
+  "POSSIBLE_DUPLICATE_ITEM": {
+   "severity": "Medium",
+   "exception_allowed": true,
+   "title": "Possible duplicate BOQ item / cost in several packages"
+  },
+  "POSSIBLE_DUPLICATE_INDIRECT": {
+   "severity": "Medium",
+   "exception_allowed": true,
+   "title": "Indirect may duplicate a priced preliminaries item"
+  },
+  "UNIT_INCONSISTENT": {
+   "severity": "High",
+   "exception_allowed": false,
+   "title": "Inconsistent / unresolved unit"
+  },
+  "BOQ_NEEDS_REVIEW": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "BOQ item flagged on import"
+  },
+  "BOQ_ROWS_REJECTED": {
+   "severity": "Medium",
+   "exception_allowed": true,
+   "title": "Rows rejected on BOQ import"
+  },
+  "BOQ_CHANGE_PENDING": {
+   "severity": "High",
+   "exception_allowed": false,
+   "title": "Unapproved BOQ change pending"
+  },
+  "BOQ_ITEM_MISSING_IN_REVISION": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Item missing from latest BOQ revision"
+  },
+  "EXCLUSION_UNAPPROVED": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Excluded item without approved exclusion"
+  },
+  "ALLOWANCE_UNAPPROVED": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Allowance / sum not approved"
+  },
+  "PROVISIONAL_INPUTS": {
+   "severity": "Medium",
+   "exception_allowed": true,
+   "title": "Provisional inputs retained in estimate"
+  },
+  "SUM_NOT_SET_AS_SUM": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Looks like a provisional / PC sum but priced otherwise"
+  },
+  "CLARIFICATION_OPEN": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Unresolved clarification affecting priced scope"
+  },
+  "CLARIFICATION_OPEN_GENERAL": {
+   "severity": "Low",
+   "exception_allowed": true,
+   "title": "Open clarification"
+  },
+  "SCHEDULE_RECON": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Pricing schedule differs from internal estimate"
+  },
+  "SCHEDULE_RECON_MAJOR": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Pricing schedule materially differs from internal estimate"
+  },
+  "TOTALS_DO_NOT_RECONCILE": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Cost totals fail to reconcile"
+  },
+  "OFFER_MISSING": {
+   "severity": "Medium",
+   "exception_allowed": false,
+   "title": "No letter of offer generated"
+  },
+  "OFFER_STALE": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Offer letter does not match the pricing schedule"
+  },
+  "OFFER_COMMITMENT_NOT_PRICED": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Offer inclusion not represented in the estimate"
+  },
+  "PRICED_BUT_EXCLUDED": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Priced item contradicts an approved exclusion"
+  },
+  "SYNTHETIC_IN_REAL_PROJECT": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Synthetic/demo data in a non-demo project"
+  },
+  "SYNTHETIC_DEMO": {
+   "severity": "Low",
+   "exception_allowed": true,
+   "title": "Synthetic demonstration data present"
+  },
+  "TAX_UNVERIFIED": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Tax rate unresolved or not approved"
+  },
+  "POLICY_UNAPPROVED": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Commercial policy missing / not approved"
+  },
+  "DURATION_UNAPPROVED": {
+   "severity": "High",
+   "exception_allowed": false,
+   "title": "Project duration not approved"
+  },
+  "INDIRECT_UNAPPROVED": {
+   "severity": "High",
+   "exception_allowed": false,
+   "title": "Indirect cost item unresolved / not approved"
+  },
+  "VERSION_DIFFERENCE": {
+   "severity": "Low",
+   "exception_allowed": true,
+   "title": "Material difference from previous estimate version"
+  },
+  "LOW_CONFIDENCE_RATE": {
+   "severity": "Low",
+   "exception_allowed": true,
+   "title": "Low-confidence or aged rate in use"
+  },
+  "STALE_WORKBOOK": {
+   "severity": "Medium",
+   "exception_allowed": true,
+   "title": "Exported workbook is stale / formula values differ"
+  },
+  "QUOTATION_EXPIRED": {
+   "severity": "High",
+   "exception_allowed": false,
+   "title": "Approved quotation behind a used rate has expired"
+  },
+  "SYSTEM_EXCEPTION": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Estimating engine exception"
+  }
+ }
+}

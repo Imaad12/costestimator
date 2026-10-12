@@ -1,0 +1,153 @@
+code,parent_code,level,kind,name,short_name,default_unit,description,active,is_system
+A,,1,division,Preliminaries and general requirements,PRELIM,,,1,1
+A.01,A,2,subtrade,Mobilisation and demobilisation,,,,1,1
+A.02,A,2,subtrade,Site establishment and temporary facilities,,,,1,1
+A.03,A,2,subtrade,Site management and supervision,,,,1,1
+A.04,A,2,subtrade,"HSE, security and access control",,,,1,1
+A.05,A,2,subtrade,"Temporary power, water and lighting",,,,1,1
+A.06,A,2,subtrade,"Hoarding, scaffolding and temporary works",,,,1,1
+A.07,A,2,subtrade,"Site transport, logistics and accommodation",,,,1,1
+A.08,A,2,subtrade,"Testing, inspections and third-party certification",,,,1,1
+A.09,A,2,subtrade,"Temporary access, protection and traffic management",,,,1,1
+A.10,A,2,subtrade,"Cleaning, demobilisation and handover",,,,1,1
+B,,1,division,Civil and infrastructure,CIVIL,,,1,1
+B.01,B,2,subtrade,Site clearance and demolition,,,,1,1
+B.02,B,2,subtrade,"Excavation, earthworks, cut and fill",,,,1,1
+B.03,B,2,subtrade,"Backfilling, compaction and disposal",,,,1,1
+B.04,B,2,subtrade,Shoring and excavation support,,,,1,1
+B.05,B,2,subtrade,"Roads, pavements, kerbs and footpaths",,,,1,1
+B.06,B,2,subtrade,Asphalt and road markings,,,,1,1
+B.07,B,2,subtrade,Stormwater drainage,,,,1,1
+B.08,B,2,subtrade,Sewerage and wastewater networks,,,,1,1
+B.09,B,2,subtrade,Potable water and irrigation networks,,,,1,1
+B.10,B,2,subtrade,Underground utility networks,,,,1,1
+B.11,B,2,subtrade,Duct banks and utility crossings,,,,1,1
+B.12,B,2,subtrade,"Manholes, chambers and culverts",,,,1,1
+B.13,B,2,subtrade,Retaining walls and external structures,,,,1,1
+B.14,B,2,subtrade,"Fencing, gates and barriers",,,,1,1
+B.15,B,2,subtrade,Landscaping and irrigation,,,,1,1
+B.16,B,2,subtrade,External lighting and associated networks,,,,1,1
+B.17,B,2,subtrade,Utility connections and authority interfaces,,,,1,1
+C,,1,division,Structural,STRUCT,,,1,1
+C.01,C,2,subtrade,Foundations and reinforced concrete,,,,1,1
+C.02,C,2,subtrade,Formwork and falsework,,,,1,1
+C.03,C,2,subtrade,Reinforcement supply and fixing,,,,1,1
+C.04,C,2,subtrade,Structural steel and connections,,,,1,1
+C.05,C,2,subtrade,Precast concrete,,,,1,1
+C.06,C,2,subtrade,Post-tensioning,,,,1,1
+C.07,C,2,subtrade,Metal decking and composite structures,,,,1,1
+C.08,C,2,subtrade,Structural waterproofing,,,,1,1
+C.09,C,2,subtrade,Concrete repairs and strengthening,,,,1,1
+C.10,C,2,subtrade,Structural fire protection,,,,1,1
+C.11,C,2,subtrade,Specialist foundations,,,,1,1
+D,,1,division,Architecture and finishes,ARCH,,,1,1
+D.01,D,2,subtrade,Blockwork and masonry,,,,1,1
+D.02,D,2,subtrade,Drywall and partitions,,,,1,1
+D.03,D,2,subtrade,"Plastering, rendering and screeds",,,,1,1
+D.04,D,2,subtrade,Waterproofing and insulation,,,,1,1
+D.05,D,2,subtrade,"Doors, windows, glazing and curtain walls",,,,1,1
+D.06,D,2,subtrade,"Flooring, tiles, stone and raised floors",,,,1,1
+D.07,D,2,subtrade,Painting and wall coverings,,,,1,1
+D.08,D,2,subtrade,Suspended ceilings and access panels,,,,1,1
+D.09,D,2,subtrade,Joinery and architectural metalwork,,,,1,1
+D.10,D,2,subtrade,Toilet partitions and accessories,,,,1,1
+D.11,D,2,subtrade,Acoustic treatments,,,,1,1
+D.12,D,2,subtrade,Fire stopping,,,,1,1
+D.13,D,2,subtrade,Signage and wayfinding,,,,1,1
+D.14,D,2,subtrade,"Furniture, fixtures and equipment",,,,1,1
+D.15,D,2,subtrade,Architectural protection and finishing,,,,1,1
+E,,1,division,Mechanical and HVAC,HVAC,,,1,1
+E.01,E,2,subtrade,Chillers and cooling towers,,,,1,1
+E.02,E,2,subtrade,Air handling units and fan coil units,,,,1,1
+E.03,E,2,subtrade,Ventilation fans and air distribution,,,,1,1
+E.04,E,2,subtrade,"Ductwork, dampers and accessories",,,,1,1
+E.05,E,2,subtrade,Duct insulation and cladding,,,,1,1
+E.06,E,2,subtrade,Chilled-water and condenser-water piping,,,,1,1
+E.07,E,2,subtrade,Refrigerant piping and DX systems,,,,1,1
+E.08,E,2,subtrade,"Pumps, valves and pipe supports",,,,1,1
+E.09,E,2,subtrade,"Air terminals, grilles and diffusers",,,,1,1
+E.10,E,2,subtrade,HVAC controls and instrumentation,,,,1,1
+E.11,E,2,subtrade,Building management system interfaces,,,,1,1
+E.12,E,2,subtrade,Smoke extraction and stair pressurisation,,,,1,1
+E.13,E,2,subtrade,"Testing, adjusting, balancing and commissioning",,,,1,1
+F,,1,division,Plumbing and public health,PLUMB,,,1,1
+F.01,F,2,subtrade,Domestic cold and hot water,,,,1,1
+F.02,F,2,subtrade,Water tanks and booster systems,,,,1,1
+F.03,F,2,subtrade,Sanitary fixtures and fittings,,,,1,1
+F.04,F,2,subtrade,"Soil, waste and vent piping",,,,1,1
+F.05,F,2,subtrade,Rainwater and roof drainage,,,,1,1
+F.06,F,2,subtrade,Pumps and specialist drainage,,,,1,1
+F.07,F,2,subtrade,Water treatment and filtration,,,,1,1
+F.08,F,2,subtrade,Water heaters and calorifiers,,,,1,1
+F.09,F,2,subtrade,Pipe insulation and supports,,,,1,1
+F.10,F,2,subtrade,"Testing, flushing, disinfection and commissioning",,,,1,1
+G,,1,division,Fire protection and life safety,FIRE,,,1,1
+G.01,G,2,subtrade,Sprinkler systems,,,,1,1
+G.02,G,2,subtrade,Fire hydrants and hose reels,,,,1,1
+G.03,G,2,subtrade,Fire pumps and pump rooms,,,,1,1
+G.04,G,2,subtrade,"Wet, dry and pre-action systems",,,,1,1
+G.05,G,2,subtrade,Clean-agent and specialist suppression,,,,1,1
+G.06,G,2,subtrade,Fire alarm and detection,,,,1,1
+G.07,G,2,subtrade,Emergency lighting and exit signage,,,,1,1
+G.08,G,2,subtrade,Fire stopping and penetrations,,,,1,1
+G.09,G,2,subtrade,Integrated life-safety testing and commissioning,,,,1,1
+H,,1,division,Electrical power and lighting,ELEC,,,1,1
+H.01,H,2,subtrade,MV and LV switchgear,,,,1,1
+H.02,H,2,subtrade,Transformers and substations,,,,1,1
+H.03,H,2,subtrade,Distribution boards and panelboards,,,,1,1
+H.04,H,2,subtrade,Generators and automatic transfer switches,,,,1,1
+H.05,H,2,subtrade,UPS and battery systems,,,,1,1
+H.06,H,2,subtrade,"Busducts, cables and containment",,,,1,1
+H.07,H,2,subtrade,"Cable trays, ladders and conduits",,,,1,1
+H.08,H,2,subtrade,"Earthing, bonding and lightning protection",,,,1,1
+H.09,H,2,subtrade,Internal and external lighting,,,,1,1
+H.10,H,2,subtrade,Small power and final circuits,,,,1,1
+H.11,H,2,subtrade,Power quality and metering,,,,1,1
+H.12,H,2,subtrade,Solar PV and energy storage,,,,1,1
+H.13,H,2,subtrade,Testing and commissioning,,,,1,1
+I,,1,division,"ELV, ICT and security",ELV,,,1,1
+I.01,I,2,subtrade,Structured cabling and fibre optics,,,,1,1
+I.02,I,2,subtrade,Network racks and infrastructure,,,,1,1
+I.03,I,2,subtrade,CCTV and video management,,,,1,1
+I.04,I,2,subtrade,Access control,,,,1,1
+I.05,I,2,subtrade,Intrusion detection,,,,1,1
+I.06,I,2,subtrade,Public address and voice alarm,,,,1,1
+I.07,I,2,subtrade,Intercom and nurse call,,,,1,1
+I.08,I,2,subtrade,Audio-visual and conference systems,,,,1,1
+I.09,I,2,subtrade,BMS integration and gateways,,,,1,1
+I.10,I,2,subtrade,"Testing, configuration and system integration",,,,1,1
+J,,1,division,Specialist systems and equipment,SPEC,,,1,1
+J.01,J,2,subtrade,Lifts and escalators,,,,1,1
+J.02,J,2,subtrade,Building facade access systems,,,,1,1
+J.03,J,2,subtrade,Commercial kitchen and laundry equipment,,,,1,1
+J.04,J,2,subtrade,Medical gas and specialist healthcare systems,,,,1,1
+J.05,J,2,subtrade,Industrial and process equipment,,,,1,1
+J.06,J,2,subtrade,Waste handling systems,,,,1,1
+J.07,J,2,subtrade,Swimming pools and water features,,,,1,1
+J.08,J,2,subtrade,Specialist refrigeration and cold rooms,,,,1,1
+J.09,J,2,subtrade,Laboratories and cleanrooms,,,,1,1
+J.10,J,2,subtrade,EV charging,,,,1,1
+J.11,J,2,subtrade,Renewable energy systems,,,,1,1
+J.12,J,2,subtrade,Other configurable specialist packages,,,,1,1
+K,,1,division,External works and sitewide systems,EXT,,,1,1
+K.01,K,2,subtrade,External utilities,,,,1,1
+K.02,K,2,subtrade,Boundary walls and gates,,,,1,1
+K.03,K,2,subtrade,External lighting,,,,1,1
+K.04,K,2,subtrade,Landscaping and irrigation,,,,1,1
+K.05,K,2,subtrade,Traffic barriers and signage,,,,1,1
+K.06,K,2,subtrade,Parking and access-control equipment,,,,1,1
+K.07,K,2,subtrade,Stormwater attenuation,,,,1,1
+K.08,K,2,subtrade,Utility connections,,,,1,1
+L,,1,division,"Engineering, commercial and closeout",COMM,,,1,1
+L.01,L,2,subtrade,Design and engineering allowances,,,,1,1
+L.02,L,2,subtrade,Authority fees and permits,,,,1,1
+L.03,L,2,subtrade,Insurance and bonds,,,,1,1
+L.04,L,2,subtrade,"Freight, customs and logistics",,,,1,1
+L.05,L,2,subtrade,Escalation and currency exposure,,,,1,1
+L.06,L,2,subtrade,Risk allowances and contingency,,,,1,1
+L.07,L,2,subtrade,Warranties and defects-liability costs,,,,1,1
+L.08,L,2,subtrade,Training and O&M manuals,,,,1,1
+L.09,L,2,subtrade,"Testing, commissioning and handover",,,,1,1
+L.10,L,2,subtrade,Provisional sums,,,,1,1
+L.11,L,2,subtrade,Prime-cost sums,,,,1,1
+L.12,L,2,subtrade,Client allowances and other approved commercial provisions,,,,1,1

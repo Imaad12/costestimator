@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ksa-construction-estimator"
+version = "0.1.0"
+description = "KSA Construction Estimating Suite - local-first, human-approved estimating and procurement support"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "pydantic>=2.5",
+  "openpyxl>=3.1",
+  "pandas>=2.1",
+  "python-docx>=1.1",
+  "jinja2>=3.1",
+  "python-multipart>=0.0.9",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+ai = ["anthropic>=0.40"]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[project.scripts]
+ksa = "app.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["libreoffice: requires LibreOffice for recalculation"]

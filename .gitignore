@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+var/
+backups/
+data/projects/*
+!data/projects/.gitkeep
+data/outputs/*
+!data/outputs/.gitkeep
+*.egg-info/
+.coverage
+htmlcov/
+~$*.xlsx
+.~lock.*

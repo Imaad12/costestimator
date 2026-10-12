@@ -1,0 +1,7 @@
+code,name,name_ar,parent_code,kind,notes
+KSA-ALL,Kingdom of Saudi Arabia (all regions),المملكة العربية السعودية,,national,"Applicability code for rates valid nationwide. Not a regional multiplier."
+KSA-CENTRAL,Central Region (e.g. Riyadh),المنطقة الوسطى,KSA-ALL,region,"Region grouping used for rate applicability only."
+KSA-WESTERN,Western Region (e.g. Makkah / Madinah / Jeddah),المنطقة الغربية,KSA-ALL,region,"Region grouping used for rate applicability only."
+KSA-EASTERN,Eastern Region (e.g. Dammam / Al Khobar / Jubail),المنطقة الشرقية,KSA-ALL,region,"Region grouping used for rate applicability only."
+KSA-SOUTHERN,Southern Region (e.g. Abha / Jazan / Najran),المنطقة الجنوبية,KSA-ALL,region,"Region grouping used for rate applicability only."
+KSA-NORTHERN,Northern Region (e.g. Tabuk / Hail / Al Jouf),المنطقة الشمالية,KSA-ALL,region,"Region grouping used for rate applicability only."

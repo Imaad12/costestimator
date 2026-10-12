@@ -1,0 +1,38 @@
+# KSA Construction Estimating Suite - default configuration.
+# Override any value with an environment variable KSA_<SECTION>_<KEY> or via .env (see .env.example).
+# Defaults here are operational settings, NOT commercial data. No rates, wages or markups are set here.
+
+[app]
+db_path = "var/ksa_estimator.db"
+data_dir = "data"
+log_level = "INFO"
+host = "127.0.0.1"
+port = 8000
+
+[security]
+allow_self_approval = true       # single-user MVP. Set false for small teams (creator cannot approve own item).
+token_ttl_hours = 12
+
+[ai]
+enabled = false                  # deterministic features never require AI
+model = "claude-sonnet-5-5"
+max_tokens = 2000
+
+[company]
+# Used on generated offer letters / RFQs. Edit in Settings UI or here.
+name = "[Your Company Name]"
+address = "[Company address]"
+cr_number = ""
+vat_number = ""
+contact_name = ""
+contact_email = ""
+contact_phone = ""
+
+[approval_thresholds]
+# Value (SAR) at or above which a Commercial Approver (not Procurement Reviewer / Estimator) is required.
+supplier_selection_commercial_approver_sar = "1000000"
+estimate_final_requires_commercial_approver = true
+
+[reconciliation]
+# Pricing schedule vs internal estimate tolerance (SAR) before a finding is raised.
+rounding_tolerance_sar = "1.00"
