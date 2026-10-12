@@ -188,3 +188,20 @@ def test_authoring_forms_create_resource_assembly_and_policy(client):
     assert "POLICY_INVALID" in r.headers["location"]
     r = c.post("/ui/do/create_policy", data={"code": "UI-POL3", "name": "bad", "config": "not json", "_next": "/projects"}, follow_redirects=False)
     assert "valid JSON" in r.headers["location"] or "valid%20JSON" in r.headers["location"] or "JSON" in r.headers["location"]
+
+
+def test_labour_buildup_via_form_and_similar_item_search(client):
+    c = client
+    c.post("/login", data={"username": "est", "password": "pw-est"})
+    comps = '{"monthly_base_wage":"1800","allowances_monthly":"400","accommodation_monthly":"300","transport_monthly":"150","employer_costs_monthly":"250","normal_hours_per_month":"208"}'
+    r = c.post("/ui/do/propose_rate", data={"resource_id": "LAB-028", "rate_type": "Estimator-Entered Allowance", "components": comps, "price_date": "2026-09-01", "_next": "/libraries/LAB-028"},
+               follow_redirects=False)
+    assert "ok=" in r.headers["location"], r.headers["location"]
+    row = get_db().one("SELECT unit_price FROM resource_rates WHERE resource_id='LAB-028' AND unit_price IS NOT NULL")
+    from decimal import Decimal
+    assert Decimal(row["unit_price"]) == Decimal(2900) / Decimal(208)                  # derived deterministically; not typed by the user
+    r = c.post("/ui/do/propose_rate", data={"resource_id": "LAB-028", "rate_type": "Estimator-Entered Allowance", "components": "{bad", "_next": "/libraries/LAB-028"}, follow_redirects=False)
+    assert "valid%20JSON" in r.headers["location"] or "valid+JSON" in r.headers["location"] or "JSON" in r.headers["location"]
+    from app.demo.build import seed_demo
+    pid = seed_demo(get_db())["project_id"]
+    assert c.get(f"/projects/{pid}/mapping?q=blockwork").status_code == 200

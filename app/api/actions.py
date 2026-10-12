@@ -112,7 +112,18 @@ def _(db, a, p):
 
 @action("propose_rate")
 def _(db, a, p):
-    return rates.propose_rate(db, a, req(p, "resource_id")[0], unit_price=req(p, "unit_price")[0], rate_type=req(p, "rate_type")[0],
+    import json
+    comps = None
+    if opt(p, "components"):
+        try:
+            comps = json.loads(opt(p, "components"))
+        except ValueError as e:
+            raise ValidationFailed(f"Build-up components must be valid JSON: {e}")
+        if not isinstance(comps, dict):
+            raise ValidationFailed("Build-up components must be a JSON object.")
+    if comps and not opt(p, "unit_price"):
+        p = {**p, "unit_price": "0"}          # price is derived from the build-up below
+    return rates.propose_rate(db, a, req(p, "resource_id")[0], unit_price=None if comps else req(p, "unit_price")[0], components=comps, rate_type=req(p, "rate_type")[0],
                               currency=opt(p, "currency") or "SAR", price_date=opt(p, "price_date"), valid_until=opt(p, "valid_until"),
                               region=opt(p, "region") or "KSA-ALL", evidence=opt(p, "evidence"), source_id=opt(p, "source_id"),
                               supplier_id=opt(p, "supplier_id"), confidence=opt(p, "confidence") or "Unverified", submit=bool(p.get("submit")))

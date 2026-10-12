@@ -14,6 +14,8 @@
 <form class="inline" method="post" action="/ui/do/propose_rate"><input type="hidden" name="_next" value="/libraries/{{ r.id }}"><input type="hidden" name="resource_id" value="{{ r.id }}">
 <input name="unit_price" placeholder="unit price" size="9"><input name="currency" value="SAR" size="4"><select name="rate_type">{% for t in rate_types %}{% if t != 'Missing Rate' %}<option>{{ t }}</option>{% endif %}{% endfor %}</select>
 <input name="price_date" placeholder="price date YYYY-MM-DD" size="14"><input name="valid_until" placeholder="valid until" size="12"><input name="evidence" placeholder="source / evidence" size="26"><select name="confidence"><option>Unverified</option><option>Low</option><option>Medium</option><option>High</option></select>
-<label><input type="checkbox" name="submit" value="1" checked> submit for review</label><button class="sm">Propose</button></form></div>
+<label><input type="checkbox" name="submit" value="1" checked> submit for review</label><button class="sm">Propose</button>
+{% if r.resource_type in ('labour','plant') %}<br><textarea name="components" rows="3" style="font-family:monospace" placeholder='Optional build-up JSON (price is then DERIVED, leave price empty). Labour: {"monthly_base_wage":"…","allowances_monthly":"…","accommodation_monthly":"…","transport_monthly":"…","employer_costs_monthly":"…","normal_hours_per_month":"…","overtime_multiplier":"…"}  Plant: {"hire_rate":"…","hire_basis":"hour|day|week|month","hours_per_day":"…","days_per_week":"…","days_per_month":"…","operator_hourly":"…","fuel_litres_per_hour":"…","fuel_price_per_litre":"…","maintenance_pct_of_hire":"…","mobilisation_lump":"…","demobilisation_lump":"…"}'></textarea>{% endif %}
+</form></div>
 <h2>Change history</h2>{{ table(history, [('ts','When'),('actor','Who'),('action','Action'),('comment','Comment')]) }}
 {% endblock %}

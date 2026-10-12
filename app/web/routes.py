@@ -171,9 +171,11 @@ async def takeoff(pid: str, file: UploadFile = File(...), actor: Actor = Depends
 
 # ---- mapping
 @router.get("/projects/{pid}/mapping", response_class=HTMLResponse)
-def project_mapping(pid: str, request: Request, actor: Actor = Depends(current_actor)):
+def project_mapping(pid: str, request: Request, q: str = "", actor: Actor = Depends(current_actor)):
     db = get_db()
-    return page(request, "mapping.html", actor, project=_proj(pid), items=boq.list_items(db, pid), assemblies=assemblies.list_assemblies(db, project_id=pid),
+    from ..ai import service as ai_service
+    similar = ai_service.find_historical(db, q, exclude_project=pid) if q else []
+    return page(request, "mapping.html", actor, similar=similar, q=q, project=_proj(pid), items=boq.list_items(db, pid), assemblies=assemblies.list_assemblies(db, project_id=pid),
                 suggestions=suggestions.list_suggestions(db, pid, kind="mapping"), cost_codes=rows_to_dicts(db.all("SELECT code, name FROM cost_codes ORDER BY code")),
                 resources=rows_to_dicts(db.all("SELECT id, description FROM resources WHERE resource_type='subcontract' ORDER BY id LIMIT 300")),
                 title="Mapping", tab="mapping")

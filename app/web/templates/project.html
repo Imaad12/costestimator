@@ -10,5 +10,6 @@
 <div class="kpi"><b>{% if est.schedule and est.schedule.complete %}{{ money(est.schedule.total_pre_tax) }}{% else %}incomplete{% endif %}</b><span>Pricing schedule total before tax</span></div>
 <div class="kpi"><b>{% if est.commercial and est.schedule and est.schedule.complete %}{{ money(est.commercial.final_payable) }}{% else %}n/a{% endif %}</b><span>Final payable incl. tax</span></div></div>
 <h2>Estimate versions</h2>{{ table(versions, [('version_no','#'),('label','Label'),('state','State'),('status','Status','t'),('created_by','By'),('approved_by','Approved by')]) }}
+<p>{{ actform('archive_project', '/projects', [('project_id', project.id, 'hidden'), ('reason','reason (required)',none,24)], 'Archive project (Commercial Approver / Administrator)', 'alt', 'Archive makes the project read-only. Continue?') }}</p>
 {% if changes %}<div class="banner warn">{{ changes|length }} pending BOQ change request(s) — see <a href="/projects/{{ project.id }}/boq">BOQ import</a>.</div>{% endif %}
 {% endblock %}

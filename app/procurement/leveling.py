@@ -17,6 +17,7 @@ from ..core.units import registry
 from ..database import Database, rows_to_dicts
 from ..models.actor import Actor
 from ..services import audit
+from ..ai.service import spec_diff
 from .quotes import get_quotation, validity
 
 
@@ -126,7 +127,8 @@ def level_package(db: Database, package_id: str, *, as_of: date | None = None, t
                              qty_required=qty_req, unit=ln["unit"], quoted_extended=quantize(quoted_ext, 2),
                              normalised=None if norm is None else quantize(norm, 2), unit_flag=uflag, compliance=ln["compliance"],
                              lead_time_days=ln["lead_time_days"], delivery_included=ln["delivery_included"],
-                             unloading_included=ln["unloading_included"], comments=ln["comments"]))
+                             unloading_included=ln["unloading_included"], comments=ln["comments"],
+                             spec_differences=spec_diff(it.get("specification") or "", ln.get("specification") or "") if (it.get("specification") and ln.get("specification")) else []))
         adjs = rows_to_dicts(db.all("SELECT * FROM quote_adjustments WHERE quotation_id=?", (q["id"],)))
         approved_adj = sum((D(a["amount"]) for a in adjs if a["status"] == "Approved"), ZERO)
         pending_adj = [a for a in adjs if a["status"] != "Approved"]
