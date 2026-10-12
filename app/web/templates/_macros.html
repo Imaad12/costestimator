@@ -4,7 +4,7 @@
 <div class="sub">
 {% for key, label in [('', 'Overview'), ('boq', 'BOQ import'), ('mapping', 'Mapping'), ('estimate', 'Estimate build-up'), ('assumptions', 'Assumptions'),
  ('procurement', 'Procurement & RFQs'), ('quotes', 'Quotations'), ('commercial', 'Indirects & commercials'), ('registers', 'Clarifications & risk'),
- ('reconciliation', 'Reconciliation'), ('reports', 'Reports & exports')] %}
+ ('reconciliation', 'Reconciliation'), ('reports', 'Reports & exports'), ('workspace', 'Workspace & documents'), ('completeness', 'Completeness')] %}
 <a href="/projects/{{ project.id }}/{{ key }}" class="{{ 'on' if key == current else '' }}">{{ label }}</a>{% endfor %}</div>
 {% if project.is_demo %}<div class="synth">DEMONSTRATION PROJECT — SYNTHETIC DATA — NOT A MARKET QUOTE</div>{% endif %}
 {% if project.status == 'Archived' %}<div class="banner warn">Project is archived (read-only).</div>{% endif %}

@@ -25,7 +25,12 @@ from ..models.enums import RATE_TYPE_VALUES, ROLE_VALUES
 from ..procurement import leveling, needs, quotes, rfq
 from ..reconciliation import engine as recon
 from ..reporting import dashboard, history
-from ..services import assemblies, assumptions, audit, auth, backup, boq, commercial, estimates, indirects, offers, projects, rates, registers, suggestions, suppliers
+from ..rate_updates import candidates as rate_candidates
+from ..rate_updates import importer as rate_importer
+from ..rate_updates import index_import, refresh as source_refresh
+from ..reporting import completeness
+from ..services import (assemblies, assumptions, audit, auth, backup, boq, commercial, estimates, indirects, offers, project_index, projects, rates, registers,
+                        snapshots, suggestions, suppliers, workspaces)
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
@@ -34,6 +39,11 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 def page(request: Request, name: str, actor: Actor | None, **ctx):
     ctx.setdefault("ok", request.query_params.get("ok"))
     ctx.setdefault("err", request.query_params.get("err"))
+    if actor is not None:
+        try:
+            ctx.setdefault("lib", workspaces.library_versions(get_db()))
+        except Exception:
+            ctx.setdefault("lib", None)
     return templates.TemplateResponse(request, name, {"actor": actor, "request": request, **ctx})
 
 
@@ -410,3 +420,87 @@ async def dataset_stage(file: UploadFile = File(...), source_id: str = Form(""),
 def dataset_view(did: int, request: Request, actor: Actor = Depends(current_actor)):
     db = get_db()
     return page(request, "dataset.html", actor, ds=dict(db.one("SELECT * FROM dataset_imports WHERE id=?", (did,))), rows=datasets.staged_rows(db, did), title=f"Dataset {did}")
+
+
+# ------------------------------------------------------------------ project workspace / documents / completeness
+@router.get("/projects/{pid}/workspace", response_class=HTMLResponse)
+def project_workspace(pid: str, request: Request, actor: Actor = Depends(current_actor)):
+    db = get_db()
+    root = workspaces.ensure_workspace(db, pid)
+    counts = {}
+    for key, name in workspaces.AREAS.items():
+        d = root / name
+        counts[key] = sum(1 for f in d.rglob("*") if f.is_file()) if d.is_dir() else 0
+    claude_md = (root / "CLAUDE.md").read_text(encoding="utf-8") if (root / "CLAUDE.md").exists() else ""
+    snaps = rows_to_dicts(db.all("SELECT s.estimate_version_id, v.version_no, s.sha256, s.created_at, s.file_path FROM estimate_snapshots s JOIN estimate_versions v "
+                                 "ON v.id=s.estimate_version_id WHERE s.project_id=? ORDER BY v.version_no", (pid,)))
+    return page(request, "workspace.html", actor, project=_proj(pid), root=str(root), areas=workspaces.AREAS, counts=counts,
+                docs=project_index.list_documents(db, pid), claude_md=claude_md, snaps=snaps,
+                trades=jload(_proj(pid).get("trades"), []), title="Workspace", tab="workspace")
+
+
+@router.post("/projects/{pid}/workspace/upload")
+async def workspace_upload(pid: str, area: str = Form("tender"), file: UploadFile = File(...), actor: Actor = Depends(current_actor)):
+    from ..approvals import engine as _ap
+    try:
+        _ap.require_author(actor)
+        projects.require_active(get_db(), pid)
+        if area not in workspaces.AREAS or area == "ai_context":
+            return back(f"/projects/{pid}/workspace", err="Choose a valid workspace folder (generated 'AI Context' cannot receive uploads).")
+        path = save_upload(pid, file, area)
+    except AppError as e:
+        return back(f"/projects/{pid}/workspace", err=e.message)
+    return back(f"/projects/{pid}/workspace", ok=f"Saved {path.name} to '{workspaces.AREAS[area]}' (original kept as uploaded; never overwritten).")
+
+
+@router.get("/projects/{pid}/completeness", response_class=HTMLResponse)
+def project_completeness(pid: str, request: Request, actor: Actor = Depends(current_actor)):
+    return page(request, "completeness.html", actor, project=_proj(pid), rep=completeness.project_completeness(get_db(), pid), title="Completeness", tab="completeness")
+
+
+# ------------------------------------------------------------------ public-source rate updates (proposals only)
+@router.get("/rates/updates", response_class=HTMLResponse)
+def rate_updates(request: Request, queue: str = "", status: str = "", actor: Actor = Depends(current_actor)):
+    db = get_db()
+    from ..services import workspaces as _w
+    return page(request, "rate_updates.html", actor, rows=rate_candidates.list_queue(db, queue=queue or None, status=status or None, open_only=not status),
+                counts=rate_candidates.queue_counts(db), srcs=source_refresh.status_report(db), queue=queue, status=status, lib=_w.library_versions(db),
+                register=rows_to_dicts(db.all("SELECT source_id, name FROM sources ORDER BY source_id")), title="Rate updates")
+
+
+@router.get("/rates/updates/{ref}", response_class=HTMLResponse)
+def rate_update_detail(ref: str, request: Request, actor: Actor = Depends(current_actor)):
+    db = get_db()
+    c = rate_candidates.get(db, ref)
+    price, how, reasons = rate_candidates.publishable_price(db, c)
+    man = db.one("SELECT id, source_name, source_url, sha256, imported_at FROM import_manifests WHERE id=?", (c["manifest_id"],)) if c["manifest_id"] else None
+    return page(request, "rate_candidate.html", actor, c=c, publish_price=price, publish_how=how, reasons=reasons, manifest=dict(man) if man else None,
+                resources=rows_to_dicts(db.all("SELECT id, description, unit FROM resources WHERE is_active=1 ORDER BY id LIMIT 3000")),
+                suggestions=rate_candidates.suggest_resource(db, f"{c['description'] or ''} {c['specification'] or ''}"), title=c["candidate_ref"])
+
+
+@router.post("/rates/updates/import")
+async def rate_updates_import(file: UploadFile = File(...), source_id: str = Form(""), source_name: str = Form(""), source_url: str = Form(""),
+                              source_type: str = Form("Manual dataset"), description: str = Form(""), dry_run: str = Form(""),
+                              actor: Actor = Depends(current_actor)):
+    try:
+        path = save_upload("", file)
+        r = rate_importer.import_rates_file(get_db(), actor, path, source_id=source_id or None, source_name=source_name or None, source_url=source_url or None,
+                                            source_type=source_type, description=description, dry_run=bool(dry_run),
+                                            extra_flags=["AWARD_NOT_MARKET_QUOTE"] if source_type == "Public tender award" else None)
+    except AppError as e:
+        return back("/rates/updates", err=f"{e.code}: {e.message}")
+    msg = (f"{'DRY RUN - nothing stored. ' if r['dry_run'] else ''}{r['accepted']} row(s) accepted, {r['rejected']} rejected (manifest #{r['manifest_id']})."
+           + ("".join(f" Row {e['row']}: {'; '.join(e['errors'])}." for e in r['errors'][:5])))
+    return back("/rates/updates", ok=msg)
+
+
+@router.post("/rates/updates/index")
+async def index_upload(file: UploadFile = File(...), dataset: str = Form("gastat-cci"), source_id: str = Form(""), source_name: str = Form(""),
+                       dry_run: str = Form(""), actor: Actor = Depends(current_actor)):
+    try:
+        r = index_import.import_index_file(get_db(), actor, save_upload("", file), dataset=dataset, source_id=source_id or None, source_name=source_name or dataset,
+                                           dry_run=bool(dry_run))
+    except AppError as e:
+        return back("/rates/updates", err=f"{e.code}: {e.message}")
+    return back("/rates/updates", ok=f"Index data: {r}")

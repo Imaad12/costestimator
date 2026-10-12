@@ -1,0 +1,23 @@
+{
+ "manifest_id": 1,
+ "kind": "index",
+ "adapter": "manual-file",
+ "source_id": null,
+ "source_name": "manual",
+ "source_url": null,
+ "original_path": "/tmp/pytest-of-root/pytest-56/test_index_csv_long_format0/cci.csv",
+ "stored_path": "/home/user/costestimator/data/public_data/imports/b0bbc6af53_cci.csv",
+ "sha256": "b0bbc6af538a5684aac2c2cf8dfb8310f36c6c7580df5c5fad0b05273518940f",
+ "description": "",
+ "imported_at": "2026-10-12T21:04:53+00:00",
+ "imported_by": "est",
+ "parsing": {
+  "format": "csv",
+  "file": "cci.csv",
+  "rejected": []
+ },
+ "accepted_rows": 2,
+ "rejected_rows": 0,
+ "errors": [],
+ "candidate_ids": []
+}

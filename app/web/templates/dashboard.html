@@ -6,6 +6,13 @@
 <div class="kpi"><b>SAR {{ money(d.totals.indicative_exposure) }}</b><span>Indicative exposure from unapproved/expired rates (not in totals)</span></div>
 <div class="kpi"><b>{{ d.totals.pending_approvals }}</b><span><a href="/approvals">Items awaiting human approval</a></span></div>
 </div>
+{% if not d.projects %}<div class="card"><h2 style="margin-top:0">Getting started</h2><ol>
+<li><a href="/projects">Create a project</a> — a numbered workspace folder (1. Tender Documents … 10. Exports &amp; Archive) and a project <code>CLAUDE.md</code> are created automatically.</li>
+<li>Put the tender documents in <i>1. Tender Documents</i> and press <i>Index documents</i> on the project's Workspace tab.</li>
+<li>Import the BOQ (human-measured quantities) from the BOQ template, then map items to assemblies.</li>
+<li>Rates: open <a href="/rates/updates">Rate updates</a> to import a price list or public dataset as <i>candidates</i>, review them, and approve. Missing rates go to Procurement &amp; RFQs.</li>
+<li>Check the project's <i>Completeness</i> tab, run reconciliation, and obtain the human approvals needed to release a submission-ready export.</li></ol>
+<p class="muted">The optional demonstration project is clearly marked SYNTHETIC: run <code>python -m app.cli demo</code>.</p></div>{% endif %}
 <h2>Estimates</h2>
 {% for p in d.projects %}
 <div class="card"><h3 style="margin:0 0 6px"><a href="/projects/{{ p.project_id }}">{{ p.project_id }} — {{ p.name }}</a>

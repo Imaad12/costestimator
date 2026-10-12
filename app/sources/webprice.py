@@ -19,8 +19,8 @@ from urllib.parse import urlsplit
 SAR_TOKENS = {"SAR", "SR", "SAR.", "ر.س", "ريال", "ريال سعودي", "﷼"}
 QUOTE_PHRASES = re.compile(r"request (a )?(quote|quotation|price)|call (us )?for (price|quote)|price on (request|application)|contact (us )?for (price|pricing)|"
                            r"get (a )?quote|اطلب\s*(عرض)?\s*سعر|السعر عند الطلب|تواصل للحصول", re.I)
-VAT_INC = re.compile(r"incl(?:uding|usive)?\.?\s*(of\s*)?(vat|tax)|\bvat\s*(included|inclusive)|with\s*vat|شامل\s*(ضريبة|الضريبة)", re.I)
-VAT_EXC = re.compile(r"excl(?:uding|usive)?\.?\s*(of\s*)?(vat|tax)|\bex\.?\s*-?vat|\+\s*vat|before\s*vat|vat\s*(excluded|extra|not included)|غير\s*شامل", re.I)
+VAT_INC = re.compile(r"incl(?:ude[sd]?|uding|usive)?\.?\s*(of\s*)?(vat|tax)|\bvat\s*(included|inclusive)|with\s*vat|شامل\s*(ضريبة|الضريبة)", re.I)
+VAT_EXC = re.compile(r"excl(?:ude[sd]?|uding|usive)?\.?\s*(of\s*)?(vat|tax)|\bex\.?\s*-?vat|\+\s*vat|before\s*vat|vat\s*(excluded|extra|not included)|غير\s*شامل", re.I)
 DELIVERED = re.compile(r"(free |fast |nationwide )?deliver(y|ed)( included| to site)?|shipping included|توصيل", re.I)
 DELIVERY_EXCLUDED = re.compile(r"ex[- ]?works|collection only|pick[- ]?up|delivery (extra|not included|charges apply)|shipping (extra|calculated at checkout)", re.I)
 INSTALL_INC = re.compile(r"supply (and|&) install|installation included|installed price|inc(?:l)?\.? installation|تركيب", re.I)

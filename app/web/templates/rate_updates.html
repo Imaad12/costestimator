@@ -1,0 +1,42 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table, actform %}{% block body %}
+<h1>Rate updates — public sources &amp; datasets</h1>
+<p class="muted">Everything here is a <b>proposal</b>. A candidate becomes a global rate only after (1) a human approves it for publication, (2) it is published as a new <i>Pending Review</i> rate version, and (3) a human approves that rate. Old versions are kept and approved estimates are never changed. Original prices are never overwritten.</p>
+{% if lib and lib.rates_approved_real == 0 %}<div class="banner warn">The global library currently has <b>0 approved real rates</b>. Nothing in this queue has been approved yet.</div>{% endif %}
+<div class="grid">
+<div class="kpi"><b>{{ counts.by_status.get('Pending Review', 0) }}</b><span>Candidates pending review</span></div>
+<div class="kpi"><b>{{ counts.by_status.get('Needs Verification', 0) }}</b><span>Needing verification</span></div>
+<div class="kpi"><b>{{ counts.by_status.get('Approved for Publication', 0) }}</b><span>Approved for publication</span></div>
+<div class="kpi"><b>{{ counts.rates_pending_approval }}</b><span>Published rates awaiting approval · {{ counts.expired_rates }} expired</span></div></div>
+<h2>Review queue</h2>
+<form class="filter" method="get"><select name="queue"><option value="">all open queues</option>{% for q in ['New','Updated','Conflicting','Expired','Requires Verification'] %}<option {{ 'selected' if q == queue else '' }}>{{ q }}</option>{% endfor %}</select>
+<select name="status"><option value="">open</option>{% for s in ['Pending Review','Needs Verification','Approved for Publication','Rejected','Published'] %}<option {{ 'selected' if s == status else '' }}>{{ s }}</option>{% endfor %}</select><button class="alt sm">Filter</button>
+ <span class="muted">Queues: {% for k, v in counts.by_queue.items() %}{{ k }} {{ v }} · {% endfor %}</span></form>
+{% if rows %}<table><thead><tr><th>Ref</th><th>Queue</th><th>Status</th><th>Resource</th><th>Description</th><th>Original price</th><th>Source</th><th>Flags</th></tr></thead><tbody>
+{% for r in rows %}<tr><td><a href="/rates/updates/{{ r.candidate_ref }}">{{ r.candidate_ref }}</a></td><td>{{ r.queue }}</td><td>{{ tag(r.status) }}</td><td>{{ r.resource_id or ('? ' ~ (r.suggested_resource_id or '')) }}</td><td>{{ r.description }}</td>
+<td>{% if r.original_price %}{{ r.original_price }} {{ r.original_currency }}/{{ r.original_unit or '?' }}{% else %}<span class="muted">no price ({{ r.price_kind }})</span>{% endif %}</td><td>{{ r.source_name }}</td><td class="muted">{{ r.flags|join(', ') }}</td></tr>{% endfor %}</tbody></table>
+{% else %}<p class="muted">No candidates in this view. Import a price list below, or refresh sources.</p>{% endif %}
+<h2>Import a price list / public dataset (CSV, XLSX, JSON)</h2>
+<form method="post" action="/rates/updates/import" enctype="multipart/form-data" class="stack"><div class="grid">
+<div><label>File</label><input type="file" name="file" required></div>
+<div><label>Source name</label><input name="source_name" placeholder="e.g. Supplier X price list, Sep 2026" style="width:100%"></div>
+<div><label>Source URL (optional; file reference is stored otherwise)</label><input name="source_url" style="width:100%"></div>
+<div><label>Source Register id</label><select name="source_id"><option value="">(none)</option>{% for s in register %}<option value="{{ s.source_id }}">{{ s.source_id }} — {{ s.name[:60] }}</option>{% endfor %}</select></div>
+<div><label>Source type</label><select name="source_type"><option>Manual dataset</option><option>Supplier website</option><option>Manufacturer website</option><option>Public tender award</option><option>Quotation</option><option>Historical project</option></select></div>
+<div><label>Description</label><input name="description" style="width:100%"></div></div>
+<p><label><input type="checkbox" name="dry_run" value="1" checked> Dry run (validate only; nothing is stored as candidates)</label> <button class="sm">Validate / import</button></p>
+<p class="muted">Columns: Resource ID, Description, Unit, Unit Price, Currency (required), Price Date, VAT (Included/Excluded), Delivery, Source URL. Rows with unknown resources, non-numeric prices or missing currency are rejected with the reason.</p></form>
+<h2>Official index data (e.g. GASTAT Construction Cost Index) — escalation reference only</h2>
+<form method="post" action="/rates/updates/index" enctype="multipart/form-data" class="stack"><div class="grid">
+<div><label>File (KAPSARC/GASTAT CSV or API JSON)</label><input type="file" name="file" required></div><div><label>Dataset key</label><input name="dataset" value="gastat-cci"></div>
+<div><label>Source Register id</label><select name="source_id"><option value="SRC-002">SRC-002 (KAPSARC mirror)</option><option value="SRC-001">SRC-001 (GASTAT)</option><option value="">(none)</option></select></div>
+<div><label>Source name</label><input name="source_name" value="GASTAT CCI via KAPSARC" style="width:100%"></div></div>
+<p><label><input type="checkbox" name="dry_run" value="1" checked> Dry run</label> <button class="sm">Import index</button> <span class="muted">An index is not a price and is never turned into a rate.</span></p></form>
+<h2>Source status</h2>
+<p>{{ actform('refresh_sources', '/rates/updates', [], 'Dry-run refresh (no network)', 'alt') }}
+<form class="inline" method="post" action="/ui/do/refresh_sources" onsubmit="return confirm('Contact the permitted public sources now? Only proposals are created.')"><input type="hidden" name="_next" value="/rates/updates"><input type="hidden" name="live" value="1"><button class="sm">Live refresh (permitted sources only)</button></form></p>
+<table><thead><tr><th>Provider</th><th>Status</th><th>Auto access</th><th>Produces</th><th>Last attempt</th><th>How to use it manually</th></tr></thead><tbody>
+{% for s in srcs.sources %}<tr><td><b>{{ s.name }}</b><div class="muted">{{ s.id }} {{ ('· ' ~ s.register_id) if s.register_id }}</div></td><td>{{ s.status }}<div class="muted">{{ s.effective_status }}</div></td><td>{{ 'yes' if s.automated_access else 'no' }}</td><td>{{ s.produces }}</td>
+<td>{% if s.last_attempt %}{{ s.last_attempt.outcome }} · {{ s.last_attempt.attempted_at }}<div class="muted">{{ s.last_attempt.error or '' }}</div>{% else %}never{% endif %}</td><td class="muted">{{ s.manual_alternative }}</td></tr>{% endfor %}</tbody></table>
+{% if srcs.stale_datasets %}<div class="banner warn">Stale index data: {% for d in srcs.stale_datasets %}{{ d.dataset }} latest {{ d.latest_period }} ({{ d.age_days }} days old). {% endfor %}</div>{% endif %}
+<h2>Recent imports (manifests)</h2>{{ table(srcs.imports, [('id','#'),('kind','Kind'),('adapter','Adapter'),('source_name','Source'),('imported_at','When'),('status','Status'),('accepted_rows','Accepted'),('rejected_rows','Rejected')]) }}
+{% endblock %}

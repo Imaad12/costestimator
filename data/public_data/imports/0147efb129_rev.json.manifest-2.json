@@ -1,0 +1,50 @@
+{
+ "manifest_id": 2,
+ "kind": "index",
+ "adapter": "manual-file",
+ "source_id": "SRC-002",
+ "source_name": "x",
+ "source_url": null,
+ "original_path": "/tmp/pytest-of-root/pytest-56/test_index_revision_keeps_both0/rev.json",
+ "stored_path": "/home/user/costestimator/data/public_data/imports/0147efb129_rev.json",
+ "sha256": "0147efb1290df0f786aba4bfddb29ed714c9a48e78a4593e1d6c484e7b94b2b2",
+ "description": "",
+ "imported_at": "2026-10-12T21:04:53+00:00",
+ "imported_by": "est",
+ "parsing": {
+  "format": "json",
+  "file": "rev.json",
+  "total_count_declared": null,
+  "rejected": [
+   {
+    "row": 2,
+    "reason": "unparseable period 'not-a-date'"
+   },
+   {
+    "row": 3,
+    "reason": "value 'abc' is not numeric"
+   },
+   {
+    "row": 4,
+    "reason": "unknown measure 'Weird' (expected one of ['index', 'm-o-m', 'q-o-q', 'y-o-y'])"
+   }
+  ]
+ },
+ "accepted_rows": 1,
+ "rejected_rows": 3,
+ "errors": [
+  {
+   "row": 2,
+   "reason": "unparseable period 'not-a-date'"
+  },
+  {
+   "row": 3,
+   "reason": "value 'abc' is not numeric"
+  },
+  {
+   "row": 4,
+   "reason": "unknown measure 'Weird' (expected one of ['index', 'm-o-m', 'q-o-q', 'y-o-y'])"
+  }
+ ],
+ "candidate_ids": []
+}

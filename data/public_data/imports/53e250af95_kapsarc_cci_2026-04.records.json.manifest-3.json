@@ -1,0 +1,24 @@
+{
+ "manifest_id": 3,
+ "kind": "index",
+ "adapter": "manual-file",
+ "source_id": "SRC-002",
+ "source_name": "gastat-cci",
+ "source_url": null,
+ "original_path": "/tmp/pytest-of-root/pytest-56/test_rate_update_screens_impor0/projects/_uploads/kapsarc_cci_2026-04.records.json",
+ "stored_path": "/home/user/costestimator/data/public_data/imports/53e250af95_kapsarc_cci_2026-04.records.json",
+ "sha256": "53e250af95ceb14b7e1c3406e35d65399fda7ca2d278db4424bbddf3e5e3a8e5",
+ "description": "",
+ "imported_at": "2026-10-12T21:04:49+00:00",
+ "imported_by": "proc",
+ "parsing": {
+  "format": "json",
+  "file": "kapsarc_cci_2026-04.records.json",
+  "total_count_declared": 39,
+  "rejected": []
+ },
+ "accepted_rows": 39,
+ "rejected_rows": 0,
+ "errors": [],
+ "candidate_ids": []
+}

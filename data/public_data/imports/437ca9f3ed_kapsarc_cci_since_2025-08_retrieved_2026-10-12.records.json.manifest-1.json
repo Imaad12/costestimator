@@ -1,0 +1,24 @@
+{
+ "manifest_id": 1,
+ "kind": "index",
+ "adapter": "kapsarc-gastat-cci",
+ "source_id": "SRC-002",
+ "source_name": "GASTAT Construction Cost Index via KAPSARC Data Portal",
+ "source_url": "https://datasource.kapsarc.org/api/explore/v2.1/catalog/datasets/construction-cost-index-series-by-sections-and-groups-at-national-level",
+ "original_path": "/tmp/tmp2v5pdh1s/kapsarc_cci_since_2025-08_retrieved_2026-10-12.records.json",
+ "stored_path": "/home/user/costestimator/data/public_data/imports/437ca9f3ed_kapsarc_cci_since_2025-08_retrieved_2026-10-12.records.json",
+ "sha256": "437ca9f3ed598176f7774a60290a89a080335e29d89e5945f54351e7e17e38bb",
+ "description": "API refresh since 2025-08; 3 record(s)",
+ "imported_at": "2026-10-12T21:04:53+00:00",
+ "imported_by": "est",
+ "parsing": {
+  "format": "json",
+  "file": "kapsarc_cci_since_2025-08_retrieved_2026-10-12.records.json",
+  "total_count_declared": 3,
+  "rejected": []
+ },
+ "accepted_rows": 3,
+ "rejected_rows": 0,
+ "errors": [],
+ "candidate_ids": []
+}

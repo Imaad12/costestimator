@@ -642,3 +642,65 @@ def _(db, a, p):
                                source="data/indirects/indirect_categories.csv (no amount supplied)")
         n += 1
     return n
+
+
+# ---------------------------------------------------------------- workspaces / documents / public-source rate updates
+@action("update_project")
+def _(db, a, p):
+    pid = req(p, "project_id")[0]
+    changes = {k: opt(p, k) or "" for k in ("project_type", "drawing_revision", "spec_revision", "design_stage", "tender_ref", "location", "client") if k in p}
+    if "trades" in p:
+        changes["trades"] = [t.strip() for t in (opt(p, "trades") or "").replace(";", ",").split(",") if t.strip()]
+    projects.update_project(db, a, pid, **changes)
+
+
+@action("refresh_workspace")
+def _(db, a, p):
+    from ..services import workspaces
+    from ..approvals import engine as _ap
+    _ap.require_author(a)
+    return str(workspaces.ensure_workspace(db, req(p, "project_id")[0]))
+
+
+@action("index_project_documents")
+def _(db, a, p):
+    from ..services import project_index
+    r = project_index.index_project(db, a, req(p, "project_id")[0])
+    return f"{r['new']} new, {r['changed']} changed, {r['unchanged']} unchanged, {r['missing']} missing; {r['extracted']} extracted, {r['not_extracted']} not text-extracted"
+
+
+@action("mark_document_reviewed")
+def _(db, a, p):
+    from ..services import project_index
+    project_index.mark_reviewed(db, a, req(p, "project_id")[0], int(req(p, "doc_id")[0]), opt(p, "comment") or "")
+
+
+@action("review_rate_candidate")
+def _(db, a, p):
+    from ..rate_updates import candidates
+    return candidates.review(db, a, req(p, "candidate")[0], req(p, "decision")[0], opt(p, "comment") or "")["status"]
+
+
+@action("edit_rate_candidate")
+def _(db, a, p):
+    from ..rate_updates import candidates
+    ch = {k: opt(p, k) for k in ("resource_id", "unit", "tax_basis", "delivery_basis", "installation_included", "geography", "specification",
+                                 "valid_until", "effective_date", "confidence", "price_kind") if opt(p, k)}
+    return candidates.edit(db, a, req(p, "candidate")[0], **ch)["queue"]
+
+
+@action("publish_rate_candidate")
+def _(db, a, p):
+    from ..rate_updates import candidates
+    return candidates.publish(db, a, req(p, "candidate")[0])
+
+
+@action("refresh_sources")
+def _(db, a, p):
+    """Dry-run by default. A live refresh contacts only providers whose policy permits automated access and only creates proposals."""
+    from ..rate_updates import refresh
+    live = str(p.get("live", "")).lower() in ("1", "true", "yes", "on")
+    rep = refresh.refresh_sources(db, a, provider_ids=[x for x in [opt(p, "provider")] if x] or None, dry_run=not live)
+    s = rep["summary"]
+    return (f"{'LIVE' if live else 'DRY RUN'}: {s['successful']} ok, {s['blocked']} blocked, {s['skipped_or_dry_run']} skipped/dry, {s['errors']} errors; "
+            f"{s['new_candidates']} new candidate(s), {s['new_or_revised_index_rows']} index row(s)")

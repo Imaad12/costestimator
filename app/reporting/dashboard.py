@@ -53,7 +53,8 @@ def pending_approvals_count(db: Database) -> int:
     q = {"rates": "SELECT COUNT(*) FROM resource_rates WHERE status='Pending Review'", "assumptions": "SELECT COUNT(*) FROM assumptions WHERE status='Pending Review'",
          "assemblies": "SELECT COUNT(*) FROM assemblies WHERE status='Pending Review'", "quotations": "SELECT COUNT(*) FROM quotations WHERE status='Pending Review'",
          "changes": "SELECT COUNT(*) FROM change_requests WHERE status='Pending Review'", "selections": "SELECT COUNT(*) FROM quote_selections WHERE status='Pending Review'",
-         "versions": "SELECT COUNT(*) FROM estimate_versions WHERE status='Pending Review'", "suggestions": "SELECT COUNT(*) FROM ai_suggestions WHERE status='Pending Review'"}
+         "versions": "SELECT COUNT(*) FROM estimate_versions WHERE status='Pending Review'", "suggestions": "SELECT COUNT(*) FROM ai_suggestions WHERE status='Pending Review'",
+         "rate candidates": "SELECT COUNT(*) FROM rate_candidates WHERE status IN ('Pending Review','Needs Verification','Approved for Publication')"}
     return sum(db.scalar(s) or 0 for s in q.values())
 
 
@@ -74,5 +75,6 @@ def pending_queue(db: Database) -> dict[str, list[dict]]:
         "Scope entries": rows_to_dicts(db.all("SELECT id, project_id, kind, description FROM scope_register WHERE status='Draft' ORDER BY project_id, id LIMIT 200")),
         "Allowances / sums": rows_to_dicts(db.all("SELECT project_id, item_key, pricing_method, pricing_amount, pricing_note FROM boq_items WHERE pricing_status='Pending Review'")),
         "Estimate versions": rows_to_dicts(db.all("SELECT id, project_id, version_no, state FROM estimate_versions WHERE status='Pending Review'")),
+        "Rate candidates (public sources, awaiting review/publication)": rows_to_dicts(db.all("SELECT candidate_ref, queue, status, COALESCE(resource_id, suggested_resource_id) AS resource, original_price, original_currency, original_unit, source_name FROM rate_candidates WHERE status IN ('Pending Review','Needs Verification','Approved for Publication') ORDER BY id LIMIT 200")),
         "AI / heuristic suggestions": rows_to_dicts(db.all("SELECT id, project_id, kind, produced_by, confidence FROM ai_suggestions WHERE status='Pending Review' ORDER BY id DESC LIMIT 100")),
     }

@@ -1,0 +1,45 @@
+{
+ "manifest_id": 2,
+ "kind": "rates",
+ "adapter": "manual-file",
+ "source_id": null,
+ "source_name": "Test list",
+ "source_url": null,
+ "original_path": "/tmp/pytest-of-root/pytest-56/test_rate_update_screens_impor0/projects/_uploads/list__1.csv",
+ "stored_path": "/home/user/costestimator/data/public_data/imports/d10f1a4581_list__1.csv",
+ "sha256": "d10f1a4581fca808947d521940025757a6b80fe6b7fc0ca124fa8b1364e251fc",
+ "description": "",
+ "imported_at": "2026-10-12T21:04:49+00:00",
+ "imported_by": "est",
+ "parsing": {
+  "file": "list__1.csv",
+  "format": "csv",
+  "rows_read": 2,
+  "source_type": "Manual dataset",
+  "columns": [
+   "currency",
+   "delivery_basis",
+   "description",
+   "effective_date",
+   "original_price",
+   "resource_id",
+   "source_url",
+   "tax_basis",
+   "unit"
+  ]
+ },
+ "accepted_rows": 1,
+ "rejected_rows": 1,
+ "errors": [
+  {
+   "row": 3,
+   "errors": [
+    "price 'x' is not numeric",
+    "a price is required unless the item is 'Specification only' or 'Quote required'"
+   ]
+  }
+ ],
+ "candidate_ids": [
+  1
+ ]
+}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table, actform %}{% block body %}
+<h1>{{ c.candidate_ref }} {{ tag(c.status) }} <span class="tag">{{ c.queue }}</span></h1>
+<p><a href="/rates/updates">← Rate updates</a></p>
+<div class="card"><div class="grid">
+<div><b>Description</b><br>{{ c.description }}</div><div><b>Specification</b><br>{{ c.specification or '—' }}</div>
+<div><b>Resource</b><br>{{ c.resource_id or 'NOT MATCHED' }}{% if not c.resource_id and suggestions %}<div class="muted">Suggestions (not applied): {% for s in suggestions %}{{ s.id }} ({{ s.description[:40] }}) {% endfor %}</div>{% endif %}</div>
+<div><b>Original price (immutable)</b><br>{{ c.original_price or 'none' }} {{ c.original_currency or '' }} / {{ c.original_unit or '?' }} <span class="muted">({{ c.price_kind }})</span></div>
+<div><b>Comparison / publishable price</b><br>{% if publish_price is not none %}{{ publish_price }} SAR VAT-exclusive per resource unit<div class="muted">{{ publish_how }}</div>{% else %}<span class="muted">not computable</span>{% endif %}</div>
+<div><b>Source</b><br>{{ c.source_type }} — {{ c.source_name }}<br><code>{{ c.source_url }}</code></div>
+<div><b>Retrieved / effective / valid until</b><br>{{ c.retrieved_at }} / {{ c.effective_date }} / {{ c.valid_until or '—' }}</div>
+<div><b>Geography</b><br>{{ c.geography }}</div><div><b>Tax / delivery / installation</b><br>VAT {{ c.tax_basis }} · {{ c.delivery_basis }} · install {{ c.installation_included }}</div>
+<div><b>Extraction</b><br>{{ c.extraction_method }}</div><div><b>Flags</b><br>{{ c.flags|join(', ') or 'none' }}</div></div>
+{% if c.evidence_snippet %}<p><b>Evidence snippet</b></p><pre style="white-space:pre-wrap" class="card">{{ c.evidence_snippet }}</pre>{% endif %}
+{% if manifest %}<p class="muted">Import manifest #{{ manifest.id }} · {{ manifest.source_name }} · sha256 {{ manifest.sha256 }} · {{ manifest.imported_at }}</p>{% endif %}
+{% if c.normalisation %}<p class="muted">Normalisation: {{ c.normalisation_method }}{% if c.normalisation.unresolved %} — unresolved: {{ c.normalisation.unresolved|join('; ') }}{% endif %}</p>{% endif %}
+{% if reasons %}<div class="banner warn">Cannot be approved for publication yet: <ul>{% for r in reasons %}<li>{{ r }}</li>{% endfor %}</ul></div>{% endif %}</div>
+{% if c.status not in ('Rejected','Published') %}
+<h2>Edit matching / basis (original price stays as found)</h2>
+<form method="post" action="/ui/do/edit_rate_candidate" class="stack"><input type="hidden" name="_next" value="/rates/updates/{{ c.candidate_ref }}"><input type="hidden" name="candidate" value="{{ c.candidate_ref }}"><div class="grid">
+<div><label>Resource id</label><input name="resource_id" list="res" value="{{ c.resource_id or '' }}"><datalist id="res">{% for r in resources %}<option value="{{ r.id }}">{{ r.description[:50] }} [{{ r.unit }}]</option>{% endfor %}</datalist></div>
+<div><label>Unit</label><input name="unit" value="{{ c.unit or '' }}" size="8"></div>
+<div><label>VAT</label><select name="tax_basis"><option value="">(unchanged: {{ c.tax_basis }})</option><option>Included</option><option>Excluded</option><option>Unknown</option></select></div>
+<div><label>Delivery</label><select name="delivery_basis"><option value="">(unchanged: {{ c.delivery_basis }})</option><option>Delivered</option><option>Supply only</option><option>Unknown</option></select></div>
+<div><label>Price kind</label><select name="price_kind"><option value="">(unchanged: {{ c.price_kind }})</option><option>List price</option><option>Quoted</option><option>Promotional</option></select></div>
+<div><label>Effective date</label><input name="effective_date" placeholder="{{ c.effective_date }}"></div></div><p><button class="sm">Save</button></p></form>
+<h2>Decision (human only)</h2>
+<form method="post" action="/ui/do/review_rate_candidate" class="stack"><input type="hidden" name="_next" value="/rates/updates/{{ c.candidate_ref }}"><input type="hidden" name="candidate" value="{{ c.candidate_ref }}">
+<input name="comment" placeholder="comment (required for reject / verify)" size="50"> <button class="sm" name="decision" value="approve">Approve for publication</button>
+<button class="sm alt" name="decision" value="needs_verification">Needs verification</button><button class="sm danger" name="decision" value="reject">Reject</button></form>
+{% if c.status == 'Approved for Publication' %}{{ actform('publish_rate_candidate', '/rates/updates/' ~ c.candidate_ref, [('candidate', c.candidate_ref, 'hidden')], 'Publish as a new Pending Review rate version') }}
+<p class="muted">The published version still needs its own rate approval (Approvals page) before any final estimate can use it.</p>{% endif %}
+{% elif c.published_rate_id %}<p>Published as rate version id <b>{{ c.published_rate_id }}</b> by {{ c.published_by }} — approve it on the resource page.</p>{% endif %}
+{% if c.reviewer %}<p class="muted">Reviewed by {{ c.reviewer }} on {{ c.reviewed_at }}: {{ c.review_comments }}</p>{% endif %}
+{% endblock %}

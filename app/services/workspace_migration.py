@@ -44,7 +44,7 @@ def plan(db: Database) -> list[dict]:
         existing = workspaces.find_existing(pid)
         root = existing or (s.workspaces_dir / workspaces.workspace_name(pid, p["name"]))
         moves: list[dict] = []
-        for base, kind in ((s.projects_dir / pid, "uploads"), (s.outputs_dir / pid, "outputs")):
+        for base, kind in ((s.projects_dir / pid / "uploads", "uploads"), (s.outputs_dir / pid, "outputs")):
             if not base.is_dir():
                 continue
             for f in sorted(base.rglob("*")):
@@ -71,7 +71,8 @@ def migrate(db: Database, *, dry_run: bool = True) -> dict:
         report["projects"] = pl
         report["note"] = "Dry run: nothing was created, copied or changed."
         return report
-    b = backup.create_backup(s, label="pre-workspace-migration")
+    b = backup.create_backup(s, label="pre-workspace-migration",
+                             dest=s.backups_dir / f"ksa-backup-pre-workspace-migration-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S-%f')}.zip")
     ok = backup.validate_backup(b)
     report["backup"] = {"file": str(b), "valid": ok["ok"]}
     if not ok["ok"]:

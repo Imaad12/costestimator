@@ -2,9 +2,10 @@
 <title>{{ title or "KSA Construction Estimating Suite" }}</title><link rel="stylesheet" href="/static/app.css"></head><body>
 <header><span class="brand">KSA Construction Estimating Suite</span>
 {% if actor %}<a href="/">Dashboard</a><a href="/projects">Projects</a><a href="/libraries">Resource libraries</a><a href="/assumptions">Assumptions</a>
-<a href="/assemblies">Assemblies</a><a href="/approvals">Approvals</a><a href="/settings">Settings &amp; sources</a>
+<a href="/assemblies">Assemblies</a><a href="/rates/updates">Rate updates</a><a href="/approvals">Approvals</a><a href="/settings">Settings &amp; sources</a>
 <span class="who">{{ actor.display_name or actor.username }} · {{ actor.role }} · <a href="/logout">sign out</a></span>{% endif %}</header>
 <main>
 {% if ok %}<div class="banner ok">{{ ok }}</div>{% endif %}{% if err %}<div class="banner bad">{{ err }}</div>{% endif %}
+{% if actor and lib and lib.rates_approved_real == 0 %}<div class="banner warn"><b>No approved real rates yet.</b> The global library lists {{ lib.resources }} catalogue resources but contains no approved real Saudi rate: every real price must come from a quotation, dataset or source you import and a human approves (<a href="/rates/updates">Rate updates</a>). Synthetic demo rates, where present, are labelled SYNTHETIC / DEMO / NOT A MARKET QUOTE.</div>{% endif %}
 {% block body %}{% endblock %}
 </main></body></html>

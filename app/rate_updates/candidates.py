@@ -165,7 +165,12 @@ def get(db: Database, cid: int) -> dict:
 def recompute(db: Database, cid: int) -> dict:
     """Refresh normalisation, derived flags and queue. Original price fields are never touched."""
     c = get(db, cid)
-    flags = {f for f in c["flags"] if f not in ("NORMALISATION_INCOMPLETE", "RESOURCE_UNMATCHED", "STALE_EXPIRED")}
+    flags = {f for f in c["flags"] if f not in ("NORMALISATION_INCOMPLETE", "RESOURCE_UNMATCHED", "STALE_EXPIRED", "VAT_UNKNOWN", "DELIVERY_UNKNOWN")}
+    if D_opt(c["original_price"]) is not None:
+        if (c["tax_basis"] or "Unknown") not in ("Included", "Excluded"):
+            flags.add("VAT_UNKNOWN")
+        if (c["delivery_basis"] or "Unknown") == "Unknown":
+            flags.add("DELIVERY_UNKNOWN")
     res = db.one("SELECT unit FROM resources WHERE id=?", (c["resource_id"],)) if c["resource_id"] else None
     if not c["resource_id"]:
         flags.add("RESOURCE_UNMATCHED")
