@@ -92,7 +92,10 @@ def client_pricing_schedule(est: EstimateResult, path: Path | None = None, *, su
                 ws.cell(r, 6, None if v["tax"] is None else float(v["tax"])).number_format = SAR
             r += 1
             ws.cell(r, 5, "Total including tax").font = Font(bold=True)
-            ws.cell(r, 6, f"=F{r - len(c.tax_by_category) - 1}+" + "+".join(f"F{r - i}" for i in range(1, len(c.tax_by_category) + 1))).number_format = SAR
+            if any(v["tax"] is None for v in c.tax_by_category.values()):
+                ws.cell(r, 6, "UNRESOLVED (tax rate not verified/approved)")
+            else:
+                ws.cell(r, 6, f"=F{r - len(c.tax_by_category) - 1}+" + "+".join(f"F{r - i}" for i in range(1, len(c.tax_by_category) + 1))).number_format = SAR
     for col, w in zip("ABCDEFG", (12, 60, 8, 12, 14, 16, 34)):
         ws.column_dimensions[col].width = w
     ws.auto_filter.ref = f"A5:G{max(r, 6)}"

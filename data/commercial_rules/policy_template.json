@@ -1,0 +1,14 @@
+{
+  "_comment": "TEMPLATE ONLY. No commercial policy is assumed: every value below is null and must be decided and approved by a Commercial Approver. compute_commercial() refuses a policy with missing values.",
+  "method": null,
+  "markup_pct": null,
+  "margin_pct": null,
+  "default_tax_category": "VAT-STD",
+  "contingency": {"pct": null, "base": null},
+  "risk_items": [],
+  "escalation": {"pct": null, "base": null},
+  "discount": null,
+  "rounding": {"dp": 2, "mode": "half_up", "step": null},
+  "rate_dp": 2,
+  "options": {"method": ["markup", "margin"], "contingency.base": ["direct", "direct_indirect"], "escalation.base": ["direct", "direct_indirect", "cost_before_escalation"]}
+}

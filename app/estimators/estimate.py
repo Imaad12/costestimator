@@ -257,7 +257,9 @@ def _tax_from_schedule(c: com.CommercialResult, sch: PricingSchedule, rates: dic
         t = quantize(base * rate / 100, dp)
         by[cat] = {"base": base, "rate_pct": rate, "tax": t}
         total += t
-    return replace(c, tax_by_category=by, tax_total=total, final_payable=sch.total_pre_tax + total if not unresolved else sch.total_pre_tax)
+    # an unresolved tax rate is shown as unresolved (None) - never as zero tax or a payable that silently omits tax
+    return replace(c, tax_by_category=by, tax_total=None if unresolved else total,
+                   final_payable=None if unresolved else sch.total_pre_tax + total)
 
 
 _BLOCKING_SOURCES_SEV = ("Critical", "High")

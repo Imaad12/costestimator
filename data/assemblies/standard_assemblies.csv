@@ -1,0 +1,73 @@
+assembly_code,description,unit,cost_code,line_no,line_type,resource_id,productivity_basis,notes
+STD-CIV-EXC,Bulk excavation and disposal per m3,m3,B.02,1,plant,PLT-001,,Factor required - estimator input (hours per m3)
+STD-CIV-EXC,Bulk excavation and disposal per m3,m3,B.02,2,plant,PLT-016,,Factor required - estimator input
+STD-CIV-EXC,Bulk excavation and disposal per m3,m3,B.02,3,labour,LAB-028,paid_hours_per_unit,Factor required - estimator input
+STD-CIV-BACKFILL,Backfill with imported structural fill per m3,m3,B.03,1,material,MAT-B-003,,Factor required - estimator input; set waste via approved assumption
+STD-CIV-BACKFILL,Backfill with imported structural fill per m3,m3,B.03,2,plant,PLT-011,,Factor required - estimator input
+STD-CIV-BACKFILL,Backfill with imported structural fill per m3,m3,B.03,3,labour,LAB-028,paid_hours_per_unit,Factor required - estimator input
+STD-CIV-KERB,Precast kerb per m,m,B.05,1,material,MAT-B-013,,Factor required - estimator input
+STD-CIV-KERB,Precast kerb per m,m,B.05,2,material,MAT-D-004,,Factor required - estimator input
+STD-CIV-KERB,Precast kerb per m,m,B.05,3,labour,LAB-028,paid_hours_per_unit,Factor required - estimator input
+STD-CIV-ASPHALT,Asphalt wearing course per tonne laid,t,B.06,1,material,MAT-B-016,,Factor required - estimator input
+STD-CIV-ASPHALT,Asphalt wearing course per tonne laid,t,B.06,2,material,MAT-B-019,,Factor required - estimator input
+STD-CIV-ASPHALT,Asphalt wearing course per tonne laid,t,B.06,3,plant,PLT-043,,Factor required - estimator input
+STD-CIV-ASPHALT,Asphalt wearing course per tonne laid,t,B.06,4,labour,LAB-028,paid_hours_per_unit,Factor required - estimator input
+STD-CIV-STORM,Stormwater HDPE pipe network per m,m,B.07,1,material,MAT-B-022,,Factor required - estimator input
+STD-CIV-STORM,Stormwater HDPE pipe network per m,m,B.07,2,material,MAT-B-007,,Factor required - estimator input
+STD-CIV-STORM,Stormwater HDPE pipe network per m,m,B.07,3,plant,PLT-001,,Factor required - estimator input
+STD-CIV-STORM,Stormwater HDPE pipe network per m,m,B.07,4,labour,LAB-028,paid_hours_per_unit,Factor required - estimator input
+STD-STR-RC,Reinforced concrete (concrete + placing) per m3,m3,C.01,1,material,MAT-C-002,,Factor required - estimator input; waste per approved assumption
+STD-STR-RC,Reinforced concrete (concrete + placing) per m3,m3,C.01,2,plant,PLT-039,,Factor required - estimator input
+STD-STR-RC,Reinforced concrete (concrete + placing) per m3,m3,C.01,3,labour,LAB-037,paid_hours_per_unit,Factor required - estimator input
+STD-STR-FORM,Formwork per m2 contact area,m2,C.02,1,material,MAT-C-008,,Factor required - estimator input
+STD-STR-FORM,Formwork per m2 contact area,m2,C.02,2,material,MAT-C-010,,Factor required - estimator input
+STD-STR-FORM,Formwork per m2 contact area,m2,C.02,3,labour,LAB-039,paid_hours_per_unit,Factor required - estimator input
+STD-STR-REBAR,Reinforcement supply and fix per tonne,t,C.03,1,material,MAT-C-013,,Factor required - estimator input
+STD-STR-REBAR,Reinforcement supply and fix per tonne,t,C.03,2,material,MAT-C-019,,Factor required - estimator input
+STD-STR-REBAR,Reinforcement supply and fix per tonne,t,C.03,3,labour,LAB-041,paid_hours_per_unit,Factor required - estimator input
+STD-STR-WPROOF,Below-ground waterproofing membrane per m2,m2,C.08,1,material,MAT-C-038,,Factor required - estimator input
+STD-STR-WPROOF,Below-ground waterproofing membrane per m2,m2,C.08,2,labour,LAB-028,paid_hours_per_unit,Factor required - estimator input
+STD-ARC-BLOCK,Blockwork 200mm per m2,m2,D.01,1,material,MAT-D-001,,Factor required - estimator input (geometric block count may be derived from block size)
+STD-ARC-BLOCK,Blockwork 200mm per m2,m2,D.01,2,material,MAT-D-004,,Factor required - estimator input
+STD-ARC-BLOCK,Blockwork 200mm per m2,m2,D.01,3,labour,LAB-035,paid_hours_per_unit,Factor required - estimator input
+STD-ARC-BLOCK,Blockwork 200mm per m2,m2,D.01,4,labour,LAB-028,paid_hours_per_unit,Factor required - estimator input
+STD-ARC-DRYWALL,Plasterboard partition per m2,m2,D.02,1,material,MAT-D-006,,Factor required - estimator input
+STD-ARC-DRYWALL,Plasterboard partition per m2,m2,D.02,2,material,MAT-D-009,,Factor required - estimator input
+STD-ARC-DRYWALL,Plasterboard partition per m2,m2,D.02,3,labour,LAB-053,paid_hours_per_unit,Factor required - estimator input
+STD-ARC-RENDER,Cement render per m2,m2,D.03,1,material,MAT-D-014,,Factor required - estimator input
+STD-ARC-RENDER,Cement render per m2,m2,D.03,2,labour,LAB-028,paid_hours_per_unit,Factor required - estimator input
+STD-ARC-TILE,Porcelain floor tiling per m2,m2,D.06,1,material,MAT-D-031,,Factor required - estimator input
+STD-ARC-TILE,Porcelain floor tiling per m2,m2,D.06,2,material,MAT-D-004,,Factor required - estimator input
+STD-ARC-TILE,Porcelain floor tiling per m2,m2,D.06,3,labour,LAB-051,paid_hours_per_unit,Factor required - estimator input
+STD-ARC-PAINT,Interior emulsion painting per m2,m2,D.07,1,material,MAT-D-038,,Factor required - estimator input
+STD-ARC-PAINT,Interior emulsion painting per m2,m2,D.07,2,labour,LAB-052,paid_hours_per_unit,Factor required - estimator input
+STD-ARC-CEIL,Suspended mineral-fibre ceiling per m2,m2,D.08,1,material,MAT-D-041,,Factor required - estimator input
+STD-ARC-CEIL,Suspended mineral-fibre ceiling per m2,m2,D.08,2,material,MAT-D-043,,Factor required - estimator input
+STD-ARC-CEIL,Suspended mineral-fibre ceiling per m2,m2,D.08,3,labour,LAB-054,paid_hours_per_unit,Factor required - estimator input
+STD-MEC-DUCT,Galvanised ductwork supply and install per m2,m2,E.04,1,material,MAT-E-010,,Factor required - estimator input
+STD-MEC-DUCT,Galvanised ductwork supply and install per m2,m2,E.04,2,material,MAT-E-022,,Factor required - estimator input
+STD-MEC-DUCT,Galvanised ductwork supply and install per m2,m2,E.04,3,labour,LAB-063,paid_hours_per_unit,Factor required - estimator input
+STD-MEC-CHW,Chilled-water black steel pipework per m,m,E.06,1,material,MAT-E-025,,Factor required - estimator input
+STD-MEC-CHW,Chilled-water black steel pipework per m,m,E.06,2,material,MAT-E-026,,Factor required - estimator input
+STD-MEC-CHW,Chilled-water black steel pipework per m,m,E.06,3,material,MAT-E-022,,Factor required - estimator input
+STD-MEC-CHW,Chilled-water black steel pipework per m,m,E.06,4,labour,LAB-063,paid_hours_per_unit,Factor required - estimator input
+STD-PLM-PPR,PPR pipework per m,m,F.01,1,material,MAT-F-001,,Factor required - estimator input
+STD-PLM-PPR,PPR pipework per m,m,F.01,2,material,MAT-F-002,,Factor required - estimator input
+STD-PLM-PPR,PPR pipework per m,m,F.01,3,labour,LAB-062,paid_hours_per_unit,Factor required - estimator input
+STD-PLM-WC,WC suite installation per set,set,F.03,1,material,MAT-F-009,,Factor required - estimator input
+STD-PLM-WC,WC suite installation per set,set,F.03,2,labour,LAB-062,paid_hours_per_unit,Factor required - estimator input
+STD-FIR-PIPE,Sprinkler pipework per m,m,G.01,1,material,MAT-G-003,,Factor required - estimator input
+STD-FIR-PIPE,Sprinkler pipework per m,m,G.01,2,material,MAT-G-004,,Factor required - estimator input
+STD-FIR-PIPE,Sprinkler pipework per m,m,G.01,3,labour,LAB-063,paid_hours_per_unit,Factor required - estimator input
+STD-FIR-HEAD,Sprinkler head per nr,nr,G.01,1,material,MAT-G-001,,Factor required - estimator input
+STD-FIR-HEAD,Sprinkler head per nr,nr,G.01,2,labour,LAB-063,paid_hours_per_unit,Factor required - estimator input
+STD-ELE-CABLE,LV power cable (3C/4C XLPE/SWA) installed per m,m,H.06,1,material,MAT-H-016,,Factor required - estimator input; waste per approved assumption
+STD-ELE-CABLE,LV power cable (3C/4C XLPE/SWA) installed per m,m,H.06,2,labour,LAB-072,paid_hours_per_unit,Factor required - estimator input
+STD-ELE-TRAY,Perforated cable tray installed per m,m,H.07,1,material,MAT-H-024,,Factor required - estimator input
+STD-ELE-TRAY,Perforated cable tray installed per m,m,H.07,2,labour,LAB-072,paid_hours_per_unit,Factor required - estimator input
+STD-ELE-LIGHT,LED recessed luminaire installed per nr,nr,H.09,1,material,MAT-H-035,,Factor required - estimator input
+STD-ELE-LIGHT,LED recessed luminaire installed per nr,nr,H.09,2,labour,LAB-072,paid_hours_per_unit,Factor required - estimator input
+STD-ELV-CAT6A,Cat6A cabling installed per roll-equivalent (convert to m via approved assumption),roll,I.01,1,material,MAT-I-002,,Factor required - estimator input
+STD-ELV-CAT6A,Cat6A cabling installed per roll-equivalent (convert to m via approved assumption),roll,I.01,2,labour,LAB-067,paid_hours_per_unit,Factor required - estimator input
+STD-ELV-CCTV,IP camera installation per nr,nr,I.03,1,material,MAT-I-011,,Factor required - estimator input
+STD-ELV-CCTV,IP camera installation per nr,nr,I.03,2,labour,LAB-067,paid_hours_per_unit,Factor required - estimator input

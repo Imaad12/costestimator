@@ -127,6 +127,31 @@ def load_assumption_register(db: Database) -> int:
     return n
 
 
+def load_standard_assemblies(db: Database) -> int:
+    """Structure-only assemblies (no factors). Loaded as Draft: they cannot be mapped or approved until an estimator supplies the factors."""
+    from . import assemblies as asm_service
+    p = _data("assemblies", "standard_assemblies.csv")
+    if not p.exists():
+        return 0
+    groups: dict[str, list[dict]] = {}
+    for r in read_csv(p):
+        groups.setdefault(r["assembly_code"], []).append(r)
+    n = 0
+    for code, ls in groups.items():
+        if db.one("SELECT 1 FROM assemblies WHERE code=?", (code,)):
+            continue
+        first = ls[0]
+        lines = [dict(line_type=l["line_type"], resource_id=l["resource_id"], productivity_basis=l["productivity_basis"] or None, notes=l["notes"]) for l in ls]
+        for l in lines:
+            if l["productivity_basis"] is None:
+                del l["productivity_basis"]
+        asm_service.create_assembly(db, SYSTEM_SEED, code=code, description=first["description"], unit=first["unit"], cost_code=first["cost_code"],
+                                    source="Structure only - consumption/productivity factors NOT provided (not a benchmark)", confidence="Unverified",
+                                    notes="Draft structure from data/assemblies/standard_assemblies.csv", lines_=lines)
+        n += 1
+    return n
+
+
 def seed_reference(db: Database) -> dict:
     """Seed everything that is real structure (no prices). Safe to run repeatedly."""
     with db.tx():
@@ -139,6 +164,8 @@ def seed_reference(db: Database) -> dict:
             "resources": load_resource_catalogues(db),
         }
         out["tax_categories"] = seed_tax_categories(db)
+        out["standard_assemblies"] = load_standard_assemblies(db)
+        out["fx_rates"] = seed_fx(db)
         audit.log(db, SYSTEM_SEED, "seed", "reference", "seed_reference", after=out)
     return out
 
@@ -165,3 +192,12 @@ def seed_tax_categories(db: Database) -> int:
                                          status="Pending Review", created_by="system:seed"))
         n += 1
     return n
+
+
+def seed_fx(db: Database) -> int:
+    """SAR/USD peg proposal with its official citation. Seeded PENDING REVIEW - a reviewer must approve before any conversion uses it."""
+    if db.one("SELECT 1 FROM fx_rates WHERE from_ccy='USD' AND to_ccy='SAR' AND source LIKE 'SAMA%'"):
+        return 0
+    db.insert("fx_rates", dict(from_ccy="USD", to_ccy="SAR", rate="3.75", rate_date="2020-05-04", source="SAMA news 'SAMA Affirms Commitment to Exchange Rate Policy', 04 May 2020 (see data/sources ACCESS_LOG.md); verify the peg is still current",
+                               status="Pending Review", is_synthetic=0, created_by="system:seed"))
+    return 1

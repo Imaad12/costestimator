@@ -513,11 +513,55 @@ def _(db, a, p):
 
 @action("save_company_settings")
 def _(db, a, p):
+    import json
     from ..approvals import engine as ap
     from ..config import get_settings
+    from ..core.timeutil import now_iso
     ap.require_admin(a, "company settings")
     co = get_settings().company
     for k in ("name", "address", "cr_number", "vat_number", "contact_name", "contact_email", "contact_phone"):
         if opt(p, k) is not None:
             co[k] = opt(p, k)
+    val = json.dumps(co, ensure_ascii=False)
+    if db.one("SELECT 1 FROM settings WHERE key='company'"):
+        db.update("settings", {"value": val, "updated_at": now_iso(), "updated_by": a.username}, "key='company'")
+    else:
+        db.insert("settings", dict(key="company", value=val, updated_at=now_iso(), updated_by=a.username))
     audit.log(db, a, "settings", "company", "update", after={k: co.get(k) for k in co})
+
+
+@action("create_user")
+def _(db, a, p):
+    from ..approvals import engine as ap
+    ap.require_admin(a, "user administration")
+    username, role, pw = req(p, "username", "role", "password")
+    if len(pw) < 8:
+        raise ValidationFailed("Password must be at least 8 characters.")
+    from ..services import auth
+    auth.create_user(db, username, opt(p, "display_name") or username, role, pw, creator=a)
+    return username
+
+
+@action("export_project_package")
+def _(db, a, p):
+    from ..approvals import engine as ap
+    ap.require_author(a)
+    return str(backup.export_project_package(db, req(p, "project_id")[0]))
+
+
+@action("add_standard_indirects")
+def _(db, a, p):
+    """Create Draft indirect items (no amounts) for every standard category so nothing is forgotten; amounts must be entered, never defaulted."""
+    import csv as _csv
+    from ..config import get_settings
+    pid = req(p, "project_id")[0]
+    n = 0
+    path = get_settings().data_dir / "indirects" / "indirect_categories.csv"
+    for r in _csv.DictReader(open(path, encoding="utf-8-sig")):
+        if db.one("SELECT 1 FROM indirect_items WHERE project_id=? AND code=?", (pid, r["code"])):
+            continue
+        method = r["typical_methods"].split("|")[0]
+        indirects.add_indirect(db, a, pid, code=r["code"], category=r["category"], description=r["description"], method=method, amount=None, notes=r["notes"],
+                               source="data/indirects/indirect_categories.csv (no amount supplied)")
+        n += 1
+    return n

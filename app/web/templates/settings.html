@@ -14,5 +14,8 @@
 <h2>Add cost code (taxonomy)</h2>{{ actform('add_cost_code', '/settings', [('code','code e.g. D.07.01',none,12), ('name','name',none,24), ('parent_code','parent',none,8), ('default_unit','unit',none,5)], 'Add (Administrator)', 'alt') }}
 <details><summary>Cost-code taxonomy ({{ cost_codes|length }})</summary>{{ table(cost_codes, [('code','Code'),('parent_code','Parent'),('level','Lvl'),('name','Name'),('kind','Kind')]) }}</details>
 <h2>Users</h2>{{ table(users, [('username','User'),('display_name','Name'),('role','Role'),('is_active','Active')]) }}
+<form class="inline" method="post" action="/ui/do/create_user"><input type="hidden" name="_next" value="/settings"><input name="username" placeholder="username" size="12"><input name="display_name" placeholder="display name" size="16">
+<select name="role">{% for r in ['Estimator','Procurement Reviewer','Commercial Approver','Administrator','Viewer'] %}<option>{{ r }}</option>{% endfor %}</select><input type="password" name="password" placeholder="password (8+)" size="14"><button class="sm alt">Add user (Administrator)</button></form>
+<p class="muted">The AI principal ('ai-assistant') has no password, cannot sign in, and can never approve.</p>
 <h2>Backups</h2>{{ actform('create_backup', '/settings', [], 'Create backup now (Administrator)') }}<ul>{% for b in backups %}<li>{{ b }}</li>{% endfor %}</ul><p class="muted">Restore: <code>python -m app.cli restore &lt;file&gt; --yes</code> (command line, with safety backup). See docs/BACKUP_RESTORE.md.</p>
 {% endblock %}

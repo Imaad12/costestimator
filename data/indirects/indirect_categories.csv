@@ -1,0 +1,17 @@
+code,category,description,typical_methods,notes
+IND-PM,Project management,Project manager / construction manager / planning,per_month|fixed,Amount per person-month is company/project specific; none supplied
+IND-SUP,Site supervision,Site engineers and supervisors,per_month,
+IND-HSE,HSE,HSE officers and provisions,per_month|fixed,
+IND-QA,Quality management,QA/QC staff and testing administration,per_month,
+IND-OFF,Temporary offices and facilities,Site offices and welfare,per_month|fixed,Consider separate_line allocation
+IND-UTL,Utilities,Temporary power water and consumption,per_month,
+IND-ACC,Accommodation,Staff accommodation,per_month,Do not duplicate labour rates that already include accommodation
+IND-TRN,Transport,Staff transport and site vehicles,per_month|per_day,
+IND-COM,Site communications,Telecoms and IT,per_month,
+IND-TWK,Temporary works and access,Hoarding scaffolding access,fixed|per_month,Avoid double counting with Preliminaries BOQ items
+IND-SEC,Security,Site security,per_month,Exclude when included in a subcontract quotation
+IND-CLN,Cleaning,Site cleaning and waste,per_month,
+IND-INS,Insurance,Contractor all-risk and third-party insurance,percent_of_direct|fixed,
+IND-MOB,Mobilisation and demobilisation,Mobilisation and demobilisation,fixed,
+IND-PRM,Permits and administration,Authority fees permits and project administration,fixed,
+IND-OTH,Other approved project overheads,Other,fixed|per_month,

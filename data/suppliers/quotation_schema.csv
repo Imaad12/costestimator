@@ -1,0 +1,1 @@
+quotation_id,supplier_id,reference,quote_date,valid_until,currency,tax_treatment,tax_rate_pct,payment_terms,line_no,procurement_item_id,description,quantity,unit,unit_rate,discount_pct,delivery_included,unloading_included,lead_time_days,compliance,comments

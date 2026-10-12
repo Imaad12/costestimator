@@ -126,6 +126,12 @@ def cmd_audit_verify(a) -> int:
     return 0 if r["ok"] else 1
 
 
+def cmd_coverage(a) -> int:
+    from .reporting.coverage import library_coverage
+    print(json.dumps(library_coverage(get_db()), indent=1, default=str))
+    return 0
+
+
 def cmd_export_project(a) -> int:
     print(backup.export_project_package(get_db(), a.project))
     return 0
@@ -155,6 +161,7 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("verify-workbook"); s.add_argument("file"); s.add_argument("--project"); s.add_argument("--no-recalc", action="store_true")
     s.set_defaults(fn=cmd_verify_workbook)
     sub.add_parser("audit-verify", help="verify the audit hash chain").set_defaults(fn=cmd_audit_verify)
+    sub.add_parser("coverage", help="measured rate-library coverage (counts only)").set_defaults(fn=cmd_coverage)
     s = sub.add_parser("export-project"); s.add_argument("project"); s.set_defaults(fn=cmd_export_project)
     a = p.parse_args(argv)
     logging.basicConfig(level=get_settings().log_level, format="%(levelname)s %(name)s: %(message)s")

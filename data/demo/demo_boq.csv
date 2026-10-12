@@ -1,0 +1,38 @@
+Item,Description,Unit,Qty,Trade,Drawing Ref,Spec Ref
+1,CIVIL WORKS,,,Civil,,
+1.1,"Bulk excavation, cart away and dispose",m3,2500,Civil,DWG-SYN-01,SPEC-SYN-01
+1.2,"Backfill with approved selected fill, compacted",m3,1200,Civil,DWG-SYN-01,SPEC-SYN-01
+1.3,Precast concrete kerb 150x300,m,400,Civil,DWG-SYN-01,SPEC-SYN-01
+2,STRUCTURAL WORKS,,,Structural,,
+2.1,Reinforced concrete C35 to foundations and slabs,m3,850,Structural,DWG-SYN-02,SPEC-SYN-02
+2.2,"Reinforcement bars B500, supply and fix",ton,95,Structural,DWG-SYN-02,SPEC-SYN-02
+2.3,Formwork to slabs and walls,m2,3400,Structural,DWG-SYN-02,SPEC-SYN-02
+3,ARCHITECTURAL AND FINISHES,,,Architecture,,
+3.1,Blockwork 200mm thick internal walls,m2,2100,Architecture,DWG-SYN-03,SPEC-SYN-03
+3.2,"Emulsion paint, 3 coats, to plastered walls",m2,6500,Architecture,DWG-SYN-03,SPEC-SYN-03
+3.3,Ceramic floor tiling 600x600,m2,1800,Architecture,DWG-SYN-03,SPEC-SYN-03
+,,,,,,
+4,HVAC,,,Mechanical,,
+4.1,"GI ductwork, supply and install, insulated",m2,950,Mechanical,DWG-SYN-04,SPEC-SYN-04
+4.2,"Air handling unit 5000 l/s, supply, install, commission",nr,6,Mechanical,DWG-SYN-04,SPEC-SYN-04
+5,PLUMBING AND PUBLIC HEALTH,,,Plumbing,,
+5.1,PPR cold water pipework 32mm,m,1200,Plumbing,DWG-SYN-05,SPEC-SYN-05
+5.2,WC sets complete with cistern,nr,40,Plumbing,DWG-SYN-05,SPEC-SYN-05
+6,ELECTRICAL,,,Electrical,,
+6.1,LV cable 4Cx16mm2 installed,m,3500,Electrical,DWG-SYN-06,SPEC-SYN-06
+6.2,"Cable tray 300mm, supply and install",m,900,Electrical,DWG-SYN-06,SPEC-SYN-06
+6.3,"LED recessed luminaires, installed",nr,520,Electrical,DWG-SYN-06,SPEC-SYN-06
+7,FIRE PROTECTION,,,Fire,,
+7.1,Sprinkler pipework 50mm black steel,m,2400,Fire,DWG-SYN-07,SPEC-SYN-07
+7.2,Pendant sprinkler heads,nr,760,Fire,DWG-SYN-07,SPEC-SYN-07
+8,ELV,,,ELV,,
+8.1,Cat6A U/FTP structured cabling,m,9000,ELV,DWG-SYN-08,SPEC-SYN-08
+8.2,"IP CCTV cameras, installed and configured",nr,48,ELV,DWG-SYN-08,SPEC-SYN-08
+9,"SPECIALIST, ALLOWANCES AND OTHERS",,,Specialist,,
+9.1,"Passenger lift 8 stops, supply, install, test and commission",set,2,Specialist,DWG-SYN-09,
+9.2,Provisional sum for testing and commissioning by others,ls,1,General,DWG-SYN-09,SPEC-SYN-09
+9.3,Prime cost sum for kitchen equipment,ls,1,Specialist,DWG-SYN-09,SPEC-SYN-09
+9.4,External landscaping by others,ls,1,Civil,DWG-SYN-09,
+9.5,Temporary construction power connection,ls,1,General,DWG-SYN-09,SPEC-SYN-09
+6.1,LV cable 4Cx25mm2 (duplicate item code in client file),m,800,Electrical,DWG-SYN-06,SPEC-SYN-06
+9.6,Allowance item with quantity to be advised,item,TBA,General,DWG-SYN-09,SPEC-SYN-09

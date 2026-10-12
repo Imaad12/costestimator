@@ -33,6 +33,21 @@ async def lifespan(app: FastAPI):
     yield
 
 
+class SerializeRequests:
+    """ASGI middleware: one request at a time. The app shares one SQLite connection and uses explicit transactions, so requests
+    are serialised to rule out interleaved transactions (adequate for the local single-user / small-team design)."""
+
+    def __init__(self, app):
+        import asyncio
+        self.app, self.lock = app, asyncio.Lock()
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        async with self.lock:
+            await self.app(scope, receive, send)
+
+
 def create_app() -> FastAPI:
     from .api.routes import router as api_router
     from .web.routes import router as web_router
@@ -56,6 +71,7 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=static), name="static")
     app.include_router(api_router)
     app.include_router(web_router)
+    app.add_middleware(SerializeRequests)
     return app
 
 
