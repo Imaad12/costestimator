@@ -247,6 +247,17 @@ def cmd_rates(a) -> int:
     return 2
 
 
+def cmd_pack(a) -> int:
+    from .services import refdata
+    db = get_db()
+    if a.pcmd2 == "list":
+        for p_ in refdata.list_packs(db):
+            print(f"{p_['name']:14} loaded={p_['loaded']!s:5} codes={p_['cost_codes']} resources={p_['resources']}  {p_['description']}")
+        return 0
+    _print(refdata.load_pack(db, _actor(a), a.name))
+    return 0
+
+
 def cmd_index(a) -> int:
     from .rate_updates import index_import
     db = get_db()
@@ -317,6 +328,10 @@ def main(argv: list[str] | None = None) -> int:
     q = rs.add_parser("review"); q.add_argument("candidate"); q.add_argument("decision", choices=["approve", "reject", "needs_verification"])
     q.add_argument("--comment"); q.add_argument("--user"); q.set_defaults(fn=cmd_rates)
     q = rs.add_parser("publish"); q.add_argument("candidate"); q.add_argument("--user"); q.set_defaults(fn=cmd_rates)
+    s = sub.add_parser("pack", help="optional definitions-only packs (no prices): list / load")
+    pks = s.add_subparsers(dest="pcmd2", required=True)
+    pks.add_parser("list").set_defaults(fn=cmd_pack)
+    q = pks.add_parser("load"); q.add_argument("name"); q.add_argument("--user"); q.set_defaults(fn=cmd_pack)
     s = sub.add_parser("index", help="official index series (e.g. GASTAT CCI): import / list")
     isub = s.add_subparsers(dest="icmd", required=True)
     q = isub.add_parser("import"); q.add_argument("file"); q.add_argument("--dataset", required=True); q.add_argument("--source"); q.add_argument("--source-name")

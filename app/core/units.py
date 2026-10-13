@@ -103,7 +103,8 @@ class UnitRegistry:
         return qty * self.factor(src, dst)
 
 
-CONVERTIBLE = {"length", "area", "volume", "mass"}
+# dimensions whose units differ only by an EXACT definitional factor (pressure_psi and the count-like dimensions never convert)
+CONVERTIBLE = {"length", "area", "volume", "mass", "power", "apparent_power", "pressure", "flow_vol"}
 
 _cache: dict[int, UnitRegistry] = {}
 

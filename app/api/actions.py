@@ -596,6 +596,19 @@ def _(db, a, p):
                                  description=opt(p, "description"), cost_date=opt(p, "cost_date"))
 
 
+@action("add_unit")
+def _(db, a, p):
+    from ..services import units_admin
+    return units_admin.add_unit(db, a, code=req(p, "code")[0], name=req(p, "name")[0], dimension=req(p, "dimension")[0], to_base=opt(p, "to_base") or "1",
+                                synonyms=opt(p, "synonyms") or "", ambiguous_synonyms=opt(p, "ambiguous_synonyms") or "")
+
+
+@action("load_pack")
+def _(db, a, p):
+    from ..services import refdata
+    return refdata.load_pack(db, a, req(p, "name")[0])
+
+
 @action("add_cost_code")
 def _(db, a, p):
     from ..approvals import engine as ap

@@ -1,0 +1,13 @@
+{
+ "name": "industrial",
+ "description": "Optional definitions-only pack for industrial / process-plant estimating: cost division M and resource definitions (no prices, no factors, no standards claims). Load with: python -m app.cli pack load industrial",
+ "cost_codes": 19,
+ "resources": 258,
+ "by_type": {
+  "material": 98,
+  "equipment": 30,
+  "plant": 19,
+  "subcontract": 62,
+  "labour": 49
+ }
+}

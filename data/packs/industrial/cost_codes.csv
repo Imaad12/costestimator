@@ -1,0 +1,20 @@
+code,parent_code,level,kind,name,short_name,default_unit,description,active,is_system
+M,,1,division,Industrial and process plant,INDPLANT,,Optional pack: definitions only,1,0
+M.01,M,2,subtrade,Process piping,,,,1,0
+M.02,M,2,subtrade,Valves and in-line items,,,,1,0
+M.03,M,2,subtrade,Instrumentation and control systems,,,,1,0
+M.04,M,2,subtrade,Industrial electrical power,,,,1,0
+M.05,M,2,subtrade,Industrial structural steel and supports,,,,1,0
+M.06,M,2,subtrade,"Tanks, vessels and heat exchangers",,,,1,0
+M.07,M,2,subtrade,Rotating and packaged equipment,,,,1,0
+M.08,M,2,subtrade,Coatings and surface preparation,,,,1,0
+M.09,M,2,subtrade,"Insulation, heat tracing and fireproofing",,,,1,0
+M.10,M,2,subtrade,Scaffolding and temporary access (industrial),,,,1,0
+M.11,M,2,subtrade,"Heavy lifting, rigging and transport",,,,1,0
+M.12,M,2,subtrade,"Inspection, NDT and testing",,,,1,0
+M.13,M,2,subtrade,Cathodic protection and corrosion control,,,,1,0
+M.14,M,2,subtrade,"Shutdown, turnaround and brownfield works",,,,1,0
+M.15,M,2,subtrade,Modularisation and prefabrication,,,,1,0
+M.16,M,2,subtrade,"Pre-commissioning, commissioning and start-up",,,,1,0
+M.17,M,2,subtrade,Engineering services,,,,1,0
+M.18,M,2,subtrade,Home-office and project-management services,,,,1,0
