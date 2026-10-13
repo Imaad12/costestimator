@@ -8,7 +8,7 @@ import pytest
 from app.core.errors import Conflict, ValidationFailed
 from app.database import Database, get_db, set_db
 from app.imports import datasets
-from app.services import audit, backup, projects, rates
+from app.services import estimates, audit, backup, projects, rates
 from app.services.rates import create_resource
 
 from tests.conftest import COMMERCIAL, ESTIMATOR, PROCUREMENT
@@ -85,10 +85,17 @@ def test_backup_with_tampered_audit_chain_flagged(filedb):
 def test_project_package_and_archive(filedb):
     db, s, tmp = filedb
     pid = build_mini(db, tmp)
+    from app.services import governed, wbs
+    from tests.conftest import COMMERCIAL as COM
+    wbs.add_node(db, ESTIMATOR, pid, "A1", "Area 1")
+    gp = governed.propose(db, ESTIMATOR, "productivity_factor", "PKG", {"category": "height", "factor": "1.1"}, project_id=pid, source="test record", submit=True)
+    governed.approve(db, COM, gp)
+    estimates.freeze_version(db, ESTIMATOR, pid, "v1")
     z = backup.export_project_package(db, pid, settings=s)
     with zipfile.ZipFile(z) as zf:
         data = json.loads(zf.read("project_data.json"))
         assert len(data["boq_items"]) == 2 and data["project"][0]["id"] == pid and "manifest.json" in zf.namelist()
+        assert [n["code"] for n in data["wbs_nodes"]] == ["A1"] and data["governed_params"][0]["code"] == "PKG" and len(data["estimate_snapshots"]) == 1   # iteration-4 data travels with the project
     with pytest.raises(Exception):
         projects.archive_project(db, ESTIMATOR, pid, "done")                 # archiving needs a Commercial Approver / Administrator
     projects.archive_project(db, COMMERCIAL, pid, "tender closed")

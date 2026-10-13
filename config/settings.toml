@@ -13,6 +13,11 @@ port = 8000
 [security]
 allow_self_approval = true       # single-user MVP. Set false for small teams (creator cannot approve own item).
 token_ttl_hours = 12
+csrf_origin_check = true          # cookie-authenticated writes must come from the same origin (see docs/SECURITY.md)
+security_headers = true
+login_max_failures = 5            # consecutive failed sign-ins before a name is locked; 0 disables
+login_lock_minutes = 15
+tls = false                       # true when TLS is terminated in front of the app (Secure cookies, HSTS)
 
 [ai]
 enabled = false                  # deterministic features never require AI

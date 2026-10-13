@@ -187,6 +187,11 @@
      "ref": "tests/unit/test_industrial_units.py::test_administrator_adds_units_with_guards",
      "verdict": "yes",
      "note": "admin-only, audited, no redefinition, no spelling clash"
+    },
+    {
+     "ref": "tests/integration/test_industrial_flow.py::test_piping_welds_from_pack_to_basis_of_estimate",
+     "verdict": "yes",
+     "note": "pack -> approved rates/factors -> 200 joints -> derivation -> approval -> 22,200 -> 24,400 with height factor -> 660 h -> roll-up, loading, risk, BoE"
     }
    ],
    "output": "Unit registry extended (inch-dia, joint, spool, loop, tag, MW/MVA, pressure, flow, imperial length/area/volume/mass) and an administrator action `add_unit` (UI/API form data). Count-like and non-exact dimensions never convert.",
@@ -558,6 +563,11 @@
      "ref": "tests/unit/test_industrial_pack.py::test_pack_with_price_column_or_unknown_unit_is_refused",
      "verdict": "yes",
      "note": ""
+    },
+    {
+     "ref": "tests/integration/test_industrial_flow.py::test_piping_welds_from_pack_to_basis_of_estimate",
+     "verdict": "yes",
+     "note": "pack -> approved rates/factors -> 200 joints -> derivation -> approval -> 22,200 -> 24,400 with height factor -> 660 h -> roll-up, loading, risk, BoE"
     }
    ],
    "output": "Optional definitions-only pack `industrial` (division M, 18 sub-trades, 258 resource definitions across material/equipment/plant/subcontract/labour) loaded by an administrator (`python -m app.cli pack load industrial`). No price is held.",
@@ -1043,6 +1053,11 @@
      "ref": "tests/unit/test_mto.py::test_stale_detection_after_factor_or_driver_change",
      "verdict": "yes",
      "note": ""
+    },
+    {
+     "ref": "tests/integration/test_industrial_flow.py::test_piping_welds_from_pack_to_basis_of_estimate",
+     "verdict": "yes",
+     "note": "pack -> approved rates/factors -> 200 joints -> derivation -> approval -> 22,200 -> 24,400 with height factor -> 660 h -> roll-up, loading, risk, BoE"
     }
    ],
    "output": "Take-off template(s) `piping.pipe_fab_install, piping.weld_joint, piping.spool, piping.supports, piping.valve_install, piping.hydrotest` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.",
@@ -2173,6 +2188,11 @@
      "ref": "tests/unit/test_mto.py::test_productivity_factor_applies_to_derived_labour_only",
      "verdict": "yes",
      "note": ""
+    },
+    {
+     "ref": "tests/integration/test_industrial_flow.py::test_piping_welds_from_pack_to_basis_of_estimate",
+     "verdict": "yes",
+     "note": "pack -> approved rates/factors -> 200 joints -> derivation -> approval -> 22,200 -> 24,400 with height factor -> 660 h -> roll-up, loading, risk, BoE"
     }
    ],
    "output": "Governed productivity factors (height, congestion, climate/heat, shift pattern, remote site, learning curve, access, permit-to-work, weather, other), scoped by cost-code prefix and/or WBS area, applied multiplicatively to assembly and take-off-derived labour hours; company-wide or project-specific; every application is recorded on the cost line.",

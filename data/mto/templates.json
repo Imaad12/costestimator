@@ -45,7 +45,7 @@
      "slot": "crane_plant",
      "description": "Mobile crane / handling plant hours per inch-dia",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     }
    ]
   },
@@ -80,13 +80,13 @@
      "slot": "ndt",
      "description": "NDT services per joint",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "pwht",
      "description": "Post-weld heat treatment per joint",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "grinding_labour",
@@ -115,19 +115,19 @@
      "slot": "blast_paint",
      "description": "Blast and paint per spool",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "transport",
      "description": "Transport per spool",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "handling_plant",
      "description": "Handling plant hours per spool",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     }
    ]
   },
@@ -162,7 +162,7 @@
      "slot": "paint",
      "description": "Support painting per tonne",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -185,7 +185,7 @@
      "slot": "gaskets_bolting",
      "description": "Gaskets and bolting sets per valve",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "test_labour",
@@ -220,7 +220,7 @@
      "slot": "test_equipment",
      "description": "Test pump / temporary spools per pack",
      "resource_type": "equipment",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -249,7 +249,7 @@
      "slot": "crane_plant",
      "description": "Crane hours per item",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     },
     {
      "slot": "grout_material",
@@ -261,7 +261,7 @@
      "slot": "vendor_rep",
      "description": "Vendor representative services per item",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -308,7 +308,7 @@
      "slot": "jb_glands",
      "description": "Junction box / glands per loop",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "dcs_config",
@@ -349,7 +349,7 @@
      "slot": "pull_plant",
      "description": "Cable-pulling plant hours per metre",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     }
    ]
   },
@@ -372,7 +372,7 @@
      "slot": "lugs_glands",
      "description": "Lugs and glands each",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "test_labour",
@@ -425,7 +425,7 @@
      "slot": "crane_plant",
      "description": "Crane hours per tonne",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     }
    ]
   },
@@ -466,13 +466,13 @@
      "slot": "crane_plant",
      "description": "Crane hours per tonne",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     },
     {
      "slot": "settlement_survey",
      "description": "Settlement survey services per tonne",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -525,7 +525,7 @@
      "slot": "inspection",
      "description": "Coating inspection services per m2",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -583,7 +583,7 @@
      "slot": "fixings",
      "description": "Bands, screws, sealant per m2",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "install_labour",
@@ -618,13 +618,13 @@
      "slot": "hire_material",
      "description": "Scaffold hire per m3 (period set by the programme)",
      "resource_type": "equipment",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "inspection",
      "description": "Scaffold inspection per m3",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -641,7 +641,7 @@
      "slot": "crane_hire",
      "description": "Crane hire days per lift",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     },
     {
      "slot": "rigging_labour",
@@ -653,13 +653,13 @@
      "slot": "engineering",
      "description": "Lift study / engineering per lift",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "mobilisation",
      "description": "Mobilisation / demobilisation per lift",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -676,7 +676,7 @@
      "slot": "service_cost",
      "description": "Specialist service per unit",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "support_labour",
@@ -688,7 +688,7 @@
      "slot": "support_material",
      "description": "Consumables per unit",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -717,13 +717,13 @@
      "slot": "materials",
      "description": "Materials per tie-in",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "standby_plant",
      "description": "Standby plant hours per tie-in",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     }
    ]
   },
@@ -746,7 +746,7 @@
      "slot": "transport",
      "description": "Transport per module",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "site_set",
@@ -758,7 +758,7 @@
      "slot": "lift_plant",
      "description": "Heavy-lift plant hours per module",
      "resource_type": "plant",
-     "unit_dim": "time_hr"
+     "unit_dim": "time"
     }
    ]
   },
@@ -775,25 +775,25 @@
      "slot": "camp_accommodation",
      "description": "Accommodation per person",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "catering",
      "description": "Catering per person",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "transport",
      "description": "Personnel transport per person",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "welfare_ppe",
      "description": "Welfare / PPE per person",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "admin_support",
@@ -828,19 +828,19 @@
      "slot": "vendor_support",
      "description": "Vendor commissioning services per system",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "consumables",
      "description": "Commissioning consumables per system",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "spares",
      "description": "Commissioning spares per system",
      "resource_type": "material",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   },
@@ -863,13 +863,13 @@
      "slot": "training",
      "description": "Training services per system",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     },
     {
      "slot": "om_manuals",
      "description": "O&M manual production per system",
      "resource_type": "subcontract",
-     "unit_dim": "count"
+     "unit_dim": "count*"
     }
    ]
   }

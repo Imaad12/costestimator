@@ -70,6 +70,8 @@ def authenticate(db: Database, username: str, password: str, client: str | None 
     r = db.one("SELECT * FROM users WHERE username=? AND is_active=1", (username,))
     ok = bool(r) and not r["is_ai"] and verify_password(password, r["password_hash"])
     db.insert("login_attempts", dict(username=username, ts=now, success=int(ok), client=client))
+    if ok:
+        db.execute("DELETE FROM login_attempts WHERE ts<?", (now - 30 * 86400,))              # keep a month of history only
     if not ok:
         if s.login_max_failures > 0 and n + 1 >= s.login_max_failures:
             audit.log(db, "system:auth", "user", username, "lockout", after={"failures": n + 1, "minutes": s.login_lock_minutes})

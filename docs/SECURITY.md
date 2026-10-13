@@ -15,6 +15,8 @@ The application is designed for **one workstation or a small trusted team on a p
 | Uploads / templates | Uploads never overwrite; client-form templates must be inside the project's workspace (`FORM_PATH`) |
 | Secrets | `.env`, `var/`, `projects/` are git-ignored; the signing key is read from `KSA_SECRET_KEY` or a generated key file |
 
+Caveats of the provided controls: (1) the lockout can be used to lock out a *known* user name on purpose (there is no per-IP separation) - an administrator unlocks it; (2) behind a reverse proxy the `Host` header must be passed through unchanged, otherwise the same-origin check refuses browser writes (`KSA_CSRF_ORIGIN_CHECK=false` is the diagnostic escape, not a fix); (3) sign-in history older than 30 days is pruned on the next successful sign-in.
+
 ## Not provided (do not rely on these)
 * **MFA / SSO / password policy / password-reset flow.** Passwords are set by an administrator (`create-user --reset`).
 * Per-folder or per-document **access control** inside a project workspace; every signed-in user with a project role sees its files.

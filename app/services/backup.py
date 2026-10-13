@@ -193,6 +193,16 @@ def export_project_package(db: Database, project_id: str, dest: Path | None = No
         "quotations": "SELECT * FROM quotations WHERE project_id=?", "recon_findings": "SELECT * FROM recon_findings WHERE project_id=?",
         "approvals": "SELECT * FROM approvals WHERE project_id=?", "audit_log": "SELECT * FROM audit_log WHERE project_id=?",
         "actual_costs": "SELECT * FROM actual_costs WHERE project_id=?",
+        # structure, programme, parameters, analyses and controls (iteration 4) and the rows earlier exports omitted
+        "takeoff_resource_lines": "SELECT * FROM takeoff_resource_lines WHERE project_id=?", "schedule_tasks": "SELECT * FROM schedule_tasks WHERE project_id=?",
+        "estimate_snapshots": "SELECT * FROM estimate_snapshots WHERE project_id=?", "procurement_packages": "SELECT * FROM procurement_packages WHERE project_id=?",
+        "wbs_nodes": "SELECT * FROM wbs_nodes WHERE project_id=?", "boq_wbs": "SELECT * FROM boq_wbs WHERE project_id=?", "code_crosswalk": "SELECT * FROM code_crosswalk WHERE project_id=?",
+        "governed_params": "SELECT * FROM governed_params WHERE project_id=?", "analysis_runs": "SELECT * FROM analysis_runs WHERE project_id=?",
+        "mto_applications": "SELECT * FROM mto_applications WHERE project_id=?", "project_profiles": "SELECT * FROM project_profiles WHERE project_id=?",
+        "profile_assessments": "SELECT * FROM profile_assessments WHERE project_id=?", "bid_scores": "SELECT * FROM bid_scores WHERE project_id=?",
+        "long_lead_items": "SELECT * FROM long_lead_items WHERE project_id=?", "package_scope": "SELECT * FROM package_scope WHERE project_id=?",
+        "variations": "SELECT * FROM variations WHERE project_id=?", "task_progress": "SELECT * FROM task_progress WHERE project_id=?",
+        "variation_lines": "SELECT l.* FROM variation_lines l JOIN variations v ON v.id=l.variation_id WHERE v.project_id=?",
     }
     data = {k: rows_to_dicts(db.all(q, (project_id,))) for k, q in tables.items()}
     with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as z:

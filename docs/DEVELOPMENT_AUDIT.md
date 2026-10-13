@@ -102,10 +102,11 @@ Migrations 0008-0013 (forward-only). Generated references: GOVERNED_PARAMETERS, 
 5. A naive cache would have served stale estimates after a CLI import while the server runs - the cache also keys on SQLite `data_version` (test with a second connection).
 6. A client-form template path could point anywhere on disk - restricted to the project workspace (`FORM_PATH`).
 7. Cookie-authenticated writes had no cross-site protection (SameSite only) - same-origin check added; the existing UI tests now emulate a browser's `Origin`.
-8. (Own mistakes caught by tests) audit-log argument order in the pack loader; a vacuous assertion in two new tests; an incorrect expected value in a cash-flow horizon.
+8. Take-off slots demanded `hr`/`count` units while the pack prices plant per day/month and subcontracts per `item`/`joint`/`loop` - found by the end-to-end industrial test; slots now accept unit *groups* (`time`, `count*`).
+9. (Own mistakes caught by tests) audit-log argument order in the pack loader; a vacuous assertion in two new tests; an incorrect expected value in a cash-flow horizon.
 
 ### 9.3 Verification performed
-* **Full suite: 340 passed** (`python -m pytest -o addopts="" -q`, ~75 s). Before this iteration: 230.
+* **Full suite: 341 passed** (`python -m pytest -o addopts="" -q`, ~75 s). Before this iteration: 230. `tests/integration/test_industrial_flow.py` runs the whole industrial chain against the real pack (200 weld joints: 22,200 -> 24,400 with a height factor; 660 man-hours; roll-up, loading, risk, Basis of Estimate).
 * Live run on a scratch DB: `init` -> `demo` -> every registered report via the CLI -> server started on a port -> login, 7 pages (200), CSRF refused without Origin and accepted with it, headers present -> Playwright/Chromium: login, screenshots of the new pages, a real browser form submission (WBS node) succeeded with the Origin check on, no CSP console errors.
 * Master workbook of the demo project recalculated in LibreOffice: **217 formulas, 0 errors, 0 mismatches**, structure OK. `audit-verify`: chain OK (433 entries).
 * Measured at 20,000 BOQ items: estimate 2.7 s; repeat from cache 0.09 ms; freeze + snapshot 4.4 s; **full replay 3.9 s (ok)**; roll-up 2.9 s; master workbook 25.6 s.

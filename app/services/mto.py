@@ -19,6 +19,10 @@ from ..models.enums import Status
 from . import audit, governed, projects
 
 
+# slot `unit_dim` may name a group of dimensions (see scripts/gen_mto_templates.py)
+DIM_GROUPS = {"time": {"time_hr", "time_day", "time_wk", "time_mo"}, "count*": {"count", "item", "joint", "spool", "loop", "tag", "set", "pair"}}
+
+
 def templates() -> dict[str, dict]:
     return engine.load_templates(get_settings().data_dir)
 
@@ -42,8 +46,9 @@ def check_factor(db: Database, code: str, clean: dict) -> None:
         raise ValidationFailed(f"resource_id {clean['resource_id']} not found.", code="PARAM_FIELD")
     if res["resource_type"] != slot["resource_type"]:
         raise ValidationFailed(f"Slot {slot['slot']} expects a {slot['resource_type']} resource; {clean['resource_id']} is {res['resource_type']}.", code="MTO_RESOURCE")
-    if res["dimension"] != slot["unit_dim"]:
-        raise ValidationFailed(f"Slot {slot['slot']} expects a '{slot['unit_dim']}' unit; {clean['resource_id']} is in '{res['unit']}' ({res['dimension']}).", code="MTO_UNIT")
+    allowed = DIM_GROUPS.get(slot["unit_dim"], {slot["unit_dim"]})
+    if res["dimension"] not in allowed:
+        raise ValidationFailed(f"Slot {slot['slot']} expects a unit of kind '{slot['unit_dim']}' ({', '.join(sorted(allowed))}); {clean['resource_id']} is in '{res['unit']}' ({res['dimension']}).", code="MTO_UNIT")
 
 
 def _factors(db: Database, project_id: str, template: str, include_unapproved: bool = False) -> dict[str, dict]:
