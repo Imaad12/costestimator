@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ..core.timeutil import today_iso
 from ..database import Database, jload
-from ..estimators.estimate import compute_estimate
+from ..estimators.estimate import compute_estimate, compute_estimate_cached
 from ..services import workspaces
 
 OK, OPEN, BLOCKED, INFO = "OK", "Open", "Blocked", "Info"
@@ -56,7 +56,7 @@ def project_completeness(db: Database, project_id: str) -> dict:
         rows.append(_row("BOQ", "BOQ items", INFO, f"{n_items} item(s) imported (human-measured quantities as supplied).", f"{base}/boq"))
         rows.append(_row("BOQ", "Items mapped to an assembly or priced resource", OK if not unmapped else BLOCKED, f"{unmapped} unmapped item(s)." if unmapped else "All items mapped.", f"{base}/mapping"))
         rows.append(_row("BOQ", "Pending BOQ change requests", OK if not pend else OPEN, f"{pend} awaiting human decision.", f"{base}/boq"))
-        est = compute_estimate(db, project_id)
+        est = compute_estimate_cached(db, project_id)
         c = est.completeness
         rows.append(_row("Rates", "Lines priced from eligible rates", OK if not c["missing_rate_lines"] else BLOCKED,
                          f"{c['items_complete']}/{c['items_total']} items fully priced; {c['missing_rate_lines']} unpriced line(s); indicative exposure from unapproved/expired rates SAR {c['indicative_exposure']} "

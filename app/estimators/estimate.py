@@ -153,6 +153,33 @@ def compute_estimate(db: Database, project_id: str, *, include_unapproved: bool 
     return compute_estimate_from(inp, load_extras(db, inp), policy_override=policy_override)
 
 
+_CACHE_MAX = 16
+
+
+def compute_estimate_cached(db: Database, project_id: str, *, include_unapproved: bool = False, as_of: date | None = None, **kw) -> EstimateResult:
+    """Read-only convenience for pages and reports that recompute the same estimate repeatedly. The cache is valid only while the database connection has seen
+    NO row change by this connection (`total_changes`) or any other process (`PRAGMA data_version`), so any approval, import, edit or audit entry invalidates it;
+    what-if overrides bypass it. Callers must not mutate the result."""
+    if kw.get("assumption_overrides") or kw.get("policy_override") is not None:
+        return compute_estimate(db, project_id, include_unapproved=include_unapproved, as_of=as_of, **kw)
+    from ..core.timeutil import today
+    cache = db.__dict__.setdefault("_estimate_cache", {"changes": -1, "items": {}})
+    tc = (db.conn.total_changes, db.scalar("PRAGMA data_version"))
+    if cache["changes"] != tc:
+        cache["items"].clear()
+        cache["changes"] = tc
+    key = (project_id, bool(include_unapproved), as_of.isoformat() if as_of else None, today().isoformat())
+    hit = cache["items"].get(key)
+    if hit is not None:
+        return hit
+    res = compute_estimate(db, project_id, include_unapproved=include_unapproved, as_of=as_of)
+    cache["changes"] = (db.conn.total_changes, db.scalar("PRAGMA data_version"))
+    if len(cache["items"]) >= _CACHE_MAX:
+        cache["items"].pop(next(iter(cache["items"])))
+    cache["items"][key] = res
+    return res
+
+
 def compute_estimate_from(inp: EstimateInputs, ex: EstimateExtras, *, policy_override: dict | None = None) -> EstimateResult:
     """Pure: no database, no clock. Same inputs + extras -> same result and fingerprint."""
     project_id = inp.project["id"]

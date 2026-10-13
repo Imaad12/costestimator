@@ -30,7 +30,8 @@ def _kind(kind: str):
 
 
 def kinds() -> list[dict]:
-    return [dict(kind=k.name, label=k.label, approvers=sorted(k.approvers), description=k.description) for k in KINDS.values()]
+    from ..estimators.param_kinds import EXAMPLES
+    return [dict(kind=k.name, label=k.label, approvers=sorted(k.approvers), description=k.description, fields=EXAMPLES.get(k.name, {})) for k in KINDS.values()]
 
 
 def _db_checks(db: Database, kind: str, code: str, clean: dict) -> None:

@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from ..approvals import engine as approvals
 from ..core.errors import AppError, ValidationFailed
 from ..database import Database, jload, rows_to_dicts
-from ..estimators.estimate import compute_estimate
+from ..estimators.estimate import compute_estimate, compute_estimate_cached
 from ..excel import roundtrip
 from ..excel.master import build_master
 from ..imports import boq as boq_import
@@ -50,11 +50,11 @@ def health():
 
 
 @router.post("/auth/login")
-def login(body: dict, db: Database = Depends(database)):
-    a = auth.authenticate(db, body.get("username", ""), body.get("password", ""))
+def login(body: dict, request: Request, db: Database = Depends(database)):
+    a = auth.authenticate(db, body.get("username", ""), body.get("password", ""), client=request.client.host if request.client else None)
     token = auth.make_token(a.username)
     r = JSONResponse({"token": token, "user": {"username": a.username, "role": a.role}})
-    r.set_cookie(COOKIE, token, httponly=True, samesite="strict")
+    r.set_cookie(COOKIE, token, httponly=True, samesite="strict", secure=get_settings().tls or request.url.scheme == "https")
     return r
 
 
@@ -86,7 +86,7 @@ def get_project(pid: str, actor: Actor = Depends(current_actor), db: Database = 
 
 @router.get("/projects/{pid}/estimate")
 def get_estimate(pid: str, preliminary: bool = False, lines: bool = False, actor: Actor = Depends(current_actor), db: Database = Depends(database)):
-    return estimate_summary(compute_estimate(db, pid, include_unapproved=preliminary), include_lines=lines)
+    return estimate_summary(compute_estimate_cached(db, pid, include_unapproved=preliminary), include_lines=lines)
 
 
 @router.get("/projects/{pid}/boq")

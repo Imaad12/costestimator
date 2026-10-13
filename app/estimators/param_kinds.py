@@ -337,3 +337,30 @@ def _pool(d: dict) -> dict:
     _no_extra(d, {"name", "annual_cost", "annual_base", "base_kind", "basis"}, "overhead_pool")
     return {"name": text(d, "name"), "annual_cost": dec(d, "annual_cost", ge="0"), "annual_base": dec(d, "annual_base", gt="0"),
             "base_kind": text(d, "base_kind", choices=("direct_cost", "labour_hours", "selling_price")), "basis": text(d, "basis")}
+
+
+# Field skeletons shown on the input form: names and the shape of nested values only - never a number.
+EXAMPLES: dict[str, dict] = {
+    "productivity_factor": {"category": "height", "factor": "", "scope_cost_prefix": "", "scope_wbs": ""},
+    "plant_hire_terms": {"resource_id": "", "min_hire_qty": "", "standby_qty": "", "standby_pct_of_rate": ""},
+    "calendar": {"start_date": "YYYY-MM-DD", "work_weekdays": [], "holidays": []},
+    "mto_factor": {"template": "", "slot": "", "resource_id": "", "factor": "", "waste_pct": "", "basis": ""},
+    "classification_scheme": {"name": "", "source_document": "", "classes": [{"class_id": "", "name": "", "min_definition_pct": "", "max_definition_pct": "", "low_pct": "", "high_pct": ""}]},
+    "maturity_input": {"definition_pct": "", "basis": "", "deliverables_status": ""},
+    "landed_cost_terms": {"name": "", "incoterm": "", "output_currency": "", "units_per_shipment": "", "components": [{"name": "", "kind": "pct", "value": "", "applies_to": "base"}]},
+    "labour_statutory": {"name": "", "basis": "pct_of_base_wage", "value": "", "applies_to": "all", "authority_ref": ""},
+    "national_workforce_target": {"name": "", "required_pct": "", "authority_ref": ""},
+    "hedge_cover": {"currency": "", "cover_pct": "", "instrument": ""},
+    "escalation_profile": {"name": "", "annual_pct": "", "base_date": "YYYY-MM-DD", "scope_kind": "all", "scope_cost_prefix": "", "basis": ""},
+    "range_item": {"name": "", "low": "", "likely": "", "high": "", "basis": ""},
+    "payment_terms": {"name": "", **{k: "" for k in ("advance_pct", "retention_pct", "retention_release_at_completion_pct", "defects_months", "certification_lag_months",
+                                                       "payment_lag_months", "supplier_payment_lag_months", "financing_rate_annual_pct", "performance_bond_pct",
+                                                       "performance_bond_fee_annual_pct")}},
+    "evaluation_criteria": {"name": "", "stage": "bid", "scale_max": "", "price_weight": "", "criteria": [{"id": "", "name": "", "weight": "", "pass_fail": False, "min_score": ""}]},
+    "variation_markup": {"overhead_pct": "", "profit_pct": "", "contract_clause": ""},
+    "contract_baseline": {"contract_sum": "", "currency": "", "award_date": "YYYY-MM-DD", "reference": ""},
+    "benchmark_range": {"name": "", "metric": "item_unit_cost", "cost_prefix": "", "unit": "", "kind": "", "low": "", "high": "", "currency": "", "source_note": ""},
+    "reserve_rule": {"name": "", "base": "direct", "pct": "", "category": "", "basis": ""},
+    "engineering_basis": {"discipline": "", "deliverable": "", "count": "", "hours_each": "", "resource_id": "", "basis": ""},
+    "overhead_pool": {"name": "", "annual_cost": "", "annual_base": "", "base_kind": "direct_cost", "basis": ""},
+}

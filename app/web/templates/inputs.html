@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% from "_macros.html" import tabs, actform %}{% block body %}
+<h1>{{ project.id }} — Inputs &amp; parameters</h1>{{ tabs(project, 'inputs') }}
+<p class="muted"><b>Governed parameters</b> are numbers and rules that the company supplies (productivity factors, hire terms, calendar, escalation, payment terms, benchmark ranges, take-off factors ...).
+The software ships <b>none</b>. Each is validated, needs a stated source, goes Draft → Pending Review → Approved by a permitted human, and an approved value is never edited — a change is a new version.
+Only <i>Approved</i> values affect the strict estimate.</p>
+<h2>Propose a parameter</h2>
+<form method="post" action="/ui/do/propose_param" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/inputs">
+<div class="grid"><div><label>Kind</label><select name="kind" id="kind">{% for k in kinds %}<option value="{{ k.kind }}">{{ k.label }} ({{ k.kind }})</option>{% endfor %}</select></div>
+<div><label>Code (unique per kind; MTO factors use template/slot)</label><input name="code" required style="width:100%"></div>
+<div><label>Scope</label><select name="project_id"><option value="{{ project.id }}">this project</option><option value="">company-wide</option></select></div>
+<div><label>Source / basis (document, record, contract clause) — required</label><input name="source" style="width:100%"></div></div>
+<label>Data (JSON — field names shown per kind below; fill in every value from your records)</label>
+<textarea name="data" rows="7" style="width:100%;font-family:monospace" placeholder='{"field": "value"}'></textarea>
+<p><label><input type="checkbox" name="submit" value="1"> submit for review now</label> <button class="sm">Save</button></p></form>
+<details><summary>Fields per kind (no values — names only)</summary>
+{% for k in kinds %}<p><b>{{ k.kind }}</b> — approvers: {{ k.approvers|join(', ') }}<br><span class="muted">{{ k.description }}</span><br><code>{{ k.fields_json }}</code></p>{% endfor %}</details>
+<h2>Parameters in this project and company-wide</h2>
+{% if params %}<table><thead><tr><th>Kind</th><th>Code</th><th>v</th><th>Scope</th><th>Status</th><th>Data</th><th>Source</th><th>By</th><th></th></tr></thead><tbody>
+{% for p in params %}<tr><td>{{ p.kind }}</td><td>{{ p.code }}</td><td>{{ p.version }}</td><td>{{ p.scope }}</td><td>{{ p.status }}</td><td><code>{{ p.data_text }}</code></td><td>{{ p.source or '' }}</td><td>{{ p.created_by }}{% if p.approved_by %} → {{ p.approved_by }}{% endif %}</td>
+<td>{% if p.status == 'Draft' %}{{ actform('submit_param', '/projects/' ~ project.id ~ '/inputs', [('param_id', p.id, 'hidden')], 'Submit') }}
+{% elif p.status == 'Pending Review' %}{{ actform('approve_param', '/projects/' ~ project.id ~ '/inputs', [('param_id', p.id, 'hidden'), ('comments', 'comment')], 'Approve') }}
+{{ actform('reject_param', '/projects/' ~ project.id ~ '/inputs', [('param_id', p.id, 'hidden'), ('comments', 'reason (required)')], 'Reject', 'alt') }}{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% else %}<p class="muted">No parameters yet.</p>{% endif %}
+{% endblock %}

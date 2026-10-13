@@ -58,7 +58,101 @@ def cmd_run(a) -> int:
     import uvicorn
     s = get_settings()
     get_db()
-    uvicorn.run("app.main:app", host=a.host or s.host, port=a.port or s.port, log_level=s.log_level.lower())
+    host = a.host or s.host
+    tls = bool(a.ssl_certfile and a.ssl_keyfile)
+    if bool(a.ssl_certfile) != bool(a.ssl_keyfile):
+        print("ERROR: --ssl-certfile and --ssl-keyfile must be given together.", file=sys.stderr)
+        return 2
+    if host not in ("127.0.0.1", "localhost", "::1") and not tls and not a.allow_insecure_network:
+        print(f"ERROR: refusing to listen on {host} without TLS. Use --ssl-certfile/--ssl-keyfile (or terminate TLS at a reverse proxy and pass --allow-insecure-network "
+              "to confirm). See docs/SECURITY.md.", file=sys.stderr)
+        return 2
+    if tls:
+        s.tls = True
+        os.environ["KSA_TLS"] = "1"
+    uvicorn.run("app.main:app", host=host, port=a.port or s.port, log_level=s.log_level.lower(),
+                ssl_certfile=a.ssl_certfile if tls else None, ssl_keyfile=a.ssl_keyfile if tls else None)
+    return 0
+
+
+def cmd_report(a) -> int:
+    from .api.serializers import ser
+    from .reporting import registry
+    db = get_db()
+    if a.project == "list":
+        for r in registry.listing():
+            print(f"{r['name']:18} {r['group']:22} {r['label']}  params: {', '.join(p['name'] for p in r['params']) or '-'}")
+        return 0
+    params = dict(kv.split("=", 1) for kv in (a.param or []))
+    res = registry.run_report(db, a.name, a.project, params)
+    if a.save:
+        from .services import analysis
+        rid = analysis.save_run(db, _actor(a), a.project, a.name, params, res, inputs_hash=analysis.digest(res))
+        print(f"Saved analysis run #{rid}", file=sys.stderr)
+    _print(ser(res))
+    return 0
+
+
+def cmd_param(a) -> int:
+    from .services import governed
+    db = get_db()
+    if a.pcmd3 == "kinds":
+        _print(governed.kinds())
+    elif a.pcmd3 == "list":
+        _print(governed.list_params(db, a.kind, a.project))
+    elif a.pcmd3 == "propose":
+        data = json.loads(Path(a.data[1:]).read_text(encoding="utf-8")) if a.data.startswith("@") else json.loads(a.data)
+        print(governed.propose(db, _actor(a), a.kind, a.code, data, project_id=a.project, source=a.source, basis_note=a.basis, submit=a.submit))
+    elif a.pcmd3 == "submit":
+        governed.submit(db, _actor(a), a.param_id)
+    elif a.pcmd3 == "approve":
+        governed.approve(db, _actor(a), a.param_id, comments=a.comment)
+    elif a.pcmd3 == "reject":
+        governed.reject(db, _actor(a), a.param_id, comments=a.comment or "")
+    return 0
+
+
+def cmd_wbs(a) -> int:
+    from .services import wbs
+    _print(wbs.import_csv(get_db(), _actor(a), a.project, Path(a.file)))
+    return 0
+
+
+def cmd_profile(a) -> int:
+    from .services import profiles
+    db = get_db()
+    if a.prcmd == "create":
+        reqs = profiles.import_requirements_csv(Path(a.requirements)) if a.requirements else []
+        docs = json.loads(Path(a.documents[1:]).read_text(encoding="utf-8")) if a.documents and a.documents.startswith("@") else (json.loads(a.documents) if a.documents else [])
+        print(profiles.create_profile(db, _actor(a), a.code, a.name, client=a.client, source_documents=docs, requirements=reqs))
+    elif a.prcmd == "submit":
+        profiles.submit_profile(db, _actor(a), a.profile_id)
+    elif a.prcmd == "approve":
+        profiles.approve_profile(db, _actor(a), a.profile_id, a.comment)
+    elif a.prcmd == "link":
+        profiles.link_project(db, _actor(a), a.project, a.code)
+    elif a.prcmd == "attest":
+        print(profiles.attest(db, _actor(a), a.project, a.req_id, a.status, a.evidence))
+    return 0
+
+
+def cmd_mto(a) -> int:
+    from .api.serializers import ser
+    from .services import mto
+    db = get_db()
+    if a.mcmd == "templates":
+        for t in sorted(mto.templates().values(), key=lambda t: t["code"]):
+            print(f"{t['code']:30} driver={t['driver_unit']:9} slots={len(t['slots']):2}  {t['name']}")
+    elif a.mcmd == "preview":
+        _print(ser(mto.preview(db, a.project, a.item, a.template, a.driver_qty, a.driver_source, a.skip)))
+    elif a.mcmd == "apply":
+        _print(ser(mto.apply(db, _actor(a), a.project, a.item, a.template, a.driver_qty, a.driver_source, a.skip)))
+    return 0
+
+
+def cmd_unlock(a) -> int:
+    n = auth.unlock_user(get_db(), _actor(a), a.username)
+    print(f"Cleared {n} failed attempt(s) for {a.username}.")
     return 0
 
 
@@ -286,7 +380,37 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(fn=cmd_create_user)
     s = sub.add_parser("run", help="start the local web application")
     s.add_argument("--host"); s.add_argument("--port", type=int)
+    s.add_argument("--ssl-certfile", help="serve over TLS (with --ssl-keyfile)"); s.add_argument("--ssl-keyfile")
+    s.add_argument("--allow-insecure-network", action="store_true", help="confirm that TLS is terminated elsewhere when binding a non-loopback address")
     s.set_defaults(fn=cmd_run)
+    s = sub.add_parser("report", help="run a registered project report / analysis (use 'report list x y' to list)")
+    s.add_argument("project"); s.add_argument("name"); s.add_argument("--param", action="append", help="name=value"); s.add_argument("--save", action="store_true"); s.add_argument("--user")
+    s.set_defaults(fn=cmd_report)
+    s = sub.add_parser("param", help="governed parameters: kinds / list / propose / submit / approve / reject")
+    ps_ = s.add_subparsers(dest="pcmd3", required=True)
+    ps_.add_parser("kinds").set_defaults(fn=cmd_param)
+    q = ps_.add_parser("list"); q.add_argument("--kind"); q.add_argument("--project"); q.set_defaults(fn=cmd_param)
+    q = ps_.add_parser("propose"); q.add_argument("kind"); q.add_argument("code"); q.add_argument("data", help="JSON text or @file.json"); q.add_argument("--project")
+    q.add_argument("--source", required=True); q.add_argument("--basis"); q.add_argument("--submit", action="store_true"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
+    for n in ("submit", "approve", "reject"):
+        q = ps_.add_parser(n); q.add_argument("param_id", type=int); q.add_argument("--comment"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
+    s = sub.add_parser("wbs", help="import WBS nodes or item->WBS assignments from CSV"); s.add_argument("project"); s.add_argument("file"); s.add_argument("--user"); s.set_defaults(fn=cmd_wbs)
+    s = sub.add_parser("profile", help="client/owner profile: create / submit / approve / link / attest")
+    pr_ = s.add_subparsers(dest="prcmd", required=True)
+    q = pr_.add_parser("create"); q.add_argument("code"); q.add_argument("name"); q.add_argument("--client"); q.add_argument("--requirements", help="CSV: req_id,category,title,source_ref[,mandatory][,fact,op,value]")
+    q.add_argument("--documents", help="JSON list or @file.json of source documents"); q.add_argument("--user"); q.set_defaults(fn=cmd_profile)
+    for n in ("submit", "approve"):
+        q = pr_.add_parser(n); q.add_argument("profile_id", type=int); q.add_argument("--comment"); q.add_argument("--user"); q.set_defaults(fn=cmd_profile)
+    q = pr_.add_parser("link"); q.add_argument("project"); q.add_argument("code"); q.add_argument("--user"); q.set_defaults(fn=cmd_profile)
+    q = pr_.add_parser("attest"); q.add_argument("project"); q.add_argument("req_id"); q.add_argument("status"); q.add_argument("evidence"); q.add_argument("--user"); q.set_defaults(fn=cmd_profile)
+    s = sub.add_parser("mto", help="take-off derivation templates: templates / preview / apply")
+    mt_ = s.add_subparsers(dest="mcmd", required=True)
+    mt_.add_parser("templates").set_defaults(fn=cmd_mto)
+    for n in ("preview", "apply"):
+        q = mt_.add_parser(n); q.add_argument("project"); q.add_argument("item"); q.add_argument("template"); q.add_argument("--driver-qty"); q.add_argument("--driver-source")
+        q.add_argument("--skip", action="append"); q.add_argument("--user"); q.set_defaults(fn=cmd_mto)
+    s = sub.add_parser("unlock-user", help="clear the failed-sign-in lock of a user (administrator)"); s.add_argument("username"); s.add_argument("--user")
+    s.set_defaults(fn=cmd_unlock)
     sub.add_parser("demo", help="create the SYNTHETIC demonstration project").set_defaults(fn=cmd_demo)
     s = sub.add_parser("backup"); s.add_argument("--label"); s.set_defaults(fn=cmd_backup)
     s = sub.add_parser("validate-backup"); s.add_argument("file"); s.set_defaults(fn=cmd_validate_backup)

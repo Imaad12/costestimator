@@ -71,7 +71,11 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=static), name="static")
     app.include_router(api_router)
     app.include_router(web_router)
+    from .web.routes_ext import router as web_ext_router
+    app.include_router(web_ext_router)
     app.add_middleware(SerializeRequests)
+    from .security import Hardening
+    app.add_middleware(Hardening)
     return app
 
 

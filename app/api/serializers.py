@@ -17,7 +17,7 @@ def ser(o: Any) -> Any:
     if dataclasses.is_dataclass(o) and not isinstance(o, type):
         return {f.name: ser(getattr(o, f.name)) for f in dataclasses.fields(o)}
     if isinstance(o, dict):
-        return {str(k): ser(v) for k, v in o.items()}
+        return {("|".join(map(str, k)) if isinstance(k, tuple) else str(k)): ser(v) for k, v in o.items()}
     if isinstance(o, (list, tuple, set)):
         return [ser(v) for v in o]
     return o

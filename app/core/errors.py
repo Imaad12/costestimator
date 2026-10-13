@@ -44,6 +44,11 @@ class AuthRequired(AppError):
     code = "AUTH_REQUIRED"
 
 
+class AccountLocked(AppError):
+    status_code = 429
+    code = "ACCOUNT_LOCKED"
+
+
 class ImmutableRecord(Conflict):
     code = "IMMUTABLE_RECORD"
 

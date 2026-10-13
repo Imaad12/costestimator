@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% from "_macros.html" import tabs, actform, table %}{% block body %}
+<h1>{{ project.id }} — Structure, programme &amp; take-off</h1>{{ tabs(project, 'structure') }}
+<p class="muted">Structure and human-entered inputs. Quantities are measured by people; nothing here measures a drawing. See <a href="/projects/{{ project.id }}/analysis/rollup">roll-up</a>, <a href="/projects/{{ project.id }}/analysis/schedule">programme</a>,
+<a href="/projects/{{ project.id }}/analysis/loading">loading</a>, <a href="/projects/{{ project.id }}/analysis/manhours">man-hours</a>.</p>
+
+<h2>Work breakdown structure (WBS)</h2>
+{{ table(wbs, [('code','Code'),('parent_code','Parent'),('name','Name'),('kind','Kind')], 'No WBS nodes yet.') }}
+<p>{{ actform('add_wbs_node', '/projects/' ~ project.id ~ '/structure', [('project_id', project.id, 'hidden'), ('code', 'code'), ('name', 'name', None, 22), ('parent_code', 'parent (optional)'), ('kind', 'area|unit|system|phase|package')], 'Add node') }}</p>
+<p>{{ actform('assign_wbs', '/projects/' ~ project.id ~ '/structure', [('project_id', project.id, 'hidden'), ('item_key', 'BOQ item key'), ('wbs_code', 'WBS code')], 'Assign item to WBS') }}</p>
+
+<h2>Client / owner code cross-walk</h2>
+{{ table(crosswalk, [('system','System'),('client_code','Client code'),('client_name','Name'),('cost_code','Internal cost code / prefix')], 'No cross-walk rows. Load the client\'s own code list; nothing is guessed.') }}
+<p>{{ actform('add_crosswalk', '/projects/' ~ project.id ~ '/structure', [('project_id', project.id, 'hidden'), ('system', 'client system'), ('client_code', 'client code'), ('cost_code', 'cost code/prefix'), ('client_name', 'name (optional)')], 'Add row') }}</p>
+
+<h2>Programme tasks (human-entered)</h2>
+{{ table(tasks, [('task_code','Task'),('name','Name'),('duration_days','Working days'),('predecessors','Predecessors'),('wbs_code','WBS'),('cost_code','Cost code'),('snet','SNET'),('fnlt','FNLT')], 'No tasks yet.') }}
+<form method="post" action="/ui/do/set_schedule_tasks" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/structure"><input type="hidden" name="project_id" value="{{ project.id }}">
+<label>Replace the task list (JSON). Predecessors: <code>A</code>, <code>B-SS+2</code>, <code>C-FF-1</code> (types FS/SS/FF/SF, lag in working days). Tasks take cost and hours by <code>cost_code</code> prefix and/or <code>wbs_code</code>.</label>
+<textarea name="tasks" rows="5" style="width:100%;font-family:monospace" placeholder='[{"task_code":"T1","name":"...","duration_days":"","predecessors":"","wbs_code":"","cost_code":""}]'></textarea><button class="sm">Save tasks</button></form>
+
+<h2>Take-off derivation (template × approved factors)</h2>
+<p class="muted">The driver quantity is <b>your</b> measured figure (or the BOQ quantity when its unit is the driver). Factors must be approved under <a href="/projects/{{ project.id }}/inputs">Inputs &amp; parameters</a> (kind <code>mto_factor</code>, code <code>template/slot</code>). The result is a <i>Pending Review</i> pricing decision.</p>
+{{ table(mto_apps, [('item_key','Item'),('template','Template'),('driver_qty','Driver'),('driver_unit','Unit'),('pricing_status','Pricing'),('flags','Flags')], 'No derivations applied.') }}
+<form method="post" action="/ui/do/mto_apply" class="inline"><input type="hidden" name="_next" value="/projects/{{ project.id }}/structure"><input type="hidden" name="project_id" value="{{ project.id }}">
+<input name="item_key" placeholder="BOQ item key" size="10"><select name="template">{% for t in templates %}<option value="{{ t.code }}">{{ t.code }} — {{ t.name }} [{{ t.driver_unit }}]</option>{% endfor %}</select>
+<input name="driver_qty" placeholder="driver qty (optional)" size="12"><input name="driver_source" placeholder="source of driver" size="16"><input name="skip_slots" placeholder="skip slots (comma)" size="14"><button class="sm">Apply</button></form>
+<p class="muted">Preview first: <a href="/projects/{{ project.id }}/analysis">Analysis → Take-off derivation preview</a>.</p>
+
+<h2>Risk register — quantification</h2>
+{{ table(risks, [('id','Risk'),('title','Title'),('prob_pct','Probability %'),('cost_low','Low'),('cost_likely','Most likely'),('cost_high','High'),('status','Status')], 'No risks recorded.') }}
+<form method="post" action="/ui/do/quantify_risk" class="inline"><input type="hidden" name="_next" value="/projects/{{ project.id }}/structure">
+<input name="risk_id" placeholder="risk id" size="14"><input name="prob_pct" placeholder="prob %" size="6"><input name="cost_low" placeholder="low" size="8"><input name="cost_likely" placeholder="likely" size="8"><input name="cost_high" placeholder="high" size="8">
+<input name="schedule_days" placeholder="days (opt)" size="7"><input name="basis" placeholder="basis (required)" size="24"><button class="sm">Quantify</button></form>
+
+<h2>Client / owner profile</h2>
+<p>{% if link %}Linked: <b>{{ link.profile_code }} v{{ link.profile_version }}</b> — <a href="/projects/{{ project.id }}/analysis/compliance">compliance matrix</a>.{% else %}No profile linked. Profiles are loaded from the owner's controlled documents (never supplied by the software) and approved by a Commercial Approver.{% endif %}</p>
+{{ actform('link_profile', '/projects/' ~ project.id ~ '/structure', [('project_id', project.id, 'hidden'), ('code', 'approved profile code')], 'Link profile') }}
+{{ actform('attest_requirement', '/projects/' ~ project.id ~ '/structure', [('project_id', project.id, 'hidden'), ('req_id', 'requirement id'), ('status', 'Met|Not met|Not applicable'), ('evidence', 'evidence reference', None, 28)], 'Record attestation') }}
+{% endblock %}

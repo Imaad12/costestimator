@@ -29,7 +29,7 @@ def client(tmp_path, monkeypatch):
         auth.create_user(db, u, u, role, "pw-" + u)
     auth.create_user(db, "ai-assistant", "AI", "AI Assistant", None, is_ai=True)
     from app.main import app
-    with TestClient(app) as c:
+    with TestClient(app, headers={"Origin": "http://testserver"}) as c:       # same-origin browser
         yield c
     set_db(None)
     cfg.set_settings(None)

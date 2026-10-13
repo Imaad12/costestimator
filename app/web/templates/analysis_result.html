@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% from "_macros.html" import tabs, actform %}{% from "_render.html" import val %}{% block body %}
+<h1>{{ project.id }} — {{ label }}</h1>{{ tabs(project, 'analysis') }}
+{% if error %}<div class="banner warn"><b>{{ error.code }}</b>: {{ error.message }}</div>
+{% else %}
+{% if saved %}<div class="synth">Saved analysis run #{{ saved.id }} — {{ saved.created_at }} — input hash {{ (saved.inputs_hash or '')[:12] }}</div>{% endif %}
+{% if result.note %}<p class="muted">{{ result.note }}</p>{% endif %}
+{% if result.statement %}<div class="banner warn">{{ result.statement }}</div>{% endif %}
+<div class="card">{{ val(result) }}</div>
+{% if not saved %}<p>{{ actform('save_analysis', '/projects/' ~ project.id ~ '/analysis', [('project_id', project.id, 'hidden'), ('report', rname, 'hidden'), ('params', params_json, 'hidden')], 'Save this run (immutable record, not an approval)') }}
+<a href="/api/projects/{{ project.id }}/report/{{ rname }}?{{ qs }}">JSON</a></p>{% endif %}
+{% endif %}
+<p><a href="/projects/{{ project.id }}/analysis">← all analyses</a></p>
+{% endblock %}

@@ -16,7 +16,7 @@ from ..api.routes import save_upload
 from ..config import get_settings
 from ..core.errors import AppError, AuthRequired
 from ..database import Database, get_db, jload, rows_to_dicts
-from ..estimators.estimate import compute_estimate
+from ..estimators.estimate import compute_estimate, compute_estimate_cached
 from ..excel.master import build_master
 from ..imports import boq as boq_import
 from ..imports import datasets
@@ -66,11 +66,11 @@ def login_form(request: Request):
 @router.post("/login")
 def login(request: Request, username: str = Form(...), password: str = Form(...)):
     try:
-        a = auth.authenticate(get_db(), username, password)
+        a = auth.authenticate(get_db(), username, password, client=request.client.host if request.client else None)
     except AppError as e:
         return page(request, "login.html", None, err=e.message)
     r = RedirectResponse("/", status_code=303)
-    r.set_cookie(COOKIE, auth.make_token(a.username), httponly=True, samesite="strict")
+    r.set_cookie(COOKIE, auth.make_token(a.username), httponly=True, samesite="strict", secure=get_settings().tls or request.url.scheme == "https")
     return r
 
 
@@ -120,7 +120,7 @@ def _proj(pid: str) -> dict:
 @router.get("/projects/{pid}/", response_class=HTMLResponse)
 def project_home(pid: str, request: Request, actor: Actor = Depends(current_actor)):
     db = get_db()
-    est = compute_estimate(db, pid)
+    est = compute_estimate_cached(db, pid)
     return page(request, "project.html", actor, project=_proj(pid), est=est, versions=estimates.list_versions(db, pid),
                 changes=boq.pending_changes(db, pid), title=_proj(pid)["name"], tab="")
 
@@ -195,7 +195,7 @@ def project_mapping(pid: str, request: Request, q: str = "", actor: Actor = Depe
 @router.get("/projects/{pid}/estimate", response_class=HTMLResponse)
 def project_estimate(pid: str, request: Request, preliminary: int = 0, view: str = "summary", item: str | None = None, actor: Actor = Depends(current_actor)):
     db = get_db()
-    est = compute_estimate(db, pid, include_unapproved=bool(preliminary))
+    est = compute_estimate_cached(db, pid, include_unapproved=bool(preliminary))
     lines = [l for l in est.direct.lines if not item or l.item_key == item]
     return page(request, "estimate.html", actor, project=_proj(pid), est=est, lines=lines[:1500], total_lines=len(lines), prelim=preliminary, item=item or "",
                 title="Estimate build-up", tab="estimate")
@@ -207,7 +207,7 @@ def project_assumptions(pid: str, request: Request, actor: Actor = Depends(curre
     db = get_db()
     rows = assumptions.project_assumption_status(db, pid)
     pending = rows_to_dicts(db.all("SELECT * FROM project_assumptions WHERE project_id=? AND status='Pending Review'", (pid,)))
-    est = compute_estimate(db, pid)
+    est = compute_estimate_cached(db, pid)
     return page(request, "project_assumptions.html", actor, project=_proj(pid), rows=rows, pending=pending, used=sorted(est.direct.used_assumptions),
                 all_assumptions=assumptions.list_assumptions(db), title="Assumptions", tab="assumptions")
 
@@ -275,7 +275,7 @@ async def quote_import(qid: str, file: UploadFile = File(...), actor: Actor = De
 @router.get("/projects/{pid}/commercial", response_class=HTMLResponse)
 def project_commercial(pid: str, request: Request, actor: Actor = Depends(current_actor)):
     db = get_db()
-    est = compute_estimate(db, pid)
+    est = compute_estimate_cached(db, pid)
     pols = rows_to_dicts(db.all("SELECT id, code, version, name, status FROM commercial_policies ORDER BY id DESC"))
     return page(request, "commercial.html", actor, project=_proj(pid), est=est, indirects=indirects.list_indirects(db, pid), durations=indirects.list_durations(db, pid),
                 policies=pols, policy_json=json.dumps(est.policy, indent=1) if est.policy else "", tax=commercial.list_tax_categories(db),

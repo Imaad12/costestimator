@@ -6,7 +6,7 @@ from decimal import Decimal
 from ..core.money import ZERO, quantize
 from ..core.timeutil import today
 from ..database import Database
-from ..estimators.estimate import compute_estimate
+from ..estimators.estimate import compute_estimate, compute_estimate_cached
 from ..procurement.quotes import validity
 
 
@@ -15,7 +15,7 @@ def dashboard(db: Database, project_id: str | None = None) -> dict:
     rows = []
     tot_value = tot_exposure = ZERO
     for pid in pids:
-        est = compute_estimate(db, pid)
+        est = compute_estimate_cached(db, pid)
         crit = db.scalar("SELECT COUNT(*) FROM recon_findings f JOIN recon_runs r ON r.id=f.run_id WHERE f.project_id=? AND f.severity='Critical' AND f.status='Open' "
                          "AND r.id=(SELECT MAX(id) FROM recon_runs WHERE project_id=?)", (pid, pid))
         last_ver = db.one("SELECT version_no, status FROM estimate_versions WHERE project_id=? ORDER BY version_no DESC LIMIT 1", (pid,))

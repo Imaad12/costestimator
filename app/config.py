@@ -36,6 +36,11 @@ class Settings:
     secret_key: str | None = None
     allow_self_approval: bool = True
     token_ttl_hours: int = 12
+    csrf_origin_check: bool = True              # cookie-authenticated unsafe requests must come from the same origin
+    security_headers: bool = True
+    login_max_failures: int = 5
+    login_lock_minutes: int = 15
+    tls: bool = False                           # set when the app is served over TLS (cookies Secure, HSTS)
     ai_enabled: bool = False
     ai_model: str = "claude-sonnet-5-5"
     ai_max_tokens: int = 2000
@@ -126,6 +131,11 @@ def load_settings(config_file: Path | None = None, env: dict | None = None) -> S
         secret_key=environ.get("KSA_SECRET_KEY") or None,
         allow_self_approval=_truthy(pick("KSA_ALLOW_SELF_APPROVAL", sec.get("allow_self_approval", True))),
         token_ttl_hours=int(pick("KSA_TOKEN_TTL_HOURS", sec.get("token_ttl_hours", 12))),
+        csrf_origin_check=_truthy(pick("KSA_CSRF_ORIGIN_CHECK", sec.get("csrf_origin_check", True))),
+        security_headers=_truthy(pick("KSA_SECURITY_HEADERS", sec.get("security_headers", True))),
+        login_max_failures=int(pick("KSA_LOGIN_MAX_FAILURES", sec.get("login_max_failures", 5))),
+        login_lock_minutes=int(pick("KSA_LOGIN_LOCK_MINUTES", sec.get("login_lock_minutes", 15))),
+        tls=_truthy(pick("KSA_TLS", sec.get("tls", False))),
         ai_enabled=_truthy(pick("KSA_AI_ENABLED", ai.get("enabled", False))),
         ai_model=str(pick("KSA_AI_MODEL", ai.get("model", "claude-sonnet-5-5"))),
         ai_max_tokens=int(pick("KSA_AI_MAX_TOKENS", ai.get("max_tokens", 2000))),

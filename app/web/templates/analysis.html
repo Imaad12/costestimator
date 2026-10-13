@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% from "_macros.html" import tabs %}{% block body %}
+<h1>{{ project.id }} — Analysis &amp; controls</h1>{{ tabs(project, 'analysis') }}
+<p class="muted">Read-only analyses over the estimate and the project's inputs. They <b>never change an estimate and never approve anything</b>; a figure that matters is carried into the estimate only by a person through the normal approval route.
+Numbers come from the company's own approved inputs (see <a href="/projects/{{ project.id }}/inputs">Inputs &amp; parameters</a>); nothing is assumed.</p>
+{% for group, reps in groups.items() %}<h2>{{ group }}</h2>
+{% for r in reps %}<div class="card"><b>{{ r.label }}</b><div class="muted">{{ r.description }}</div>
+<form method="get" action="/projects/{{ project.id }}/analysis/{{ r.name }}" class="inline">
+{% for p in r.params %}<label class="muted">{{ p.name }}</label> <input name="{{ p.name }}" value="{{ p.default }}" size="12" title="{{ p.help }}"> {% endfor %}
+<button class="sm">Run</button></form></div>{% endfor %}{% endfor %}
+<h2>Saved analysis runs</h2>
+{% if runs %}<table><thead><tr><th>#</th><th>Report</th><th>Saved by</th><th>When</th><th>Input hash</th><th></th></tr></thead><tbody>
+{% for r in runs %}<tr><td>{{ r.id }}</td><td>{{ r.kind }}</td><td>{{ r.created_by }}</td><td>{{ r.created_at }}</td><td>{{ (r.inputs_hash or '')[:12] }}</td><td><a href="/projects/{{ project.id }}/analysis-run/{{ r.id }}">open</a></td></tr>{% endfor %}</tbody></table>
+{% else %}<p class="muted">No analysis has been saved yet.</p>{% endif %}
+{% endblock %}

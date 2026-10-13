@@ -128,6 +128,12 @@ def list_nodes(db: Database, project_id: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------------------------------- reports
+def _matrix_rows(m: dict) -> dict:
+    """Cross-tab as plain rows (JSON-friendly) next to the keyed cells used by callers and tests."""
+    return {"cells": m["cells"], "row_totals": m["row_totals"], "col_totals": m["col_totals"], "grand_total": m["grand_total"],
+            "rows": [{"wbs": r, "division": c, "amount": a} for (r, c), a in sorted(m["cells"].items())]}
+
+
 def rollup_report(db: Database, project_id: str, *, est=None, include_unapproved: bool = False) -> dict:
     """Direct cost rolled up by cost-code tree (CBS), by WBS, as a WBS x CBS-division matrix and through each client cross-walk.
     Ties out to the estimate's direct total; items without a cost code / WBS appear in an explicit '(unassigned)' bucket."""
@@ -171,7 +177,7 @@ def rollup_report(db: Database, project_id: str, *, est=None, include_unapproved
         "wbs": {"nodes": [dict(code=c, name=next((n["name"] for n in wbs_nodes if n["code"] == c), ""), level=wbs["nodes"][c].level,
                                own=wbs["nodes"][c].own, total=wbs["nodes"][c].total) for c in wbs["order"]],
                 "unassigned": wbs["unassigned"], "grand_total": wbs["grand_total"]},
-        "matrix": rollup.matrix(cells), "crosswalks": systems,
+        "matrix": _matrix_rows(rollup.matrix(cells)), "crosswalks": systems,
         "tie_out": {"cbs": cbs["grand_total"] == total, "wbs": wbs["grand_total"] == total,
                     "crosswalk": {s: r["grand_total"] == total for s, r in systems.items()}},
     }

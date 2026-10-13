@@ -1,0 +1,15 @@
+{# Generic recursive renderer for report dictionaries (all values already JSON-safe strings). #}
+{% macro val(v, depth=0) %}
+{%- if v is mapping -%}
+  {%- if v|length == 0 -%}<span class="muted">—</span>
+  {%- else -%}<table class="kv"><tbody>{% for k, x in v.items() %}<tr><th>{{ k }}</th><td>{{ val(x, depth+1) }}</td></tr>{% endfor %}</tbody></table>{%- endif -%}
+{%- elif v is iterable and v is not string -%}
+  {%- if v|length == 0 -%}<span class="muted">none</span>
+  {%- elif v[0] is mapping -%}
+    {%- set cols = [] -%}{%- for r in v -%}{%- for k in r.keys() -%}{%- if k not in cols -%}{%- set _ = cols.append(k) -%}{%- endif -%}{%- endfor -%}{%- endfor -%}
+    <table><thead><tr>{% for c in cols %}<th>{{ c }}</th>{% endfor %}</tr></thead><tbody>{% for r in v %}<tr>{% for c in cols %}<td>{{ val(r.get(c), depth+1) }}</td>{% endfor %}</tr>{% endfor %}</tbody></table>
+  {%- else -%}{{ v|join(', ') }}{%- endif -%}
+{%- elif v is none -%}<span class="muted">—</span>
+{%- elif v is sameas true -%}yes{%- elif v is sameas false -%}no
+{%- else -%}{{ v }}{%- endif -%}
+{% endmacro %}
