@@ -99,7 +99,12 @@ def test_rollup_is_computed_from_records_not_hand_written():
     eng = lambda lv: [r for r in g.required_for(REC, lv) if r["kind"] == "engine"]  # noqa: E731
     assert len(eng(1)) > len(eng(3)) > len(eng(5)) > 0
     assert all(r["kind"] == "data" for r in REC if r["id"] in ("LIB-07", "LIB-08"))
-    assert g.verdict(eng(1)).startswith("NOT SUPPORTED") and g.verdict(eng(2)).startswith("NOT SUPPORTED")
+    # verdicts follow the records: any Missing engine capability required at a level makes it NOT SUPPORTED, any Partial/Unverified one makes it CONDITIONAL
+    for lv in (1, 2, 3, 4, 5):
+        st = {r["status"] for r in eng(lv)}
+        want = "NOT SUPPORTED" if "Missing" in st else ("CONDITIONALLY" if st & {"Partial", "Implemented but unverified"} else "SUPPORTED")
+        assert g.verdict(eng(lv)).startswith(want), lv
+    assert any(r["status"] == "Missing" and r["id"] == "SAU-07" for r in eng(1))              # the owner-controlled requirements stay Missing: Level 1 is not supported
 
 
 def test_every_gap_in_the_matrix_is_covered_by_a_roadmap_work_package():

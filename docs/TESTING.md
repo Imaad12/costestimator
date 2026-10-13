@@ -2,7 +2,7 @@
 
 ```
 . .venv/bin/activate
-pytest                      # or scripts/test.sh ; 230 tests, ~80 s
+pytest                      # or scripts/test.sh ; see the current count in DEVELOPMENT_AUDIT.md §9, ~95 s
 pytest tests/unit -q        # fast engine tests
 pytest -k workflow -s       # the end-to-end nine-package scenario
 pytest -m libreoffice       # (marker registered; LibreOffice tests auto-skip when `soffice` is missing)
@@ -34,3 +34,24 @@ Not covered: the live Claude API, Microsoft Excel, browsers (only HTTP-level), v
 | `tests/unit/test_indirect_duration.py` (additions) | schedule tasks → CPM → duration proposal needs an approved calendar and human approval; archived projects refuse schedule/duration changes |
 | `tests/integration/test_workspace_ui.py` (additions) | schedule actions via API with roles; standard indirect categories created as amount-less drafts |
 | `tests/unit/test_capability_matrix.py` | the capability matrix cites only existing code/symbols/tests, status claims match evidence, no Aramco compliance claim, roadmap covers every open gap, rendered page is current |
+
+## Iteration-4 additions (2026-10-13)
+Every numeric test uses figures worked out by hand in the test (comments show the arithmetic); nothing is copied from the code under test. All data is SYNTHETIC.
+| File | Covers |
+|---|---|
+| `tests/unit/test_industrial_units.py`, `test_industrial_pack.py` | exact industrial unit conversions and refusals, admin unit management, definitions-only industrial pack (idempotent, admin-only, no price column accepted) |
+| `tests/unit/test_governed_params.py` | parameter lifecycle (propose/submit/approve, versions, effective resolution, project over company), roles (AI/viewer/procurement refused, self-approval switch), validators, productivity factors (multiplicative, scoped by cost prefix/WBS, unapproved flagged), plant minimum-hire/standby |
+| `tests/unit/test_wbs_rollup.py` | tree roll-up and client cross-walk (longest prefix, ambiguity, unmapped) tie out to the estimate; WBS rules; WBS-scoped factors |
+| `tests/unit/test_programme.py`, `test_programme_service.py` | FS/SS/FF/SF, lags, leads, float, constraints, cycles, predecessor syntax, calendar dates; loading histograms and man-hours (exact spreading, unscheduled bucket, shared tasks) |
+| `tests/unit/test_mto.py` | derivation arithmetic, factor validation, pricing gate (Pending Review until approved), double-pricing guard, stale detection |
+| `tests/unit/test_profiles_boe.py` | fact checks, profile lifecycle and attestation, compliance statement limits, classification from approved scheme, Basis of Estimate content and placeholders |
+| `tests/unit/test_landed_labour_exposure.py` | landed cost step by step (4,504.0934375), exposure, hedge, statutory labour build-up, workforce mix |
+| `tests/unit/test_risk_escalation.py`, `test_cashflow.py` | expected value, seeded Monte Carlo (reproducible, bounded, degenerate cases), escalation factors; hand-worked monthly cash flow with retention, bond and interest |
+| `tests/unit/test_full_replay.py` | full-estimate replay after rate/factor/indirect/tax changes, legacy snapshots, tamper detection |
+| `tests/unit/test_bids_scope.py`, `test_controls.py`, `test_provisions.py`, `test_methods.py` | bid scoring/gates/long-lead dates/interface matrix; variations, contract status, earned value; benchmarks, reserves, engineering, overhead; method alternatives |
+| `tests/reconciliation/test_extended_rules.py` | new reconciliation findings and severities; package double count cannot be waived |
+| `tests/integration/test_security_hardening.py` | CSRF origin check, headers, lockout/unlock, TLS refusal |
+| `tests/integration/test_ext_ui.py` | every registered report renders (or explains), API listing/422s, inputs and structure pages enforce roles |
+| `tests/unit/test_estimate_cache.py`, `tests/excel/test_workbooks.py` (addition) | cache hit/invalidation (also by another process), workbook style reuse equivalence |
+| `tests/integration/test_full_workflow.py` (addition) | client-form export (item-code matching, formulas untouched, gated, preliminary copy labelled) |
+| `tests/unit/test_generated_docs.py` | the generated reference docs list every governed kind, report and template |

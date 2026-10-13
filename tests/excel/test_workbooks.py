@@ -265,3 +265,22 @@ def test_round_trip_into_a_fresh_project_reproduces_the_boq(mini_wb):
     it = boq.get_item(db, new, "1.1")
     assert it["assembly_code"] == "DEMO-CONC" and it["mapping_status"] == "Approved"   # mapping travels via the mapping sheet
     assert db.scalar("SELECT COUNT(*) FROM approvals WHERE entity_type='boq_mapping' AND project_id=?", (new,)) == 2   # recorded as the importing estimator's decision
+
+
+def test_row_styles_are_identical_down_each_column_after_style_reuse():
+    """The writer builds each column's style once and copies it down the sheet (speed); every data row of a column must still look, format and lock identically."""
+    from openpyxl import Workbook
+    from app.excel.builder import write_sheet
+    wb = Workbook()
+    checked = 0
+    for name, spec in S.items():
+        rows = [{c.key: ("2026-10-13" if c.fmt and "yy" in c.fmt.lower() else "1") for c in spec.cols} for _ in range(14)]
+        ws = write_sheet(wb, spec, rows, name=f"t_{name}"[:30])
+        for col in range(1, len(spec.cols) + 1):
+            ref = ws.cell(FIRST_ROW, col)
+            for r in range(FIRST_ROW + 1, FIRST_ROW + 14):
+                c = ws.cell(r, col)
+                assert (c.fill.fgColor.rgb, c.protection.locked, c.border.left.style, c.alignment.wrap_text, c.number_format) == \
+                       (ref.fill.fgColor.rgb, ref.protection.locked, ref.border.left.style, ref.alignment.wrap_text, ref.number_format), (name, col, r)
+                checked += 1
+    assert checked > 500

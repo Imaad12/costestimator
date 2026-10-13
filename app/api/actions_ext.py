@@ -256,3 +256,12 @@ def _(db, a, p):
 def _(db, a, p):
     from ..services import provisions
     return [{k: str(v) for k, v in o.items()} for o in provisions.propose_overhead_indirects(db, a, req(p, "project_id")[0])]
+
+
+# ---------------------------------------------------------------- client forms
+@action("export_client_form")
+def _(db, a, p):
+    """Fill a client-supplied tender-form workbook (path under the project workspace or an absolute path) with a JSON mapping. With version_id + approval_id: submission-ready."""
+    from ..services import estimates
+    return estimates.export_client_form(db, a, req(p, "project_id")[0], req(p, "template_path")[0], jdict(p, "mapping"),
+                                        version_id=int(p["version_id"]) if opt(p, "version_id") else None, approval_id=int(p["approval_id"]) if opt(p, "approval_id") else None)

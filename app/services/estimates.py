@@ -134,8 +134,8 @@ def approve_tender_export(db: Database, actor: Actor, project_id: str, version_i
                             version=v["version_no"], approved_value={"recon_run": gate["run_id"], "offer_version": o["version_no"]}, comments=comments)
 
 
-def export_submission(db: Database, actor: Actor, project_id: str, version_id: int, approval_id: int) -> dict[str, str]:
-    """Produce the submission-ready package. Requires a valid tender-export approval record that is still current."""
+def require_export_gate(db: Database, actor: Actor, project_id: str, version_id: int, approval_id: int):
+    """Shared by every submission-ready export: a valid, still-current tender-export approval, a clean reconciliation gate and an approved, unchanged estimate."""
     approvals.require_author(actor)
     ap = db.one("SELECT * FROM approvals WHERE id=? AND entity_type='tender_export' AND action='approve'", (approval_id,))
     v = get_version(db, version_id)
@@ -145,6 +145,12 @@ def export_submission(db: Database, actor: Actor, project_id: str, version_id: i
     gate = final_gate(db, actor, project_id)
     if gate["fingerprint"] != v["inputs_hash"] or gate["blocked"] or v["status"] != Status.APPROVED.value:
         raise ApprovalBlocked("Project state changed after approval or blocking findings exist; submission export refused.", code="EXPORT_BLOCKED")
+    return v, gate
+
+
+def export_submission(db: Database, actor: Actor, project_id: str, version_id: int, approval_id: int) -> dict[str, str]:
+    """Produce the submission-ready package. Requires a valid tender-export approval record that is still current."""
+    v, gate = require_export_gate(db, actor, project_id, version_id, approval_id)
     est = gate["estimate"]
     assum = assumption_service.project_assumption_status(db, project_id)
     o = offers.latest_offer(db, project_id)
@@ -161,3 +167,40 @@ def export_submission(db: Database, actor: Actor, project_id: str, version_id: i
     db.update("estimate_versions", {"submitted_at": now_iso()}, "id=?", (version_id,))
     audit.log(db, actor, "export", project_id, "submission_export", after=files, project_id=project_id)
     return files
+
+
+def export_client_form(db: Database, actor: Actor, project_id: str, template_path, mapping: dict, *, version_id: int | None = None, approval_id: int | None = None) -> dict:
+    """Fill a client-supplied form workbook. With a version and a valid, current tender-export approval the file is submission-ready (same gate as export_submission);
+    without them it is a PRELIMINARY copy with a banner, never presented as final."""
+    from pathlib import Path
+
+    from ..exports import client_form
+    from . import workspaces
+    approvals.require_author(actor)
+    template_path = Path(template_path)
+    if not template_path.is_absolute():
+        template_path = workspaces.resolve_dir(project_id, db) / template_path
+    root = workspaces.resolve_dir(project_id, db).resolve()
+    if root not in template_path.resolve().parents:
+        raise ValidationFailed("The form template must be a file inside the project's workspace (copy it into '8. Commercial Submission' or '1. Tender Documents').", code="FORM_PATH")
+    if not template_path.exists():
+        raise ValidationFailed(f"Template not found: {template_path}", code="FILE_NOT_FOUND")
+    if (version_id is None) != (approval_id is None):
+        raise ValidationFailed("Give both version_id and approval_id for a submission-ready form, or neither for a preliminary copy.", code="FORM_ARGS")
+    if version_id is not None:
+        v, gate = require_export_gate(db, actor, project_id, version_id, approval_id)
+        est, ready, banner = gate["estimate"], True, None
+    else:
+        est, ready = compute_estimate(db, project_id), False
+        banner = "PRELIMINARY - NOT FOR SUBMISSION" + (" - DEMONSTRATION / SYNTHETIC DATA" if est.project.get("is_demo") else "")
+    d = workspaces.area_dir(project_id, "commercial", db)
+    n = 1
+    while (d / f"ClientForm_{project_id}_{n:02d}{'' if ready else '_PRELIMINARY'}.xlsx").exists():
+        n += 1
+    out = d / f"ClientForm_{project_id}_{n:02d}{'' if ready else '_PRELIMINARY'}.xlsx"
+    rep = client_form.fill(est, template_path, mapping, out, banner=banner)
+    db.insert("exports", dict(project_id=project_id, kind="client_form", submission_ready=int(ready), estimate_version_id=version_id, file_path=str(out), sha256=_sha(str(out)),
+                              created_by=actor.username, created_at=now_iso(), approval_ref=str(approval_id) if approval_id else None))
+    audit.log(db, actor, "export", project_id, "client_form", after={"file": out.name, "submission_ready": ready, "rows": rep["rows_filled"]}, project_id=project_id)
+    rep["submission_ready"] = ready
+    return rep

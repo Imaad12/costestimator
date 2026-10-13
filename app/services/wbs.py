@@ -9,7 +9,6 @@ from pathlib import Path
 
 from ..approvals import engine as approvals
 from ..core.errors import Conflict, NotFound, ValidationFailed
-from ..core.money import to_text
 from ..core.timeutil import now_iso
 from ..database import Database, rows_to_dicts
 from ..estimators import rollup

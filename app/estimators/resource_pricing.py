@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from ..core.money import ONE, D
+from ..core.money import D
 from ..core.timeutil import parse_date, today
 from ..database import Database, rows_to_dicts
 from .rate_resolution import resolve_rate

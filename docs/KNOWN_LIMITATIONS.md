@@ -48,5 +48,17 @@
 * Estimate snapshots exist only for versions frozen after migration 0007; snapshot replay re-runs the direct-cost engine, not the commercial tail.
 * The document indexer has no OCR and no CAD/BIM extraction; revision/category/trade come from file names only; summaries are counts, not content summaries.
 
+## Iteration 4: frameworks without data (read before relying on any output)
+* **Every governed parameter kind ships empty** ([GOVERNED_PARAMETERS.md](GOVERNED_PARAMETERS.md)): productivity factors, take-off factors, hire terms, calendars, escalation, payment terms, benchmark ranges, statutory labour rules, evaluation criteria, classification schemes ... A report that needs one says so and stops. Nothing is estimated "typically".
+* Take-off templates ([MTO_TEMPLATES.md](MTO_TEMPLATES.md)) are structure only; they do not know pipe classes, weld procedures, coating systems, crane capacities, camp rotations or shutdown logic. Discipline records PRC-01..14 are therefore **Partial**.
+* Programme: working-day arithmetic with one calendar per project and typed-in tasks; no schedule-file import, no resource levelling, no Gantt chart. Loading spreads each task's quantity **uniformly**; cost reaches tasks only through the task's declared cost-code prefix / WBS.
+* Risk: independent risks, triangular distributions, no correlation, schedule days summed (no critical-path logic). Results are proposals; the commercial policy is changed only by an approved policy revision.
+* Escalation compounds a company-chosen annual percentage; index series are shown as information only. Cash flow assumes value earned follows cost incurred and excludes VAT.
+* Client profiles: no profile content is shipped. **No Saudi Aramco (or other owner) compliance is claimed.** A profile only checks the requirements a person loaded from the owner's controlled documents; a "met" statement is scoped to those.
+* The client tender-form export fills a form the user supplies using a mapping the user writes; it does not validate the form against client rules and does not generate bilingual deliverables.
+* Withholding tax / zakat / corporate tax treatment is not modelled (VAT only). Method statements are free text; equipment selection from site conditions is not automated.
+* Security hardening is for a trusted LAN ([SECURITY.md](SECURITY.md)): no MFA/SSO, no per-folder ACLs, no encrypted backups, serialised requests.
+* Performance (20,000 BOQ items): estimate 2.7 s, master workbook 25.6 s, not tested at 50,000.
+
 ## Not implemented (documented integration points)
 DuckDB analytics (architecture-compatible); GASTAT website adapter, Etimad adapter (manual import only); automated tests of the browser UI beyond HTTP-level rendering and form posts.

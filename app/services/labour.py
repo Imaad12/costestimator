@@ -2,11 +2,9 @@
 The software holds no wage, levy, insurance or accrual value."""
 from __future__ import annotations
 
-from decimal import Decimal
-
 from ..approvals import engine as approvals
 from ..core.errors import ValidationFailed
-from ..core.money import ZERO, D, D_opt, to_text
+from ..core.money import D, D_opt, to_text
 from ..database import Database
 from ..estimators import labour_costs, rate_build
 from ..models.actor import Actor

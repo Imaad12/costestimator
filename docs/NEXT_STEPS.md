@@ -36,7 +36,13 @@ Before relying on the system for a real tender: (a) real approved rates with evi
 ## Capability audit follow-ups (2026-10-13)
 Result of the audit (details and evidence in the matrix): **Levels 5–4 conditionally supported, Levels 3–1 not supported; 0 approved real rates; no industrial/EPC modules; strongest area is governance.** Defects found and already fixed (with regression tests): O(n²) estimate computation, missing `pypdf` dependency (PDFs were never text-extracted on a default install), schedule→duration path untested/unreachable and not protected for archived projects, several untested claims now tested.
 
-### Next three highest-priority tasks (current)
+### Status update after iteration 4 (2026-10-13)
+Items 1-3 of the list below that were **code** are done: WP-01 (units), WP-02 (WBS/CBS) and most of WP-03..10, 15, 16, 19-22 (see the status table in [ESTIMATING_GAP_ROADMAP.md](ESTIMATING_GAP_ROADMAP.md) §0a). What remains is **mostly data and verification that only you can provide**; the new next three:
+1. **Load real data** for a pilot BOQ: approved rates (`rates import`, RFQs) and your own factors as governed parameters (`Inputs & parameters`): productivity, take-off factors, hire terms, calendar, escalation, payment terms. Until then every estimate is Preliminary and every analysis says what it lacks.
+2. **Verify where the sandbox could not:** run `python -m app.cli sources refresh --dry-run` then live on a normal network; open the master workbook and templates in Microsoft Excel; record both in `data/sources/ACCESS_LOG.md` / the audit.
+3. **Pilot one real project end to end** (BOQ -> templates/assemblies -> analyses -> Basis of Estimate -> reconciliation -> approvals), then decide which Partial records (discipline templates, DSC-01..11) need real acceptance tests; load any owner's estimating requirements as a client profile **only from documents you are authorised to supply**.
+
+### Next three highest-priority tasks (as set at the 2026-10-13 audit; superseded by the update above)
 1. **WP-00a — load evidence-backed rates and productivity/consumption factors** for a named pilot BOQ (through RFQs, quotations, permitted price lists, company actuals). Nothing real prices without this; it is data and human approval, not code.
 2. **WP-01 + WP-02 — units/dimensions management and the WBS/CBS cross-walk with roll-ups.** These are the foundational code blockers for every industrial and large-project module (piping and instrument BOQs cannot even be imported today; no WBS exists).
 3. **WP-11 + WP-00b — verification that needs a normal environment:** run `sources refresh` on an unrestricted network and open the workbooks in Microsoft Excel; record both outcomes.

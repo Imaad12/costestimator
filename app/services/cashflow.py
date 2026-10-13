@@ -2,7 +2,6 @@
 costs as Draft indirect items (a person submits and approves them)."""
 from __future__ import annotations
 
-from datetime import date
 from decimal import Decimal
 
 from ..approvals import engine as approvals

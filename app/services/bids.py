@@ -6,8 +6,8 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from ..approvals import engine as approvals
-from ..core.errors import Conflict, NotFound, ValidationFailed
-from ..core.money import ZERO, D, D_opt, to_text
+from ..core.errors import NotFound, ValidationFailed
+from ..core.money import D, D_opt, to_text
 from ..core.timeutil import now_iso, parse_date, today
 from ..database import Database, rows_to_dicts
 from ..estimators import bid_eval

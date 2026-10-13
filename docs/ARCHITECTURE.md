@@ -39,6 +39,20 @@ app/
   rate_updates/               import manifests, index import, rate candidates (review queue, publish), normalisation, importer, refresh/status
   cli.py, main.py             command line, FastAPI factory
 ```
+Iteration 4 additions (each pure engine has a service and an entry in the shared registries):
+```
+  estimators/                 + param_kinds (validators for governed parameter kinds), programme (FS/SS/FF/SF CPM + calendar), loading, rollup, mto, landed_cost,
+                                labour_costs, montecarlo, escalation, cashflow, evm, bid_eval, profile_checks, resource_pricing; estimate.py now splits
+                                compute_estimate (reads the DB) from compute_estimate_from (pure) and offers compute_estimate_cached
+  services/                   + governed (parameter lifecycle), wbs, programme, mto, profiles, boe, landed, labour, risk, cashflow, bids, controls (variations, EVM),
+                                provisions (benchmarks, reserves, engineering, overhead), methods, analysis, units_admin; refdata.load_pack
+  reporting/registry.py       ONE registry of read-only reports (rollup, schedule, loading, risk, cashflow, earned_value ...) exposed by UI, REST and CLI alike
+  api/actions_ext.py          iteration-4 actions registered in the same action registry (UI and REST share them)
+  reconciliation/ext_rules.py findings for benchmarks, stale take-off derivations, package interfaces, long-lead, risk, client profile, pending parameters
+  exports/client_form.py      fills a client-supplied tender form from the pricing schedule with a user-written mapping (gated like the submission package)
+  security.py                 same-origin (CSRF) check and security headers (middleware)
+```
+Rule kept from earlier iterations: **AI proposes, humans approve**; analyses and proposals (`propose_*` actions) write Drafts or immutable analysis runs and never change an approved record, a frozen estimate, or the commercial policy.
 
 ## Data model (SQLite; decimals stored as exact TEXT)
 Identity/audit: `users`, `audit_log` (hash chain), `approvals`, `change_requests`. Reference: `cost_codes`, `units`, `regions`, `tax_categories`,

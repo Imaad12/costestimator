@@ -1,4 +1,4 @@
-"""Regenerates .claude/skills/*/SKILL.md (the skill text is maintained here so all 14 stay structurally identical). Run: python scripts/gen_skills.py"""
+"""Regenerates .claude/skills/*/SKILL.md (the skill text is maintained here so all of them stay structurally identical). Run: python scripts/gen_skills.py"""
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent / ".claude" / "skills"
 
@@ -279,6 +279,44 @@ skill("architecture-maintenance",
  approval="Changes that touch roles, gates, severities or approval records require explicit user instruction; otherwise do not alter them.",
  failure=["Failing baseline → record it in the audit doc; do not mask it.", "Migration needed for existing data → provide a dry-run script, backup, report (see `workspace_migration.py`).", "Push failure → retry only on network errors with backoff; report the final state truthfully."],
  extra_prohibited=["Force-push, reset, history rewrite, merging into `main`, deleting project data.", "Committing `projects/*`, `var/`, `.env`, client documents or secrets; putting model identifiers in repository artifacts."])
+
+skill("governed-inputs-and-analysis",
+ "Record company-supplied numbers (productivity factors, hire terms, calendar, escalation, payment terms, benchmark ranges, take-off factors, statutory rules ...) as governed parameters with their sources, then run the read-only analyses (roll-up, programme, loading, man-hours, risk, cash flow, earned value ...). Use when the user supplies factors/terms/ranges or asks for an analysis or a Basis of Estimate.",
+ "Read, Glob, Grep, Bash(python -m app.cli *), Bash(python -m pytest *)", "<PRJ-ID> [report name]",
+ purpose="Turn evidence the human provides into validated, versioned, approvable parameters - and use them - without ever supplying a value yourself. Analyses and proposals inform decisions; people approve.",
+ when="The user gives you factors, rates of recovery, terms, ranges or a calendar from their records; they ask for a loading histogram, man-hours, risk analysis, cash flow, escalation, earned value, benchmark check, method comparison or a Basis of Estimate.",
+ inputs="Project ID; the user's evidence for every number (document/record/contract clause) - without a source the parameter is refused; an authenticated author user. If a number is missing, **ask**; never fill it.",
+ read=["CLAUDE.md (root)", "docs/GOVERNED_PARAMETERS.md", "docs/ANALYSIS_REPORTS.md", "docs/MTO_TEMPLATES.md", "app/estimators/param_kinds.py", "app/reporting/registry.py"],
+ steps=["List kinds: `python -m app.cli param kinds`; pick the kind that matches the user's evidence; read its field skeleton (names only).",
+        "Propose with the user's exact figures: `python -m app.cli param propose KIND CODE '<json>' --project <PRJ> --source \"<where the number comes from>\" [--submit]`. Validation errors are returned verbatim - fix the input with the user, do not adjust numbers to pass.",
+        "Tell the human which role approves the kind (see the doc table) and that only *Approved* values enter a strict estimate. Do not call approve yourself unless the user explicitly asks you to act as their own signed-in session.",
+        "Run reports: `python -m app.cli report <PRJ> <name> [--param k=v] [--save]`; read the `note`, `notes` and `estimate_state` fields and repeat them to the user. A report that stops for a missing input is correct behaviour - say what is missing.",
+        "For take-off derivation: `mto preview` first, confirm the driver quantity is the **user's measured figure** (or the BOQ quantity), then `mto apply`; remind the user that the item is now a Pending Review pricing decision.",
+        "For proposals (`propose_*`): they create Draft indirect items; tell the user to review and submit/approve them in *Indirects & commercials*.",
+        "Generate the Basis of Estimate with the `generate_boe` action and list the six sections the estimator must still write."],
+ outputs="`governed_params` rows (Draft/Pending), saved `analysis_runs` (immutable, not approvals), Draft indirect items from proposals, `5. Estimate & Cost Build-Up/basis_of_estimate/BoE_*.md/.docx`.",
+ validate=["Every proposed parameter has a source quoted from the user; none was derived, defaulted or rounded by you.", "A report's `tie_out` fields are true where present (roll-up, loading, man-hours).", "After running proposals the estimate totals are unchanged until a human approves.", "`python -m pytest tests/unit/test_governed_params.py -q` passes if you touched parameter code."],
+ approval="Parameters: the roles listed per kind in `docs/GOVERNED_PARAMETERS.md` (AI never). Analyses need no approval and approve nothing. Indirect proposals and pricing decisions use the existing approvals.",
+ failure=["`PARAM_SOURCE` / `PARAM_FIELD` -> ask the user for the missing evidence/field.", "`CALENDAR_REQUIRED`, `TERMS_NONE`, `ESC_NONE`, `RISK_NONE`, `BASELINE_NONE` -> the report needs an approved input: explain which and stop.", "`MTO_FACTORS_MISSING` -> list the slots without an approved factor; do not skip slots unless the user decides to (explicit skip is recorded)."],
+ extra_prohibited=["Proposing a factor, percentage, range, rate or hours figure from your own knowledge or 'typical' practice.", "Using the output of an analysis as if it were an approved estimate or adding it to the price without the normal approval.", "Stating that a client's or owner's standards are met."])
+
+skill("client-profile-loading",
+ "Load a client's or owner's estimating requirements from the controlled documents the user is authorised to provide into a versioned client profile, link it to a project and keep the compliance matrix honest. Use when the user supplies client estimating requirements, forms or procedures.",
+ "Read, Glob, Grep, Bash(python -m app.cli *)", "<PRJ-ID> <profile code>",
+ purpose="Make owner requirements traceable (document, revision, clause) and checkable, without claiming compliance with anything that has not been loaded and traced.",
+ when="The user provides an owner's estimating procedure, form list, code list or deliverable requirements and wants them checked on a project.",
+ inputs="The owner's documents as provided by the user (with their ids/revisions); the user's decision which requirements are mandatory. Do not rely on memory of any owner's standards.",
+ read=["CLAUDE.md (root)", "app/services/profiles.py", "app/estimators/profile_checks.py", "docs/ESTIMATING_CAPABILITY_MATRIX.md (records SAU-06, SAU-07)"],
+ steps=["Read the provided documents; list each requirement with `req_id`, category, title and **source_ref** (document id + revision + clause). Skip anything you cannot trace to a clause.",
+        "Where a requirement can be tested on measured facts (see `profile_checks.FACT_HELP`), give `fact`, `op`, `value` exactly as the document states; otherwise leave it as a manual attestation.",
+        "Create the profile: `python -m app.cli profile create CODE \"Name\" --client \"…\" --requirements reqs.csv --documents @docs.json`; then `profile submit ID`; a Commercial Approver runs `profile approve ID`.",
+        "Link: `python -m app.cli profile link <PRJ> CODE`. Humans record evidence: `profile attest <PRJ> REQ Met \"evidence ref\"`.",
+        "Report with `report <PRJ> compliance`; repeat the generated statement verbatim, including its scope sentence."],
+ outputs="`client_profiles`, `profile_requirements`, `project_profiles`, `profile_assessments`; the compliance matrix report.",
+ validate=["Every requirement has a source_ref; mandatory flags match the user's instruction.", "No requirement was added from memory or inference.", "The compliance statement is quoted unchanged."],
+ approval="Profile approval: Commercial Approver / Administrator. Attestations: any author role, with evidence. AI never approves or attests.",
+ failure=["`PROFILE_REQ`/`PROFILE_CHECK` -> fix the requirement with the user.", "Document not provided -> say that no requirements are loaded and that no statement can be made."],
+ extra_prohibited=["Writing requirements from general knowledge of any owner's standards (e.g. Saudi Aramco).", "Claiming or implying compliance with an owner's standards."])
 
 def render(name, d):
     s = d["sec"]

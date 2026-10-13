@@ -31,3 +31,12 @@ Edit `config/reconciliation_rules.json` (severity, `exception_allowed`, `blockin
 
 ## New commercial policy
 *Commercials -> policies*: create a policy from `data/commercial_rules/policy_template.json` (all values null on purpose), choose markup or gross-margin, fill every value, submit, have it approved, assign to the project.
+
+## New governed parameter kind (iteration 4)
+Add a validator with `@kind(name, label, approvers, description)` in `app/estimators/param_kinds.py` (pure; reject unknown fields; use `dec()`/`text()`), a field skeleton in `EXAMPLES` (names only, no numbers), read it from the engine/service through `governed.effective(db, project_id, kind)`, run `python scripts/gen_docs.py`, and add tests (hand-calculated). The approval policy entry `param:<kind>` is created automatically from the kind's approver roles. If the engine reads it, add the kind to `ENGINE_PARAM_KINDS` in `app/estimators/context.py` so snapshots freeze it.
+## New report / analysis
+Add a function with `@report(name, label, description, params, group)` in `app/reporting/registry.py` (it appears in the UI, REST and CLI at once), run `scripts/gen_docs.py`. Reports must be read-only; anything that writes is an action in `app/api/actions_ext.py` that calls a service.
+## New take-off template
+Add it to `scripts/gen_mto_templates.py` (driver unit, slots with resource type and unit dimension; **no numbers**), run the script and `scripts/gen_docs.py`. Factors are then approved per slot (`mto_factor`, code `template/slot`).
+## Client forms and profiles
+A client's tender form is filled with `export_client_form` and a mapping you write (see `app/exports/client_form.py`). A client's requirements are loaded as a profile from their controlled documents (`python -m app.cli profile create CODE NAME --requirements reqs.csv`); nothing is shipped.

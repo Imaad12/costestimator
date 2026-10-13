@@ -1,6 +1,7 @@
 """Generic, spec-driven worksheet writer: headers, validations, formats, freeze panes, filters, protection, totals."""
 from __future__ import annotations
 
+from copy import copy
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, Iterable
@@ -121,6 +122,7 @@ def write_sheet(wb, spec: Sheet, rows: Iterable[dict] | None, *, meta: str = "",
     rows = list(rows or [])
     n = max(len(rows), template_rows)
     last = FIRST_ROW + n - 1 if n else FIRST_ROW
+    protos: dict[int, Any] = {}          # first-row style per column; later rows copy it (openpyxl hashes style objects on every assignment - the dominant cost on large sheets)
     for i in range(n):
         r = FIRST_ROW + i
         data = rows[i] if i < len(rows) else {}
@@ -130,6 +132,11 @@ def write_sheet(wb, spec: Sheet, rows: Iterable[dict] | None, *, meta: str = "",
                 c.value = col.formula.format(r=r)
             else:
                 c.value = _typed(cellvalue(data.get(col.key)), col)
+            if ci in protos:
+                c._style = copy(protos[ci])
+                if not col.fmt and c.number_format != "General":
+                    c.number_format = "General"          # undo an automatic date format picked up from the first row's value
+                continue
             c.border = BORDER
             if col.fmt:
                 c.number_format = col.fmt
@@ -142,6 +149,9 @@ def write_sheet(wb, spec: Sheet, rows: Iterable[dict] | None, *, meta: str = "",
                 c.fill = FILL_CALC
             else:
                 c.fill = FILL_RO
+            if not col.fmt:
+                c.number_format = "General"
+            protos[ci] = copy(c._style)
     # totals row
     tot_row = last + 2
     if spec.totals:

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import re
+from decimal import ROUND_HALF_UP, Decimal
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Request
@@ -17,6 +19,18 @@ from ..services import analysis, governed, projects, wbs
 from .routes import page
 
 router = APIRouter()
+_LONG = re.compile(r"^-?\d+\.\d{7,}$")
+
+
+def display_round(o, dp: int = 4):
+    """Display-only: long decimal strings (division results) are shown to `dp` places. The API and stored runs keep the exact values."""
+    if isinstance(o, str) and _LONG.match(o):
+        return str(Decimal(o).quantize(Decimal(1).scaleb(-dp), ROUND_HALF_UP))
+    if isinstance(o, dict):
+        return {k: display_round(v, dp) for k, v in o.items()}
+    if isinstance(o, list):
+        return [display_round(v, dp) for v in o]
+    return o
 
 
 def _proj(pid: str) -> dict:
@@ -38,7 +52,7 @@ def analysis_run(pid: str, name: str, request: Request, actor: Actor = Depends(c
     ctx = dict(project=_proj(pid), rname=name, label=rep.label if rep else name, params_json=json.dumps(params), qs=urlencode(params), saved=None, result=None, error=None,
                title="Analysis", tab="analysis")
     try:
-        ctx["result"] = ser(registry.run_report(get_db(), name, pid, params))
+        ctx["result"] = display_round(ser(registry.run_report(get_db(), name, pid, params)))
     except AppError as e:
         ctx["error"] = e
     return page(request, "analysis_result.html", actor, **ctx)
@@ -49,7 +63,7 @@ def analysis_saved(pid: str, rid: int, request: Request, actor: Actor = Depends(
     r = analysis.get_run(get_db(), rid)
     rep = registry.REPORTS.get(r["kind"])
     return page(request, "analysis_result.html", actor, project=_proj(pid), rname=r["kind"], label=(rep.label if rep else r["kind"]) + f" (saved run #{rid})", params_json="{}", qs="",
-                saved=r, result=r["result"], error=None, title="Analysis", tab="analysis")
+                saved=r, result=display_round(r["result"]), error=None, title="Analysis", tab="analysis")
 
 
 @router.get("/projects/{pid}/inputs", response_class=HTMLResponse)

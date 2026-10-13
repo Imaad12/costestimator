@@ -37,6 +37,47 @@ def sources_table() -> str:
     return "\n".join(out)
 
 
+def governed_parameters() -> None:
+    from app.estimators.param_kinds import EXAMPLES, KINDS
+    import json
+    out = ["# Governed parameters (company-supplied, human-approved inputs)", "",
+           "Generated from `app/estimators/param_kinds.py` by `scripts/gen_docs.py`. **The software ships no value for any of these kinds.** Every number comes from a person's records, carries a stated source,",
+           "is validated, goes *Draft -> Pending Review -> Approved* (role per kind below, enforced server-side by `approvals.engine.authorize`; AI cannot approve) and is never edited once approved - a change is a new version.",
+           "Only *Approved* values affect a strict estimate; the preliminary (what-if) view may show newer Draft/Pending ones, flagged. Scope: company-wide (`project_id` empty) or one project (project value overrides a company-wide value of the same code).",
+           "Propose with the UI (*Inputs & parameters*), `python -m app.cli param propose KIND CODE '<json>' --source '...' [--project PRJ-..]`, or the `propose_param` action. Field skeletons below show **names and shapes only**.", "",
+           "| Kind | Label | Approvers | What it is | Fields (skeleton, no values) |", "|---|---|---|---|---|"]
+    for k in KINDS.values():
+        out.append(f"| `{k.name}` | {k.label} | {', '.join(sorted(k.approvers))} | {k.description} | `{json.dumps(EXAMPLES.get(k.name, {}), ensure_ascii=False)}` |")
+    (ROOT / "docs/GOVERNED_PARAMETERS.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+
+
+def reports_doc() -> None:
+    from app.reporting.registry import REPORTS
+    out = ["# Analysis reports (read-only)", "",
+           "Generated from `app/reporting/registry.py` by `scripts/gen_docs.py`. Every report is available identically from the web UI (*Analysis & controls*), the REST API",
+           "(`GET /api/projects/{id}/report/{name}?param=value`), and the CLI (`python -m app.cli report PRJ-.. NAME --param k=v [--save]`). A report **never changes an estimate and never approves anything**;",
+           "*Save* stores an immutable `analysis_runs` record (parameters, input hash, result) that is explicitly not an approved record. A report that lacks an approved input says so instead of guessing.", "",
+           "| Report | Group | What it shows | Parameters |", "|---|---|---|---|"]
+    for r in REPORTS.values():
+        out.append(f"| `{r.name}` | {r.group} | **{r.label}** - {r.description} | {', '.join(f'`{n}`={d or chr(34)*2}' for n, d, h in r.params) or '-'} |")
+    (ROOT / "docs/ANALYSIS_REPORTS.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+
+
+def mto_doc() -> None:
+    import json
+    d = json.loads((ROOT / "data/mto/templates.json").read_text(encoding="utf-8"))
+    out = ["# Take-off derivation templates (structure only)", "",
+           "Generated from `data/mto/templates.json` (written by `scripts/gen_mto_templates.py`). A template names a **driver** (the quantity *you* measured: inch-diameter, joints, tonnes, m2 ...) and the **resource slots**",
+           "that follow from it. It contains **no factor, rate, productivity or standard**: each slot needs an approved governed `mto_factor` (code `template/slot`) naming the catalogue resource and the quantity per driver unit.",
+           "`python -m app.cli mto preview|apply PRJ-.. ITEM TEMPLATE [--driver-qty N --driver-source '...']`: the result is written as take-off lines marked `origin=mto` and the item becomes a *Pending Review* pricing decision - nothing is priced until a person approves it.",
+           "A slot without an approved factor blocks the application (or must be skipped explicitly and is recorded). Derived labour hours receive the governed productivity factors in scope.", "",
+           f"{len(d['templates'])} templates, {sum(len(t['slots']) for t in d['templates'])} slots.", "",
+           "| Template | Discipline | Driver | Slots (resource type, unit dimension) | Capability records |", "|---|---|---|---|---|"]
+    for t in sorted(d["templates"], key=lambda t: t["code"]):
+        out.append(f"| `{t['code']}` | {t['discipline']} | {t['driver_unit']} - {t['driver_description']} | " + "; ".join(f"`{s['slot']}` ({s['resource_type']}, {s['unit_dim']})" for s in t["slots"]) + f" | {t.get('capability') or '-'} |")
+    (ROOT / "docs/MTO_TEMPLATES.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+
+
 def excel_dictionary() -> None:
     from app.excel.master import REQUIRED_SHEETS
     from app.excel.spec import S
@@ -57,6 +98,9 @@ if __name__ == "__main__":
     (ROOT / "docs").mkdir(exist_ok=True)
     taxonomy()
     excel_dictionary()
+    governed_parameters()
+    reports_doc()
+    mto_doc()
     tbl = sources_table()
     (ROOT / "docs/_sources_table.md").write_text(tbl, encoding="utf-8")
     ks = ROOT / "docs/KSA_DATA_SOURCES.md"

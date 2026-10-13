@@ -41,8 +41,9 @@ Helper scripts: `scripts/setup.sh` (venv + install + init), `scripts/run.sh`, `s
 | Backup / restore / project packages, CLI | `app/services/backup.py`, `app/cli.py` |
 | Numbered project workspaces (`projects/PRJ-nnnn-slug/` with 10 fixed folders, generated project `CLAUDE.md`), document indexer, frozen estimate input snapshots | `app/services/workspaces.py`, `project_index.py`, `snapshots.py` |
 | Public-source rate updates: provider interface, KAPSARC/GASTAT CCI index import, manual price-list import, web evidence extraction, rate-candidate review queue, normalisation, publication as Pending Review | `app/sources/`, `app/rate_updates/` |
-| Claude Code instructions: root `CLAUDE.md`, 14 task skills | `CLAUDE.md`, `.claude/skills/` |
+| Claude Code instructions: root `CLAUDE.md`, 16 task skills | `CLAUDE.md`, `.claude/skills/` |
 | Data: 152-node taxonomy, 927 catalogue resources (no prices), 322 assumptions (no invented values), 27 sources, synthetic demo | `data/` |
+| **Iteration 4:** governed parameters, WBS/CBS roll-ups, programme v2 + loading + man-hours, take-off templates, landed cost/currency, statutory labour, risk/Monte Carlo/escalation, cash flow, bids/long-lead/interfaces, variations/EVM, benchmarks, Basis of Estimate, classification, client profiles, method alternatives, client-form export, full replay, security hardening | `app/estimators/`, `app/services/`, `app/reporting/registry.py`, [docs](docs/ESTIMATING_CAPABILITY_MATRIX.md) |
 | Tests (pytest) | `tests/` |
 
 ## Commands
@@ -55,6 +56,9 @@ python -m app.cli verify-workbook wb.xlsx [--project PRJ-0001]  python -m app.cl
 python -m app.cli project create --name "…" --trades "HVAC,Electrical" | list | index PRJ-0001 | search PRJ-0001 "text" | import-boq PRJ-0001 FILE
 python -m app.cli sources list | status | refresh --dry-run         python -m app.cli rates import|validate FILE … | pending | review RC-… approve | publish RC-…
 python -m app.cli index import FILE --dataset gastat-cci --source SRC-002 [--dry-run]       python -m app.cli migrate-workspaces --dry-run
+python -m app.cli pack list|load industrial   python -m app.cli report PRJ-0001 rollup|manhours|loading|risk|cashflow|earned_value … [--param k=v] [--save]
+python -m app.cli param kinds|list|propose|submit|approve|reject …    python -m app.cli wbs PRJ-0001 FILE.csv     python -m app.cli mto templates|preview|apply …
+python -m app.cli profile create|submit|approve|link|attest …         python -m app.cli unlock-user NAME --user admin     python -m app.cli run --ssl-certfile C --ssl-keyfile K
 pytest                                                          # full automated suite (see docs/TESTING.md)
 # state-changing commands authenticate: --user NAME (or KSA_CLI_USER) and KSA_CLI_PASSWORD (or a prompt)
 ```
@@ -72,7 +76,8 @@ Secrets are never committed (`.env`, `var/` are git-ignored).
 [Approval workflow](docs/APPROVAL_WORKFLOW.md) · [Procurement guide](docs/PROCUREMENT_GUIDE.md) · [Excel workbook guide](docs/EXCEL_WORKBOOK_GUIDE.md) ·
 [Trade taxonomy](docs/TRADE_TAXONOMY.md) · [Import/export formats](docs/IMPORT_EXPORT_FORMATS.md) · [Backup/restore](docs/BACKUP_RESTORE.md) ·
 [Project workspaces](docs/PROJECT_WORKSPACES.md) · [Data model](docs/DATA_MODEL.md) · [Rate update workflow](docs/RATE_UPDATE_WORKFLOW.md) · [Development audit](docs/DEVELOPMENT_AUDIT.md) · [Next steps](docs/NEXT_STEPS.md) ·
-[Extending without code changes](docs/EXTENDING.md) · [Known limitations](docs/KNOWN_LIMITATIONS.md) · [Testing](docs/TESTING.md)
+[Extending without code changes](docs/EXTENDING.md) · [Known limitations](docs/KNOWN_LIMITATIONS.md) · [Testing](docs/TESTING.md) ·
+[Capability matrix](docs/ESTIMATING_CAPABILITY_MATRIX.md) · [Gap roadmap](docs/ESTIMATING_GAP_ROADMAP.md) · [Governed parameters](docs/GOVERNED_PARAMETERS.md) · [Analysis reports](docs/ANALYSIS_REPORTS.md) · [Take-off templates](docs/MTO_TEMPLATES.md) · [Security](docs/SECURITY.md)
 
 ## Licence
 

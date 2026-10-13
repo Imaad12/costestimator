@@ -2,7 +2,6 @@
 approved terms; it goes through the normal rate approval. Exposure reporting shows which currencies the priced estimate depends on."""
 from __future__ import annotations
 
-import json
 from datetime import date
 from decimal import Decimal
 

@@ -3,7 +3,6 @@ and inputs and never change the commercial policy or any estimate."""
 from __future__ import annotations
 
 from datetime import date
-from decimal import Decimal
 
 from ..core.errors import ValidationFailed
 from ..core.money import ZERO, D, D_opt
@@ -11,7 +10,7 @@ from ..database import Database, rows_to_dicts
 from ..estimators import escalation as esc
 from ..estimators import montecarlo as mc
 from ..rate_updates import index_import
-from . import analysis, governed, programme
+from . import governed, programme
 
 
 def risk_inputs(db: Database, project_id: str, include_unapproved: bool = False) -> tuple[list[mc.RiskIn], list[mc.RangeIn], list[str]]:

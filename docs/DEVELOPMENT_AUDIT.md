@@ -67,8 +67,53 @@ See [NEXT_STEPS.md](NEXT_STEPS.md): (1) load evidence-backed rates, (2) confirm 
 
 ## 8. Five-level capability audit (2026-10-13)
 Full results: [ESTIMATING_CAPABILITY_MATRIX.md](ESTIMATING_CAPABILITY_MATRIX.md); gaps and order of work: [ESTIMATING_GAP_ROADMAP.md](ESTIMATING_GAP_ROADMAP.md).
-* **Verdicts (software capability):** Level 5 and 4 conditionally supported; Levels 3, 2, 1 not supported (Missing capabilities). Data readiness (0 approved real rates, no productivity data) applies to every level.
+* **Verdicts at the time of the first audit (software capability):** Level 5 and 4 conditionally supported; Levels 3, 2, 1 not supported (Missing capabilities). Superseded by §9. Data readiness (0 approved real rates, no productivity data) applies to every level.
 * **Defects found and fixed, each with a regression test:** O(n²) estimate computation (20,000 items: 13.8 s → 2.7 s); `pypdf` undeclared so tender PDFs were never extracted on a default install; schedule→duration path untested, unreachable from API/UI and unprotected for archived projects (+ duplicate task codes); previously untested claims (what-if numbers, non-SAR project currency, takeoff-resource pricing, standard indirects, preliminaries-overlap rule, no outbound submission channel) now tested.
 * **Corrections to earlier claims:** the glossary of "capabilities" in earlier docs counted cost codes, assumption definitions and templates; the matrix counts only implemented, tested behaviour. Division-level "support" (e.g. HVAC, electrical) is *definitions + generic engine*, not discipline-specific estimating logic.
 * **Not claimed:** any Saudi Aramco or other client compliance; any AACE class or accuracy range (no classification exists); any live source retrieval by the application.
 * A guard test (`tests/unit/test_capability_matrix.py`) now prevents the matrix from citing code, symbols or tests that do not exist and from claiming "tested" without a test that verifies the behaviour.
+
+## 9. Iteration 4 - "run everything that is missing" (2026-10-13)
+Request: implement what the capability audit found missing, fix what does not work, verify, report honestly. Constraints kept: no invented prices/rates/factors/standards, no automatic approval, no silent overwrite of approved or frozen data, no automated quantity take-off, no autonomous tender submission, **no claim of Saudi Aramco (or any client) compliance**, no merge to `main`, no PR.
+
+### 9.1 What was built (all with automated tests using hand-calculated expectations)
+| Area | Delivered | Matrix records |
+|---|---|---|
+| Units / catalogue | exact industrial units (inch-dia, joint, spool, loop, MVA, flow, pressure ...), administrator `add_unit`, optional definitions-only `industrial` pack (division M, 258 definitions, loader `pack load industrial`) | SCO-04 IT, LIB-04 PA |
+| Governed parameters | one validated, versioned, sourced, human-approved store for ~20 kinds of company-supplied numbers; ships empty; frozen into snapshots | (foundation) |
+| Structure | WBS, client code cross-walk, CBS/WBS roll-ups that tie out | LIB-02, CTL-07 IT |
+| Programme | FS/SS/FF/SF, lags, float, constraints, calendar; loading histograms; man-hours; cost-to-task tie-in | DUR-02, DUR-04, DUR-05, EST-10 IT |
+| Direct cost | productivity factors (scoped, multiplicative), plant minimum-hire/standby; derived labour carries hours | EST-12, EST-05 IT |
+| Take-off derivation | 23 structure-only templates (103 slots), approved factors, Pending Review pricing gate, stale detection | PRC-01..14, IND-02, CLO-01/02 PA |
+| Commercial/tax | landed cost + logistics (derived-rate proposals), currency exposure + hedge cover, Saudi-style statutory labour build-up + workforce check | TAX-02, TAX-04, CUR-03, SAU-03 IT; TAX-03 PA |
+| Risk / finance | quantified register, expected value, seeded Monte Carlo (proposal), time-phased escalation, cash flow/retention/bonds/financing (Draft-indirect proposals) | RSK-03/04/05, CTL-04, CLO-03 IT |
+| Basis of estimate | BoE generator (facts + six estimator-only sections), classification from an approved scheme, client-profile framework, method alternatives, client-form export | BOE-03, BOE-04, SAU-06 IT; BOE-05, EST-11, OUT-05, SAU-04 PA |
+| Procurement / control | bid evaluation, long-lead, interface matrix; variations, contract status, earned value; benchmarks; reserves/engineering/overhead proposals; 9 new reconciliation rules | PRO-06, PRO-07, CTL-03/05/06, ENG-01/02 IT |
+| Governance | **full-estimate replay** from snapshot (`compute_estimate_from`), read-only estimate cache | GOV-05 IT, SCO-09 PA |
+| Security | same-origin (CSRF) check, security headers/CSP (no inline scripts), sign-in lockout + unlock, TLS flags and refusal to listen openly without TLS | GOV-12 PA |
+| Surfaces | UI pages *Structure & programme*, *Analysis & controls*, *Inputs & parameters*; 22 reports shared by UI/REST/CLI; 35 new actions; CLI `report/param/wbs/mto/profile/pack/unlock-user`; 2 new skills | |
+Migrations 0008-0013 (forward-only). Generated references: GOVERNED_PARAMETERS, ANALYSIS_REPORTS, MTO_TEMPLATES, SECURITY.
+
+### 9.2 Defects found and fixed during this iteration (each has a regression test)
+1. `L/S` already means *lump sum*: litre-per-second must not shadow it - found by the unit test; litre/second is `LPS`.
+2. A package-gap rule fired on every project that has subcontract items but no package matrix (it broke the full-workflow test) - the interface checks now run only once a scope matrix exists.
+3. Imported take-off labour lines carried no hours (invisible to man-hour reports) - hours are now recorded.
+4. The master workbook writer re-hashed a style object for every cell: 20,000 items took 59.6 s; styles are now built once per column and copied (**25.6 s**, styles proven identical by a test).
+5. A naive cache would have served stale estimates after a CLI import while the server runs - the cache also keys on SQLite `data_version` (test with a second connection).
+6. A client-form template path could point anywhere on disk - restricted to the project workspace (`FORM_PATH`).
+7. Cookie-authenticated writes had no cross-site protection (SameSite only) - same-origin check added; the existing UI tests now emulate a browser's `Origin`.
+8. (Own mistakes caught by tests) audit-log argument order in the pack loader; a vacuous assertion in two new tests; an incorrect expected value in a cash-flow horizon.
+
+### 9.3 Verification performed
+* **Full suite: 340 passed** (`python -m pytest -o addopts="" -q`, ~75 s). Before this iteration: 230.
+* Live run on a scratch DB: `init` -> `demo` -> every registered report via the CLI -> server started on a port -> login, 7 pages (200), CSRF refused without Origin and accepted with it, headers present -> Playwright/Chromium: login, screenshots of the new pages, a real browser form submission (WBS node) succeeded with the Origin check on, no CSP console errors.
+* Master workbook of the demo project recalculated in LibreOffice: **217 formulas, 0 errors, 0 mismatches**, structure OK. `audit-verify`: chain OK (433 entries).
+* Measured at 20,000 BOQ items: estimate 2.7 s; repeat from cache 0.09 ms; freeze + snapshot 4.4 s; **full replay 3.9 s (ok)**; roll-up 2.9 s; master workbook 25.6 s.
+* Capability matrix (131 records): **IT 85, IU 3, PA 40, MI 3** (was IT 56, IU 3, PA 42, MI 30). Levels 5-2 conditionally supported; Level 1 not supported (SAU-07).
+
+### 9.4 What is NOT done and why
+* **Real rates and factors (LIB-07, LIB-08)** - data; only the user can supply and approve them. The new framework ships no value of any kind.
+* **SAU-07 (Saudi Aramco-type requirements)** - requires the owner's controlled documents, which are not in the repository. The profile framework exists; **no compliance is claimed**.
+* **Microsoft Excel** and **live source retrieval from a normal network** - not available in the sandbox (OUT-03, RTE-05 remain *Implemented but unverified*).
+* Discipline records stay *Partial*: templates and the pack are structure; every factor, pipe-class rule, shutdown logic or camp-sizing rule is the company's to supply. Also not built: schedule-file import and Gantt, withholding tax/zakat, bilingual deliverables, MFA/SSO, per-folder ACLs, server-side pagination, a 50,000-item run.
+* The 2 new skills and the CLI/UI flows were exercised by tests and a live run, **not by a live Claude Code session**.

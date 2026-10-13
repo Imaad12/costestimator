@@ -1,28 +1,29 @@
 # Estimating capability matrix (five-level audit)
 
-Audit date: 2026-10-13, repository state `ab05e06` plus the fixes listed in §6. Scope: what a cost-estimation engineer in Saudi Arabia can actually do with this application today, from basic building estimates to major industrial/EPC estimates.
+Audit date: 2026-10-13, repository state `ab05e06` plus the fixes listed in §6; re-assessed after iteration 4 (statuses below are the current ones). Scope: what a cost-estimation engineer in Saudi Arabia can actually do with this application today, from basic building estimates to major industrial/EPC estimates.
 **Method rule:** a feature counts only if code exists, a test exercises the behaviour, and (where possible) it was run. Templates, UI screens, documentation, assumption definitions, cost codes and skills are *not* evidence of capability.
 The machine-readable source is [`capability_matrix.json`](capability_matrix.json); this page's tables are rendered from it (`python scripts/gen_capability_matrix.py`) and `tests/unit/test_capability_matrix.py` verifies that every code path, symbol and test it cites exists and that status claims are consistent with their evidence.
 
 ## 1. Bottom line
-* **A generic building/MEP estimate (Levels 5–4)** can be produced end-to-end *structurally*: human-measured BOQ → mapping → assembly/rate pricing → indirects → commercial chain → reconciliation → approvals → gated export. The engine is well tested. **But the content that makes an estimate real is absent**: the library has **0 approved real Saudi rates** and **no productivity/consumption data**; every real estimate is Preliminary until a human loads and approves that data (LIB-07, LIB-08).
-* **Infrastructure/large-project estimating (Level 3)** lacks landed-cost build-up, resource loading/man-hour histograms, cash flow, quantified risk, a Basis-of-Estimate document and estimate classification.
-* **Comprehensive industrial estimating (Levels 2–1, incl. Aramco-type work)** is **not supported**: no industrial units (inch-diameter, joints, loops, MVA), no piping/instrument/tank/shutdown/modularisation models, no methodology-driven man-hours, no engineering/home-office model, no probabilistic risk, no client compliance profiles, no controlled client requirements. **No Saudi Aramco compliance is claimed or implied**; no Aramco controlled document is in the repository.
-* Governance is the strongest part: server-side approvals, AI/automation boundaries, audit chain, input snapshots, fingerprinted gates and no autonomous submission are implemented and tested.
+*Update 2026-10-13 (iteration 4): the audit's missing engine capabilities were built and tested - see §6 and [DEVELOPMENT_AUDIT.md](DEVELOPMENT_AUDIT.md) §9. The first audit (commit `907fce6`) found 30 Missing and 42 Partial records; the roll-up and tables below are the current state.*
+* **A generic building/MEP estimate (Levels 5–4)** can be produced end-to-end *structurally*: human-measured BOQ → mapping → assembly/rate pricing → indirects → commercial chain → reconciliation → approvals → gated export. The engine is well tested. **But the content that makes an estimate real is absent**: the library has **0 approved real Saudi rates** and **no productivity/consumption data**; every real estimate is Preliminary until a human loads and approves that data (LIB-07, LIB-08). These two records stay *Missing* because they are data, not code.
+* **Infrastructure/large-project estimating (Level 3)** now has landed-cost build-up, resource loading and man-hour histograms, cash flow, quantified risk (EV + seeded Monte Carlo), time-phased escalation, a Basis-of-Estimate generator, a scheme-driven estimate classification and a WBS/CBS roll-up. All of these are **frameworks fed by company-supplied, approved parameters** - the software ships no factor, rate, percentage, range or scheme.
+* **Industrial estimating (Levels 2–1, incl. Aramco-type work)**: industrial units, an industrial definitions pack, 23 take-off templates (piping, instruments, cables, steel, tanks, coatings, insulation, scaffolding, lifting, specialist services, shutdown, modularisation, temporary facilities, commissioning), productivity factors, method alternatives, engineering/home-office/reserve proposals, labour statutory build-up, variations, earned value, bid evaluation and a client-profile framework now exist. **They are all *Partial* where a discipline needs real factors or a client's own documents.** Level 1 remains **not supported** because the owner-controlled requirements record (SAU-07) is Missing. **No Saudi Aramco compliance is claimed or implied**; no Aramco controlled document is in the repository.
+* Governance is the strongest part: server-side approvals, AI/automation boundaries, audit chain, input snapshots (now with full-estimate replay), fingerprinted gates and no autonomous submission are implemented and tested; the web app is hardened (same-origin check, headers, lockout, TLS flags) for a small trusted team, not for internet exposure.
 
 ### Roll-up by capability level (engine capabilities; data readiness reported separately)
 <!-- ROLLUP_BEGIN -->
 | Level | Name | Required capabilities (engine) | IT | IU | PA | MI | Verdict (engine) |
 |---|---|---|---|---|---|---|---|
 | 5 | Basic estimating | 37 | 33 | 1 | 3 | 0 | **CONDITIONALLY SUPPORTED (partial / unverified items)** |
-| 4 | Building and MEP contractor estimating | 76 | 54 | 2 | 20 | 0 | **CONDITIONALLY SUPPORTED (partial / unverified items)** |
-| 3 | Infrastructure and large-project estimating | 99 | 56 | 3 | 29 | 11 | **NOT SUPPORTED (missing capabilities)** |
-| 2 | Industrial / process-plant estimating | 120 | 56 | 3 | 40 | 21 | **NOT SUPPORTED (missing capabilities)** |
-| 1 | Major industrial / EPC estimating (Aramco-type) | 129 | 56 | 3 | 42 | 28 | **NOT SUPPORTED (missing capabilities)** |
+| 4 | Building and MEP contractor estimating | 76 | 58 | 2 | 16 | 0 | **CONDITIONALLY SUPPORTED (partial / unverified items)** |
+| 3 | Infrastructure and large-project estimating | 99 | 75 | 3 | 21 | 0 | **CONDITIONALLY SUPPORTED (partial / unverified items)** |
+| 2 | Industrial / process-plant estimating | 120 | 80 | 3 | 37 | 0 | **CONDITIONALLY SUPPORTED (partial / unverified items)** |
+| 1 | Major industrial / EPC estimating (Aramco-type) | 129 | 85 | 3 | 40 | 1 | **NOT SUPPORTED (missing capabilities)** |
 
 Data readiness (applies to every level): LIB-07 evidence-backed Saudi rate library (material, labour, plant, equipment, subcontract) - **Missing**; LIB-08 productivity/consumption/wastage factors and crew data approved by humans - **Missing**.
 
-All 131 capability records: Implemented and tested 56, Implemented but unverified 3, Partial 42, Missing 30, Not Applicable 0.
+All 131 capability records: Implemented and tested 85, Implemented but unverified 3, Partial 40, Missing 3, Not Applicable 0.
 <!-- ROLLUP_END -->
 
 Reading the table: a capability needed from level *N* is needed at *N* and at every more demanding level (numerically lower). **IT** Implemented and tested · **IU** Implemented but unverified · **PA** Partial · **MI** Missing.
@@ -32,22 +33,22 @@ Reading the table: a capability needed from level *N* is needed at *N* and at ev
 <!-- AREAS_BEGIN -->
 | Area | Records | IT | IU | PA | MI |
 |---|---|---|---|---|---|
-| A. Scope intake: BOQ, units, quantities, mapping, documents | 11 | 8 | 1 | 1 | 1 |
-| B. Classification and libraries: CBS/WBS, catalogues, assemblies, data readiness | 9 | 3 | 0 | 3 | 3 |
+| A. Scope intake: BOQ, units, quantities, mapping, documents | 11 | 9 | 1 | 1 | 0 |
+| B. Classification and libraries: CBS/WBS, catalogues, assemblies, data readiness | 9 | 4 | 0 | 3 | 2 |
 | C. Building, civil, infrastructure and MEP disciplines | 11 | 0 | 0 | 11 | 0 |
-| D. Industrial, oil and gas, process plant | 14 | 0 | 0 | 8 | 6 |
-| E. Rates: material, labour, plant, equipment, subcontract; productivity and methodology | 18 | 13 | 1 | 0 | 4 |
-| F. Engineering services, field indirects, home office, temporary facilities | 5 | 1 | 0 | 4 | 0 |
-| G. Taxes, duties, logistics | 4 | 1 | 0 | 1 | 2 |
-| H. Project duration, sequencing and resource loading | 5 | 2 | 0 | 1 | 2 |
-| I. Basis of Estimate, scope definition, maturity and exclusions | 5 | 2 | 0 | 2 | 1 |
-| J. Escalation, contingency, quantified risk, uncertainty, currency | 8 | 4 | 0 | 2 | 2 |
-| K. Supplier quotations, bid levelling and procurement | 7 | 5 | 0 | 2 | 0 |
-| L. Cost control: CBS roll-ups, benchmarks, cash flow, forecasts, change orders, revisions | 7 | 2 | 0 | 2 | 3 |
-| M. Commissioning, start-up, handover, close-out | 3 | 0 | 0 | 2 | 1 |
-| N. Saudi-specific requirements and configurable client compliance profiles | 7 | 2 | 0 | 1 | 4 |
-| O. Approval gates, audit, snapshots, reproducibility, commercial exports | 12 | 10 | 0 | 2 | 0 |
-| P. Excel and document outputs | 5 | 3 | 1 | 0 | 1 |
+| D. Industrial, oil and gas, process plant | 14 | 0 | 0 | 14 | 0 |
+| E. Rates: material, labour, plant, equipment, subcontract; productivity and methodology | 18 | 16 | 1 | 1 | 0 |
+| F. Engineering services, field indirects, home office, temporary facilities | 5 | 3 | 0 | 2 | 0 |
+| G. Taxes, duties, logistics | 4 | 3 | 0 | 1 | 0 |
+| H. Project duration, sequencing and resource loading | 5 | 5 | 0 | 0 | 0 |
+| I. Basis of Estimate, scope definition, maturity and exclusions | 5 | 4 | 0 | 1 | 0 |
+| J. Escalation, contingency, quantified risk, uncertainty, currency | 8 | 8 | 0 | 0 | 0 |
+| K. Supplier quotations, bid levelling and procurement | 7 | 7 | 0 | 0 | 0 |
+| L. Cost control: CBS roll-ups, benchmarks, cash flow, forecasts, change orders, revisions | 7 | 7 | 0 | 0 | 0 |
+| M. Commissioning, start-up, handover, close-out | 3 | 1 | 0 | 2 | 0 |
+| N. Saudi-specific requirements and configurable client compliance profiles | 7 | 4 | 0 | 2 | 1 |
+| O. Approval gates, audit, snapshots, reproducibility, commercial exports | 12 | 11 | 0 | 1 | 0 |
+| P. Excel and document outputs | 5 | 3 | 1 | 1 | 0 |
 <!-- AREAS_END -->
 
 ## 2. Two independent classification systems (never conflate them)
@@ -106,7 +107,7 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 | SCO-01 | BOQ/takeoff import from CSV/XLSX with header detection, column mapping, Arabic headers, stored original | IT Implemented and tested | 5 |
 | SCO-02 | Import validation: invalid/negative/zero quantities, duplicates, blanks, headings, source-row traceability, re-import diffs as change requests | IT Implemented and tested | 5 |
 | SCO-03 | Unit registry with explicit conversion (length/area/volume/mass), ambiguity flagging, no implicit time/count conversion | IT Implemented and tested | 5 |
-| SCO-04 | Industrial/process units and administrator-managed unit list (inch-diameter, weld joint, spool, instrument loop, MVA, flow/pressure/temperature, tonne-km...) | MI Missing | 2 |
+| SCO-04 | Industrial/process units and administrator-managed unit list (inch-diameter, weld joint, spool, instrument loop, MVA, flow/pressure/temperature, tonne-km...) | IT Implemented and tested | 2 |
 | SCO-05 | Quantity integrity: quantities come only from human-supplied files; changes need a reason and approval; original text immutable; no automated takeoff | IT Implemented and tested | 5 |
 | SCO-06 | Pre-calculated resource quantities priced directly (takeoff resource lines) | IT Implemented and tested | 4 |
 | SCO-07 | Mapping of BOQ items to assemblies/cost codes with approval; keyword-based mapping suggestions (no AI needed) | IT Implemented and tested | 5 |
@@ -140,11 +141,11 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Every unit used in the target client's BOQ either resolves to a canonical unit or is listed as unknown with a human decision recorded.
 
 **SCO-04 - Industrial/process units and administrator-managed unit list (inch-diameter, weld joint, spool, instrument loop, MVA, flow/pressure/temperature, tonne-km...)**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. Audit probe: BOQ rows with units 'inch-dia', 'joint', 'spool', 'loop', 'MVA', 'm3/h' were all imported as unit_status=unknown (needs review) and cannot be priced.
-- *Limitations / dependencies:* Closest existing: `data/units/units.csv` (insert-only seed; no UI/API to add units; no dimensions for power-MVA, flow, pressure). Items with unknown units stay unpriced - safe but a hard blocker for piping/E&I BOQs.
+*Status:* Implemented and tested · *needed from level:* 2 · *kind:* engine
+- *Code:* `data/units/units.csv`; `app/core/units.py::CONVERTIBLE`; `app/services/units_admin.py::add_unit`; `app/api/actions.py::add_unit`
+- *Tests:* `unit/test_industrial_units.py::test_industrial_units_resolve_and_convert_exactly` [yes] (inch-dia, joint, spool, loop, MVA, m3/h, bar, MPa ... resolve; exact conversions only); `unit/test_industrial_units.py::test_industrial_boq_imports_with_no_unknown_units` [yes] (a piping/E&I BOQ imports with 0 unknown units); `unit/test_industrial_units.py::test_administrator_adds_units_with_guards` [yes] (admin-only, audited, no redefinition, no spelling clash)
+- *Workflow / output:* Unit registry extended (inch-dia, joint, spool, loop, tag, MW/MVA, pressure, flow, imperial length/area/volume/mass) and an administrator action `add_unit` (UI/API form data). Count-like and non-exact dimensions never convert.
+- *Limitations / dependencies:* Only physically exact conversions are automatic (length, area, volume, mass, power, apparent power, pressure, volumetric flow). Ambiguous spellings (`ton`, `L/S`) are never guessed - `L/S` stays lump sum; litre/second is `LPS`. Temperature, tonne-km and other compound units are not defined.
 - *Acceptance test to mark complete:* Add units inch-dia, joint, spool, loop, MVA, m3/h, bar via a controlled admin action with audit; import a piping BOQ using them with 0 unknown-unit rows; conversions only where physically exact.
 
 **SCO-05 - Quantity integrity: quantities come only from human-supplied files; changes need a reason and approval; original text immutable; no automated takeoff**  
@@ -181,10 +182,10 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 
 **SCO-09 - Scale: large BOQs (10k-50k lines)**  
 *Status:* Partial · *needed from level:* 3 · *kind:* engine
-- *Code:* `app/estimators/estimate.py::compute_estimate`; `app/excel/master.py::build_master`; `app/services/snapshots.py::build_snapshot`
-- *Tests:* `workspaces/test_audit_regressions.py::test_estimate_computation_scales_roughly_linearly_with_boq_size` [yes] (ratio test guards the O(n^2) defect found by this audit)
-- *Workflow / output:* Audit measurement (this sandbox, synthetic 20,000-item BOQ, 40,000 lines): import 1.1 s, mapping 3.1 s, compute_estimate 2.7 s (was 13.8 s before the fix), freeze+snapshot 4.6 s, master workbook export 62 s.
-- *Limitations / dependencies:* Every UI page recomputes the whole estimate; workbook export of 20k rows takes about a minute; snapshots store full inputs (large JSON). No pagination in several tables. Single SQLite connection, serialised requests.
+- *Code:* `app/estimators/estimate.py::compute_estimate_cached`; `app/estimators/estimate.py::compute_estimate_from`; `app/excel/builder.py::write_sheet`
+- *Tests:* `unit/test_estimate_cache.py::test_cache_hits_until_any_change` [yes]; `unit/test_estimate_cache.py::test_cache_sees_writes_from_another_connection` [yes]; `excel/test_workbooks.py::test_row_styles_are_identical_down_each_column_after_style_reuse` [partly] (workbook writer optimisation keeps styles identical); `unit/test_direct_cost.py::test_full_assembly_hand_calculated` [partly] (engine correctness, not scale)
+- *Workflow / output:* Measured on 20,000 BOQ items (2 lines each): estimate 2.7 s, repeat call from the read-only cache 0.09 ms (any write by this or another process invalidates it), freeze + snapshot 4.4 s, full replay 3.9 s, roll-up 2.9 s, master workbook export 25.6 s (59.6 s before the style-reuse fix in the workbook writer).
+- *Limitations / dependencies:* No 50,000-item run; the master workbook still takes ~26 s at 20,000 items; HTML tables are not paginated server-side; the performance budget is not enforced by an automated test (only the linear-scaling test of the estimate).
 - *Acceptance test to mark complete:* 50,000-item BOQ: estimate < 10 s, any page < 3 s (cached estimate), workbook export < 3 min, memory < 2 GB; regression test with a published budget.
 
 **SCO-10 - Tender-document intake: numbered workspace, hash/type/size index, versioned text extracts (txt/md/csv/json/xml/html/PDF/DOCX/XLSX), change and missing-file flags**  
@@ -208,7 +209,7 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 | ID | Capability | Status | Needed from level |
 |---|---|---|---|
 | LIB-01 | Cost breakdown structure: 3-level cost-code taxonomy A-L (152 nodes), extensible as data | IT Implemented and tested | 5 |
-| LIB-02 | Work breakdown structure separate from CBS (area/unit/system/tag) and cross-walk to client-specific code lists | MI Missing | 3 |
+| LIB-02 | Work breakdown structure separate from CBS (area/unit/system/tag) and cross-walk to client-specific code lists | IT Implemented and tested | 3 |
 | LIB-03 | Resource catalogue definitions for building trades and MEP (927 resources, no prices) | IT Implemented and tested | 5 |
 | LIB-04 | Industrial/process resource catalogue (piping classes, valves/flanges by rating, instruments, vessels, tanks, NDT, cathodic protection, hazardous-area equipment) | PA Partial | 2 |
 | LIB-05 | Assembly library: structure-only standard assemblies (26 assemblies / 72 lines in divisions B-I), no consumption factors | PA Partial | 4 |
@@ -226,12 +227,12 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Load a client CBS of 500 codes with parents, map every BOQ item to it, and roll costs up by any level with totals equal to the estimate.
 
 **LIB-02 - Work breakdown structure separate from CBS (area/unit/system/tag) and cross-walk to client-specific code lists**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. BOQ items carry `section`, `trade`, `cost_code`, `drawing_ref`, `spec_ref` only (migration 0003).
-- *Limitations / dependencies:* Closest existing: `boq_items.section` (free text heading) and `cost_code`. No area/unit/system/tag fields; no code cross-walk table; no roll-up report by WBS element.
-- *Acceptance test to mark complete:* Define a WBS (area > unit > system) and a CBS-to-client-code map; every item gets both; reports roll up by either and reconcile to the same total.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/services/wbs.py::add_node`; `app/services/wbs.py::assign_items`; `app/services/wbs.py::add_crosswalk`; `app/services/wbs.py::rollup_report`; `app/estimators/rollup.py::tree_rollup`; `app/estimators/rollup.py::crosswalk`; `app/migrations/0008_structure_params_analysis.sql`
+- *Tests:* `unit/test_wbs_rollup.py::test_tree_rollup_hand_calculated_and_ties_out` [yes]; `unit/test_wbs_rollup.py::test_crosswalk_longest_prefix_unmapped_and_ambiguous` [yes]; `unit/test_wbs_rollup.py::test_rollup_report_ties_to_estimate_and_wbs_scoped_by_item` [yes]; `unit/test_wbs_rollup.py::test_wbs_structure_rules` [yes]; `unit/test_wbs_rollup.py::test_import_csv_and_crosswalk_rejects_unknown_cost_code` [yes]
+- *Workflow / output:* Project WBS (area/unit/system/phase/package) separate from the cost-code tree, item assignment, client code cross-walk (longest-prefix, ambiguity reported, never split by guesswork) and roll-ups that tie out to the estimate. UI: Structure & programme; report `rollup`; CLI `wbs`.
+- *Limitations / dependencies:* The client coding system itself is loaded by a person from the client's own list; none is shipped. Cross-walk is one internal cost code -> one client code; many-to-many splits are not modelled.
+- *Acceptance test to mark complete:* Selecting a client code system produces a cost report in that system whose total equals the estimate's direct cost; unmapped and ambiguous amounts are listed.
 
 **LIB-03 - Resource catalogue definitions for building trades and MEP (927 resources, no prices)**  
 *Status:* Implemented and tested · *needed from level:* 5 · *kind:* engine
@@ -243,11 +244,11 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 
 **LIB-04 - Industrial/process resource catalogue (piping classes, valves/flanges by rating, instruments, vessels, tanks, NDT, cathodic protection, hazardous-area equipment)**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/equipment/equipment_categories.csv`; `data/materials/materials.csv`; `data/plant/plant_categories.csv`
-- *Tests:* `unit/test_library_data.py::test_catalogues_contain_no_prices_and_use_valid_units` [partly] (validates the existing rows only)
-- *Workflow / output:* Existing industrial-adjacent rows are searchable in the libraries UI (J.05 'Industrial and process equipment', pressure vessel, intumescent coating, shot-blasting plant, hydrotest pump, pipe welder labour, structural steel supply/erect package).
-- *Limitations / dependencies:* Audit keyword probe of the 927 definitions: no transmitters/DCS/PLC/SCADA/NDT/radiography/cathodic/boiler/turbine/manifold/refractory/shutdown rows; piping limited to building services and water mains; valves are building-grade.
-- *Acceptance test to mark complete:* Catalogue extended (definitions only) for each industrial discipline with specification fields reviewed by a discipline lead; coverage report shows counts by discipline.
+- *Code:* `scripts/gen_industrial_pack.py`; `app/services/refdata.py::load_pack`; `app/api/actions.py::load_pack`; `data/packs/industrial/manifest.json`
+- *Tests:* `unit/test_industrial_pack.py::test_load_industrial_pack_is_definitions_only_and_idempotent` [yes] (19 cost codes + 258 definitions, Missing-rate placeholders, no price); `unit/test_industrial_pack.py::test_pack_load_is_admin_only_and_unknown_pack_refused` [yes]; `unit/test_industrial_pack.py::test_pack_with_price_column_or_unknown_unit_is_refused` [yes]
+- *Workflow / output:* Optional definitions-only pack `industrial` (division M, 18 sub-trades, 258 resource definitions across material/equipment/plant/subcontract/labour) loaded by an administrator (`python -m app.cli pack load industrial`). No price is held.
+- *Limitations / dependencies:* Definitions only: no prices, no pipe-class/rating catalogue values, no standards. Specifications are `to be confirmed` attribute prompts. Equipment/instrument specifics (class, material, rating) are recorded per project.
+- *Acceptance test to mark complete:* A project's piping class list and instrument index are loaded as resources/specifications; every definition has an approved rate or an open procurement requirement.
 
 **LIB-05 - Assembly library: structure-only standard assemblies (26 assemblies / 72 lines in divisions B-I), no consumption factors**  
 *Status:* Partial · *needed from level:* 4 · *kind:* engine
@@ -397,131 +398,131 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 
 | ID | Capability | Status | Needed from level |
 |---|---|---|---|
-| PRC-01 | Process piping: spools, inch-diameter, pipe class/schedule/material, welds, supports, NDT, hydrotest, flushing, field vs shop split | MI Missing | 2 |
+| PRC-01 | Process piping: spools, inch-diameter, pipe class/schedule/material, welds, supports, NDT, hydrotest, flushing, field vs shop split | PA Partial | 2 |
 | PRC-02 | Process equipment (vessels, exchangers, pumps, compressors): supply, receive, set, align, grout, vendor reps, spares | PA Partial | 2 |
-| PRC-03 | Instrumentation and control (loops, I/O, junction boxes, tubing, calibration, DCS/PLC/SCADA configuration, FAT/SAT) | MI Missing | 2 |
+| PRC-03 | Instrumentation and control (loops, I/O, junction boxes, tubing, calibration, DCS/PLC/SCADA configuration, FAT/SAT) | PA Partial | 2 |
 | PRC-04 | Industrial electrical power (MV/LV switchgear, transformers, MCC, cable pulling/termination, tray, earthing, hazardous-area) | PA Partial | 2 |
 | PRC-05 | Structural steel by tonnage: supply, fabricate, blast/paint, erect, bolt/weld | PA Partial | 2 |
-| PRC-06 | Field-erected tanks and large vessels (plate welding, NDT, hydro/air test, settlement test) | MI Missing | 2 |
+| PRC-06 | Field-erected tanks and large vessels (plate welding, NDT, hydro/air test, settlement test) | PA Partial | 2 |
 | PRC-07 | Surface preparation, coating systems and fireproofing (blast, primer/intermediate/topcoat, DFT, coverage, shop vs field) | PA Partial | 2 |
 | PRC-08 | Thermal insulation and cladding (hot/cold service, thickness, jacketing) | PA Partial | 2 |
 | PRC-09 | Scaffolding and temporary access for industrial work (volume-based, by phase) | PA Partial | 2 |
 | PRC-10 | Heavy lifting, rigging and crane selection (lift studies, crane hire periods, mobilisation of large cranes) | PA Partial | 2 |
-| PRC-11 | Cathodic protection, NDT services, specialist industrial services (hazardous-area works, hot-tapping, chemical cleaning) | MI Missing | 2 |
-| PRC-12 | Shutdown/turnaround and brownfield estimating (tie-ins, live-plant restrictions, permits, hot-work, outage windows) | MI Missing | 1 |
-| PRC-13 | Modularisation, prefabrication and yard-vs-site work splits | MI Missing | 1 |
+| PRC-11 | Cathodic protection, NDT services, specialist industrial services (hazardous-area works, hot-tapping, chemical cleaning) | PA Partial | 2 |
+| PRC-12 | Shutdown/turnaround and brownfield estimating (tie-ins, live-plant restrictions, permits, hot-work, outage windows) | PA Partial | 1 |
+| PRC-13 | Modularisation, prefabrication and yard-vs-site work splits | PA Partial | 1 |
 | PRC-14 | Remote-site construction: camps, catering, logistics, rotation and per-diem, site mobilisation | PA Partial | 2 |
 
 **PRC-01 - Process piping: spools, inch-diameter, pipe class/schedule/material, welds, supports, NDT, hydrotest, flushing, field vs shop split**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Closest existing: generic assembly lines (kg/m/nr) and a pipe-welder labour definition; no unit for inch-dia/joint (SCO-04), no weld/NDT/test sequence logic, no pipe-class catalogue. Depends on: SCO-04, LIB-04, EST-12.
+*Status:* Partial · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]
+- *Workflow / output:* Take-off template(s) `piping.pipe_fab_install, piping.weld_joint, piping.spool, piping.supports, piping.valve_install, piping.hydrotest` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Pipe class/schedule/material selection and weld-procedure logic are not modelled; shop vs field split is expressed only by separate slots. Depends on: SCO-04, LIB-04, EST-12.
 - *Acceptance test to mark complete:* Estimate a 500-spool package from a MTO: man-hours derive from inch-dia x approved factors by size/schedule/material with shop/field split; weld and NDT counts reconcile to the MTO; hydrotest and flushing costed.
 
 **PRC-02 - Process equipment (vessels, exchangers, pumps, compressors): supply, receive, set, align, grout, vendor reps, spares**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/equipment/equipment_categories.csv`; `app/estimators/direct_cost.py::_material_like`
-- *Tests:* `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works); `unit/test_direct_cost.py::test_full_assembly_hand_calculated` [partly] (generic assembly lines only)
-- *Workflow / output:* Equipment can be priced as supplied items plus an installation assembly.
-- *Limitations / dependencies:* No weight/tonnage-based erection model, vendor-package structure, rigging/lift linkage or spares/special-tools build-up (assumption definitions only). Depends on: PRC-10.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`; `data/equipment/equipment_categories.csv`; `app/estimators/direct_cost.py::_material_like`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]; `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works); `unit/test_direct_cost.py::test_full_assembly_hand_calculated` [partly] (generic assembly lines only)
+- *Workflow / output:* Take-off template(s) `equipment.set_and_align` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. No equipment-specific logic (alignment tolerances, grouting method, vendor scope); supply price comes from quotations through the rate pipeline. Earlier audit note: No weight/tonnage-based erection model, vendor-package structure, rigging/lift linkage or spares/special-tools build-up (assumption definitions only). Depends on: PRC-10.
 - *Acceptance test to mark complete:* A vendor-supplied pump skid and a field-erected vessel are each estimated with supply, freight, rigging, set/align and vendor-representative costs, all traceable to approved inputs.
 
 **PRC-03 - Instrumentation and control (loops, I/O, junction boxes, tubing, calibration, DCS/PLC/SCADA configuration, FAT/SAT)**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Closest existing: ELV/BMS definitions (division I) and an instrumentation-technician labour definition. No loop/I-O driven estimating, no loop-check/calibration productivity, no unit 'loop'. Depends on: SCO-04, LIB-04.
+*Status:* Partial · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]
+- *Workflow / output:* Take-off template(s) `instrument.loop` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. I/O counts, DCS/PLC configuration scope and calibration standards are not modelled beyond per-loop slots. Depends on: SCO-04, LIB-04.
 - *Acceptance test to mark complete:* A 400-loop instrument package is estimated from an instrument index: installation, tubing, calibration and loop-check hours derive from approved per-loop factors; control-system configuration priced from vendor quotation.
 
 **PRC-04 - Industrial electrical power (MV/LV switchgear, transformers, MCC, cable pulling/termination, tray, earthing, hazardous-area)**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/materials/materials.csv`; `data/equipment/equipment_categories.csv`
-- *Tests:* `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works)
-- *Workflow / output:* As building electrical (DSC-08).
-- *Limitations / dependencies:* No cable schedule/length-by-size engine, termination counts, hazardous-area classification costs, or substation commissioning logic; MV/HV beyond a few catalogue lines is absent. Depends on: LIB-04, EST-12.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`; `data/materials/materials.csv`; `data/equipment/equipment_categories.csv`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]; `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works)
+- *Workflow / output:* Take-off template(s) `electrical.cable, electrical.termination` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Cable sizing, tray fill, hazardous-area classification and testing standards are not modelled. Earlier audit note: No cable schedule/length-by-size engine, termination counts, hazardous-area classification costs, or substation commissioning logic; MV/HV beyond a few catalogue lines is absent. Depends on: LIB-04, EST-12.
 - *Acceptance test to mark complete:* A substation + 2 km cable package is estimated from a cable schedule with termination/pulling hours per approved factors and testing/commissioning scope.
 
 **PRC-05 - Structural steel by tonnage: supply, fabricate, blast/paint, erect, bolt/weld**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/materials/materials.csv`; `data/subcontractors/subcontract_packages.csv`; `app/estimators/direct_cost.py::_price_line`
-- *Tests:* `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works); `unit/test_direct_cost.py::test_unit_conversion_t_to_kg` [partly] (t<->kg conversion only)
-- *Workflow / output:* Priceable per tonne through an assembly or a subcontract lump.
-- *Limitations / dependencies:* No MH/tonne by member class, connection count, fabrication vs erection split, galvanising logistics or weight-from-section library. Depends on: LIB-08.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`; `data/materials/materials.csv`; `data/subcontractors/subcontract_packages.csv`; `app/estimators/direct_cost.py::_price_line`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]; `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works); `unit/test_direct_cost.py::test_unit_conversion_t_to_kg` [partly] (t<->kg conversion only)
+- *Workflow / output:* Take-off template(s) `steel.structural` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. No connection-type or fabrication-complexity classification; weight is the estimator's measured tonnage. Earlier audit note: No MH/tonne by member class, connection count, fabrication vs erection split, galvanising logistics or weight-from-section library. Depends on: LIB-08.
 - *Acceptance test to mark complete:* A 1,000 t steel package priced by approved MH/tonne factors and rates with shop/field split and coating tonnage reconciled to the steel MTO.
 
 **PRC-06 - Field-erected tanks and large vessels (plate welding, NDT, hydro/air test, settlement test)**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Closest existing: generic welder labour and plant lines. No plate-weight/seam-length models. Depends on: PRC-01.
+*Status:* Partial · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]
+- *Workflow / output:* Take-off template(s) `tank.field_erected` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. No plate-sequence, welding-position, settlement or hydrotest-duration logic beyond the slots. Depends on: PRC-01.
 - *Acceptance test to mark complete:* A storage-tank package estimated from plate weights, weld length, test requirements, with productivity from approved factors.
 
 **PRC-07 - Surface preparation, coating systems and fireproofing (blast, primer/intermediate/topcoat, DFT, coverage, shop vs field)**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/materials/materials.csv`; `data/plant/plant_categories.csv`
-- *Tests:* `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works)
-- *Workflow / output:* Priceable by area (m2) through an assembly.
-- *Limitations / dependencies:* Coating system, DFT, coverage and wastage can only be encoded by hand in assembly factors; no system definition, no repair/touch-up logic.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`; `data/materials/materials.csv`; `data/plant/plant_categories.csv`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]; `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works)
+- *Workflow / output:* Take-off template(s) `coating.surface, coating.fireproofing` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Coating-system specification (DFT, surface standard, coats) is carried in factor basis text, not modelled. Earlier audit note: Coating system, DFT, coverage and wastage can only be encoded by hand in assembly factors; no system definition, no repair/touch-up logic.
 - *Acceptance test to mark complete:* A coating specification (blast + 3 coats) is an approved assembly whose material quantity derives from stated coverage and DFT factors.
 
 **PRC-08 - Thermal insulation and cladding (hot/cold service, thickness, jacketing)**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/materials/materials.csv`
-- *Tests:* `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works)
-- *Workflow / output:* Priceable by m2 or m through assemblies.
-- *Limitations / dependencies:* 8 catalogue definitions; no thickness/diameter-based area computation (quantities are human-supplied).
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`; `data/materials/materials.csv`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]; `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works)
+- *Workflow / output:* Take-off template(s) `insulation.surface` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Thickness-by-service tables and heat-loss calculations are not modelled. Earlier audit note: 8 catalogue definitions; no thickness/diameter-based area computation (quantities are human-supplied).
 - *Acceptance test to mark complete:* Insulation by size/thickness priced from an approved assembly set with applicator productivity and jacketing.
 
 **PRC-09 - Scaffolding and temporary access for industrial work (volume-based, by phase)**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/plant/plant_categories.csv`; `data/taxonomy/cost_codes.csv`
-- *Tests:* `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works)
-- *Workflow / output:* Priceable through A.06 items/assemblies or indirects.
-- *Limitations / dependencies:* No scaffold-volume, erect/dismantle/hire-period model. Depends on: DUR-05.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`; `data/plant/plant_categories.csv`; `data/taxonomy/cost_codes.csv`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]; `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (proves the trade nodes exist, not that estimating them works)
+- *Workflow / output:* Take-off template(s) `scaffold.volume` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Scaffold design, hire periods and inspection regimes are not modelled beyond slots. Earlier audit note: No scaffold-volume, erect/dismantle/hire-period model. Depends on: DUR-05.
 - *Acceptance test to mark complete:* Scaffolding for a unit costed by volume and duration with erect/dismantle productivity and hire time from the programme.
 
 **PRC-10 - Heavy lifting, rigging and crane selection (lift studies, crane hire periods, mobilisation of large cranes)**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/plant/plant_categories.csv`; `app/estimators/rate_build.py::build_plant`
-- *Tests:* `unit/test_rate_build.py::test_plant_day_basis_uses_supplied_calendar` [yes] (plant hire build-up); `unit/test_direct_cost.py::test_full_assembly_hand_calculated` [partly]
-- *Workflow / output:* Crane lines priced as plant with mobilisation once.
-- *Limitations / dependencies:* Standby/minimum-hire not applied (EST-05); no lift-plan or crane-capacity logic; hire period is not tied to a programme. Depends on: EST-05, DUR-05.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`; `data/plant/plant_categories.csv`; `app/estimators/rate_build.py::build_plant`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]; `unit/test_rate_build.py::test_plant_day_basis_uses_supplied_calendar` [yes] (plant hire build-up); `unit/test_direct_cost.py::test_full_assembly_hand_calculated` [partly]
+- *Workflow / output:* Take-off template(s) `lifting.heavy_lift` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. No crane capacity / radius selection or lift-study logic. Earlier audit note: Standby/minimum-hire not applied (EST-05); no lift-plan or crane-capacity logic; hire period is not tied to a programme. Depends on: EST-05, DUR-05.
 - *Acceptance test to mark complete:* A lift package priced with crane hire derived from the programme durations plus mobilisation, standby and rigging labour.
 
 **PRC-11 - Cathodic protection, NDT services, specialist industrial services (hazardous-area works, hot-tapping, chemical cleaning)**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Only expressible as generic subcontract packages with human-entered amounts.
+*Status:* Partial · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]
+- *Workflow / output:* Take-off template(s) `services.specialist` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Specialist scopes (cathodic protection, NDT campaigns, hazardous-area packages) are generic count-based slots.
 - *Acceptance test to mark complete:* Each specialist service has a catalogue definition, unit and subcontract RFQ template with scope matrix.
 
 **PRC-12 - Shutdown/turnaround and brownfield estimating (tie-ins, live-plant restrictions, permits, hot-work, outage windows)**  
-*Status:* Missing · *needed from level:* 1 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* No calendar windows, restricted-access productivity factors, or outage-critical path. Depends on: DUR-05, EST-12.
+*Status:* Partial · *needed from level:* 1 · *kind:* engine
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]
+- *Workflow / output:* Take-off template(s) `turnaround.tie_in` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. No shutdown schedule, isolation planning, permit durations or live-plant restriction logic beyond slots. Depends on: DUR-05, EST-12.
 - *Acceptance test to mark complete:* A turnaround scope is estimated with window-constrained durations, access factors approved as assumptions, and permit/standby costs.
 
 **PRC-13 - Modularisation, prefabrication and yard-vs-site work splits**  
-*Status:* Missing · *needed from level:* 1 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* No module/lift/transport/hook-up model.
+*Status:* Partial · *needed from level:* 1 · *kind:* engine
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]
+- *Workflow / output:* Take-off template(s) `module.prefabricated, piping.spool` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Yard-vs-site logic, module weights and transport permits are not modelled beyond slots.
 - *Acceptance test to mark complete:* A module is estimated in yard and at site with transport, lift and hook-up costs separated and reconciled.
 
 **PRC-14 - Remote-site construction: camps, catering, logistics, rotation and per-diem, site mobilisation**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `data/indirects/indirect_categories.csv`; `app/estimators/indirect.py::compute_indirects`; `app/services/indirects.py::add_indirect`
-- *Tests:* `unit/test_indirect_duration.py::test_methods_hand_calculated` [yes] (indirect methods); `unit/test_indirect_duration.py::test_duration_not_approved_blocks_duration_costs_but_not_fixed` [yes]
-- *Workflow / output:* Accommodation/transport/offices as duration-based indirects.
-- *Limitations / dependencies:* No camp sizing from manpower, no rotation/leave cost model, no remote-location logistics build-up; there are intentionally no regional multipliers. Depends on: DUR-04.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `data/mto/templates.json`; `scripts/gen_mto_templates.py`; `data/packs/industrial/manifest.json`; `data/indirects/indirect_categories.csv`; `app/estimators/indirect.py::compute_indirects`; `app/services/indirects.py::add_indirect`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_mto.py::test_factor_validation_against_template_slot_resource_and_unit` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]; `unit/test_indirect_duration.py::test_methods_hand_calculated` [yes] (indirect methods); `unit/test_indirect_duration.py::test_duration_not_approved_blocks_duration_costs_but_not_fixed` [yes]
+- *Workflow / output:* Take-off template(s) `temp.site_establishment` + industrial definitions pack + governed productivity factors + MTO status/stale reconciliation; derived quantities need a pricing decision. CLI `mto`, UI Structure & programme, report `mto_preview`.
+- *Limitations / dependencies:* Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Camp sizing, rotation and per-diem rules are not modelled; peak persons come from the loading histogram or the estimator. Earlier audit note: No camp sizing from manpower, no rotation/leave cost model, no remote-location logistics build-up; there are intentionally no regional multipliers. Depends on: DUR-04.
 - *Acceptance test to mark complete:* Camp, catering and transport costs derive from the manpower histogram and programme with approved unit costs.
 
 ### E. Rates: material, labour, plant, equipment, subcontract; productivity and methodology
@@ -537,11 +538,11 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 | EST-01 | Assembly-based consumption pricing with explicit waste basis, nested assemblies, cycle guard, double-count prevention | IT Implemented and tested | 5 |
 | EST-02 | Labour hours and crews: productivity bases (paid hours/unit, productive hours/unit, output per crew shift), overtime share | IT Implemented and tested | 5 |
 | EST-03 | Plant mobilisation/demobilisation lump sums applied once per resource | IT Implemented and tested | 4 |
-| EST-05 | Plant standby/idle and minimum hire periods applied to cost | MI Missing | 3 |
+| EST-05 | Plant standby/idle and minimum hire periods applied to cost | IT Implemented and tested | 3 |
 | EST-07 | Quantity/unit conversion between BOQ unit and assembly unit | IT Implemented and tested | 5 |
-| EST-10 | Man-hour aggregation and histograms by craft/trade/area/period | MI Missing | 3 |
-| EST-11 | Construction methodology: method statements, equipment selection, work sequencing that drives labour/plant quantities | MI Missing | 2 |
-| EST-12 | Productivity adjustment factors (height, congestion, climate, shift, remote site, learning) as approved assumptions applied to hours | MI Missing | 2 |
+| EST-10 | Man-hour aggregation and histograms by craft/trade/area/period | IT Implemented and tested | 3 |
+| EST-11 | Construction methodology: method statements, equipment selection, work sequencing that drives labour/plant quantities | PA Partial | 2 |
+| EST-12 | Productivity adjustment factors (height, congestion, climate, shift, remote site, learning) as approved assumptions applied to hours | IT Implemented and tested | 2 |
 | EST-04 | Missing/unapproved/expired/index-only rates leave lines unpriced with indicative exposure reported separately | IT Implemented and tested | 5 |
 | EST-06 | Estimate states (Complete / Complete with Provisional Inputs / Preliminary) and SHA-256 fingerprint for stale detection | IT Implemented and tested | 5 |
 | EST-08 | Project-scoped provisional rate approval with mandatory reason, always disclosed | IT Implemented and tested | 5 |
@@ -620,11 +621,11 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Plant used in two items is mobilised once; used in two phases on different sites is mobilised twice when so configured.
 
 **EST-05 - Plant standby/idle and minimum hire periods applied to cost**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. `standby_pct` is read into the build-up (app/estimators/rate_build.py) but not applied by any cost line.
-- *Limitations / dependencies:* Documented in KNOWN_LIMITATIONS; unit-tested only as a stored value. Depends on: DUR-05.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/direct_cost.py::_plant_hire_terms`; `app/estimators/param_kinds.py::_plant_terms`; `app/services/governed.py::propose`
+- *Tests:* `unit/test_governed_params.py::test_plant_min_hire_and_standby_hand_calculated` [yes] (top-up 3 h x 400 + standby 2 h x 25% x 400); `unit/test_governed_params.py::test_authority_source_and_ai_rules` [yes]
+- *Workflow / output:* Governed `plant_hire_terms` per plant resource: minimum chargeable quantity (top-up line) and standby quantity at a stated percentage of the approved rate, priced at that resource's approved rate. Lines are labelled and flagged if the terms are unapproved.
+- *Limitations / dependencies:* Terms are entered from the hire quotation/contract (none shipped). Minimum hire is applied per resource over the whole project, not per mobilisation/hire period. Depends on: DUR-05.
 - *Acceptance test to mark complete:* Plant with 20% standby and a 1-month minimum hire prices correctly under a hand-calculated example.
 
 **EST-07 - Quantity/unit conversion between BOQ unit and assembly unit**  
@@ -636,27 +637,27 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Incompatible units are refused with an explanation, never converted silently.
 
 **EST-10 - Man-hour aggregation and histograms by craft/trade/area/period**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. Per-line labour hours exist in the build-up (quantity in hr); no aggregate report. Only `productivity_variance` compares estimated and actual hours per resource.
-- *Limitations / dependencies:* Closest existing: app/reporting/history.py::productivity_variance (needs actuals). Depends on: DUR-04.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/services/programme.py::manhours_report`; `app/estimators/direct_cost.py::_price_takeoff_item`
+- *Tests:* `unit/test_programme_service.py::test_manhours_by_craft_wbs_division_hand_calculated` [yes]; `unit/test_programme_service.py::test_loading_blocks_without_calendar_and_weeks_with_calendar` [yes]
+- *Workflow / output:* Own-labour man-hours by craft, cost code, division, WBS and item, and histograms over the programme (reports `manhours`, `loading`); ties out to the priced labour lines.
+- *Limitations / dependencies:* Own labour only: subcontract and lump-sum items carry labour that is not counted (listed as items without hours). No crew/productivity actuals feedback loop. Depends on: DUR-04.
 - *Acceptance test to mark complete:* A report totals man-hours by craft and trade for any project and by month once a programme exists; totals equal the sum of labour lines.
 
 **EST-11 - Construction methodology: method statements, equipment selection, work sequencing that drives labour/plant quantities**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. The estimator encodes methodology by hand in assembly factors; nothing records or checks it.
-- *Limitations / dependencies:* No method library, no link between method and programme. Depends on: DUR-05.
-- *Acceptance test to mark complete:* A method (e.g. slip-form vs conventional) is a recorded, approved option that selects assembly sets and durations, with both alternatives priceable and compared.
+*Status:* Partial · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/services/methods.py::comparison_report`; `app/services/methods.py::check_alternative`; `app/estimators/context.py::load_inputs`; `app/estimators/param_kinds.py::_method_alt`
+- *Tests:* `unit/test_methods.py::test_alternative_is_compared_what_if_and_changes_nothing` [yes] (lean method: direct -225, hours -15, one month less staff -100; estimate fingerprint unchanged); `unit/test_methods.py::test_alternative_validation_and_unknown_items` [yes]
+- *Workflow / output:* Method alternatives: named re-mappings of BOQ items to other approved assemblies (equipment/crew choices) and an optional implied duration, compared side by side with the base (direct/indirect/total cost, man-hours, plant hours, duration) without changing the estimate. Report `method_comparison`.
+- *Limitations / dependencies:* A method statement is free text in the alternative's basis; the software does not generate methods, select equipment from site conditions, or derive sequencing from them. Assemblies for each method must already exist and be approved. Adoption is a normal approved re-mapping. Depends on: DUR-05.
+- *Acceptance test to mark complete:* Two methods for the same work (crane vs pump placement) compare in cost, hours and duration with each assumption traceable.
 
 **EST-12 - Productivity adjustment factors (height, congestion, climate, shift, remote site, learning) as approved assumptions applied to hours**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. By design no unexplained multipliers exist.
-- *Limitations / dependencies:* Would need approved, evidence-backed factor tables and an explicit engine step with traceable basis text.
+*Status:* Implemented and tested · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/estimators/direct_cost.py::productivity_factors_for`; `app/estimators/direct_cost.py::_adjust_hours`; `app/estimators/param_kinds.py::_productivity`
+- *Tests:* `unit/test_governed_params.py::test_combined_productivity_factors_are_multiplicative_and_hand_checked` [yes] (1.20 x 1.10 -> 132 h); `unit/test_governed_params.py::test_factor_scope_cost_prefix_and_wbs` [yes]; `unit/test_governed_params.py::test_unapproved_factor_is_flagged_loudly` [yes]; `unit/test_governed_params.py::test_project_scope_overrides_company_and_estimate_reads_it` [yes]; `unit/test_mto.py::test_productivity_factor_applies_to_derived_labour_only` [yes]
+- *Workflow / output:* Governed productivity factors (height, congestion, climate/heat, shift pattern, remote site, learning curve, access, permit-to-work, weather, other), scoped by cost-code prefix and/or WBS area, applied multiplicatively to assembly and take-off-derived labour hours; company-wide or project-specific; every application is recorded on the cost line.
+- *Limitations / dependencies:* No factor value is shipped; each comes from company records with a stated source and is approved. Factors compound by multiplication - enter one combined factor where compounding would overstate. Learning-curve effects over time are not modelled, only a stated factor.
 - *Acceptance test to mark complete:* A congestion factor of 1.15 approved as an assumption raises hours on tagged items only, appears in the basis string, and is visible in the impact analysis.
 
 **EST-04 - Missing/unapproved/expired/index-only rates leave lines unpriced with indicative exposure reported separately**  
@@ -697,8 +698,8 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 |---|---|---|---|
 | IND-01 | Field indirects: fixed, percent-of-direct, per day/week/month x approved duration; allocation (pro-rata, separate line, by trade); subcontract-included exclusion | IT Implemented and tested | 5 |
 | IND-02 | Temporary facilities, mobilisation/demobilisation and site establishment as priced scope | PA Partial | 4 |
-| ENG-01 | Engineering services estimating (discipline man-hours, deliverables, vendor-data review, design allowance) | PA Partial | 1 |
-| ENG-02 | Home-office/overhead/G&A allocation and project-management costs for EPC | PA Partial | 1 |
+| ENG-01 | Engineering services estimating (discipline man-hours, deliverables, vendor-data review, design allowance) | IT Implemented and tested | 1 |
+| ENG-02 | Home-office/overhead/G&A allocation and project-management costs for EPC | IT Implemented and tested | 1 |
 | PRE-01 | Preliminaries and general requirements (division A): priced as BOQ items/assemblies or as field indirects, with double-count detection between the two | PA Partial | 5 |
 
 **IND-01 - Field indirects: fixed, percent-of-direct, per day/week/month x approved duration; allocation (pro-rata, separate line, by trade); subcontract-included exclusion**  
@@ -711,26 +712,26 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 
 **IND-02 - Temporary facilities, mobilisation/demobilisation and site establishment as priced scope**  
 *Status:* Partial · *needed from level:* 4 · *kind:* engine
-- *Code:* `data/taxonomy/cost_codes.csv`; `data/indirects/indirect_categories.csv`; `app/estimators/indirect.py::compute_indirects`
-- *Tests:* `unit/test_indirect_duration.py::test_methods_hand_calculated` [partly] (method arithmetic only)
-- *Workflow / output:* Pricing via division A items (99 definitions incl. labour/plant) or indirects.
-- *Limitations / dependencies:* No sizing logic (offices, camp, laydown, utilities) and no link from manpower/area to facility quantity. Depends on: DUR-04.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `app/services/provisions.py::reserve_proposals`; `data/taxonomy/cost_codes.csv`; `data/indirects/indirect_categories.csv`; `app/estimators/indirect.py::compute_indirects`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_provisions.py::test_reserve_proposals_are_draft_indirects_with_hand_calculated_amounts` [yes]; `unit/test_indirect_duration.py::test_methods_hand_calculated` [partly] (method arithmetic only)
+- *Workflow / output:* Pricing via division A items (99 definitions incl. labour/plant) or indirects. Template and reserve-rule framework added.
+- *Limitations / dependencies:* Camp/temporary-facility quantities use the `temp.site_establishment` template and reserve rules; mobilisation lump sums come from rate build-ups and indirect items. Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Earlier audit note: No sizing logic (offices, camp, laydown, utilities) and no link from manpower/area to facility quantity. Depends on: DUR-04.
 - *Acceptance test to mark complete:* Site establishment is derived from an approved manpower and area schedule using approved unit allowances.
 
 **ENG-01 - Engineering services estimating (discipline man-hours, deliverables, vendor-data review, design allowance)**  
-*Status:* Partial · *needed from level:* 1 · *kind:* engine
-- *Code:* `app/services/boq.py::set_pricing`; `data/taxonomy/cost_codes.csv`
-- *Tests:* `integration/test_full_workflow.py::test_complete_workflow_to_gated_submission_export` [partly] (allowance approvals only)
-- *Workflow / output:* Cost code L.01 'Design and engineering allowances'; priceable as an approved allowance or lump sum.
-- *Limitations / dependencies:* No engineering deliverable/man-hour model, no discipline rates, no EPC phase split (FEED/detail/procurement support). Depends on: ENG-02.
+*Status:* Implemented and tested · *needed from level:* 1 · *kind:* engine
+- *Code:* `app/services/provisions.py::engineering_report`; `app/services/provisions.py::propose_engineering_indirects`; `app/estimators/param_kinds.py::_eng_basis`
+- *Tests:* `unit/test_provisions.py::test_engineering_effort_costing_hand_calculated_and_unpriced_blocks` [yes] (12x30 + 4x50 = 560 h x 80 = 44,800; unpriced rate blocks the proposal)
+- *Workflow / output:* Governed `engineering_basis` (discipline, deliverable, count, hours each, labour resource) costed at the resource's eligible approved hourly rate; per-discipline hours and cost; Draft indirect items proposed. Report `engineering`.
+- *Limitations / dependencies:* No hours-per-deliverable are shipped - they come from company records or the engineering contractor's proposal. Vendor-data review, design growth and client-review cycles are only modelled if the user enters them as deliverables. Depends on: ENG-02.
 - *Acceptance test to mark complete:* An engineering package is estimated from a deliverables list x approved hours x discipline rates, with a home-office rate build-up and reconciliation to the allowance.
 
 **ENG-02 - Home-office/overhead/G&A allocation and project-management costs for EPC**  
-*Status:* Partial · *needed from level:* 1 · *kind:* engine
-- *Code:* `app/estimators/indirect.py::compute_indirects`; `app/estimators/commercial.py::compute_commercial`
-- *Tests:* `unit/test_commercial.py::test_markup_method_independent_calculation` [partly] (markup on cost, not home-office build-up)
-- *Workflow / output:* Expressible as an indirect item (fixed or % of direct) or via the commercial markup.
-- *Limitations / dependencies:* No separate home-office cost pool, labour-burden/overhead rate build-up, or allocation across projects.
+*Status:* Implemented and tested · *needed from level:* 1 · *kind:* engine
+- *Code:* `app/services/provisions.py::overhead_report`; `app/services/provisions.py::propose_overhead_indirects`; `app/services/provisions.py::reserve_proposals`; `app/estimators/param_kinds.py::_pool`
+- *Tests:* `unit/test_provisions.py::test_overhead_pool_share_hand_calculated` [yes] (5% of direct cost; SAR 5 per labour hour); `unit/test_provisions.py::test_reserve_proposals_are_draft_indirects_with_hand_calculated_amounts` [yes]
+- *Workflow / output:* Governed annual overhead pools (cost and recovery base: direct cost, labour hours or selling price) give a project share; reserve rules give percentage provisions; both are proposed as Draft indirect items. Reports `overhead`; actions `propose_overhead_indirects`, `propose_reserves`.
+- *Limitations / dependencies:* Annual cost and base come from the company's accounts (none shipped). Time-based home-office staffing (named managers by month) is not modelled - use indirect items with per-month methods.
 - *Acceptance test to mark complete:* Home-office cost is built from approved rates x staffing and shown separately from field indirects and profit.
 
 **PRE-01 - Preliminaries and general requirements (division A): priced as BOQ items/assemblies or as field indirects, with double-count detection between the two**  
@@ -746,9 +747,9 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 | ID | Capability | Status | Needed from level |
 |---|---|---|---|
 | TAX-01 | VAT as dated, verified tax categories; unresolved tax never assumed; tax on tendered schedule per category | IT Implemented and tested | 5 |
-| TAX-02 | Import landed-cost build-up: Incoterms, freight, insurance, customs duty, clearance, port charges, inland haulage | MI Missing | 3 |
-| TAX-03 | Withholding tax, zakat/income tax treatment, expatriate levy and other employer statutory costs | MI Missing | 3 |
-| TAX-04 | Logistics: transport to site, laydown, handling, storage, port-to-site, project-specific logistics plans | PA Partial | 3 |
+| TAX-02 | Import landed-cost build-up: Incoterms, freight, insurance, customs duty, clearance, port charges, inland haulage | IT Implemented and tested | 3 |
+| TAX-03 | Withholding tax, zakat/income tax treatment, expatriate levy and other employer statutory costs | PA Partial | 3 |
+| TAX-04 | Logistics: transport to site, laydown, handling, storage, port-to-site, project-specific logistics plans | IT Implemented and tested | 3 |
 
 **TAX-01 - VAT as dated, verified tax categories; unresolved tax never assumed; tax on tendered schedule per category**  
 *Status:* Implemented and tested · *needed from level:* 5 · *kind:* engine
@@ -759,27 +760,27 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* A Commercial Approver verifies VAT-STD against current ZATCA text; zero-rated and exempt supplies priced in the same schedule produce the hand-calculated tax.
 
 **TAX-02 - Import landed-cost build-up: Incoterms, freight, insurance, customs duty, clearance, port charges, inland haulage**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. Assumption definitions exist (ASMP-F-003/004/005, ASMP-J-013) but no calculation consumes them.
-- *Limitations / dependencies:* Closest existing: rate `delivery_basis` text and `L.04 Freight, customs and logistics` cost code (manual items). Depends on: CUR-03.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/landed_cost.py::landed`; `app/services/landed.py::compute`; `app/services/landed.py::propose_landed_rate`; `app/estimators/param_kinds.py::_landed_terms`
+- *Tests:* `unit/test_landed_labour_exposure.py::test_landed_cost_hand_calculated_with_exposure` [yes] (FOB base -> freight, insurance, duty, clearance, port, handling = 4,504.0934375); `unit/test_landed_labour_exposure.py::test_landed_validation_and_missing_fx` [yes]; `unit/test_landed_labour_exposure.py::test_landed_rate_is_a_proposal_that_needs_normal_approval_and_changes_exposure` [yes]
+- *Workflow / output:* Ordered landed-cost components (percentage of base / earlier components / cumulative, per unit, per shipment, in any currency) from approved terms turn an APPROVED base rate into a Draft/Pending derived rate with its build-up and currency exposure recorded; normal rate approval still applies.
+- *Limitations / dependencies:* No Incoterm template, freight, insurance or duty value is shipped; tariff classification and customs rules are the user's inputs. FX is converted at the approved rate on the proposal date. Depends on: CUR-03.
 - *Acceptance test to mark complete:* An imported equipment item is priced FOB -> CIF -> duty -> clearance -> delivered with each step an approved input and FX at the right date.
 
 **TAX-03 - Withholding tax, zakat/income tax treatment, expatriate levy and other employer statutory costs**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None as calculations (assumption definitions ASMP-J-011/012/014 only).
-- *Limitations / dependencies:* Out of scope of the cost engine by design unless a client profile requires them. Depends on: SAU-03.
+*Status:* Partial · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/labour_costs.py::statutory_monthly`; `app/services/labour.py::propose_labour_rate`; `app/estimators/param_kinds.py::_labour_statutory`
+- *Tests:* `unit/test_landed_labour_exposure.py::test_statutory_monthly_and_workforce_blend_hand_calculated` [yes]; `unit/test_landed_labour_exposure.py::test_labour_buildup_with_user_rules_and_workforce_check` [yes]
+- *Workflow / output:* Employer-side statutory/mobilisation labour on-costs (levy, social insurance, end-of-service accrual, visa/iqama, medical) as governed rules feeding the labour rate build-up.
+- *Limitations / dependencies:* Withholding tax on foreign subcontractors, zakat/income tax treatment and corporate tax effects are NOT modelled (tax categories cover VAT only). No rule value is shipped. Depends on: SAU-03.
 - *Acceptance test to mark complete:* Treatment of each is an explicit approved assumption with a tested effect on cost or price.
 
 **TAX-04 - Logistics: transport to site, laydown, handling, storage, port-to-site, project-specific logistics plans**  
-*Status:* Partial · *needed from level:* 3 · *kind:* engine
-- *Code:* `app/services/indirects.py::add_indirect`; `app/services/rates.py::propose_rate`
-- *Tests:* `procurement/test_procurement.py::test_leveling_normalisation_tax_currency_units` [partly] (delivery included/excluded in levelling)
-- *Workflow / output:* Delivery basis recorded on rates/quotes; transport as indirect items.
-- *Limitations / dependencies:* No haul/lead-time/laydown model; no per-item logistics factor.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/landed_cost.py::landed`; `app/services/landed.py::propose_landed_rate`; `app/estimators/mto.py::derive`
+- *Tests:* `unit/test_landed_labour_exposure.py::test_landed_rate_is_a_proposal_that_needs_normal_approval_and_changes_exposure` [yes] (local haulage per unit + freight %); `unit/test_mto.py::test_templates_are_structure_only_and_cover_the_industrial_gaps` [yes]
+- *Workflow / output:* Domestic logistics (transport to site, handling, storage, port-to-site) use the same governed component terms as imports; project-specific logistics scope can also be derived from the temporary-facilities take-off template.
+- *Limitations / dependencies:* Laydown/storage durations and rates are inputs. No logistics cost model for remote-site rotation beyond the template slots.
 - *Acceptance test to mark complete:* Logistics cost for 50 imported items derived from weights/volumes and approved lane rates.
 
 ### H. Project duration, sequencing and resource loading
@@ -787,10 +788,10 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 | ID | Capability | Status | Needed from level |
 |---|---|---|---|
 | DUR-01 | Time-related costs require a human-approved duration and approved working calendar | IT Implemented and tested | 5 |
-| DUR-02 | CPM duration from human-entered tasks (finish-to-start), converted to months with an approved calendar; proposal only | PA Partial | 4 |
+| DUR-02 | CPM duration from human-entered tasks (finish-to-start), converted to months with an approved calendar; proposal only | IT Implemented and tested | 4 |
 | DUR-03 | Labour-hours-derived duration cross-check (formula) | IT Implemented and tested | 4 |
-| DUR-04 | Resource loading: manpower/plant histograms and peaks over time | MI Missing | 3 |
-| DUR-05 | Construction sequencing, phasing, areas/units and logic-linked cost-to-schedule tie-in | MI Missing | 3 |
+| DUR-04 | Resource loading: manpower/plant histograms and peaks over time | IT Implemented and tested | 3 |
+| DUR-05 | Construction sequencing, phasing, areas/units and logic-linked cost-to-schedule tie-in | IT Implemented and tested | 3 |
 
 **DUR-01 - Time-related costs require a human-approved duration and approved working calendar**  
 *Status:* Implemented and tested · *needed from level:* 5 · *kind:* engine
@@ -801,12 +802,12 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Time-based indirect lines resolve only after duration approval.
 
 **DUR-02 - CPM duration from human-entered tasks (finish-to-start), converted to months with an approved calendar; proposal only**  
-*Status:* Partial · *needed from level:* 4 · *kind:* engine
-- *Code:* `app/estimators/duration.py::cpm`; `app/services/indirects.py::set_tasks`; `app/services/indirects.py::propose_duration_from_schedule`; `app/api/actions.py::set_schedule_tasks`
-- *Tests:* `unit/test_indirect_duration.py::test_cpm` [yes]; `unit/test_indirect_duration.py::test_schedule_tasks_to_duration_proposal_needs_approved_calendar_and_human_approval` [yes] (added by this audit); `integration/test_workspace_ui.py::test_schedule_actions_are_reachable_from_the_api_and_respect_roles` [yes] (added by this audit)
-- *Workflow / output:* Actions `set_schedule_tasks` / `propose_duration_from_schedule` (API/UI form data); no UI page or chart.
-- *Limitations / dependencies:* Finish-to-start only: no lags, other relationship types, constraints, float/backward pass, calendars/holidays/Ramadan, no import from Primavera/MS Project, no Gantt output. Two defects found and fixed by this audit: the path was untestable from the API and archived projects were not protected.
-- *Acceptance test to mark complete:* A 200-task network with SS/FF/lag relationships imported from a schedule file yields the same critical path and finish as the scheduling tool.
+*Status:* Implemented and tested · *needed from level:* 4 · *kind:* engine
+- *Code:* `app/estimators/programme.py::schedule`; `app/estimators/programme.py::parse_predecessors`; `app/estimators/programme.py::Calendar`; `app/services/programme.py::schedule_report`; `app/services/indirects.py::set_tasks`; `app/services/indirects.py::propose_duration_from_schedule`; `app/estimators/duration.py::cpm`
+- *Tests:* `unit/test_programme.py::test_four_relationship_types_forward_and_backward_by_hand` [yes] (FS/SS/FF/SF, lags, float, free float, critical path); `unit/test_programme.py::test_start_to_finish_and_negative_lag_lead` [yes]; `unit/test_programme.py::test_constraints_and_negative_float` [yes]; `unit/test_programme.py::test_cycle_unknown_duplicate_negative_duration_rejected` [yes]; `unit/test_programme.py::test_parse_predecessors_handles_codes_with_dashes_and_types` [yes]; `unit/test_programme.py::test_calendar_dates_skip_non_working_days_and_holidays` [yes]; `unit/test_programme_service.py::test_task_storage_syntax_and_validation` [yes]; `unit/test_indirect_duration.py::test_schedule_tasks_to_duration_proposal_needs_approved_calendar_and_human_approval` [yes] (duration stays a proposal until a person approves it); `integration/test_workspace_ui.py::test_schedule_actions_are_reachable_from_the_api_and_respect_roles` [yes]
+- *Workflow / output:* Programme engine with FS/SS/FF/SF relationships, lags and leads, SNET/FNLT constraints, total/free float, driving and critical path, working calendar (start date, working weekdays, holidays) and dates. UI: Structure & programme; reports `schedule`; the duration remains a proposal until approved.
+- *Limitations / dependencies:* Task durations, links, constraints and the calendar are typed in by a person (no import from Primavera/MS Project, no Gantt chart, no resource-levelling, no multiple calendars per task). Working weekdays and holidays are never assumed.
+- *Acceptance test to mark complete:* A 200-task network with SS/FF/lag relationships imported from a schedule file yields the same critical path and finish as the scheduling tool (import not built).
 
 **DUR-03 - Labour-hours-derived duration cross-check (formula)**  
 *Status:* Implemented and tested · *needed from level:* 4 · *kind:* engine
@@ -817,19 +818,19 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Matches a hand calculation.
 
 **DUR-04 - Resource loading: manpower/plant histograms and peaks over time**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Needs a programme linked to hours (EST-10, DUR-05). Depends on: EST-10, DUR-05.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/loading.py::spread`; `app/estimators/loading.py::histogram`; `app/services/programme.py::loading_report`; `app/services/programme.py::assign_lines_to_tasks`
+- *Tests:* `unit/test_programme_service.py::test_loading_spread_is_exact_and_fractional_edges_hand_checked` [yes]; `unit/test_programme_service.py::test_loading_blocks_without_calendar_and_weeks_with_calendar` [yes] (hand-calculated weekly histogram); `unit/test_programme_service.py::test_untied_quantities_are_reported_not_smeared` [yes]; `unit/test_programme_service.py::test_equally_specific_tasks_share_in_proportion_to_duration` [yes]
+- *Workflow / output:* Time-phased labour hours / plant hours / cost histograms by week, month or working-day block with peaks per resource and an explicit 'unscheduled' bucket; ties out to the estimate. Report `loading`.
+- *Limitations / dependencies:* Uniform spread over each task's working days (stated simplification, no S-curve shaping); cost lines reach tasks only through the task's declared cost-code prefix / WBS scope; manpower from subcontract lump sums is not counted. Depends on: EST-10, DUR-05.
 - *Acceptance test to mark complete:* Monthly manpower by craft from the programme x hours; peak and total reconcile to the estimate's total hours.
 
 **DUR-05 - Construction sequencing, phasing, areas/units and logic-linked cost-to-schedule tie-in**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. `schedule_tasks.cost_code` exists but nothing reads it.
-- *Limitations / dependencies:* No phase/area structure on BOQ items; no cost-loaded programme. Depends on: LIB-02.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/services/programme.py::assign_lines_to_tasks`; `app/services/programme.py::loading_report`; `app/estimators/programme.py::schedule`; `app/services/wbs.py::assign_items`
+- *Tests:* `unit/test_programme_service.py::test_loading_blocks_without_calendar_and_weeks_with_calendar` [yes]; `unit/test_programme_service.py::test_equally_specific_tasks_share_in_proportion_to_duration` [yes]; `unit/test_wbs_rollup.py::test_wbs_scoped_productivity_factor_changes_only_that_area` [yes]
+- *Workflow / output:* Cost-to-schedule tie-in: tasks declare the WBS node and/or cost-code prefix they carry; the most specific task takes the cost and hours; shared scopes split by duration. Areas/units come from the WBS.
+- *Limitations / dependencies:* Construction logic (which task follows which) is the estimator's input; the software does not propose sequences or phasing. Cost not tied to any task is reported separately. Depends on: LIB-02.
 - *Acceptance test to mark complete:* Costs are assigned to activities; the programme can be re-sequenced and time-dependent costs and escalation update accordingly.
 
 ### I. Basis of Estimate, scope definition, maturity and exclusions
@@ -838,8 +839,8 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 |---|---|---|---|
 | BOE-01 | Scope register: inclusions, exclusions, qualifications, clarifications (with evidence), cross-checks against priced scope and the offer | IT Implemented and tested | 4 |
 | BOE-02 | Assumptions register (322 definitions) with approval, project overrides, validity and impact analysis | IT Implemented and tested | 5 |
-| BOE-03 | Basis of Estimate document (scope, design basis, methodology, rate/productivity sources, exclusions, assumptions, risks, maturity, accuracy) | PA Partial | 3 |
-| BOE-04 | Estimate classification (AACE or client-specific) with maturity indicators and accuracy range | MI Missing | 3 |
+| BOE-03 | Basis of Estimate document (scope, design basis, methodology, rate/productivity sources, exclusions, assumptions, risks, maturity, accuracy) | IT Implemented and tested | 3 |
+| BOE-04 | Estimate classification (AACE or client-specific) with maturity indicators and accuracy range | IT Implemented and tested | 3 |
 | BOE-05 | Design-maturity/completeness checks (MTO completeness, % engineered, drawing/spec revision control) | PA Partial | 3 |
 
 **BOE-01 - Scope register: inclusions, exclusions, qualifications, clarifications (with evidence), cross-checks against priced scope and the offer**  
@@ -859,27 +860,27 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Every assumption an engine reads is listed in the BoE with value, status, source.
 
 **BOE-03 - Basis of Estimate document (scope, design basis, methodology, rate/productivity sources, exclusions, assumptions, risks, maturity, accuracy)**  
-*Status:* Partial · *needed from level:* 3 · *kind:* engine
-- *Code:* `app/exports/documents.py::estimate_report_docx`; `app/services/workspaces.py::render_generated_block`
-- *Tests:* `integration/test_final_flow.py::test_final_flow_and_gates` [partly] (report is generated; contents not validated against a BoE standard)
-- *Workflow / output:* Estimate report (.docx): summary, cost reconciliation, exceptions, assumptions in use, watermark.
-- *Limitations / dependencies:* It is an estimate summary, not a BoE: no design-basis/deliverables list, methodology, rate-source summary, maturity or accuracy statement. Depends on: BOE-04.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/services/boe.py::build_boe`; `app/services/boe.py::generate_boe`; `app/services/boe.py::render_markdown`; `app/services/boe.py::render_docx`
+- *Tests:* `unit/test_profiles_boe.py::test_boe_contains_facts_flags_synthetic_and_leaves_judgement_blank` [yes]
+- *Workflow / output:* Basis of Estimate generated as .md and .docx into the project workspace (scope, BOQ imports, pricing basis and rate sources, assemblies, factors, assumptions, take-off derivations, indirects, programme, commercial, risks, classification, client-profile status, exceptions, approvals) with six judgement sections left as [TO BE COMPLETED BY ESTIMATOR].
+- *Limitations / dependencies:* Facts only - methodology, design basis, site conditions and risk commentary must be written by the estimator. Not a client-format BoE (no client template). Depends on: BOE-04.
 - *Acceptance test to mark complete:* A BoE generated for a project contains every section of the client's/organisation's BoE template populated from recorded data, with missing sections explicitly shown as missing.
 
 **BOE-04 - Estimate classification (AACE or client-specific) with maturity indicators and accuracy range**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. ASMP-A-001 (design stage) and ASMP-L-004 (design maturity) are definitions only; nothing stores or checks a class.
-- *Limitations / dependencies:* No class field, no profile of required deliverables per class, no accuracy-range output. See the two-systems section of the matrix document.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/services/profiles.py::classification_report`; `app/estimators/param_kinds.py::_classification_scheme`; `app/estimators/param_kinds.py::_maturity`
+- *Tests:* `unit/test_profiles_boe.py::test_classification_requires_scheme_and_maturity_and_follows_them` [yes] (class from approved scheme bands; range applied to total cost; band edge)
+- *Workflow / output:* Class and accuracy range follow an APPROVED classification scheme (bands, ranges and source document entered by the company) and the estimator's approved maturity statement, shown beside measured maturity facts. Report `classification`.
+- *Limitations / dependencies:* The software holds no AACE or client scheme: class definitions and ranges are entered with their source. The class is not derived from drawings or by the software. No client-specific classification scheme is claimed.
 - *Acceptance test to mark complete:* A selectable classification profile (configuration file) sets required deliverable-maturity checks; the estimate shows its class, unmet criteria and the profile's stated accuracy range, and approval is blocked if mandatory criteria fail.
 
 **BOE-05 - Design-maturity/completeness checks (MTO completeness, % engineered, drawing/spec revision control)**  
 *Status:* Partial · *needed from level:* 3 · *kind:* engine
-- *Code:* `app/reporting/completeness.py::project_completeness`; `app/services/workspaces.py::outstanding_issues`
-- *Tests:* `integration/test_workspace_ui.py::test_create_project_shows_workspace_path_next_action_and_numbered_folders` [partly] (completeness page renders and shows blockers)
-- *Workflow / output:* Completeness tab; reconciliation BOQ_ITEM_MISSING_IN_REVISION.
-- *Limitations / dependencies:* Counts records; does not assess design maturity. Drawing/spec revisions are recorded text. Depends on: BOE-04.
+- *Code:* `app/services/profiles.py::project_facts`; `app/services/mto.py::status_report`; `app/reporting/completeness.py::project_completeness`; `app/services/profiles.py::classification_report`
+- *Tests:* `unit/test_profiles_boe.py::test_compliance_matrix_never_claims_beyond_loaded_requirements` [yes]; `unit/test_mto.py::test_stale_detection_after_factor_or_driver_change` [yes]
+- *Workflow / output:* Measured maturity facts (unpriced %, WBS-assigned %, open clarifications, stale take-off derivations, synthetic/provisional use) in classification, profile checks and the completeness report.
+- *Limitations / dependencies:* No % engineered or MTO-completeness measure exists (the software does not know what the drawings contain); drawing/spec revision is recorded text. Completeness is counted from the database only. Depends on: BOE-04.
 - *Acceptance test to mark complete:* Completeness lists unresolved design items per discipline against the chosen classification profile.
 
 ### J. Escalation, contingency, quantified risk, uncertainty, currency
@@ -888,12 +889,12 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 |---|---|---|---|
 | RSK-01 | Contingency with explicit base (direct or direct+indirect) and rate as policy fields; double-count guards | IT Implemented and tested | 5 |
 | RSK-02 | Named risk allowances (percentage or fixed) in the commercial policy | IT Implemented and tested | 4 |
-| RSK-03 | Risk register (probability, impact, cost exposure, mitigation) | PA Partial | 3 |
-| RSK-04 | Quantified risk and uncertainty: expected value, range estimating or Monte Carlo (P50/P80), correlation, contingency derivation | MI Missing | 3 |
-| RSK-05 | Escalation: single percentage on an explicit base | PA Partial | 4 |
+| RSK-03 | Risk register (probability, impact, cost exposure, mitigation) | IT Implemented and tested | 3 |
+| RSK-04 | Quantified risk and uncertainty: expected value, range estimating or Monte Carlo (P50/P80), correlation, contingency derivation | IT Implemented and tested | 3 |
+| RSK-05 | Escalation: single percentage on an explicit base | IT Implemented and tested | 4 |
 | CUR-01 | Foreign-currency rates converted with APPROVED, dated FX; unresolved FX leaves the line unpriced | IT Implemented and tested | 4 |
 | CUR-02 | Non-SAR project currency with SAR rates converted by approved FX | IT Implemented and tested | 3 |
-| CUR-03 | Currency exposure and hedging (multi-currency packages, exposure by currency, FX sensitivity) | MI Missing | 2 |
+| CUR-03 | Currency exposure and hedging (multi-currency packages, exposure by currency, FX sensitivity) | IT Implemented and tested | 2 |
 
 **RSK-01 - Contingency with explicit base (direct or direct+indirect) and rate as policy fields; double-count guards**  
 *Status:* Implemented and tested · *needed from level:* 5 · *kind:* engine
@@ -912,27 +913,27 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Each allowance traces to a named, approved risk entry.
 
 **RSK-03 - Risk register (probability, impact, cost exposure, mitigation)**  
-*Status:* Partial · *needed from level:* 3 · *kind:* engine
-- *Code:* `app/services/registers.py::add_risk`; `app/services/registers.py::list_risks`
-- *Tests:* `excel/test_workbooks.py::test_populated_workbook_matches_engine_and_ids` [partly] (risk sheet populated)
-- *Workflow / output:* Risk Register sheet; Clarifications & risk tab.
-- *Limitations / dependencies:* Stored only: not used by any calculation, reconciliation rule or export. Probability/impact are free text.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/services/registers.py::quantify_risk`; `app/services/registers.py::add_risk`; `app/reconciliation/ext_rules.py::collect_extended`
+- *Tests:* `unit/test_risk_escalation.py::test_quantify_risk_validation` [yes]; `reconciliation/test_extended_rules.py::test_extended_findings_raised_with_configured_severity` [yes] (unquantified open risks are flagged)
+- *Workflow / output:* Risk register entries carry a human-entered probability, three-point cost range, schedule days, category and response with the stated basis; unquantified open risks raise a Low reconciliation finding.
+- *Limitations / dependencies:* No default probabilities or ranges; risks are identified by people. Correlations between risks are not modelled.
 - *Acceptance test to mark complete:* Risks have numeric probability and impact distributions and feed RSK-04.
 
 **RSK-04 - Quantified risk and uncertainty: expected value, range estimating or Monte Carlo (P50/P80), correlation, contingency derivation**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Nothing probabilistic exists in the engines. Depends on: RSK-03.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/montecarlo.py::simulate`; `app/estimators/montecarlo.py::expected_value`; `app/services/risk.py::risk_report`
+- *Tests:* `unit/test_risk_escalation.py::test_expected_value_hand_calculated` [yes]; `unit/test_risk_escalation.py::test_simulation_is_reproducible_ordered_and_close_to_expected_value` [yes] (seeded, reproducible, P10-P90 ordered); `unit/test_risk_escalation.py::test_degenerate_cases_are_exact` [yes]; `unit/test_risk_escalation.py::test_risk_report_proposes_provision_and_compares_with_policy` [yes]
+- *Workflow / output:* Expected value and seeded Monte Carlo (independent Bernoulli x triangular risks plus range-estimate deviations) giving P10/P50/Pxx/P90, per-risk contribution, histogram and schedule-days percentiles; proposes a provision and compares it with the commercial policy's contingency + risk. Report `risk`.
+- *Limitations / dependencies:* Independence assumed (no correlation matrix), triangular distributions only, schedule impacts summed without critical-path logic. The result is a PROPOSAL; the commercial policy is changed only by an approved policy revision. No inputs shipped. Depends on: RSK-03.
 - *Acceptance test to mark complete:* A seeded Monte Carlo over approved distributions reproduces published P50/P80 within tolerance; contingency derived at a client-selected confidence level.
 
 **RSK-05 - Escalation: single percentage on an explicit base**  
-*Status:* Partial · *needed from level:* 4 · *kind:* engine
-- *Code:* `app/estimators/commercial.py::compute_commercial`
-- *Tests:* `unit/test_commercial.py::test_contingency_base_is_explicit_and_changes_result` [partly] (escalation base shares the validation path)
-- *Workflow / output:* Escalation line in the commercial trace.
-- *Limitations / dependencies:* No time-phasing against the programme, no index-linked escalation (stored CCI data is not consumed), no per-commodity/labour/currency escalation, no base-date handling. Depends on: DUR-05, RTE-06.
+*Status:* Implemented and tested · *needed from level:* 4 · *kind:* engine
+- *Code:* `app/estimators/escalation.py::phase`; `app/estimators/escalation.py::factor`; `app/services/risk.py::escalation_report`; `app/estimators/param_kinds.py::_escalation`
+- *Tests:* `unit/test_risk_escalation.py::test_escalation_factor_and_phasing_hand_calculated` [yes] ((1+10%)^(6/12) = 1.0488...); `unit/test_risk_escalation.py::test_escalation_report_hand_calculated_and_scoped` [yes]; `unit/test_risk_escalation.py::test_escalation_scope_by_kind_and_overlap_protection` [yes] (overlapping profiles refused)
+- *Workflow / output:* Time-phased escalation by programme month from each approved profile's base date, scoped by cost kind and/or cost-code prefix; overlap is refused so nothing is escalated twice; official index values can be shown beside it. Report `escalation`. The policy's single-percentage escalation remains available.
+- *Limitations / dependencies:* Percentages and base dates are the company's decision (no forecast, no index-derived default). Cost not tied to a task is not escalated and is listed. Compounding is annual-rate continuous-fraction. Depends on: DUR-05, RTE-06.
 - *Acceptance test to mark complete:* Escalation is computed per cost element over the programme from an approved index and base date with hand-checkable results.
 
 **CUR-01 - Foreign-currency rates converted with APPROVED, dated FX; unresolved FX leaves the line unpriced**  
@@ -952,11 +953,11 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* A USD project with mixed SAR/USD rates produces a USD schedule, with every conversion in the basis text.
 
 **CUR-03 - Currency exposure and hedging (multi-currency packages, exposure by currency, FX sensitivity)**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Cost lines record currency and FX, but no exposure report or sensitivity exists. Depends on: CUR-01.
+*Status:* Implemented and tested · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/services/landed.py::exposure_report`; `app/estimators/param_kinds.py::_hedge`
+- *Tests:* `unit/test_landed_labour_exposure.py::test_exposure_report_split_hedge_and_sensitivity` [yes] (USD 3,750 SAR-equivalent, 60% hedged, 10% shock -> 150); `unit/test_landed_labour_exposure.py::test_landed_rate_is_a_proposal_that_needs_normal_approval_and_changes_exposure` [yes]
+- *Workflow / output:* Priced direct cost by quotation currency (landed-cost rates split by their recorded exposure), approved hedge cover per currency and what-if sensitivity steps. Report `currency_exposure`.
+- *Limitations / dependencies:* Sensitivity steps are what-if magnitudes, not forecasts. Hedge instruments are recorded as cover percentages, not modelled. Home-currency items carry no FX exposure in the view. Depends on: CUR-01.
 - *Acceptance test to mark complete:* A report lists cost by original currency and the effect of +/-x% FX movement.
 
 ### K. Supplier quotations, bid levelling and procurement
@@ -968,8 +969,8 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 | PRO-03 | Quotation capture, validity/expiry, tax and delivery basis, unit/currency, deviations/exclusions; import from completed RFQ sheet | IT Implemented and tested | 4 |
 | PRO-04 | Bid levelling: normalised price (tax, currency, units), coverage, missing items, adjustments (approved), spec differences | IT Implemented and tested | 4 |
 | PRO-05 | Supplier selection requiring human approval with reasons and value-threshold role | IT Implemented and tested | 4 |
-| PRO-06 | Vendor prequalification, technical bid evaluation scoring, long-lead tracking, vendor data/ITP, PO/subcontract award management | PA Partial | 2 |
-| PRO-07 | Subcontract package scope/interface matrix and double-count control across packages | PA Partial | 4 |
+| PRO-06 | Vendor prequalification, technical bid evaluation scoring, long-lead tracking, vendor data/ITP, PO/subcontract award management | IT Implemented and tested | 2 |
+| PRO-07 | Subcontract package scope/interface matrix and double-count control across packages | IT Implemented and tested | 4 |
 
 **PRO-01 - Procurement needs detection from the strict estimate (missing/expired/unapproved/low-confidence rates), packages by trade**  
 *Status:* Implemented and tested · *needed from level:* 4 · *kind:* engine
@@ -1012,19 +1013,19 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Selection cannot be approved without reason when not lowest like-for-like; threshold role enforced.
 
 **PRO-06 - Vendor prequalification, technical bid evaluation scoring, long-lead tracking, vendor data/ITP, PO/subcontract award management**  
-*Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `app/services/suppliers.py::qualify_supplier`
-- *Tests:* `procurement/test_procurement.py::test_supplier_contacts_need_a_source` [partly] (supplier master data only)
-- *Workflow / output:* Supplier directory with qualification flag.
-- *Limitations / dependencies:* No scoring model, award/PO documents, delivery schedules, expediting, inspection or vendor-document control.
+*Status:* Implemented and tested · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/estimators/bid_eval.py::evaluate`; `app/services/bids.py::record_score`; `app/services/bids.py::evaluation_report`; `app/services/bids.py::add_long_lead`; `app/services/bids.py::long_lead_report`; `app/estimators/param_kinds.py::_eval_criteria`
+- *Tests:* `unit/test_bids_scope.py::test_evaluation_hand_calculated_with_gate_minimum_and_incomplete` [yes] (Q2 79 > Q1 76; gate and minimum disqualify; incomplete not ranked); `unit/test_bids_scope.py::test_weights_must_total_100_and_passfail_has_no_weight` [yes]; `unit/test_bids_scope.py::test_scores_need_evidence_valid_ranges_and_authority` [yes]; `unit/test_bids_scope.py::test_report_uses_levelled_prices_and_latest_score` [yes]; `unit/test_bids_scope.py::test_long_lead_dates_hand_calculated` [yes]
+- *Workflow / output:* Approved evaluation criteria (weights sum to 100, pass/fail gates, minimum scores, prequalification or bid stage), evidence-bearing scores, weighted ranking with levelled prices, and long-lead tracking (latest order date, float, vendor-data due/received). Reports `bid_evaluation`, `long_lead`; late items raise reconciliation findings. Advisory: selection/award stay the separate human-approved procurement decision.
+- *Limitations / dependencies:* Criteria and weights come from the tender evaluation plan (none shipped). Vendor prequalification is scored with the same engine; certificates/financial checks are recorded as evidence text, not verified. No supplier performance history.
 - *Acceptance test to mark complete:* A package award produces an award record, delivery milestones and technical/commercial scores traceable to the bid evaluation.
 
 **PRO-07 - Subcontract package scope/interface matrix and double-count control across packages**  
-*Status:* Partial · *needed from level:* 4 · *kind:* engine
-- *Code:* `app/reconciliation/engine.py::collect_findings`; `app/ai/service.py::spec_diff`
-- *Tests:* `reconciliation/test_recon.py::test_double_count_subcontract_is_critical` [yes]; `reconciliation/test_recon.py::test_duplicate_items_and_cost_in_multiple_packages` [yes]
-- *Workflow / output:* DOUBLE_COUNT / PRICED_BUT_EXCLUDED findings.
-- *Limitations / dependencies:* No interface-responsibility matrix; detection is rule-based with false positives/negatives.
+*Status:* Implemented and tested · *needed from level:* 4 · *kind:* engine
+- *Code:* `app/services/bids.py::set_scope`; `app/services/bids.py::interface_report`; `app/reconciliation/ext_rules.py::collect_extended`
+- *Tests:* `unit/test_bids_scope.py::test_interface_matrix_detects_double_count_gap_and_open_interface` [yes]; `reconciliation/test_extended_rules.py::test_package_double_count_is_critical_and_cannot_be_waived` [yes]
+- *Workflow / output:* Package scope / interface matrix per BOQ item or cost-code prefix (included / excluded / by others with a named counterpart); finds items included in two packages (Critical, cannot be waived), subcontract items in no package and interfaces the counterpart does not close. Report `interface_matrix`.
+- *Limitations / dependencies:* The matrix is typed by people; the software does not read subcontract documents. It is only checked once at least one scope entry exists.
 - *Acceptance test to mark complete:* Interface matrix completeness is reported per package.
 
 ### L. Cost control: CBS roll-ups, benchmarks, cash flow, forecasts, change orders, revisions
@@ -1033,11 +1034,11 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 |---|---|---|---|
 | CTL-01 | Actual-cost capture with mandatory source; estimate-vs-actual and productivity variance by cost code/resource | IT Implemented and tested | 4 |
 | CTL-02 | Estimate revision control: frozen versions, version differences, approval status per version | IT Implemented and tested | 4 |
-| CTL-03 | Benchmarking: cost ratios, historical analogues, rate/productivity reasonableness checks | PA Partial | 3 |
-| CTL-04 | Cash flow / S-curve / payment-schedule forecast and financing cost | MI Missing | 3 |
-| CTL-05 | Forecasting and earned-value control during execution | MI Missing | 1 |
-| CTL-06 | Change orders / variation management after award (pricing, approval, audit, cumulative effect) | MI Missing | 1 |
-| CTL-07 | Cost roll-up by CBS level (division, sub-trade, cost code) | PA Partial | 4 |
+| CTL-03 | Benchmarking: cost ratios, historical analogues, rate/productivity reasonableness checks | IT Implemented and tested | 3 |
+| CTL-04 | Cash flow / S-curve / payment-schedule forecast and financing cost | IT Implemented and tested | 3 |
+| CTL-05 | Forecasting and earned-value control during execution | IT Implemented and tested | 1 |
+| CTL-06 | Change orders / variation management after award (pricing, approval, audit, cumulative effect) | IT Implemented and tested | 1 |
+| CTL-07 | Cost roll-up by CBS level (division, sub-trade, cost code) | IT Implemented and tested | 4 |
 
 **CTL-01 - Actual-cost capture with mandatory source; estimate-vs-actual and productivity variance by cost code/resource**  
 *Status:* Implemented and tested · *needed from level:* 4 · *kind:* engine
@@ -1056,43 +1057,43 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Compare v1 and v2 by CBS code with explained deltas.
 
 **CTL-03 - Benchmarking: cost ratios, historical analogues, rate/productivity reasonableness checks**  
-*Status:* Partial · *needed from level:* 3 · *kind:* engine
-- *Code:* `app/ai/service.py::find_historical`; `app/reporting/history.py::rate_changes`
-- *Tests:* `approvals/test_ai_boundary.py::test_deterministic_features_work_without_any_ai` [partly] (find_historical returns [] on empty history; quality untested)
-- *Workflow / output:* Similar-item search on the Mapping page.
-- *Limitations / dependencies:* Keyword search of past BOQ items only. No cost/m2, cost/inch-dia, MH/unit or %-of-direct benchmark library; ASMP-L-013 (deviation threshold) is a definition only.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/services/provisions.py::benchmark_report`; `app/estimators/param_kinds.py::_benchmark`; `app/reconciliation/ext_rules.py::collect_extended`
+- *Tests:* `unit/test_provisions.py::test_benchmark_report_flags_outliers_and_says_nothing_without_ranges` [yes]; `unit/test_provisions.py::test_benchmark_validation` [yes]; `reconciliation/test_extended_rules.py::test_extended_findings_raised_with_configured_severity` [yes]
+- *Workflow / output:* Reasonableness checks against the company's own approved ranges: unit cost per BOQ unit by cost prefix, share of direct cost by kind, hours per unit; outliers raise a Medium reconciliation finding. Report `benchmarks`.
+- *Limitations / dependencies:* No benchmark ranges are shipped - without them no check is made (and it says so). Currency must match (no silent conversion). Historical analogue search beyond the existing similar-item search is not built.
 - *Acceptance test to mark complete:* Estimate is compared with approved benchmark ranges; deviations beyond an approved threshold raise findings.
 
 **CTL-04 - Cash flow / S-curve / payment-schedule forecast and financing cost**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Needs a cost-loaded programme and payment terms (DUR-05). Depends on: DUR-05.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/cashflow.py::build`; `app/services/cashflow.py::cashflow_report`; `app/services/cashflow.py::propose_financing_indirects`; `app/estimators/param_kinds.py::_payment_terms`
+- *Tests:* `unit/test_cashflow.py::test_cashflow_hand_worked_schedule` [yes] (balances -50, -144.25, -33.1925, 85.225575; interest 2.274425; bond 1.25); `unit/test_cashflow.py::test_supplier_credit_and_zero_financing_cases` [yes]; `unit/test_cashflow.py::test_service_report_proposals_and_estimate_unchanged` [yes]
+- *Workflow / output:* Monthly contract cash flow from approved payment terms (advance, retention and release, certification/payment lags, supplier credit, performance bond, financing rate): peak funding, interest and bond cost; financing and bond cost proposed as Draft indirect items. Report `cashflow`.
+- *Limitations / dependencies:* Value earned follows cost incurred (no margin loading), VAT excluded, interest on negative balances only, one bond type. All terms come from the contract/bank/supplier; none shipped. Depends on: DUR-05.
 - *Acceptance test to mark complete:* Monthly cash flow from a cost-loaded programme and approved payment terms reconciles to the total price.
 
 **CTL-05 - Forecasting and earned-value control during execution**  
-*Status:* Missing · *needed from level:* 1 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Application scope ends at tender; no progress, commitments or forecast-to-complete. Depends on: CTL-01, LIB-02.
+*Status:* Implemented and tested · *needed from level:* 1 · *kind:* engine
+- *Code:* `app/estimators/evm.py::metrics`; `app/services/controls.py::evm_report`; `app/services/controls.py::record_progress`
+- *Tests:* `unit/test_controls.py::test_evm_arithmetic_and_undefined_ratios` [yes]; `unit/test_controls.py::test_evm_report_hand_calculated` [yes] (PV 937.5, EV 750, AC 800 -> CPI 0.9375, SPI 0.8, EAC 2000); `unit/test_controls.py::test_progress_validation_and_frozen_version_baseline` [yes]
+- *Workflow / output:* Earned value at a data date: planned value from the programme, earned value from human-entered task progress (with basis), actuals from recorded costs; CPI/SPI, EAC (two methods), ETC, VAC, TCPI; baseline from the live estimate or a frozen version's snapshot. Report `earned_value`.
+- *Limitations / dependencies:* Progress percentages and actual costs are entered by people with their basis/source; linear planned value; cost not tied to a task is outside the metrics. Forecasts are analyses. Depends on: CTL-01, LIB-02.
 - *Acceptance test to mark complete:* EAC/ETC from actuals and progress per control account.
 
 **CTL-06 - Change orders / variation management after award (pricing, approval, audit, cumulative effect)**  
-*Status:* Missing · *needed from level:* 1 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. Pre-award BOQ change requests exist (SCO-05) but they are not contract variations.
-- *Limitations / dependencies:* No variation register, no pricing from the approved library against a baseline, no approval chain with client reference. Depends on: CTL-02.
+*Status:* Implemented and tested · *needed from level:* 1 · *kind:* engine
+- *Code:* `app/services/controls.py::create_variation`; `app/services/controls.py::price_variation`; `app/services/controls.py::submit_variation`; `app/services/controls.py::decide_variation`; `app/services/controls.py::contract_status`
+- *Tests:* `unit/test_controls.py::test_variation_pricing_lifecycle_and_authority` [yes] (1,000 + 10% + 5% = 1,155; Commercial Approver only; self-approval blockable); `unit/test_controls.py::test_unpriced_resource_blocks_submission_never_priced_at_zero` [yes]; `unit/test_controls.py::test_contract_status_original_plus_approved_variations` [yes]
+- *Workflow / output:* Variations priced from eligible approved rates with the approved contract markup, frozen at submission, decided by a Commercial Approver, with original/revised contract sum, pending exposure and time impact. Report `contract_status`.
+- *Limitations / dependencies:* Resource-based pricing only (lump-sum quotations from subcontractors are not modelled as variation lines); claims, notices and entitlement assessment are outside scope. Contract baseline is entered from the signed contract. Depends on: CTL-02.
 - *Acceptance test to mark complete:* A variation is priced from approved rates against the awarded baseline, approved, and cumulatively reported.
 
 **CTL-07 - Cost roll-up by CBS level (division, sub-trade, cost code)**  
-*Status:* Partial · *needed from level:* 4 · *kind:* engine
-- *Code:* `app/estimators/types.py::DirectCostResult`; `app/reporting/history.py::estimate_vs_actual`
-- *Tests:* `integration/test_final_flow.py::test_estimate_numbers` [partly] (totals tested, per-code roll-up not)
-- *Workflow / output:* `DirectCostResult.by_cost_code()` feeds variance reports; no stand-alone roll-up page/report.
-- *Limitations / dependencies:* Direct cost only; indirects/commercials not allocated to codes in a report. Depends on: LIB-01.
+*Status:* Implemented and tested · *needed from level:* 4 · *kind:* engine
+- *Code:* `app/services/wbs.py::rollup_report`; `app/estimators/rollup.py::tree_rollup`
+- *Tests:* `unit/test_wbs_rollup.py::test_rollup_report_ties_to_estimate_and_wbs_scoped_by_item` [yes] (parent includes child; ties out; unassigned shown)
+- *Workflow / output:* Direct cost rolled up the full cost-code tree (division, sub-trade, code) and the WBS, with a WBS x division matrix; ties out to the estimate. Report `rollup`.
+- *Limitations / dependencies:* Direct cost only; indirects and commercial adders are shown at project level, not allocated down the tree in this report. Depends on: LIB-01.
 - *Acceptance test to mark complete:* Roll-up report by any level whose total equals the estimate.
 
 ### M. Commissioning, start-up, handover, close-out
@@ -1101,30 +1102,30 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 |---|---|---|---|
 | CLO-01 | Testing, pre-commissioning, commissioning, start-up and performance tests | PA Partial | 3 |
 | CLO-02 | Handover documentation, training, O&M manuals, warranties/defects-liability and spares | PA Partial | 4 |
-| CLO-03 | Retention, bonds, advance payments, financing and final-account/close-out costing | MI Missing | 3 |
+| CLO-03 | Retention, bonds, advance payments, financing and final-account/close-out costing | IT Implemented and tested | 3 |
 
 **CLO-01 - Testing, pre-commissioning, commissioning, start-up and performance tests**  
 *Status:* Partial · *needed from level:* 3 · *kind:* engine
-- *Code:* `data/taxonomy/cost_codes.csv`; `app/estimators/direct_cost.py::compute_direct_cost`
-- *Tests:* `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (cost codes exist)
-- *Workflow / output:* Priceable via L.09, H.13, I.10, A.08 and commissioning labour definitions.
-- *Limitations / dependencies:* No system/loop-based commissioning model, vendor-representative, consumables/spares, or start-up support build-up; no commissioning sequencing. Depends on: EST-12.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `app/services/provisions.py::reserve_proposals`; `data/taxonomy/cost_codes.csv`; `app/estimators/direct_cost.py::compute_direct_cost`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_provisions.py::test_reserve_proposals_are_draft_indirects_with_hand_calculated_amounts` [yes]; `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (cost codes exist)
+- *Workflow / output:* Priceable via L.09, H.13, I.10, A.08 and commissioning labour definitions. Template and reserve-rule framework added.
+- *Limitations / dependencies:* Pre-commissioning/commissioning/start-up use the `commissioning.system` template (per system) plus a governed reserve rule; performance-test costing and client commissioning procedures are not modelled. Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Earlier audit note: No system/loop-based commissioning model, vendor-representative, consumables/spares, or start-up support build-up; no commissioning sequencing. Depends on: EST-12.
 - *Acceptance test to mark complete:* Commissioning cost is derived from a systems/loops list with approved hours, vendor-rep rates and consumables.
 
 **CLO-02 - Handover documentation, training, O&M manuals, warranties/defects-liability and spares**  
 *Status:* Partial · *needed from level:* 4 · *kind:* engine
-- *Code:* `data/taxonomy/cost_codes.csv`
-- *Tests:* `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (cost codes exist)
-- *Workflow / output:* Priceable as items under L.07/L.08/A.10.
-- *Limitations / dependencies:* No warranty-reserve or spares-list logic.
+- *Code:* `app/estimators/mto.py::derive`; `app/services/mto.py::apply`; `app/services/mto.py::preview`; `app/services/provisions.py::reserve_proposals`; `data/taxonomy/cost_codes.csv`
+- *Tests:* `unit/test_mto.py::test_engine_derive_hand_calculated_missing_and_skipped` [yes] (driver x factor x (1+waste); missing slot yields nothing); `unit/test_mto.py::test_apply_pricing_gate_and_hand_calculated_cost` [yes] (derived lines are Pending Review until a person approves the pricing); `unit/test_provisions.py::test_reserve_proposals_are_draft_indirects_with_hand_calculated_amounts` [yes]; `unit/test_library_data.py::test_every_required_trade_division_and_subtrade_is_present` [partly] (cost codes exist)
+- *Workflow / output:* Priceable as items under L.07/L.08/A.10. Template and reserve-rule framework added.
+- *Limitations / dependencies:* Handover documentation/training use `handover.documentation` plus warranty/defects reserve rules (`reserve_rule`); O&M content, warranty claims and spares optimisation are not modelled. Structure only: the template names the driver and the resource slots, but NO factor, productivity or consumption value is shipped - each is entered from company records as a governed `mto_factor` and approved. The driver quantity is the estimator's own measured figure; the software never measures drawings. Earlier audit note: No warranty-reserve or spares-list logic.
 - *Acceptance test to mark complete:* Warranty/DLP reserve derived from an approved method and period.
 
 **CLO-03 - Retention, bonds, advance payments, financing and final-account/close-out costing**  
-*Status:* Missing · *needed from level:* 3 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. ASMP-I-019..I-028 are definitions only.
-- *Limitations / dependencies:* Not consumed by the commercial engine. Depends on: CTL-04.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/cashflow.py::build`; `app/services/cashflow.py::propose_financing_indirects`; `app/services/controls.py::contract_status`
+- *Tests:* `unit/test_cashflow.py::test_cashflow_hand_worked_schedule` [yes]; `unit/test_controls.py::test_contract_status_original_plus_approved_variations` [yes]
+- *Workflow / output:* Retention (with release at completion and after the defects period), advance payment and recovery, performance-bond fee, financing interest and the revised contract sum after approved variations.
+- *Limitations / dependencies:* Final-account statements, certificates and retention release correspondence are not generated. Advance bonds and parent-company guarantees are not modelled separately. Depends on: CTL-04.
 - *Acceptance test to mark complete:* Bond/retention/financing costs derive from approved terms and the cash-flow forecast.
 
 ### N. Saudi-specific requirements and configurable client compliance profiles
@@ -1133,10 +1134,10 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 |---|---|---|---|
 | SAU-01 | Saudi basics: SAR default, region applicability by code (no multipliers), Arabic BOQ headers/descriptions, Arabic RFQ draft | IT Implemented and tested | 5 |
 | SAU-02 | VAT 15% as a dated, verified category (seeded Pending Review) with verification evidence | IT Implemented and tested | 5 |
-| SAU-03 | Saudi labour cost rules: Saudization/Nitaqat, expatriate levy, iqama and visa, GOSI, end-of-service, Ramadan and overtime working-hours rules | MI Missing | 2 |
-| SAU-04 | Local content / in-kingdom value (e.g. IKTVA-type evaluation), national procurement preferences | MI Missing | 1 |
+| SAU-03 | Saudi labour cost rules: Saudization/Nitaqat, expatriate levy, iqama and visa, GOSI, end-of-service, Ramadan and overtime working-hours rules | IT Implemented and tested | 2 |
+| SAU-04 | Local content / in-kingdom value (e.g. IKTVA-type evaluation), national procurement preferences | PA Partial | 1 |
 | SAU-05 | Saudi Building Code, authority fees/permits, municipal and utility approvals | PA Partial | 4 |
-| SAU-06 | Configurable client compliance profiles (mandatory forms, templates, code lists, rules, estimate classification, approvals) per client | MI Missing | 1 |
+| SAU-06 | Configurable client compliance profiles (mandatory forms, templates, code lists, rules, estimate classification, approvals) per client | IT Implemented and tested | 1 |
 | SAU-07 | Saudi Aramco-type project requirements (controlled standards, forms, estimating procedures, vendor lists) | MI Missing | 1 |
 
 **SAU-01 - Saudi basics: SAR default, region applicability by code (no multipliers), Arabic BOQ headers/descriptions, Arabic RFQ draft**  
@@ -1156,19 +1157,19 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Commercial Approver approves with evidence; estimate resolves tax.
 
 **SAU-03 - Saudi labour cost rules: Saudization/Nitaqat, expatriate levy, iqama and visa, GOSI, end-of-service, Ramadan and overtime working-hours rules**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. Working-hours rules (HRSD) are recorded as a reference note only; labour components are generic.
-- *Limitations / dependencies:* Would need approved rule data (not available in-repo) and a labour build-up that uses it. Depends on: RTE-02.
+*Status:* Implemented and tested · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/estimators/labour_costs.py::statutory_monthly`; `app/estimators/labour_costs.py::blend`; `app/estimators/labour_costs.py::national_target_check`; `app/services/labour.py::propose_labour_rate`; `app/services/labour.py::workforce_report`
+- *Tests:* `unit/test_landed_labour_exposure.py::test_statutory_monthly_and_workforce_blend_hand_calculated` [yes] (10% + 800 levy + 1200/12 visa + 5% + 2400/12 = 1,200/500); `unit/test_landed_labour_exposure.py::test_labour_buildup_with_user_rules_and_workforce_check` [yes]
+- *Workflow / output:* Labour build-up with governed statutory/mobilisation rules per nationality group, workforce-mix blended cost and a check of the national-workforce share against an approved target (programme/contract), proposed as a Draft/Pending labour rate with the rule versions recorded.
+- *Limitations / dependencies:* The framework contains no wage, levy, insurance or accrual value and no nationalisation-programme band definitions: they are entered from the applicable regulation and approved. Compliance with any programme is not asserted - only the arithmetic against the target the user supplied. Depends on: RTE-02.
 - *Acceptance test to mark complete:* A labour rate is built from approved statutory components and a Ramadan/overtime pattern, reproducing the company's payroll costing.
 
 **SAU-04 - Local content / in-kingdom value (e.g. IKTVA-type evaluation), national procurement preferences**  
-*Status:* Missing · *needed from level:* 1 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Client-specific controlled methodology required; none is in the repository. Depends on: SAU-06.
+*Status:* Partial · *needed from level:* 1 · *kind:* engine
+- *Code:* `app/estimators/bid_eval.py::evaluate`; `app/services/bids.py::evaluation_report`; `app/estimators/param_kinds.py::_eval_criteria`
+- *Tests:* `unit/test_bids_scope.py::test_evaluation_hand_calculated_with_gate_minimum_and_incomplete` [yes]; `unit/test_bids_scope.py::test_weights_must_total_100_and_passfail_has_no_weight` [yes]
+- *Workflow / output:* A local-content / in-country-value criterion can be one of the weighted, evidence-scored criteria of a bid evaluation (weight, minimum score or pass/fail gate) as set by the tender's evaluation plan.
+- *Limitations / dependencies:* No owner's local-content method (e.g. an in-kingdom value formula, certificates, supplier lists) is implemented or supplied; the evaluator enters the score with evidence. No national-preference price adjustments are computed. Depends on: SAU-06.
 - *Acceptance test to mark complete:* Scoring inputs captured per bid package and the client's published scoring method reproduced from controlled documents.
 
 **SAU-05 - Saudi Building Code, authority fees/permits, municipal and utility approvals**  
@@ -1180,12 +1181,12 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Permit/fee schedule per authority maintained as approved data.
 
 **SAU-06 - Configurable client compliance profiles (mandatory forms, templates, code lists, rules, estimate classification, approvals) per client**  
-*Status:* Missing · *needed from level:* 1 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None. Reconciliation rules are configurable (config/reconciliation_rules.json) but there is no client-profile layer and no client template mechanism beyond editing files.
-- *Limitations / dependencies:* Needs a profile schema, controlled-document references, versioning, and per-profile templates/validators. See the profile design in ESTIMATING_GAP_ROADMAP.md. Depends on: BOE-04, LIB-02.
-- *Acceptance test to mark complete:* Selecting a profile applies its CBS/WBS mapping, forms, class definitions and mandatory checks; export is blocked for unmet mandatory items; the profile records which controlled document/revision it implements.
+*Status:* Implemented and tested · *needed from level:* 1 · *kind:* engine
+- *Code:* `app/services/profiles.py::create_profile`; `app/services/profiles.py::approve_profile`; `app/services/profiles.py::compliance_report`; `app/estimators/profile_checks.py::evaluate`; `app/reconciliation/ext_rules.py::collect_extended`
+- *Tests:* `unit/test_profiles_boe.py::test_check_evaluation_and_unknown_facts_are_not_assessable` [yes]; `unit/test_profiles_boe.py::test_profile_validation_and_authority` [yes]; `unit/test_profiles_boe.py::test_compliance_matrix_never_claims_beyond_loaded_requirements` [yes]; `reconciliation/test_extended_rules.py::test_extended_findings_raised_with_configured_severity` [yes]
+- *Workflow / output:* Client/owner profile framework: a versioned list of requirements loaded from the owner's controlled documents, each with a source reference and either an automatic check on measured facts or a human attestation with evidence; approved by a Commercial Approver; mandatory unmet items raise reconciliation findings; the statement is scoped to the loaded requirements. CLI `profile`, report `compliance`.
+- *Limitations / dependencies:* The software ships NO profile content. Templates, forms, code lists and bilingual deliverables of a client (OUT-05) are not generated. Only the fact checks in `profile_checks.FACT_HELP` can be automated; everything else is an attestation. Depends on: BOE-04, LIB-02.
+- *Acceptance test to mark complete:* Selecting a profile applies its CBS/WBS cross-walk, mandatory checks and class definitions; the profile records the controlled document/revision it implements (template generation not built).
 
 **SAU-07 - Saudi Aramco-type project requirements (controlled standards, forms, estimating procedures, vendor lists)**  
 *Status:* Missing · *needed from level:* 1 · *kind:* engine
@@ -1203,7 +1204,7 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 | GOV-02 | AI/automation cannot approve; AI output is review-pending; automated source code cannot reach approve/publish | IT Implemented and tested | 5 |
 | GOV-03 | Hash-chained audit log; backup validation re-verifies it (tamper-evident, not tamper-proof) | IT Implemented and tested | 5 |
 | GOV-04 | Estimate input snapshots: verify pinned rate rows unchanged, list newer approved rates, replay direct cost from the snapshot | IT Implemented and tested | 4 |
-| GOV-05 | Full replay of a frozen estimate (indirects, commercial, tax, schedule) from its snapshot | PA Partial | 3 |
+| GOV-05 | Full replay of a frozen estimate (indirects, commercial, tax, schedule) from its snapshot | IT Implemented and tested | 3 |
 | GOV-06 | Reconciliation: 37 configurable rules, exceptions, final gate re-run at approval and export | IT Implemented and tested | 5 |
 | GOV-07 | Gated commercial exports: SUBMISSION READY only after approved version + offer + tender-export approval + fresh reconciliation; otherwise PRELIMINARY watermark | IT Implemented and tested | 5 |
 | GOV-08 | No autonomous tender submission: no e-mail/FTP/portal automation; outputs are files for a human to send | IT Implemented and tested | 5 |
@@ -1245,11 +1246,11 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Approve a new global rate; replay of an old version equals its frozen direct cost.
 
 **GOV-05 - Full replay of a frozen estimate (indirects, commercial, tax, schedule) from its snapshot**  
-*Status:* Partial · *needed from level:* 3 · *kind:* engine
-- *Code:* `app/services/snapshots.py::replay_direct_cost`
-- *Tests:* `workspaces/test_workspaces.py::test_snapshot_keeps_frozen_estimate_reproducible_after_a_new_rate_is_approved` [partly] (direct cost only)
-- *Workflow / output:* Snapshot JSON stores policy, tax, indirect rows and duration for audit.
-- *Limitations / dependencies:* Replay engine covers direct cost only; the commercial tail is not recomputed.
+*Status:* Implemented and tested · *needed from level:* 3 · *kind:* engine
+- *Code:* `app/estimators/estimate.py::compute_estimate_from`; `app/estimators/estimate.py::EstimateExtras`; `app/services/snapshots.py::replay_estimate`; `app/services/snapshots.py::extras_from_snapshot`
+- *Tests:* `unit/test_full_replay.py::test_replay_reproduces_frozen_totals_after_everything_changes` [yes] (rate, factor, indirect, tax changed afterwards; full replay still equals the frozen totals); `unit/test_full_replay.py::test_legacy_snapshot_without_extras_still_replays` [yes]; `unit/test_full_replay.py::test_replay_detects_a_tampered_snapshot_and_changed_engine_inputs` [yes]
+- *Workflow / output:* `replay_estimate(version)` recomputes direct cost, indirects, commercial policy, pricing schedule and tax from the stored snapshot alone (pure `compute_estimate_from`) and compares state, fingerprint and every total; `project verify-snapshot` shows it.
+- *Limitations / dependencies:* Versions frozen before migration 0007 have no snapshot. Replays use the current engine code: an engine change that alters results shows as a difference (by design - that is what replay detects).
 - *Acceptance test to mark complete:* `replay_estimate` equals every frozen total.
 
 **GOV-06 - Reconciliation: 37 configurable rules, exceptions, final gate re-run at approval and export**  
@@ -1302,10 +1303,10 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 
 **GOV-12 - Multi-user operation, concurrency, security hardening (TLS, CSRF tokens, lockout, MFA/SSO)**  
 *Status:* Partial · *needed from level:* 2 · *kind:* engine
-- *Code:* `app/main.py::SerializeRequests`; `app/services/auth.py::authenticate`
-- *Tests:* `integration/test_api_ui.py::test_authentication_required_and_bad_tokens_rejected` [partly] (auth basics only)
-- *Workflow / output:* Local single-user/small-team tool.
-- *Limitations / dependencies:* Requests are serialised; no TLS, CSRF token, lockout, MFA or SSO; not for internet exposure.
+- *Code:* `app/security.py::Hardening`; `app/services/auth.py::authenticate`; `app/services/auth.py::unlock_user`; `app/main.py::SerializeRequests`; `app/cli.py::cmd_run`
+- *Tests:* `integration/test_security_hardening.py::test_cookie_authenticated_write_needs_same_origin` [yes]; `integration/test_security_hardening.py::test_security_headers_present_and_pages_not_cached` [yes]; `integration/test_security_hardening.py::test_lockout_after_repeated_failures_even_for_unknown_names_and_admin_unlock` [yes]; `integration/test_security_hardening.py::test_cli_refuses_open_network_without_tls` [yes]; `integration/test_api_ui.py::test_authentication_required_and_bad_tokens_rejected` [yes]
+- *Workflow / output:* Same-origin check for cookie-authenticated writes, CSP and other security headers, no-store caching, Secure cookies and HSTS over TLS, sign-in lockout with administrator unlock, TLS flags on `run` and refusal to listen on a non-loopback address without TLS.
+- *Limitations / dependencies:* Not provided: MFA/SSO, per-folder ACLs, encrypted backups, rotation of the signing key, true multi-user concurrency (requests are serialised), rate limiting by IP, a third-party penetration test. Not for internet exposure without a reverse proxy and a security review.
 - *Acceptance test to mark complete:* Security review passed and load-tested with concurrent estimators.
 
 ### P. Excel and document outputs
@@ -1316,7 +1317,7 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 | OUT-02 | Round-trip import: edits become drafts/proposals; status/approval columns and forged values ignored; formula tampering detected | IT Implemented and tested | 5 |
 | OUT-03 | Microsoft Excel compatibility (recalculation on open, MINIFS, protection, validations) | IU Implemented but unverified | 5 |
 | OUT-04 | Client pricing schedule, letter of offer and estimate report with exact reconciliation, hash-matched offer and visible exceptions | IT Implemented and tested | 5 |
-| OUT-05 | Client-specific tender forms/schedules of rates and bilingual deliverables | MI Missing | 2 |
+| OUT-05 | Client-specific tender forms/schedules of rates and bilingual deliverables | PA Partial | 2 |
 
 **OUT-01 - 27-sheet master workbook + 10 standalone workbooks + 2 Word templates, spec-driven, recalculated and checked with LibreOffice**  
 *Status:* Implemented and tested · *needed from level:* 5 · *kind:* engine
@@ -1351,12 +1352,12 @@ Statuses: **Implemented and tested**, **Implemented but unverified**, **Partial*
 - *Acceptance test to mark complete:* Schedule total equals net price to the halala (or the bounded rounding variance is reported).
 
 **OUT-05 - Client-specific tender forms/schedules of rates and bilingual deliverables**  
-*Status:* Missing · *needed from level:* 2 · *kind:* engine
-- *Code:* none (nothing implements this)
-- *Tests:* none
-- *Workflow / output:* None.
-- *Limitations / dependencies:* Depends on client profiles (SAU-06) and templates the user is authorised to hold. Depends on: SAU-06.
-- *Acceptance test to mark complete:* Each mandatory client form is generated or pre-filled from recorded data.
+*Status:* Partial · *needed from level:* 2 · *kind:* engine
+- *Code:* `app/exports/client_form.py::fill`; `app/services/estimates.py::export_client_form`; `app/services/estimates.py::require_export_gate`; `app/api/actions_ext.py::export_client_form`
+- *Tests:* `integration/test_full_workflow.py::test_complete_workflow_to_gated_submission_export` [yes] (client form filled by item code; formulas untouched; gated like the submission package; preliminary copy labelled)
+- *Workflow / output:* A CLIENT-SUPPLIED schedule-of-rates / tender-form workbook is filled from the pricing schedule using a user-written JSON mapping (item-code match, quantity/unit/rate/amount/description columns, total cells, banner cell). Submission-ready only through the same tender-export approval gate; otherwise a PRELIMINARY copy. Unmatched rows on either side are reported.
+- *Limitations / dependencies:* The software ships no client form or mapping - the user supplies both. No bilingual (Arabic/English) deliverable generation, no PDF, no multi-sheet forms with merged-row structures beyond cell mapping. Forms are not validated against the client's rules. Depends on: SAU-06.
+- *Acceptance test to mark complete:* A real client tender form is filled by mapping alone and the sum of the filled amounts equals the offer total (only if every client row has a schedule item).
 
 <!-- DETAIL_END -->
 

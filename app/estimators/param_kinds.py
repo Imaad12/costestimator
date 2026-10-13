@@ -339,6 +339,22 @@ def _pool(d: dict) -> dict:
             "base_kind": text(d, "base_kind", choices=("direct_cost", "labour_hours", "selling_price")), "basis": text(d, "basis")}
 
 
+@kind("method_alternative", "Construction method alternative", {E, C, A},
+      "A named alternative way of building part of the works: which BOQ items would be priced by which (approved) assemblies, and optionally the project "
+      "duration it implies, with the method statement basis. Used only for side-by-side comparison; adopting it is a normal, approved re-mapping.")
+def _method_alt(d: dict) -> dict:
+    _no_extra(d, {"name", "item_assemblies", "duration_months", "basis"}, "method_alternative")
+    ia = d.get("item_assemblies")
+    if not isinstance(ia, dict) or not ia:
+        raise ValidationFailed("item_assemblies must map at least one BOQ item key to an assembly code.", code="PARAM_FIELD")
+    clean = {}
+    for k, v in ia.items():
+        if not str(k).strip() or not str(v).strip():
+            raise ValidationFailed("item_assemblies entries need an item key and an assembly code.", code="PARAM_FIELD")
+        clean[str(k).strip()] = str(v).strip()
+    return {"name": text(d, "name"), "item_assemblies": clean, "duration_months": dec(d, "duration_months", required=False, gt="0"), "basis": text(d, "basis")}
+
+
 # Field skeletons shown on the input form: names and the shape of nested values only - never a number.
 EXAMPLES: dict[str, dict] = {
     "productivity_factor": {"category": "height", "factor": "", "scope_cost_prefix": "", "scope_wbs": ""},
@@ -362,5 +378,6 @@ EXAMPLES: dict[str, dict] = {
     "benchmark_range": {"name": "", "metric": "item_unit_cost", "cost_prefix": "", "unit": "", "kind": "", "low": "", "high": "", "currency": "", "source_note": ""},
     "reserve_rule": {"name": "", "base": "direct", "pct": "", "category": "", "basis": ""},
     "engineering_basis": {"discipline": "", "deliverable": "", "count": "", "hours_each": "", "resource_id": "", "basis": ""},
+    "method_alternative": {"name": "", "item_assemblies": {"<BOQ item key>": "<assembly code>"}, "duration_months": "", "basis": ""},
     "overhead_pool": {"name": "", "annual_cost": "", "annual_base": "", "base_kind": "direct_cost", "basis": ""},
 }

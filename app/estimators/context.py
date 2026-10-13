@@ -26,10 +26,15 @@ def _load_assembly(db: Database, code: str, project_id: str, include_unapproved:
 
 
 def load_inputs(db: Database, project_id: str, *, include_unapproved: bool = False, as_of: date | None = None,
-                assumption_overrides: dict[str, str] | None = None) -> EstimateInputs:
+                assumption_overrides: dict[str, str] | None = None, item_overrides: dict[str, str] | None = None) -> EstimateInputs:
     project = dict(db.one("SELECT * FROM projects WHERE id=?", (project_id,)))
     as_of = as_of or parse_date(project.get("rate_as_of_date")) or today()
     items = rows_to_dicts(db.all("SELECT * FROM boq_items WHERE project_id=? ORDER BY id", (project_id,)))
+    if item_overrides:                       # what-if method alternative: re-map named items to other assemblies (never stored; used only by method comparison)
+        for it in items:
+            code = item_overrides.get(it["item_key"])
+            if code and it["item_type"] == "item":
+                it.update(assembly_code=code, pricing_method="assembly", mapping_status="Approved")
 
     # ---- assemblies (recursive closure of nested assemblies)
     asm_defs: dict[str, AssemblyDef] = {}

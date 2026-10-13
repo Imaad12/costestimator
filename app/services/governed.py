@@ -10,7 +10,7 @@ import json
 from ..approvals import engine as approvals
 from ..core.errors import Conflict, NotFound, ValidationFailed
 from ..core.timeutil import now_iso
-from ..database import Database, rows_to_dicts
+from ..database import Database
 from ..estimators.param_kinds import KINDS
 from ..models.actor import Actor
 from ..models.enums import Status
@@ -41,6 +41,9 @@ def _db_checks(db: Database, kind: str, code: str, clean: dict) -> None:
     if kind == "mto_factor":
         from . import mto
         mto.check_factor(db, code, clean)
+    if kind == "method_alternative":
+        from . import methods
+        methods.check_alternative(db, clean)
 
 
 def propose(db: Database, actor: Actor, kind: str, code: str, data: dict, *, project_id: str | None = None, source: str | None = None,

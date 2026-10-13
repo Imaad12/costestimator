@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent.parent
 SKILLS = ["project-initializer", "project-indexer", "boq-import-review", "requirements-extraction", "assembly-management", "estimating-workflow",
           "rate-source-research", "rate-update-review", "subcontractor-quote-analysis", "procurement-rfq", "gantt-duration-estimation",
-          "reconciliation-check", "excel-validation", "architecture-maintenance"]
+          "reconciliation-check", "excel-validation", "architecture-maintenance", "governed-inputs-and-analysis", "client-profile-loading"]
 SECTIONS = ["Purpose", "When to use", "Required context and inputs", "Read first", "Steps", "Outputs and schemas", "Validation checks",
             "Approval requirements", "Failure handling", "Explicitly prohibited"]
 DOCS = ["ARCHITECTURE", "DATA_MODEL", "ESTIMATING_METHODOLOGY", "ASSUMPTIONS_POLICY", "APPROVAL_WORKFLOW", "EXCEL_WORKBOOK_GUIDE", "PROJECT_WORKSPACES",

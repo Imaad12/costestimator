@@ -5,7 +5,7 @@ This roadmap orders work by **dependency and risk**: first data and foundations 
 **Standing constraints for every work package:** no invented prices/rates/productivities/standards; no automatic approval; no silent overwrite of approved data or frozen estimates; no automated quantity takeoff; no autonomous tender submission; no claim of Saudi Aramco (or any client) compliance without that owner's controlled documents loaded as a profile and traced.
 
 ## 0. How the levels become "supported"
-A level is *Supported* when every engine capability required at that level is *Implemented and tested* (matrix roll-up) **and** its data prerequisites are met for the project at hand. Current verdicts: Level 5 and 4 *Conditionally supported*; Levels 3, 2, 1 *Not supported*. Exit criteria:
+A level is *Supported* when every engine capability required at that level is *Implemented and tested* (matrix roll-up) **and** its data prerequisites are met for the project at hand. Verdicts after iteration 4 (computed by the matrix roll-up): Levels 5, 4, 3 and 2 *Conditionally supported* (every required engine capability exists; the Partial ones are listed with their limits); Level 1 *Not supported* (SAU-07, owner-controlled requirements, is Missing by design - it needs the owner's documents). The first audit (commit `907fce6`) had Levels 5-4 conditional and 3-1 not supported. Exit criteria:
 | Level | Work packages that must be complete (software) | Data/human prerequisites |
 |---|---|---|
 | 5 | WP-00b (Excel check), WP-17 (DSC-01/02/PRE-01 acceptance with a pilot) | LIB-07, LIB-08 for the pilot BOQ |
@@ -13,6 +13,35 @@ A level is *Supported* when every engine capability required at that level is *I
 | 3 | Level 4 + WP-01, 02, 03, 05, 07, 08, 09, 10 | approved FX, customs/duty and escalation inputs |
 | 2 | Level 3 + WP-04, 06, 12, 13, 14, 15 | industrial catalogue, factor tables with sources, labour statutory rules (SAU-03) |
 | 1 | Level 2 + WP-19, 20, 21 | owner's controlled documents (never assumed) |
+
+## 0a. Status after iteration 4 (2026-10-13)
+Each row says what was **built and tested** and what is **still open**. "Open" is almost always data, a document the user must supply, a real network, or Microsoft Excel - not missing code.
+| WP | Status | Built and tested (matrix records) | Still open |
+|---|---|---|---|
+| WP-00a | **Open (data)** | pipeline exists (`rates import`, RFQ, candidates) | real rates and factors (LIB-07, LIB-08) - only the user can supply them |
+| WP-00b | **Open** | LibreOffice verified (217 formulas, 0 errors/mismatches) | open the workbooks in Microsoft Excel (OUT-03) |
+| WP-01 | **Done** | industrial units, admin unit management, definitions pack (SCO-04, LIB-04 partly) | - |
+| WP-02 | **Done** | WBS, cross-walk, roll-ups (LIB-02, CTL-07) | client code lists are loaded by the user |
+| WP-03 | **Done** | FS/SS/FF/SF, lags, float, constraints, calendar (DUR-02, DUR-05) | schedule-file import, Gantt, levelling |
+| WP-04 | **Done** | man-hours and loading (EST-10, DUR-04) | - |
+| WP-05 | **Partial** | productivity factors, plant minimum-hire/standby, method alternatives (EST-12, EST-05, EST-11 partial) | factor values (user data); no equipment-selection logic |
+| WP-06 | **Partial** | piping/tank templates (PRC-01, PRC-06 partial) | pipe-class and weld logic; factors |
+| WP-07 | **Done (framework)** | Basis of Estimate, classification from an approved scheme (BOE-03, BOE-04) | the scheme and ranges are the company's (BOE-05 partial) |
+| WP-08 | **Done** | landed cost, logistics, currency exposure, statutory labour (TAX-02, TAX-04, CUR-03, SAU-03) | withholding tax / zakat (TAX-03 partial) |
+| WP-09 | **Done** | quantified risk, Monte Carlo, escalation (RSK-03/04/05) | correlation between risks |
+| WP-10 | **Done** | cash flow, retention, bonds, financing (CTL-04, CLO-03) | - |
+| WP-11 | **Open** | provider tested with mocks | live run on an unrestricted network (RTE-05) |
+| WP-12 | **Partial** | pack + templates for E&I, steel, coatings, insulation, scaffolding, lifting (PRC-02/04/05/07/08/09/10 partial) | discipline assemblies need the user's factors |
+| WP-13 | **Partial** | instrument-loop and specialist-service templates (PRC-03, PRC-11) | factors |
+| WP-14 | **Partial** | temporary-facility, commissioning and handover templates + reserve rules (PRC-14, IND-02, CLO-01, CLO-02) | camp sizing, performance tests |
+| WP-15 | **Done** | statutory labour model, full replay (SAU-03, GOV-05) | - |
+| WP-16 | **Done** | bid evaluation, long-lead, interface matrix (PRO-06, PRO-07) | supplier performance history |
+| WP-17 | **Open (data)** | - | pilot BOQs per discipline (DSC-01..11, PRE-01) |
+| WP-18 | **Open** | - | live validation of requirements extraction (SCO-11), SBC/authority fees (SAU-05), OCR/CAD |
+| WP-19 | **Partial** | engineering and overhead models, shutdown and modularisation templates (ENG-01, ENG-02; PRC-12, PRC-13 partial) | shutdown logic |
+| WP-20 | **Done** | variations, contract status, earned value, benchmarks (CTL-03/05/06) | - |
+| WP-21 | **Partial** | client-profile framework, client-form export (SAU-06; OUT-05, SAU-04 partial) | **SAU-07 stays Missing**: no owner's document is loaded - no Aramco compliance is claimed |
+| WP-22 | **Partial** | estimate cache, same-origin check, headers, lockout, TLS flags; workbook export 2.3x faster (SCO-09, GOV-12 partial) | MFA/SSO, pagination, 50k-item run, ACLs |
 
 ## 1. Priority order and work packages
 Priority: **P0** blocks real use or blocks many other packages · **P1** high value, unblocks a level · **P2** needed for Level 2 · **P3** Level 1 / specialised.

@@ -28,6 +28,10 @@ Rule of thumb: **if a number or an approval matters, it is a row in the database
 * Projects: `projects` (+ `workspace_path`, `workspace_slug`, `project_type`, `trades`, `drawing_revision`, `spec_revision`), `boq_*`, `takeoff_resource_lines`, `project_durations`, `schedule_tasks`, `indirect_items`, `estimate_versions`, `estimate_snapshots`, `offers`, `clarifications`, `scope_register`, `risks`, `exports`, `recon_*`, `actual_costs`, `ai_suggestions`.
 * Documents: `project_documents` (indexer).
 * Procurement: `procurement_packages/items`, `rfqs`, `rfq_items`, `quotations/lines`, `quote_adjustments`, `quote_selections`.
+* Structure, parameters, analysis (0008): `wbs_nodes`, `boq_wbs`, `code_crosswalk`, **`governed_params`** (versioned, human-approved company/project numbers of ~20 kinds - see [GOVERNED_PARAMETERS.md](GOVERNED_PARAMETERS.md)), `analysis_runs` (immutable saved analyses, *not* approved data); `schedule_tasks.{wbs_code,snet,fnlt}`; quantified `risks.*`.
+* Take-off derivation (0009): `mto_applications`, `takeoff_resource_lines.{origin,origin_ref}` (derived lines are marked and need a pricing decision).
+* Client profiles (0010): `client_profiles`, `profile_requirements`, `project_profiles`, `profile_assessments`.
+* Bids and scope (0011): `bid_scores`, `long_lead_items`, `package_scope`. Post-award (0012): `variations`, `variation_lines`, `task_progress`. Security (0013): `login_attempts`.
 * Public sources (0007): `import_manifests`, `rate_candidates`, `index_observations`, `source_access_log`; legacy flow: `dataset_imports`, `rate_staging`.
 
 ## Stable references (what an estimate points at)
@@ -49,6 +53,12 @@ Snapshots do not exist for versions frozen before migration 0007 (reported as su
 ## Rate lifecycle across the tables
 `import / discovery` → `rate_candidates` (Pending Review) → human *Approved for Publication* (`approvals` entity `rate_candidate`) → `resource_rates` new version **Pending Review** → human `approve_rate`
 (supersedes the previous approved version for the same resource+region; old row kept) → eligible for estimates. Index series never leave `index_observations`.
+
+## Governed parameters (iteration 4)
+Numbers that a company decides (productivity factors, hire terms, calendar, escalation, payment terms, benchmark ranges, statutory rules, take-off factors, evaluation criteria ...) live in **one table**, `governed_params`, with a `kind`, `code`, `version`, `status`, validated `data_json`, a **required source**, and the approval trail in `approvals` (entity `param:<kind>`). Approved rows are immutable; a change is a new version and the approved one stays in force until the new one is approved (`governed.effective`). Project-scoped rows override company-wide rows of the same code. Direct-cost inputs of this kind are frozen into every estimate snapshot (`params`, `item_wbs`, `wbs_parent`) so replays do not depend on later changes. The library ships **empty**.
+
+## Replay and frozen estimates (iteration 4)
+`estimate_snapshots` now also store `extras` (duration rows, indirect rows, resolved commercial policy and the assumptions it used, tax categories). `compute_estimate_from(inputs, extras)` is pure, so `replay_estimate(version)` recomputes the whole estimate (direct, indirects, commercial, schedule, tax) from the snapshot alone and compares the fingerprint and every total; snapshots written before `extras` existed are rebuilt from their older keys.
 
 ## Migration rules
 Forward-only numbered SQL (`app/migrations`), applied once, recorded in `schema_migrations`. Restructuring of *files* goes through `migrate-workspaces` (dry-run, backup, report, copy-only).

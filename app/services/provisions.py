@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from ..approvals import engine as approvals
 from ..core.errors import ValidationFailed
-from ..core.money import ZERO, D, D_opt, quantize, to_text
+from ..core.money import ZERO, D, quantize, to_text
 from ..core.units import registry
 from ..database import Database
 from ..estimators.resource_pricing import price_resource_hours

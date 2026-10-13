@@ -295,6 +295,40 @@ def test_complete_workflow_to_gated_submission_export(demo):
     flat = " ".join(str(c.value) for row in ws.iter_rows() for c in row if c.value is not None).lower()
     assert "markup" not in flat and "contingency" not in flat and "direct cost" not in flat
     assert db.scalar("SELECT COUNT(*) FROM exports WHERE submission_ready=1") == 4
+    # ---- client-supplied tender form (OUT-05): matched on item code, only mapped cells written, formulas untouched, gated like every submission-ready file
+    from openpyxl import Workbook, load_workbook
+    tpl = Path(files["pricing_schedule"]).parent / "client_template_test.xlsx"
+    twb = Workbook(); tws = twb.active; tws.title = "Schedule of Rates"
+    tws["A1"] = "CLIENT TENDER FORM"
+    priced = [l for l in sch.lines if l.status in ("Priced", "Provisional") and l.amount is not None]
+    for i, l in enumerate(priced):
+        tws.cell(8 + i, 1, l.item_code or l.item_key)
+        tws.cell(8 + i, 2, "client wording " + str(i))
+    tws.cell(8 + len(priced), 1, "ZZ.9")                                                # client row the schedule knows nothing about
+    tws.cell(8, 5, "=B8&\"\"")                                                           # a client formula in a mapped column of a matched row
+    twb.save(tpl)
+    mapping = {"sheet": "Schedule of Rates", "first_row": 8, "key_column": "A", "columns": {"quantity": "D", "unit_rate": "E", "amount": "F"},
+               "totals": {"total_pre_tax": "F90"}, "banner_cell": "A1"}
+    from app.core.errors import ValidationFailed as VF
+    with pytest.raises(ApprovalBlocked):
+        estimates.export_client_form(db, ESTIMATOR, pid, tpl, mapping, version_id=vid2, approval_id=424242)                    # no valid approval -> refused
+    pre = estimates.export_client_form(db, ESTIMATOR, pid, tpl, mapping)                                                     # preliminary copy needs no approval but is labelled
+    assert pre["submission_ready"] is False and pre["file"].endswith("_PRELIMINARY.xlsx")
+    assert load_workbook(pre["file"])["Schedule of Rates"]["A1"].value.startswith("PRELIMINARY - NOT FOR SUBMISSION")
+    rep = estimates.export_client_form(db, ESTIMATOR, pid, tpl, mapping, version_id=vid2, approval_id=ap)
+    assert rep["submission_ready"] and rep["rows_filled"] == len(priced) and rep["template_rows_without_schedule_item"] == [dict(row=8 + len(priced), key="ZZ.9")]
+    out_ws = load_workbook(rep["file"])["Schedule of Rates"]
+    assert out_ws["A1"].value == "CLIENT TENDER FORM" and out_ws.cell(8, 5).value == '=B8&""'                                   # no banner on the final; client formula untouched
+    assert any("formula" in x["reason"] for x in rep["skipped"]) and rep["ties_out"] is False
+    assert abs(D(str(sum(out_ws.cell(8 + i, 6).value for i in range(len(priced))))) - rep["filled_amount_total"]) < D("0.01")
+    assert abs(D(str(out_ws["F90"].value)) - sch.total_pre_tax) < D("0.01") and out_ws.cell(8, 2).value == "client wording 0"     # totals cell written; client wording preserved
+    with pytest.raises(VF) as e:                                                                                         # templates outside the workspace are refused
+        estimates.export_client_form(db, ESTIMATOR, pid, "/etc/hostname", mapping)
+    assert e.value.code == "FORM_PATH"
+    with pytest.raises(VF):
+        estimates.export_client_form(db, ESTIMATOR, pid, tpl, {"sheet": "Nope", "first_row": 8, "key_column": "A", "columns": {"amount": "F"}})
+    with pytest.raises(VF):
+        estimates.export_client_form(db, ESTIMATOR, pid, tpl, mapping, version_id=vid2)
     # changing any input after approval re-blocks the export path and the approved version stays frozen
     db.execute("UPDATE boq_items SET quantity='999' WHERE project_id=? AND item_key='1.2'", (pid,))
     with pytest.raises(ApprovalBlocked):

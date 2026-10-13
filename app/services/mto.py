@@ -9,7 +9,7 @@ from decimal import Decimal
 from ..approvals import engine as approvals
 from ..config import get_settings
 from ..core.errors import Conflict, NotFound, ValidationFailed
-from ..core.money import D, D_opt
+from ..core.money import D_opt
 from ..core.timeutil import now_iso
 from ..core.units import registry
 from ..database import Database, rows_to_dicts

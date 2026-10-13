@@ -31,9 +31,13 @@ All trades: preliminaries, civil/earthworks, infrastructure, structural, archite
 | `app/excel/` | `spec.py` is the single source of column truth; builder, master (27 sheets), templates, roundtrip, LibreOffice `recalc.py` | `docs/EXCEL_WORKBOOK_GUIDE.md`, `docs/EXCEL_DATA_DICTIONARY.md` |
 | `app/sources/`, `app/rate_updates/` | public-source providers, fetcher, web evidence extraction; manifests, candidates, normalisation, importer, refresh | `docs/RATE_UPDATE_WORKFLOW.md`, `docs/KSA_DATA_SOURCES.md`, `docs/RATE_PROVENANCE.md` |
 | `app/ai/` | optional, review-only suggestions | `docs/APPROVAL_WORKFLOW.md` (AI section) |
+| `app/estimators/param_kinds.py`, `app/services/governed.py` | **governed parameters**: every company-supplied number (productivity, hire terms, calendar, escalation, payment terms, benchmarks, take-off factors, statutory rules ...) is a versioned, sourced, human-approved row; the library ships **empty** | `docs/GOVERNED_PARAMETERS.md` |
+| `app/reporting/registry.py`, `app/api/actions_ext.py` | one registry of read-only reports (UI+REST+CLI) and the iteration-4 actions; `propose_*` actions create Drafts only | `docs/ANALYSIS_REPORTS.md`, `docs/MTO_TEMPLATES.md` |
+| `app/services/{wbs,programme,mto,profiles,boe,landed,labour,risk,cashflow,bids,controls,provisions,methods}.py` | WBS/CBS roll-ups, programme+loading+man-hours, take-off derivation, client profiles/classification/BoE, landed cost/FX/statutory labour, risk+escalation, cash flow, bids/long-lead/interfaces, variations+EVM, benchmarks/reserves/engineering/overhead, method alternatives | `docs/ESTIMATING_CAPABILITY_MATRIX.md`, `docs/ESTIMATING_GAP_ROADMAP.md` |
+| `app/security.py` | same-origin (CSRF) check + security headers; sign-in lockout is in `services/auth.py` | `docs/SECURITY.md` |
 | `app/api/actions.py` | single action registry used by UI + REST | `docs/ARCHITECTURE.md` |
 | `app/web/` , `app/cli.py`, `app/main.py` | UI templates, CLI, FastAPI factory | `docs/USER_GUIDE.md` |
-| `app/migrations/*.sql` | forward-only schema (0001–0007) | `docs/DATA_MODEL.md` |
+| `app/migrations/*.sql` | forward-only schema (0001–0013) | `docs/DATA_MODEL.md` |
 | `data/` | seed CSVs (taxonomy, catalogues **without prices**, assumptions, assemblies, source register), `public_data/` evidence samples | `docs/DATA_MODEL.md` |
 | `projects/` | per-project numbered workspaces (git-ignored, never commit client files) | `docs/PROJECT_WORKSPACES.md` |
 | `var/` | runtime: SQLite DB, backups, `imports/` originals + manifests, source cache (git-ignored) | |
@@ -68,7 +72,8 @@ Commands: `sources list|status|refresh [--dry-run]`, `rates import|validate|pend
 python -m venv .venv && . .venv/bin/activate && pip install -e ".[dev]"
 python -m app.cli init --demo-users && python -m app.cli demo && python -m app.cli run     # http://127.0.0.1:8000
 python -m pytest -o addopts="" -q          # full suite (≈65 s); targeted: pytest tests/sources -q
-python -m app.cli coverage | audit-verify | verify-workbook FILE | templates | project create|index|search|refresh|import-boq | migrate-workspaces --dry-run
+python -m app.cli coverage | audit-verify | verify-workbook FILE | templates | project create|index|search|refresh|import-boq|verify-snapshot | migrate-workspaces --dry-run
+python -m app.cli report PRJ-… NAME [--param k=v --save] | param kinds|list|propose|approve … | wbs PRJ FILE | mto templates|preview|apply | profile create|link|attest … | pack load industrial
 ```
 State-changing CLI commands act as a real user: `KSA_CLI_USER`/`--user` + `KSA_CLI_PASSWORD`. Acceptance for any change: relevant tests added and the **full suite green**, docs updated, no approval rule weakened, no invented data, no network needed by tests.
 
@@ -81,9 +86,12 @@ Check `git status` first and never overwrite uncommitted user changes. Commit wi
 * **New feature:** put calculation in `app/estimators/` (pure, with independently computed expected values in tests), persistence in a service, approval via `policy.py` + `authorize`, expose via `api/actions.py` (UI and API share it), add a migration if the schema changes (never edit an applied migration), add tests, update docs. Use `.claude/skills/architecture-maintenance`.
 * **New data source:** a provider in `app/sources/providers.py` with an `AccessPolicy`, offline tests with a fake fetcher, a Source Register row, and an `ACCESS_LOG.md` entry. See `.claude/skills/rate-source-research`.
 
+* **New company-supplied number:** a governed parameter kind (`param_kinds.py`) - never a default in code, never a seed value. **New analysis:** a `@report` in `reporting/registry.py`; anything that writes goes through an action + service. A proposal (`propose_*`) must end as a Draft/Pending record that a person approves; an analysis run is saved, never approved.
+* **Client/owner requirements** (e.g. Saudi Aramco) enter only as a client profile loaded by a person from that owner's controlled documents, each requirement with its source reference. Never state compliance with an owner's standards; say what was loaded and checked.
+
 ## 14. Skills (`.claude/skills/*/SKILL.md`)
-project-initializer · project-indexer · boq-import-review · requirements-extraction · assembly-management · estimating-workflow · rate-source-research · rate-update-review · subcontractor-quote-analysis · procurement-rfq · gantt-duration-estimation · reconciliation-check · excel-validation · architecture-maintenance.
+project-initializer · project-indexer · boq-import-review · requirements-extraction · assembly-management · estimating-workflow · rate-source-research · rate-update-review · subcontractor-quote-analysis · procurement-rfq · gantt-duration-estimation · reconciliation-check · excel-validation · architecture-maintenance · governed-inputs-and-analysis · client-profile-loading.
 Skills orchestrate existing functions; they do not bypass validation or approvals.
 
 ## 15. Where things are documented
-`docs/ESTIMATING_CAPABILITY_MATRIX.md` (evidence-checked capability records, levels 1–5; source `docs/capability_matrix.json`) and `docs/ESTIMATING_GAP_ROADMAP.md` (gap work packages) — **update the matrix record when a capability changes; never raise a status without its acceptance test**. `docs/DEVELOPMENT_AUDIT.md` (verified state), `docs/NEXT_STEPS.md` (roadmap), `docs/KNOWN_LIMITATIONS.md` (read before relying on output), `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`, `docs/PROJECT_WORKSPACES.md`, `docs/RATE_UPDATE_WORKFLOW.md`, `docs/KSA_DATA_SOURCES.md`, `docs/RATE_PROVENANCE.md`, `docs/ASSUMPTIONS_POLICY.md`, `docs/APPROVAL_WORKFLOW.md`, `docs/EXCEL_WORKBOOK_GUIDE.md`, `docs/TESTING.md`, `README.md`.
+`docs/ESTIMATING_CAPABILITY_MATRIX.md` (evidence-checked capability records, levels 1–5; source `docs/capability_matrix.json`; regenerate with `python scripts/gen_capability_matrix.py`) and `docs/ESTIMATING_GAP_ROADMAP.md` (gap work packages) — **update the matrix record when a capability changes; never raise a status without its acceptance test**. `docs/DEVELOPMENT_AUDIT.md` (verified state), `docs/NEXT_STEPS.md` (roadmap), `docs/KNOWN_LIMITATIONS.md` (read before relying on output), `docs/GOVERNED_PARAMETERS.md`, `docs/ANALYSIS_REPORTS.md`, `docs/MTO_TEMPLATES.md`, `docs/SECURITY.md`, `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`, `docs/PROJECT_WORKSPACES.md`, `docs/RATE_UPDATE_WORKFLOW.md`, `docs/KSA_DATA_SOURCES.md`, `docs/RATE_PROVENANCE.md`, `docs/ASSUMPTIONS_POLICY.md`, `docs/APPROVAL_WORKFLOW.md`, `docs/EXCEL_WORKBOOK_GUIDE.md`, `docs/TESTING.md`, `README.md`.

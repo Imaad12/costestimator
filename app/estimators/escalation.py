@@ -8,7 +8,6 @@ from datetime import date
 from decimal import Decimal
 
 from ..core.errors import ValidationFailed
-from ..core.money import D
 
 
 def months_between(base: date, d: date) -> Decimal:

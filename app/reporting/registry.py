@@ -193,3 +193,10 @@ def _eng(db, pid):
 def _oh(db, pid, pool_code=""):
     from ..services import provisions
     return provisions.overhead_report(db, pid, pool_code=pool_code or None)
+
+
+@report("method_comparison", "Construction-method alternatives (what-if)", "Base estimate beside each approved method alternative: direct / indirect / total cost, man-hours, plant hours and duration.",
+        [("preliminary", "0", "1 = include unapproved inputs")], group="Structure")
+def _methods(db, pid, preliminary="0"):
+    from ..services import methods
+    return methods.comparison_report(db, pid, include_unapproved=_flag(preliminary))
