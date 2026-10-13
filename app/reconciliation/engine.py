@@ -245,6 +245,8 @@ def collect_findings(db: Database, project_id: str, est: EstimateResult) -> list
     wb = db.one("SELECT * FROM exports WHERE project_id=? AND kind='master_workbook' ORDER BY id DESC LIMIT 1", (project_id,))
     if wb and wb["approval_ref"] and wb["approval_ref"] != est.fingerprint:
         F.append(Finding("STALE_WORKBOOK", "The latest exported master workbook was generated from different estimate data; re-export.", "export", str(wb["id"])))
+    from .ext_rules import collect_extended          # extended controls (benchmarks, take-off derivations, package interfaces, long-lead, risk, client profile)
+    F.extend(collect_extended(db, project_id, est))
     return F
 
 

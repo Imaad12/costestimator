@@ -174,3 +174,85 @@ def _(db, a, p):
     from ..services import cashflow
     r = cashflow.propose_financing_indirects(db, a, req(p, "project_id")[0], terms_code=opt(p, "terms_code"))
     return {"indirect_codes": r["indirect_codes"], "interest": str(r["interest"]), "bond": str(r["bond"])}
+
+
+# ---------------------------------------------------------------- procurement controls
+@action("record_bid_score")
+def _(db, a, p):
+    from ..services import bids
+    return bids.record_score(db, a, *req(p, "package_id", "quotation_id", "criteria_code", "criterion_id", "score", "evidence"))
+
+
+@action("add_long_lead")
+def _(db, a, p):
+    from ..services import bids
+    return bids.add_long_lead(db, a, req(p, "project_id")[0], req(p, "description")[0], req(p, "lead_time_weeks")[0], req(p, "required_on_site")[0],
+                              package_id=opt(p, "package_id"), supplier_id=opt(p, "supplier_id"), planned_order_date=opt(p, "planned_order_date"),
+                              vendor_data_due=opt(p, "vendor_data_due"), notes=opt(p, "notes"))
+
+
+@action("update_long_lead")
+def _(db, a, p):
+    from ..services import bids
+    changes = {k: opt(p, k) for k in ("planned_order_date", "actual_order_date", "vendor_data_due", "vendor_data_received", "notes", "lead_time_weeks", "required_on_site") if k in p}
+    bids.update_long_lead(db, a, req(p, "long_lead_id")[0], **changes)
+
+
+@action("set_package_scope")
+def _(db, a, p):
+    from ..services import bids
+    return bids.set_scope(db, a, req(p, "project_id")[0], req(p, "package_id")[0], req(p, "ref_type")[0], req(p, "ref")[0], req(p, "responsibility")[0],
+                          opt(p, "counterpart_package"), opt(p, "note"))
+
+
+# ---------------------------------------------------------------- post-award control
+@action("create_variation")
+def _(db, a, p):
+    from ..services import controls
+    return controls.create_variation(db, a, req(p, "project_id")[0], req(p, "title")[0], description=opt(p, "description") or "", instructed_by=opt(p, "instructed_by"),
+                                     instruction_ref=opt(p, "instruction_ref"), time_days=opt(p, "time_days"))
+
+
+@action("add_variation_line")
+def _(db, a, p):
+    from ..services import controls
+    return controls.add_line(db, a, req(p, "variation_id")[0], req(p, "resource_id")[0], req(p, "quantity")[0], unit=opt(p, "unit"), direction=opt(p, "direction") or "add",
+                             description=opt(p, "description"))
+
+
+@action("submit_variation")
+def _(db, a, p):
+    from ..services import controls
+    r = controls.submit_variation(db, a, req(p, "variation_id")[0])
+    return {"amount": str(r["amount"])}
+
+
+@action("decide_variation")
+def _(db, a, p):
+    from ..services import controls
+    controls.decide_variation(db, a, req(p, "variation_id")[0], str(p.get("decision", "")).lower() in ("approve", "approved", "1", "true"), req(p, "comments")[0])
+
+
+@action("record_progress")
+def _(db, a, p):
+    from ..services import controls
+    return controls.record_progress(db, a, *req(p, "project_id", "task_code", "as_of", "pct", "basis"))
+
+
+# ---------------------------------------------------------------- provisions (all produce Draft indirect items)
+@action("propose_reserves")
+def _(db, a, p):
+    from ..services import provisions
+    return [{k: str(v) for k, v in o.items()} for o in provisions.reserve_proposals(db, a, req(p, "project_id")[0])]
+
+
+@action("propose_engineering_indirects")
+def _(db, a, p):
+    from ..services import provisions
+    return [{k: str(v) for k, v in o.items()} for o in provisions.propose_engineering_indirects(db, a, req(p, "project_id")[0])]
+
+
+@action("propose_overhead_indirects")
+def _(db, a, p):
+    from ..services import provisions
+    return [{k: str(v) for k, v in o.items()} for o in provisions.propose_overhead_indirects(db, a, req(p, "project_id")[0])]

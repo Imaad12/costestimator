@@ -188,6 +188,51 @@
    "severity": "High",
    "exception_allowed": true,
    "title": "Estimating engine exception"
+  },
+  "BENCHMARK_OUTSIDE_RANGE": {
+   "severity": "Medium",
+   "exception_allowed": true,
+   "title": "Value outside the company's benchmark range"
+  },
+  "MTO_STALE": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Take-off derivation out of date (factors or driver changed)"
+  },
+  "PACKAGE_DOUBLE_COUNT": {
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "BOQ item included in more than one package"
+  },
+  "INTERFACE_OPEN": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Package interface not closed"
+  },
+  "PACKAGE_GAP": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Subcontract item in no package"
+  },
+  "LONG_LEAD_AT_RISK": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Long-lead item late or at risk"
+  },
+  "RISK_UNQUANTIFIED": {
+   "severity": "Low",
+   "exception_allowed": true,
+   "title": "Open risk without probability / cost range"
+  },
+  "PROFILE_MANDATORY_UNMET": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Client profile: mandatory requirement not met or not assessed"
+  },
+  "PARAMETER_UNAPPROVED": {
+   "severity": "Low",
+   "exception_allowed": true,
+   "title": "Governed parameter awaiting approval (not used in the strict estimate)"
   }
  }
 }

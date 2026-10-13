@@ -138,3 +138,58 @@ def _escalation(db, pid, index_dataset="", preliminary="0"):
 def _cashflow(db, pid, terms_code="", preliminary="0"):
     from ..services import cashflow
     return cashflow.cashflow_report(db, pid, terms_code=terms_code or None, include_unapproved=str(preliminary) in ("1", "true", "yes"))
+
+
+def _flag(v) -> bool:
+    return str(v).lower() in ("1", "true", "yes", "on")
+
+
+@report("bid_evaluation", "Bid evaluation (weighted, advisory)", "Weighted scores from approved criteria and recorded evidence plus levelled prices; ranking is advisory.",
+        [("package_id", "", "procurement package id"), ("criteria_code", "", "approved evaluation-criteria code")], group="Procurement")
+def _bid_eval(db, pid, package_id="", criteria_code=""):
+    from ..services import bids
+    return bids.evaluation_report(db, package_id, criteria_code)
+
+
+@report("long_lead", "Long-lead items", "Latest order date, float and status for long-lead items and vendor data.", [("on", "", "report date YYYY-MM-DD (default today)")], group="Procurement")
+def _long_lead(db, pid, on=""):
+    from ..core.timeutil import parse_date
+    from ..services import bids
+    return bids.long_lead_report(db, pid, parse_date(on) if on else None)
+
+
+@report("interface_matrix", "Package scope / interface matrix", "Who includes each BOQ item; double counts, gaps and open interfaces.", group="Procurement")
+def _interface(db, pid):
+    from ..services import bids
+    return bids.interface_report(db, pid)
+
+
+@report("contract_status", "Contract value and variations", "Original contract sum, approved and pending variations, revised sum and time impact.", group="Post-award control")
+def _contract(db, pid):
+    from ..services import controls
+    return controls.contract_status(db, pid)
+
+
+@report("earned_value", "Earned value and forecast", "PV / EV / AC, CPI / SPI and forecasts at a data date from entered progress and recorded actuals.",
+        [("data_date", "", "YYYY-MM-DD (default today)"), ("version_id", "", "baseline from a frozen estimate version (default: live estimate)")], group="Post-award control")
+def _evm(db, pid, data_date="", version_id=""):
+    from ..services import controls
+    return controls.evm_report(db, pid, data_date or None, version_id=int(version_id) if version_id else None)
+
+
+@report("benchmarks", "Benchmark reasonableness check", "Estimate values compared with the company's approved benchmark ranges.", [("preliminary", "0", "1 = include unapproved inputs")], group="Risk and commercial")
+def _bench(db, pid, preliminary="0"):
+    from ..services import provisions
+    return provisions.benchmark_report(db, pid, include_unapproved=_flag(preliminary))
+
+
+@report("engineering", "Engineering effort and cost", "Hours and cost of declared engineering deliverables at approved labour rates.", group="Risk and commercial")
+def _eng(db, pid):
+    from ..services import provisions
+    return provisions.engineering_report(db, pid)
+
+
+@report("overhead", "Overhead pool allocation", "Project share of approved annual overhead pools.", [("pool_code", "", "limit to one pool")], group="Risk and commercial")
+def _oh(db, pid, pool_code=""):
+    from ..services import provisions
+    return provisions.overhead_report(db, pid, pool_code=pool_code or None)

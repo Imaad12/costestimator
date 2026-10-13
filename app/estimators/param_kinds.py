@@ -258,3 +258,82 @@ def _payment_terms(d: dict) -> dict:
         else:
             out[k] = dec(d, k, ge="0", le="100")
     return out
+
+
+@kind("evaluation_criteria", "Bid evaluation criteria", {P, C, A},
+      "Criteria, weights (summing to 100 with the price weight), pass/fail gates and the scoring scale for evaluating bids or prequalifying vendors. "
+      "Taken from the tender evaluation plan; none are supplied by the software.")
+def _eval_criteria(d: dict) -> dict:
+    from .bid_eval import validate_criteria
+    _no_extra(d, {"name", "stage", "scale_max", "criteria", "price_weight"}, "evaluation_criteria")
+    v = validate_criteria(d)
+    return {"name": text(d, "name"), "stage": text(d, "stage", choices=("prequalification", "bid")), "scale_max": dec(d, "scale_max", gt="0"), **v}
+
+
+@kind("variation_markup", "Variation pricing markup", {C, A},
+      "Overhead and profit percentages applied to the direct cost of a priced variation, from the contract's variation clause or company policy.")
+def _var_markup(d: dict) -> dict:
+    _no_extra(d, {"overhead_pct", "profit_pct", "contract_clause"}, "variation_markup")
+    return {"overhead_pct": dec(d, "overhead_pct", ge="0"), "profit_pct": dec(d, "profit_pct", ge="0"), "contract_clause": text(d, "contract_clause")}
+
+
+@kind("contract_baseline", "Awarded contract baseline", {C, A},
+      "The contract sum as awarded (not the estimate): amount, currency, award date and contract reference. Variations are measured against it.")
+def _baseline(d: dict) -> dict:
+    _no_extra(d, {"contract_sum", "currency", "award_date", "reference"}, "contract_baseline")
+    ad = text(d, "award_date")
+    try:
+        date.fromisoformat(ad)
+    except ValueError:
+        raise ValidationFailed("award_date must be YYYY-MM-DD.", code="PARAM_FIELD")
+    return {"contract_sum": dec(d, "contract_sum", gt="0"), "currency": text(d, "currency"), "award_date": ad, "reference": text(d, "reference")}
+
+
+@kind("benchmark_range", "Reasonableness benchmark range", {E, C, A},
+      "A historical or published range used only to flag outliers: unit cost per BOQ unit for a cost-code prefix, share of direct cost by cost kind, or hours per "
+      "unit. The range, its currency/unit and its source come from the company's records; none are supplied.")
+def _benchmark(d: dict) -> dict:
+    _no_extra(d, {"name", "metric", "cost_prefix", "unit", "kind", "low", "high", "currency", "source_note"}, "benchmark_range")
+    m = text(d, "metric", choices=("item_unit_cost", "share_of_direct", "hours_per_unit"))
+    out = {"name": text(d, "name"), "metric": m, "cost_prefix": text(d, "cost_prefix", required=False), "unit": text(d, "unit", required=False),
+           "kind": text(d, "kind", required=False, choices=("labour", "material", "plant", "equipment", "subcontract", "allowance")),
+           "low": dec(d, "low", ge="0"), "high": dec(d, "high", ge="0"), "currency": text(d, "currency", required=False), "source_note": text(d, "source_note")}
+    if Decimal(out["low"]) > Decimal(out["high"]):
+        raise ValidationFailed("low must not exceed high.", code="PARAM_FIELD")
+    if m in ("item_unit_cost", "hours_per_unit") and not (out["cost_prefix"] and out["unit"]):
+        raise ValidationFailed(f"{m} needs cost_prefix and unit.", code="PARAM_FIELD")
+    if m == "item_unit_cost" and not out["currency"]:
+        raise ValidationFailed("item_unit_cost needs the currency of the range.", code="PARAM_FIELD")
+    if m == "share_of_direct":
+        if not out["kind"]:
+            raise ValidationFailed("share_of_direct needs kind (labour / material / plant / ...).", code="PARAM_FIELD")
+        if Decimal(out["high"]) > 100:
+            raise ValidationFailed("a share is a percentage between 0 and 100.", code="PARAM_FIELD")
+    return out
+
+
+@kind("reserve_rule", "Reserve / provision rule", {C, A},
+      "A percentage of a stated base kept as a provision (warranty / defects liability, commissioning reserve, temporary works ...), with the basis. "
+      "The percentage comes from company policy or contract terms; none is supplied.")
+def _reserve(d: dict) -> dict:
+    _no_extra(d, {"name", "base", "pct", "category", "basis"}, "reserve_rule")
+    return {"name": text(d, "name"), "base": text(d, "base", choices=("direct", "direct_indirect", "selling_price")), "pct": dec(d, "pct", ge="0", le="100"),
+            "category": text(d, "category"), "basis": text(d, "basis")}
+
+
+@kind("engineering_basis", "Engineering / design effort basis", {E, C, A},
+      "Deliverables or work packages per discipline with hours each and the labour resource they are charged at. Hours per deliverable come from company records "
+      "or the engineering contractor's proposal; none are supplied.")
+def _eng_basis(d: dict) -> dict:
+    _no_extra(d, {"discipline", "deliverable", "count", "hours_each", "resource_id", "basis"}, "engineering_basis")
+    return {"discipline": text(d, "discipline"), "deliverable": text(d, "deliverable"), "count": dec(d, "count", ge="0"), "hours_each": dec(d, "hours_each", ge="0"),
+            "resource_id": text(d, "resource_id"), "basis": text(d, "basis")}
+
+
+@kind("overhead_pool", "Home-office / overhead pool", {C, A},
+      "An annual company cost pool and the annual base it is recovered over (e.g. annual turnover or annual labour hours), so a project share can be computed "
+      "from the project's own base and duration. Both figures come from the company's accounts.")
+def _pool(d: dict) -> dict:
+    _no_extra(d, {"name", "annual_cost", "annual_base", "base_kind", "basis"}, "overhead_pool")
+    return {"name": text(d, "name"), "annual_cost": dec(d, "annual_cost", ge="0"), "annual_base": dec(d, "annual_base", gt="0"),
+            "base_kind": text(d, "base_kind", choices=("direct_cost", "labour_hours", "selling_price")), "basis": text(d, "basis")}
