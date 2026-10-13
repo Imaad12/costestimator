@@ -41,6 +41,8 @@ POLICY: dict[str, dict[str, set[str]]] = {
     Entity.AI_SUGGESTION.value: {"approve": {E, P, C, A}, "reject": {E, P, C, A}},
 }
 
+POLICY["client_profile"] = {"approve": {C, A}, "reject": {C, A}}
+
 # Governed parameters: one entity type per kind ("param:<kind>"), approver roles defined with the kind.
 from ..estimators.param_kinds import KINDS as _PARAM_KINDS  # noqa: E402
 

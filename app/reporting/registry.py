@@ -75,3 +75,37 @@ def _loading(db, pid, measure="labour_hours", period="week", block_days="5", pre
 def _manhours(db, pid, preliminary="0"):
     from ..services import programme
     return programme.manhours_report(db, pid, include_unapproved=str(preliminary) in ("1", "true", "yes"))
+
+
+@report("classification", "Estimate classification and maturity", "Class and accuracy range from the APPROVED classification scheme and the estimator's stated maturity, next to measured maturity facts.",
+        group="Basis of estimate")
+def _classification(db, pid):
+    from ..services import profiles
+    return profiles.classification_report(db, pid)
+
+
+@report("compliance", "Client profile compliance matrix", "Requirements loaded from the owner's controlled documents, evaluated against measured facts or human attestations.",
+        group="Basis of estimate")
+def _compliance(db, pid):
+    from ..services import profiles
+    return profiles.compliance_report(db, pid)
+
+
+@report("mto_status", "Take-off derivation status", "Applications of take-off templates and whether their factors / drivers have changed since.", group="Structure")
+def _mto_status(db, pid):
+    from ..services import mto
+    return mto.status_report(db, pid)
+
+
+@report("mto_preview", "Take-off derivation preview", "What a template would derive for an item (nothing is written).",
+        [("item_key", "", "BOQ item key"), ("template", "", "template code"), ("driver_qty", "", "measured driver quantity (optional)"),
+         ("driver_source", "", "source of the driver quantity when given")], group="Structure")
+def _mto_preview(db, pid, item_key="", template="", driver_qty="", driver_source=""):
+    from ..services import mto
+    return mto.preview(db, pid, item_key, template, driver_qty or None, driver_source or None)
+
+
+@report("boe", "Basis of Estimate (facts)", "Structured facts for the Basis of Estimate; generate the document with the generate_boe action.", group="Basis of estimate")
+def _boe(db, pid):
+    from ..services import boe
+    return boe.build_boe(db, pid)

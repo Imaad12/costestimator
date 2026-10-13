@@ -33,6 +33,15 @@ def kinds() -> list[dict]:
     return [dict(kind=k.name, label=k.label, approvers=sorted(k.approvers), description=k.description) for k in KINDS.values()]
 
 
+def _db_checks(db: Database, kind: str, code: str, clean: dict) -> None:
+    """Checks that need reference data (resources, templates)."""
+    if kind == "plant_hire_terms" and not db.one("SELECT 1 FROM resources WHERE id=? AND resource_type IN ('plant','equipment')", (clean["resource_id"],)):
+        raise ValidationFailed(f"resource_id {clean['resource_id']} is not a plant/equipment resource.", code="PARAM_FIELD")
+    if kind == "mto_factor":
+        from . import mto
+        mto.check_factor(db, code, clean)
+
+
 def propose(db: Database, actor: Actor, kind: str, code: str, data: dict, *, project_id: str | None = None, source: str | None = None,
             basis_note: str | None = None, is_synthetic: bool = False, submit: bool = False) -> int:
     approvals.require_author(actor)
@@ -46,8 +55,7 @@ def propose(db: Database, actor: Actor, kind: str, code: str, data: dict, *, pro
     if not (source or "").strip() and not is_synthetic:
         raise ValidationFailed("A source / basis is required: say where this number comes from (company record, contract, approved document).",
                                code="PARAM_SOURCE")
-    if kind == "plant_hire_terms" and not db.one("SELECT 1 FROM resources WHERE id=? AND resource_type IN ('plant','equipment')", (clean["resource_id"],)):
-        raise ValidationFailed(f"resource_id {clean['resource_id']} is not a plant/equipment resource.", code="PARAM_FIELD")
+    _db_checks(db, kind, code, clean)
     with db.tx():
         prev = db.one("SELECT MAX(version) v FROM governed_params WHERE COALESCE(project_id,'')=? AND kind=? AND code=?",
                       (project_id or "", kind, code))

@@ -394,7 +394,8 @@ def productivity_factors_for(inp: EstimateInputs, item_key: str, cost_code: str 
     return out
 
 
-def _labour_price(ctx: _Ctx, line: CostLine, al: dict, hours: Decimal, ot_share, ref: str) -> None:
+def _adjust_hours(ctx: _Ctx, line: CostLine, hours: Decimal, ref: str) -> Decimal:
+    """Apply the governed productivity factors in scope to labour hours (multiplicative; recorded on the line)."""
     facs = productivity_factors_for(ctx.inp, line.item_key, line.cost_code)
     if facs:
         combined = ONE
@@ -408,6 +409,11 @@ def _labour_price(ctx: _Ctx, line: CostLine, al: dict, hours: Decimal, ot_share,
         hours = hours * combined
         line.flags.append("PRODUCTIVITY_ADJUSTED")
         line.basis += (f" | productivity factors {[p['code'] for p in facs]} (multiplicative) x {combined}: {base} h => {hours} h")
+    return hours
+
+
+def _labour_price(ctx: _Ctx, line: CostLine, al: dict, hours: Decimal, ot_share, ref: str) -> None:
+    hours = _adjust_hours(ctx, line, hours, ref)
     line.hours = hours
     line.quantity = hours
     line.unit = "hr"
@@ -566,7 +572,7 @@ _BLOCKING = {"FACTOR_MISSING", "ASSUMPTION_MISSING", "ASSUMPTION_NOT_APPROVED", 
              "ASSEMBLY_UNAVAILABLE", "QUANTITY_MISSING", "UNIT_MISSING", "MAPPING_NOT_APPROVED", "UNSUPPORTED_LINE",
              "ALLOWANCE_NOT_APPROVED", "ALLOWANCE_AMOUNT_MISSING", "ITEM_UNIT_INCOMPATIBLE", "WASTE_INVALID",
              "ASSUMPTION_NOT_NUMERIC", "OT_NEEDS_BUILDUP", "OT_INVALID", "OUTPUT_INVALID", "PLANT_BUILD_INVALID",
-             "PRODUCTIVE_HOURS_INVALID", "SHIFT_HOURS_INVALID", "UTILISATION_INVALID", "LABOUR_UNIT"}
+             "PRODUCTIVE_HOURS_INVALID", "SHIFT_HOURS_INVALID", "UTILISATION_INVALID", "LABOUR_UNIT", "TAKEOFF_NOT_APPROVED"}
 
 
 def _price_assembly_item(ctx: _Ctx, item: dict, ic: ItemCost, qty: Decimal | None) -> None:
@@ -631,6 +637,11 @@ def _price_takeoff_item(ctx: _Ctx, item: dict, ic: ItemCost) -> None:
     if not tl:
         ctx.exc("UNPRICED_ITEM", "High", f"BOQ {ik}: takeoff resource lines missing.", item_key=ik)
         return
+    st = item.get("pricing_status")
+    if any(t.get("origin") == "mto" for t in tl) and not (st in (Status.APPROVED.value, Status.PROVISIONAL.value)
+                                                          or (ctx.inp.include_unapproved and st == Status.PENDING.value)):
+        ctx.exc("TAKEOFF_NOT_APPROVED", "High", f"BOQ {ik}: quantities derived by a take-off template are '{st}' - a person must approve the pricing decision.", item_key=ik)
+        return
     for i, t in enumerate(tl, 1):
         res = ctx.inp.resources.get(t["resource_id"])
         if res is None:
@@ -646,8 +657,14 @@ def _price_takeoff_item(ctx: _Ctx, item: dict, ic: ItemCost) -> None:
         line = CostLine(item_key=ik, assembly_code=None, assembly_version=None, path=ik, line_ref=f"{ik}#T{i}",
                         kind=res["resource_type"], resource_id=res["id"], description=res["description"], quantity=q,
                         unit=res["unit"], cost_code=item.get("cost_code"))
-        line.basis = f"takeoff-supplied resource quantity {q} {res['unit']} (source row {t.get('source_row')})"
+        line.basis = (f"take-off template quantity {q} {res['unit']} ({t.get('notes')})" if t.get("origin") == "mto"
+                      else f"takeoff-supplied resource quantity {q} {res['unit']} (source row {t.get('source_row')})")
         ctx.lines.append(line)
+        if res["resource_type"] == "labour" and res["unit"] == "hr":
+            line.hours = q
+            if t.get("origin") == "mto":                                      # derived labour norms are adjusted like assembly labour
+                q = _adjust_hours(ctx, line, q, f"{ik}#T{i}")
+                line.hours = line.quantity = q
         _price_line(ctx, line, res["id"], q, res["unit"])
         if line.amount is not None:
             line.basis += f" x rate {line.rate} => {line.amount}"

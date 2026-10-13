@@ -1,0 +1,877 @@
+{
+ "schema": "ksa-estimator/mto-templates/1",
+ "note": "STRUCTURE ONLY. No factors, no rates, no standards are included; factors are governed parameters supplied and approved by the company.",
+ "templates": [
+  {
+   "code": "piping.pipe_fab_install",
+   "discipline": "Process piping",
+   "name": "Pipe fabrication and erection (per inch-diameter)",
+   "driver_unit": "inch_dia",
+   "driver_description": "Inch-diameter of pipe fabricated/erected, measured by the estimator from the piping MTO",
+   "capability": "PRC-01",
+   "note": "",
+   "slots": [
+    {
+     "slot": "fab_labour",
+     "description": "Fabrication labour hours per inch-dia",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "erect_labour",
+     "description": "Erection labour hours per inch-dia",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "fit_up_labour",
+     "description": "Fit-up / alignment labour hours per inch-dia",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "pipe_material",
+     "description": "Pipe material per inch-dia (length basis)",
+     "resource_type": "material",
+     "unit_dim": "length"
+    },
+    {
+     "slot": "welding_consumables",
+     "description": "Welding consumables per inch-dia",
+     "resource_type": "material",
+     "unit_dim": "mass"
+    },
+    {
+     "slot": "crane_plant",
+     "description": "Mobile crane / handling plant hours per inch-dia",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "piping.weld_joint",
+   "discipline": "Process piping",
+   "name": "Welds (per joint)",
+   "driver_unit": "joint",
+   "driver_description": "Number of welded joints counted from the piping MTO",
+   "capability": "PRC-01",
+   "note": "",
+   "slots": [
+    {
+     "slot": "welder_labour",
+     "description": "Welder hours per joint",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "fitter_labour",
+     "description": "Fitter hours per joint",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "consumables",
+     "description": "Welding consumables per joint",
+     "resource_type": "material",
+     "unit_dim": "mass"
+    },
+    {
+     "slot": "ndt",
+     "description": "NDT services per joint",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "pwht",
+     "description": "Post-weld heat treatment per joint",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "grinding_labour",
+     "description": "Grinding/finishing hours per joint",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "piping.spool",
+   "discipline": "Process piping",
+   "name": "Spool fabrication / handling (per spool)",
+   "driver_unit": "spool",
+   "driver_description": "Number of spools on the isometric register",
+   "capability": "PRC-01 PRC-13",
+   "note": "",
+   "slots": [
+    {
+     "slot": "shop_labour",
+     "description": "Shop fabrication hours per spool",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "blast_paint",
+     "description": "Blast and paint per spool",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "transport",
+     "description": "Transport per spool",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "handling_plant",
+     "description": "Handling plant hours per spool",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "piping.supports",
+   "discipline": "Process piping",
+   "name": "Pipe supports (per tonne)",
+   "driver_unit": "t",
+   "driver_description": "Tonnes of pipe support steel",
+   "capability": "PRC-01",
+   "note": "",
+   "slots": [
+    {
+     "slot": "fab_labour",
+     "description": "Support fabrication hours per tonne",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "install_labour",
+     "description": "Support installation hours per tonne",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "steel",
+     "description": "Support steel per tonne",
+     "resource_type": "material",
+     "unit_dim": "mass"
+    },
+    {
+     "slot": "paint",
+     "description": "Support painting per tonne",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "piping.valve_install",
+   "discipline": "Process piping",
+   "name": "Valves and in-line items (per item)",
+   "driver_unit": "nr",
+   "driver_description": "Number of valves/in-line items on the piping MTO",
+   "capability": "PRC-01",
+   "note": "",
+   "slots": [
+    {
+     "slot": "install_labour",
+     "description": "Installation hours per valve",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "gaskets_bolting",
+     "description": "Gaskets and bolting sets per valve",
+     "resource_type": "material",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "test_labour",
+     "description": "Leak-test hours per valve",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "piping.hydrotest",
+   "discipline": "Process piping",
+   "name": "Hydrotest and flushing (per system)",
+   "driver_unit": "nr",
+   "driver_description": "Number of test packs / systems",
+   "capability": "PRC-01",
+   "note": "",
+   "slots": [
+    {
+     "slot": "test_labour",
+     "description": "Test crew hours per pack",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "test_water",
+     "description": "Test water per pack",
+     "resource_type": "material",
+     "unit_dim": "volume"
+    },
+    {
+     "slot": "test_equipment",
+     "description": "Test pump / temporary spools per pack",
+     "resource_type": "equipment",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "equipment.set_and_align",
+   "discipline": "Process equipment",
+   "name": "Equipment set, level and align (per item)",
+   "driver_unit": "nr",
+   "driver_description": "Number of equipment items to set",
+   "capability": "PRC-02",
+   "note": "",
+   "slots": [
+    {
+     "slot": "rigging_labour",
+     "description": "Rigging hours per item",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "fitters_labour",
+     "description": "Fitting / alignment hours per item",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "crane_plant",
+     "description": "Crane hours per item",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "grout_material",
+     "description": "Grout per item",
+     "resource_type": "material",
+     "unit_dim": "volume"
+    },
+    {
+     "slot": "vendor_rep",
+     "description": "Vendor representative services per item",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "instrument.loop",
+   "discipline": "Instrumentation",
+   "name": "Instrument loop (per loop)",
+   "driver_unit": "loop",
+   "driver_description": "Number of loops on the instrument index",
+   "capability": "PRC-03",
+   "note": "",
+   "slots": [
+    {
+     "slot": "install_labour",
+     "description": "Instrument installation hours per loop",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "cable_pull",
+     "description": "Cable supply per loop",
+     "resource_type": "material",
+     "unit_dim": "length"
+    },
+    {
+     "slot": "tubing",
+     "description": "Tubing and fittings per loop",
+     "resource_type": "material",
+     "unit_dim": "length"
+    },
+    {
+     "slot": "loop_check",
+     "description": "Loop-check hours per loop",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "calibration",
+     "description": "Calibration hours per loop",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "jb_glands",
+     "description": "Junction box / glands per loop",
+     "resource_type": "material",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "dcs_config",
+     "description": "DCS/PLC configuration hours per loop",
+     "resource_type": "subcontract",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "electrical.cable",
+   "discipline": "Industrial electrical",
+   "name": "Cable supply, pulling and termination (per metre)",
+   "driver_unit": "m",
+   "driver_description": "Metres of cable measured by the estimator from the cable schedule",
+   "capability": "PRC-04",
+   "note": "",
+   "slots": [
+    {
+     "slot": "cable_material",
+     "description": "Cable per metre (allowing for the estimator's stated cut-length basis)",
+     "resource_type": "material",
+     "unit_dim": "length"
+    },
+    {
+     "slot": "pull_labour",
+     "description": "Pulling hours per metre",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "tray_labour",
+     "description": "Tray/support hours per metre",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "pull_plant",
+     "description": "Cable-pulling plant hours per metre",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "electrical.termination",
+   "discipline": "Industrial electrical",
+   "name": "Cable terminations (per termination)",
+   "driver_unit": "nr",
+   "driver_description": "Number of terminations from the cable schedule",
+   "capability": "PRC-04",
+   "note": "",
+   "slots": [
+    {
+     "slot": "term_labour",
+     "description": "Termination hours each",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "lugs_glands",
+     "description": "Lugs and glands each",
+     "resource_type": "material",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "test_labour",
+     "description": "Insulation/continuity test hours each",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "steel.structural",
+   "discipline": "Structural steel",
+   "name": "Structural steel (per tonne)",
+   "driver_unit": "t",
+   "driver_description": "Tonnes of structural steel from the steel MTO",
+   "capability": "PRC-05",
+   "note": "",
+   "slots": [
+    {
+     "slot": "fab_labour",
+     "description": "Fabrication hours per tonne",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "erect_labour",
+     "description": "Erection hours per tonne",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "steel_material",
+     "description": "Steel per tonne (allowing for the stated waste basis)",
+     "resource_type": "material",
+     "unit_dim": "mass"
+    },
+    {
+     "slot": "bolts",
+     "description": "Bolts and fixings per tonne",
+     "resource_type": "material",
+     "unit_dim": "mass"
+    },
+    {
+     "slot": "blast_area",
+     "description": "Blast and paint area per tonne",
+     "resource_type": "subcontract",
+     "unit_dim": "area"
+    },
+    {
+     "slot": "crane_plant",
+     "description": "Crane hours per tonne",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "tank.field_erected",
+   "discipline": "Tanks and large vessels",
+   "name": "Field-erected tank plate (per tonne)",
+   "driver_unit": "t",
+   "driver_description": "Tonnes of tank plate/steelwork",
+   "capability": "PRC-06",
+   "note": "",
+   "slots": [
+    {
+     "slot": "weld_labour",
+     "description": "Welding hours per tonne",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "fitup_labour",
+     "description": "Fit-up and rigging hours per tonne",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "ndt_length",
+     "description": "NDT weld length per tonne",
+     "resource_type": "subcontract",
+     "unit_dim": "length"
+    },
+    {
+     "slot": "test_water",
+     "description": "Hydrotest water per tonne",
+     "resource_type": "material",
+     "unit_dim": "volume"
+    },
+    {
+     "slot": "crane_plant",
+     "description": "Crane hours per tonne",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "settlement_survey",
+     "description": "Settlement survey services per tonne",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "coating.surface",
+   "discipline": "Coatings and fireproofing",
+   "name": "Surface preparation and coating system (per m2)",
+   "driver_unit": "m2",
+   "driver_description": "Surface area measured by the estimator",
+   "capability": "PRC-07",
+   "note": "",
+   "slots": [
+    {
+     "slot": "blast_labour",
+     "description": "Blasting hours per m2",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "primer",
+     "description": "Primer per m2",
+     "resource_type": "material",
+     "unit_dim": "volume"
+    },
+    {
+     "slot": "intermediate",
+     "description": "Intermediate coat per m2",
+     "resource_type": "material",
+     "unit_dim": "volume"
+    },
+    {
+     "slot": "topcoat",
+     "description": "Top coat per m2",
+     "resource_type": "material",
+     "unit_dim": "volume"
+    },
+    {
+     "slot": "apply_labour",
+     "description": "Coating application hours per m2",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "blast_media",
+     "description": "Abrasive media per m2",
+     "resource_type": "material",
+     "unit_dim": "mass"
+    },
+    {
+     "slot": "inspection",
+     "description": "Coating inspection services per m2",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "coating.fireproofing",
+   "discipline": "Coatings and fireproofing",
+   "name": "Fireproofing (per m2)",
+   "driver_unit": "m2",
+   "driver_description": "Fireproofed surface area measured by the estimator",
+   "capability": "PRC-07",
+   "note": "",
+   "slots": [
+    {
+     "slot": "material",
+     "description": "Fireproofing material per m2",
+     "resource_type": "material",
+     "unit_dim": "mass"
+    },
+    {
+     "slot": "apply_labour",
+     "description": "Application hours per m2",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "mesh_fixings",
+     "description": "Mesh and fixings per m2",
+     "resource_type": "material",
+     "unit_dim": "area"
+    }
+   ]
+  },
+  {
+   "code": "insulation.surface",
+   "discipline": "Thermal insulation",
+   "name": "Insulation and cladding (per m2)",
+   "driver_unit": "m2",
+   "driver_description": "Insulated surface area measured by the estimator",
+   "capability": "PRC-08",
+   "note": "",
+   "slots": [
+    {
+     "slot": "insulation",
+     "description": "Insulation material per m2 (thickness set in the factor basis)",
+     "resource_type": "material",
+     "unit_dim": "volume"
+    },
+    {
+     "slot": "cladding",
+     "description": "Cladding sheet per m2",
+     "resource_type": "material",
+     "unit_dim": "area"
+    },
+    {
+     "slot": "fixings",
+     "description": "Bands, screws, sealant per m2",
+     "resource_type": "material",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "install_labour",
+     "description": "Installation hours per m2",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "scaffold.volume",
+   "discipline": "Scaffolding",
+   "name": "Scaffolding (per m3 of scaffold)",
+   "driver_unit": "m3",
+   "driver_description": "Scaffold volume from the scaffold plan (estimator-measured)",
+   "capability": "PRC-09",
+   "note": "",
+   "slots": [
+    {
+     "slot": "erect_labour",
+     "description": "Erection hours per m3",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "dismantle_labour",
+     "description": "Dismantling hours per m3",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "hire_material",
+     "description": "Scaffold hire per m3 (period set by the programme)",
+     "resource_type": "equipment",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "inspection",
+     "description": "Scaffold inspection per m3",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "lifting.heavy_lift",
+   "discipline": "Heavy lifting",
+   "name": "Heavy lifts (per lift)",
+   "driver_unit": "nr",
+   "driver_description": "Number of lifts on the lift register",
+   "capability": "PRC-10",
+   "note": "",
+   "slots": [
+    {
+     "slot": "crane_hire",
+     "description": "Crane hire days per lift",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "rigging_labour",
+     "description": "Rigging crew hours per lift",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "engineering",
+     "description": "Lift study / engineering per lift",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "mobilisation",
+     "description": "Mobilisation / demobilisation per lift",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "services.specialist",
+   "discipline": "Specialist industrial services",
+   "name": "Specialist services (per unit of work)",
+   "driver_unit": "nr",
+   "driver_description": "Number of service units (e.g. CP stations, NDT campaigns, hazardous-area packages)",
+   "capability": "PRC-11",
+   "note": "",
+   "slots": [
+    {
+     "slot": "service_cost",
+     "description": "Specialist service per unit",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "support_labour",
+     "description": "Own-labour support hours per unit",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "support_material",
+     "description": "Consumables per unit",
+     "resource_type": "material",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "turnaround.tie_in",
+   "discipline": "Shutdown and brownfield",
+   "name": "Tie-ins / shutdown work (per tie-in)",
+   "driver_unit": "nr",
+   "driver_description": "Number of tie-in points",
+   "capability": "PRC-12",
+   "note": "",
+   "slots": [
+    {
+     "slot": "labour",
+     "description": "Labour hours per tie-in",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "permits_isolation",
+     "description": "Permit / isolation / supervision hours per tie-in",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "materials",
+     "description": "Materials per tie-in",
+     "resource_type": "material",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "standby_plant",
+     "description": "Standby plant hours per tie-in",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "module.prefabricated",
+   "discipline": "Modularisation",
+   "name": "Prefabricated modules (per module)",
+   "driver_unit": "nr",
+   "driver_description": "Number of modules",
+   "capability": "PRC-13",
+   "note": "",
+   "slots": [
+    {
+     "slot": "yard_labour",
+     "description": "Yard fabrication hours per module",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "transport",
+     "description": "Transport per module",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "site_set",
+     "description": "Site setting hours per module",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "lift_plant",
+     "description": "Heavy-lift plant hours per module",
+     "resource_type": "plant",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "temp.site_establishment",
+   "discipline": "Temporary facilities and remote site",
+   "name": "Site establishment (per person on site)",
+   "driver_unit": "nr",
+   "driver_description": "Peak persons on site (from the loading histogram) or the estimator's stated figure",
+   "capability": "IND-02 PRC-14",
+   "note": "",
+   "slots": [
+    {
+     "slot": "camp_accommodation",
+     "description": "Accommodation per person",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "catering",
+     "description": "Catering per person",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "transport",
+     "description": "Personnel transport per person",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "welfare_ppe",
+     "description": "Welfare / PPE per person",
+     "resource_type": "material",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "admin_support",
+     "description": "Site admin support hours per person",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    }
+   ]
+  },
+  {
+   "code": "commissioning.system",
+   "discipline": "Commissioning and start-up",
+   "name": "Pre-commissioning / commissioning (per system)",
+   "driver_unit": "nr",
+   "driver_description": "Number of systems on the completion/commissioning matrix",
+   "capability": "CLO-01",
+   "note": "",
+   "slots": [
+    {
+     "slot": "precomm_labour",
+     "description": "Pre-commissioning hours per system",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "comm_labour",
+     "description": "Commissioning hours per system",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "vendor_support",
+     "description": "Vendor commissioning services per system",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "consumables",
+     "description": "Commissioning consumables per system",
+     "resource_type": "material",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "spares",
+     "description": "Commissioning spares per system",
+     "resource_type": "material",
+     "unit_dim": "count"
+    }
+   ]
+  },
+  {
+   "code": "handover.documentation",
+   "discipline": "Close-out",
+   "name": "Handover documentation and training (per system)",
+   "driver_unit": "nr",
+   "driver_description": "Number of systems handed over",
+   "capability": "CLO-02",
+   "note": "",
+   "slots": [
+    {
+     "slot": "doc_labour",
+     "description": "Documentation hours per system",
+     "resource_type": "labour",
+     "unit_dim": "time_hr"
+    },
+    {
+     "slot": "training",
+     "description": "Training services per system",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    },
+    {
+     "slot": "om_manuals",
+     "description": "O&M manual production per system",
+     "resource_type": "subcontract",
+     "unit_dim": "count"
+    }
+   ]
+  }
+ ]
+}

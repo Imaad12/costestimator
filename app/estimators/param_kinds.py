@@ -133,3 +133,50 @@ def _calendar(d: dict) -> dict:
             raise ValidationFailed(f"holiday {h!r} must be YYYY-MM-DD.", code="PARAM_FIELD")
     return {"start_date": sd, "work_weekdays": wd, "holidays": sorted({str(h) for h in hol}),
             "hours_per_day": dec(d, "hours_per_day", required=False, gt="0")}
+
+
+@kind("mto_factor", "Take-off derivation factor", {E, C, A},
+      "Quantity of one resource per unit of a human-measured driver (e.g. welder hours per joint, paint litres per m2) for one slot of a take-off "
+      "template. The factor, any waste allowance and the resource come from company records; none are supplied.")
+def _mto_factor(d: dict) -> dict:
+    _no_extra(d, {"template", "slot", "resource_id", "factor", "waste_pct", "basis"}, "mto_factor")
+    return {"template": text(d, "template"), "slot": text(d, "slot"), "resource_id": text(d, "resource_id"), "factor": dec(d, "factor", ge="0"),
+            "waste_pct": dec(d, "waste_pct", required=False, ge="0"), "basis": text(d, "basis", required=False)}
+
+
+@kind("classification_scheme", "Estimate classification scheme", {C, A},
+      "Classes with definition-maturity bands and expected accuracy ranges taken from the scheme the company or client works to (e.g. an AACE-type scheme "
+      "or a client's own). The software holds no scheme; the numbers and the source document are entered here and approved.")
+def _classification_scheme(d: dict) -> dict:
+    _no_extra(d, {"name", "source_document", "classes"}, "classification_scheme")
+    classes = d.get("classes")
+    if not isinstance(classes, list) or not classes:
+        raise ValidationFailed("classes must be a non-empty list.", code="PARAM_FIELD")
+    out, seen = [], set()
+    for c in classes:
+        _no_extra(c, {"class_id", "name", "min_definition_pct", "max_definition_pct", "low_pct", "high_pct", "criteria"}, "class")
+        cid = text(c, "class_id")
+        if cid in seen:
+            raise ValidationFailed(f"Duplicate class_id {cid}.", code="PARAM_FIELD")
+        seen.add(cid)
+        row = {"class_id": cid, "name": text(c, "name", required=False), "min_definition_pct": dec(c, "min_definition_pct", ge="0", le="100"),
+               "max_definition_pct": dec(c, "max_definition_pct", ge="0", le="100"), "low_pct": dec(c, "low_pct"), "high_pct": dec(c, "high_pct"),
+               "criteria": text(c, "criteria", required=False)}
+        if Decimal(row["min_definition_pct"]) >= Decimal(row["max_definition_pct"]):
+            raise ValidationFailed(f"Class {cid}: min_definition_pct must be below max_definition_pct.", code="PARAM_FIELD")
+        if Decimal(row["low_pct"]) > Decimal(row["high_pct"]):
+            raise ValidationFailed(f"Class {cid}: low_pct must not exceed high_pct.", code="PARAM_FIELD")
+        out.append(row)
+    srt = sorted(out, key=lambda r: Decimal(r["min_definition_pct"]))
+    for a, b in zip(srt, srt[1:]):
+        if Decimal(a["max_definition_pct"]) > Decimal(b["min_definition_pct"]):
+            raise ValidationFailed(f"Classes {a['class_id']} and {b['class_id']} overlap in definition bands.", code="PARAM_FIELD")
+    return {"name": text(d, "name"), "source_document": text(d, "source_document"), "classes": out}
+
+
+@kind("maturity_input", "Design maturity input", {E, C, A},
+      "The estimator's statement of project definition maturity (percent of project definition and deliverable status) with its basis. Measured facts are "
+      "reported separately; this value is a human judgement and is shown as such.")
+def _maturity(d: dict) -> dict:
+    _no_extra(d, {"definition_pct", "basis", "deliverables_status"}, "maturity_input")
+    return {"definition_pct": dec(d, "definition_pct", ge="0", le="100"), "basis": text(d, "basis"), "deliverables_status": text(d, "deliverables_status", required=False)}

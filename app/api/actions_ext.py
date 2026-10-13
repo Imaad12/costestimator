@@ -89,3 +89,52 @@ def _(db, a, p):
     params = jdict(p, "params", required=False) or {}
     res = run_report(db, name, pid, params)
     return analysis.save_run(db, a, pid, name, params, res, inputs_hash=analysis.digest(res), notes=opt(p, "notes"))
+
+
+# ---------------------------------------------------------------- take-off derivation
+@action("mto_apply")
+def _(db, a, p):
+    from ..services import mto
+    skip = jdict(p, "skip_slots", required=False)
+    if isinstance(skip, str):
+        skip = [x.strip() for x in skip.split(",") if x.strip()]
+    r = mto.apply(db, a, req(p, "project_id")[0], req(p, "item_key")[0], req(p, "template")[0], opt(p, "driver_qty"), opt(p, "driver_source"), skip)
+    return {"application_id": r["application_id"], "lines": len(r["lines"]), "skipped": r["skipped"]}
+
+
+# ---------------------------------------------------------------- client profiles / classification / BoE
+@action("create_profile")
+def _(db, a, p):
+    from ..services import profiles
+    return profiles.create_profile(db, a, req(p, "code")[0], req(p, "name")[0], client=opt(p, "client"), source_documents=jdict(p, "source_documents", False),
+                                   requirements=jdict(p, "requirements", False), notes=opt(p, "notes"))
+
+
+@action("submit_profile")
+def _(db, a, p):
+    from ..services import profiles
+    profiles.submit_profile(db, a, int(req(p, "profile_id")[0]))
+
+
+@action("approve_profile")
+def _(db, a, p):
+    from ..services import profiles
+    profiles.approve_profile(db, a, int(req(p, "profile_id")[0]), opt(p, "comments"))
+
+
+@action("link_profile")
+def _(db, a, p):
+    from ..services import profiles
+    profiles.link_project(db, a, req(p, "project_id")[0], req(p, "code")[0], int(p["version"]) if opt(p, "version") else None)
+
+
+@action("attest_requirement")
+def _(db, a, p):
+    from ..services import profiles
+    return profiles.attest(db, a, *req(p, "project_id", "req_id", "status", "evidence"))
+
+
+@action("generate_boe")
+def _(db, a, p):
+    from ..services import boe
+    return boe.generate_boe(db, a, req(p, "project_id")[0])
