@@ -109,3 +109,10 @@ def _mto_preview(db, pid, item_key="", template="", driver_qty="", driver_source
 def _boe(db, pid):
     from ..services import boe
     return boe.build_boe(db, pid)
+
+
+@report("currency_exposure", "Currency exposure and hedge cover", "Priced direct cost by quotation currency (landed-cost rates split by recorded exposure), approved hedge cover and what-if sensitivity.",
+        [("shocks", "5,10", "what-if FX move steps in percent (not forecasts)"), ("preliminary", "0", "1 = include unapproved inputs")], group="Commercial")
+def _exposure(db, pid, shocks="5,10", preliminary="0"):
+    from ..services import landed
+    return landed.exposure_report(db, pid, shocks=shocks, include_unapproved=str(preliminary) in ("1", "true", "yes"))

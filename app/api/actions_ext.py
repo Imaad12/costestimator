@@ -138,3 +138,23 @@ def _(db, a, p):
 def _(db, a, p):
     from ..services import boe
     return boe.generate_boe(db, a, req(p, "project_id")[0])
+
+
+# ---------------------------------------------------------------- landed cost / labour
+@action("propose_landed_rate")
+def _(db, a, p):
+    from ..services import landed
+    r = landed.propose_landed_rate(db, a, int(req(p, "base_rate_id")[0]), req(p, "terms_code")[0], project_id=opt(p, "project_id"),
+                                   submit=str(p.get("submit", "")).lower() in ("1", "true", "on", "yes"))
+    return {"rate_id": r["rate_id"], "landed": str(r["landed"]), "currency": r["currency"]}
+
+
+@action("propose_labour_rate")
+def _(db, a, p):
+    from ..services import labour
+    extra = {k: p[k] for k in ("allowances_monthly", "accommodation_monthly", "transport_monthly", "other_monthly", "overtime_multiplier") if opt(p, k) is not None}
+    r = labour.propose_labour_rate(db, a, req(p, "resource_id")[0], monthly_base_wage=req(p, "monthly_base_wage")[0], group=req(p, "group")[0],
+                                   normal_hours_per_month=req(p, "normal_hours_per_month")[0], contract_months=opt(p, "contract_months"),
+                                   project_id=opt(p, "project_id"), evidence=req(p, "evidence")[0], price_date=opt(p, "price_date"), source_id=opt(p, "source_id"),
+                                   submit=str(p.get("submit", "")).lower() in ("1", "true", "on", "yes"), **extra)
+    return {"rate_id": r["rate_id"], "hourly_cost": str(r["hourly_cost"])}

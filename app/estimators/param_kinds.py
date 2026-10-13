@@ -180,3 +180,37 @@ def _classification_scheme(d: dict) -> dict:
 def _maturity(d: dict) -> dict:
     _no_extra(d, {"definition_pct", "basis", "deliverables_status"}, "maturity_input")
     return {"definition_pct": dec(d, "definition_pct", ge="0", le="100"), "basis": text(d, "basis"), "deliverables_status": text(d, "deliverables_status", required=False)}
+
+
+@kind("landed_cost_terms", "Landed-cost / logistics terms", {P, C, A},
+      "Ordered components (freight, insurance, duty, clearance, port charges, haulage ...) that turn a supplier base price into a delivered cost, with the "
+      "percentages and amounts taken from quotations, tariffs and forwarder terms. None are supplied.")
+def _landed_terms(d: dict) -> dict:
+    from .landed_cost import validate_components
+    _no_extra(d, {"name", "incoterm", "output_currency", "components", "units_per_shipment", "note"}, "landed_cost_terms")
+    return {"name": text(d, "name"), "incoterm": text(d, "incoterm", required=False), "output_currency": text(d, "output_currency"),
+            "components": validate_components(d.get("components")), "units_per_shipment": dec(d, "units_per_shipment", required=False, gt="0"), "note": text(d, "note", required=False)}
+
+
+@kind("labour_statutory", "Employer statutory / mobilisation labour cost rule", {C, A},
+      "One labour on-cost rule (levy, social insurance, end-of-service accrual, visa/iqama, medical ...) with its basis and value from the applicable regulation or "
+      "policy. The software holds no rule values.")
+def _labour_statutory(d: dict) -> dict:
+    from .labour_costs import BASES
+    _no_extra(d, {"name", "basis", "value", "applies_to", "authority_ref"}, "labour_statutory")
+    return {"name": text(d, "name"), "basis": text(d, "basis", choices=BASES), "value": dec(d, "value", ge="0"),
+            "applies_to": text(d, "applies_to", required=False, choices=("all", "saudi", "expat")) or "all", "authority_ref": text(d, "authority_ref", required=False)}
+
+
+@kind("national_workforce_target", "National-workforce share target", {C, A},
+      "Required share (percent) of nationals in the workforce under the applicable programme or contract, with the source. The software holds no targets.")
+def _nw_target(d: dict) -> dict:
+    _no_extra(d, {"name", "required_pct", "authority_ref"}, "national_workforce_target")
+    return {"name": text(d, "name"), "required_pct": dec(d, "required_pct", ge="0", le="100"), "authority_ref": text(d, "authority_ref")}
+
+
+@kind("hedge_cover", "Currency hedge cover", {C, A},
+      "Share of the exposure in one currency that is covered by a hedge (forward, natural hedge, price-in-SAR clause), with the instrument and its source.")
+def _hedge(d: dict) -> dict:
+    _no_extra(d, {"currency", "cover_pct", "instrument"}, "hedge_cover")
+    return {"currency": text(d, "currency"), "cover_pct": dec(d, "cover_pct", ge="0", le="100"), "instrument": text(d, "instrument")}
