@@ -77,3 +77,46 @@ def test_piping_welds_from_pack_to_basis_of_estimate(seeded, tmp_path):
     out = boe.generate_boe(db, ESTIMATOR, pid)
     md = (__import__("pathlib").Path(out["directory"]) / out["files"][0]).read_text(encoding="utf-8")
     assert "piping.weld_joint" in md and "HEIGHT" in md and md.count(boe.PLACEHOLDER) == 6
+
+
+def _compatible(db, slot):
+    allowed = mto.DIM_GROUPS.get(slot["unit_dim"], {slot["unit_dim"]})
+    return [r["id"] for r in db.all("SELECT r.id, u.dimension FROM resources r JOIN units u ON u.code=r.unit WHERE r.resource_type=? AND r.is_active=1 ORDER BY r.id", (slot["resource_type"],))
+            if db.scalar("SELECT dimension FROM units WHERE code=(SELECT unit FROM resources WHERE id=?)", (r["id"],)) in allowed]
+
+
+def test_every_template_slot_has_a_compatible_catalogue_resource_in_the_pack(seeded):
+    """COMPATIBILITY only (type and unit kind). It does not say the resource is the right one for a given job - that is the company's choice in the factor."""
+    refdata.load_pack(seeded, ADMIN, "industrial")
+    missing = [(t["code"], s["slot"]) for t in mto.templates().values() for s in t["slots"] if not _compatible(seeded, s)]
+    assert missing == []
+
+
+def test_every_template_can_be_derived_and_priced_mechanically_with_synthetic_inputs(seeded, tmp_path):
+    """Mechanics only: all 23 templates run through factor approval -> apply -> pricing approval -> estimate with SYNTHETIC unit factors of 1 and SYNTHETIC rates of 10.
+    It proves the generic engine accepts every template; it proves nothing about real norms, which the repository does not contain."""
+    db = seeded
+    refdata.load_pack(db, ADMIN, "industrial")
+    pid = projects.create_project(db, ESTIMATOR, name="All templates (SYNTHETIC)", is_demo=True, tax_category="VAT-STD")
+    tpls = sorted(mto.templates().values(), key=lambda t: t["code"])
+    rows = [(f"T{i}", t["name"], "nr", "2", "", "") for i, t in enumerate(tpls)]
+    bi.import_boq(db, ESTIMATOR, pid, write_boq(tmp_path / "all.csv", rows))
+    rated = set()
+    for i, t in enumerate(tpls):
+        for s in t["slots"]:
+            rid = _compatible(db, s)[0]
+            if rid not in rated:
+                approved_rate(db, rid, "10")
+                rated.add(rid)
+            f = governed.propose(db, ESTIMATOR, "mto_factor", f"{t['code']}/{s['slot']}", {"template": t["code"], "slot": s["slot"], "resource_id": rid, "factor": "1"},
+                                 source="SYNTHETIC mechanical test", submit=True)
+            governed.approve(db, COMMERCIAL, f)
+        mto.apply(db, ESTIMATOR, pid, f"T{i}", t["code"], driver_qty="2", driver_source="SYNTHETIC test driver")
+        boq.decide_pricing(db, COMMERCIAL, pid, f"T{i}", "approve", comment="synthetic mechanical test")
+    std_policy(db, pid)
+    est = compute_estimate(db, pid)
+    done = [k for k, ic in est.direct.items.items() if ic.complete]
+    assert len(done) == len(tpls) == 23
+    # per item: driver 2 x factor 1 x SYNTHETIC rate 10 = 20 per slot (unit conversions to the rate unit are identity here)
+    for i, t in enumerate(tpls):
+        assert est.direct.items[f"T{i}"].direct_cost == D(20) * len(t["slots"]), t["code"]

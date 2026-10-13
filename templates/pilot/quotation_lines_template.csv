@@ -1,0 +1,2 @@
+Item,Description,Specification,Qty,Unit,Unit Rate,Discount %,Lead Time (days),Remarks
+<procurement item id>,<description as quoted>,<spec>,<quoted qty>,<unit>,<quoted unit rate>,<discount %>,<days>,<deviations / remarks>

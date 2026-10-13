@@ -75,6 +75,33 @@ def propose(db: Database, actor: Actor, kind: str, code: str, data: dict, *, pro
     return pid
 
 
+def import_csv(db: Database, actor: Actor, path, *, project_id: str | None = None) -> dict:
+    """Load governed-parameter PROPOSALS from a CSV (columns: kind, code, source, basis_note, project_id, data_json).
+
+    Every valid row becomes a Draft; nothing is submitted or approved here, and any status column is ignored. Invalid rows are reported,
+    not loaded. Rows flagged is_synthetic are loaded as synthetic. No value is defaulted."""
+    import csv
+    from pathlib import Path
+    approvals.require_author(actor)
+    created, errors = [], []
+    with Path(path).open(newline="", encoding="utf-8-sig") as fh:
+        for n, row in enumerate(csv.DictReader(fh), start=2):
+            row = {(k or "").strip().lower(): (v or "").strip() for k, v in row.items()}
+            if not any(row.values()):
+                continue
+            try:
+                data = json.loads(row.get("data_json") or "{}")
+                if not isinstance(data, dict):
+                    raise ValueError("data_json must be a JSON object")
+                created.append(propose(db, actor, row.get("kind", ""), row.get("code", ""), data,
+                                       project_id=row.get("project_id") or project_id, source=row.get("source") or None,
+                                       basis_note=row.get("basis_note") or None,
+                                       is_synthetic=row.get("is_synthetic", "").lower() in ("1", "true", "yes")))
+            except (ValidationFailed, ValueError, NotFound, Conflict) as e:
+                errors.append({"row": n, "code": row.get("code", ""), "error": str(e)})
+    return {"created_ids": created, "errors": errors, "status": "Draft"}
+
+
 def _get(db: Database, pid: int) -> dict:
     r = db.one("SELECT * FROM governed_params WHERE id=?", (pid,))
     if not r:

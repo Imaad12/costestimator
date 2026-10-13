@@ -101,6 +101,12 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
     path = Path(path)
     if source_id and not db.one("SELECT 1 FROM sources WHERE source_id=?", (source_id,)):
         raise ValidationFailed(f"Source {source_id} is not in the Source Register (data/sources/source_register.csv).", code="SOURCE_UNKNOWN")
+    if source_id:
+        basis = str(db.scalar("SELECT unit_price_basis FROM sources WHERE source_id=?", (source_id,)) or "").strip().lower()
+        stype = str(db.scalar("SELECT type FROM sources WHERE source_id=?", (source_id,)) or "").strip().lower()
+        if basis.startswith("index") or "official statistics" in stype:
+            raise ValidationFailed(f"Source {source_id} publishes index/statistical series, not unit prices; its data cannot be imported as rate candidates. Use `index import` "
+                                   "(index data is reference only and can never price a line).", code="SOURCE_NOT_PRICE")
     rows = read_rows(path, sheet)
     sha = sha256_file(path)
     if not dry_run:

@@ -1,0 +1,2 @@
+req_id,category,title,source_ref,mandatory,fact,op,value
+<ID>,<category>,<requirement title as in the owner's document>,<document number + clause>,1,,,

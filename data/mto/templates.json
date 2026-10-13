@@ -313,7 +313,7 @@
     {
      "slot": "dcs_config",
      "description": "DCS/PLC configuration hours per loop",
-     "resource_type": "subcontract",
+     "resource_type": "labour",
      "unit_dim": "time_hr"
     }
    ]

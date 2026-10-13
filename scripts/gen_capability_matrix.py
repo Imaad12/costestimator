@@ -33,6 +33,23 @@ def verdict(recs: list[dict]) -> str:
     return "SUPPORTED (all required engine capabilities implemented and tested)"
 
 
+def counts_line(d: dict) -> str:
+    """Every record has exactly one status, so the status counts must add up to the number of records (checked here and by the guard test)."""
+    recs = d["records"]
+    tot = Counter(r["status"] for r in recs)
+    parts = [(s, tot[s]) for s in (IT, IU, PA, MI, NA)]
+    assert sum(n for _, n in parts) == len(recs), "status counts do not add up to the record count"
+    return (f"All {len(recs)} capability records: " + ", ".join(f"{s} {n}" for s, n in parts) + " (" + " + ".join(str(n) for _, n in parts) + f" = {len(recs)}).")
+
+
+def short_counts(d: dict) -> str:
+    tot = Counter(r["status"] for r in d["records"])
+    return (f"{len(d['records'])} records = " + " + ".join(f"{tot[s]} {SHORT[s]}" for s in (IT, IU, PA, MI, NA)) + " (IT implemented and tested, IU implemented but unverified, PA partial, MI missing, NA not applicable) - generated from `docs/capability_matrix.json`")
+
+
+COUNT_DOCS = ["DEVELOPMENT_AUDIT.md", "NEXT_STEPS.md", "ESTIMATING_GAP_ROADMAP.md"]
+
+
 def rollup(d: dict) -> str:
     recs = d["records"]
     out = ["| Level | Name | Required capabilities (engine) | IT | IU | PA | MI | Verdict (engine) |", "|---|---|---|---|---|---|---|---|"]
@@ -42,8 +59,7 @@ def rollup(d: dict) -> str:
         out.append(f"| {lv} | {d['levels'][lv]['name']} | {len(eng)} | {c[IT]} | {c[IU]} | {c[PA]} | {c[MI]} | **{verdict(eng)}** |")
     data = [r for r in recs if r["kind"] == "data"]
     out += ["", "Data readiness (applies to every level): " + "; ".join(f"{r['id']} {r['capability'].split(':', 1)[-1].strip()} - **{r['status']}**" for r in data) + "."]
-    tot = Counter(r["status"] for r in recs)
-    out += ["", f"All {len(recs)} capability records: " + ", ".join(f"{s} {tot[s]}" for s in (IT, IU, PA, MI, NA)) + "."]
+    out += ["", counts_line(d)]
     return "\n".join(out)
 
 
@@ -70,7 +86,7 @@ def detail(d: dict) -> str:
         L.append("")
         for r in rs:
             L.append(f"**{r['id']} - {r['capability']}**  ")
-            L.append(f"*Status:* {r['status']} · *needed from level:* {r['required_from']} · *kind:* {r['kind']}")
+            L.append(f"*Status:* {r['status']} · *needed from level:* {r['required_from']} (applies at levels {', '.join(str(x) for x in range(r['required_from'], 0, -1))}) · *kind:* {r['kind']}")
             L.append(f"- *Code:* " + ("; ".join(f"`{c}`" for c in r["code"]) if r["code"] else "none (nothing implements this)"))
             if r["tests"]:
                 L.append("- *Tests:* " + "; ".join(f"`{t['ref'].split('/', 1)[1] if t['ref'].startswith('tests/') else t['ref']}` [{t['verdict']}]" + (f" ({t['note']})" if t["note"] else "") for t in r["tests"]))
@@ -99,4 +115,10 @@ def render(text: str, d: dict) -> str:
 if __name__ == "__main__":
     d = load()
     DOC.write_text(render(DOC.read_text(encoding="utf-8"), d), encoding="utf-8")
+    for name in COUNT_DOCS:                      # counts quoted elsewhere are spliced from the records, never typed
+        f = DOC.parent / name
+        t = f.read_text(encoding="utf-8")
+        b, e = "<!-- MATRIX_COUNTS_BEGIN -->", "<!-- MATRIX_COUNTS_END -->"
+        if b in t and e in t:
+            f.write_text(t[: t.index(b) + len(b)] + short_counts(d) + t[t.index(e):], encoding="utf-8")
     print("rendered", len(d["records"]), "records")

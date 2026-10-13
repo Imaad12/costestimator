@@ -115,3 +115,26 @@ def test_every_gap_in_the_matrix_is_covered_by_a_roadmap_work_package():
     unknown = [i for i in covered if i not in {r["id"] for r in REC} and not i.startswith("WP-")]
     assert not unknown, unknown                                                             # roadmap cites no record that does not exist
     assert "no claim of Saudi Aramco" in road or "no claim of Saudi Aramco (or any client) compliance" in road
+
+
+def test_every_record_has_exactly_one_status_unique_id_levels_and_a_detail_section():
+    from collections import Counter
+    g = _gen()
+    assert len({r["id"] for r in REC}) == len(REC)
+    assert all(isinstance(r["status"], str) and r["status"] in D["statuses"] for r in REC)       # a single explicit status each
+    tot = Counter(r["status"] for r in REC)
+    assert sum(tot.values()) == len(REC) == sum(tot[s] for s in D["statuses"])                   # the five statuses account for every record
+    doc = (ROOT / "docs" / "ESTIMATING_CAPABILITY_MATRIX.md").read_text(encoding="utf-8")
+    for r in REC:
+        assert r["required_from"] in (1, 2, 3, 4, 5) and r["kind"] in ("engine", "data")
+        assert f"**{r['id']} - " in doc, r["id"]                                                  # evidence section present for every record
+        assert r["code"] or r["status"] in (MI, NA), (r["id"], "no code cited")
+        assert r["tests"] or r["status"] in (MI, NA, PA, IU) , (r["id"], "no test cited")
+    assert g.counts_line(D) in doc
+
+
+def test_counts_quoted_in_other_docs_come_from_the_records():
+    g = _gen()
+    for name in g.COUNT_DOCS:
+        t = (ROOT / "docs" / name).read_text(encoding="utf-8")
+        assert f"<!-- MATRIX_COUNTS_BEGIN -->{g.short_counts(D)}<!-- MATRIX_COUNTS_END -->" in t, name

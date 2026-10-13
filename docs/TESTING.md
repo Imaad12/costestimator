@@ -55,3 +55,11 @@ Every numeric test uses figures worked out by hand in the test (comments show th
 | `tests/unit/test_estimate_cache.py`, `tests/excel/test_workbooks.py` (addition) | cache hit/invalidation (also by another process), workbook style reuse equivalence |
 | `tests/integration/test_full_workflow.py` (addition) | client-form export (item-code matching, formulas untouched, gated, preliminary copy labelled) |
 | `tests/unit/test_generated_docs.py` | the generated reference docs list every governed kind, report and template |
+
+## Pilot-validation additions (2026-10-13)
+| File | Covers |
+|---|---|
+| `tests/unit/test_capability_matrix.py` (additions) | every record has exactly one status, a unique id, applicable levels and a detail section; counts quoted in other docs are generated from the records |
+| `tests/integration/test_industrial_flow.py` (additions) | **structural**: each of the 23 take-off templates has a unit-compatible pack resource per slot; **mechanical**: each template derives and prices with SYNTHETIC factors/rates. These do not show that any template reflects real practice. See [PILOT_READINESS.md](PILOT_READINESS.md) §7 for what is verified vs synthetic vs placeholder |
+| `tests/sources/test_rate_pipeline.py` (additions) | index sources/files cannot be imported as unit prices; the shipped pilot rate template's placeholder row creates no candidate |
+| `tests/unit/test_pilot_templates.py` | governed-parameter CSV import creates Drafts only, reports bad rows, rejects the template's placeholders |

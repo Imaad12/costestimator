@@ -4,6 +4,7 @@ Generated from `app/estimators/param_kinds.py` by `scripts/gen_docs.py`. **The s
 is validated, goes *Draft -> Pending Review -> Approved* (role per kind below, enforced server-side by `approvals.engine.authorize`; AI cannot approve) and is never edited once approved - a change is a new version.
 Only *Approved* values affect a strict estimate; the preliminary (what-if) view may show newer Draft/Pending ones, flagged. Scope: company-wide (`project_id` empty) or one project (project value overrides a company-wide value of the same code).
 Propose with the UI (*Inputs & parameters*), `python -m app.cli param propose KIND CODE '<json>' --source '...' [--project PRJ-..]`, or the `propose_param` action. Field skeletons below show **names and shapes only**.
+Bulk Drafts from a CSV: `python -m app.cli param import FILE` (template `templates/pilot/governed_parameters_template.csv`; never approves). See [PILOT_READINESS.md](PILOT_READINESS.md).
 
 | Kind | Label | Approvers | What it is | Fields (skeleton, no values) |
 |---|---|---|---|---|

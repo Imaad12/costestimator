@@ -15,6 +15,7 @@ A level is *Supported* when every engine capability required at that level is *I
 | 1 | Level 2 + WP-19, 20, 21 | owner's controlled documents (never assumed) |
 
 ## 0a. Status after iteration 4 (2026-10-13)
+Capability records now: <!-- MATRIX_COUNTS_BEGIN -->131 records = 85 IT + 3 IU + 40 PA + 3 MI + 0 NA (IT implemented and tested, IU implemented but unverified, PA partial, MI missing, NA not applicable) - generated from `docs/capability_matrix.json`<!-- MATRIX_COUNTS_END -->.
 Each row says what was **built and tested** and what is **still open**. "Open" is almost always data, a document the user must supply, a real network, or Microsoft Excel - not missing code.
 | WP | Status | Built and tested (matrix records) | Still open |
 |---|---|---|---|

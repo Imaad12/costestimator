@@ -103,6 +103,8 @@ def cmd_param(a) -> int:
     elif a.pcmd3 == "propose":
         data = json.loads(Path(a.data[1:]).read_text(encoding="utf-8")) if a.data.startswith("@") else json.loads(a.data)
         print(governed.propose(db, _actor(a), a.kind, a.code, data, project_id=a.project, source=a.source, basis_note=a.basis, submit=a.submit))
+    elif a.pcmd3 == "import":
+        _print(governed.import_csv(db, _actor(a), a.file, project_id=a.project))
     elif a.pcmd3 == "submit":
         governed.submit(db, _actor(a), a.param_id)
     elif a.pcmd3 == "approve":
@@ -392,6 +394,7 @@ def main(argv: list[str] | None = None) -> int:
     q = ps_.add_parser("list"); q.add_argument("--kind"); q.add_argument("--project"); q.set_defaults(fn=cmd_param)
     q = ps_.add_parser("propose"); q.add_argument("kind"); q.add_argument("code"); q.add_argument("data", help="JSON text or @file.json"); q.add_argument("--project")
     q.add_argument("--source", required=True); q.add_argument("--basis"); q.add_argument("--submit", action="store_true"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
+    q = ps_.add_parser("import", help="load proposals from CSV as Drafts (never approves)"); q.add_argument("file"); q.add_argument("--project"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
     for n in ("submit", "approve", "reject"):
         q = ps_.add_parser(n); q.add_argument("param_id", type=int); q.add_argument("--comment"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
     s = sub.add_parser("wbs", help="import WBS nodes or item->WBS assignments from CSV"); s.add_argument("project"); s.add_argument("file"); s.add_argument("--user"); s.set_defaults(fn=cmd_wbs)

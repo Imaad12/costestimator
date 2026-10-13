@@ -41,7 +41,7 @@ t("equipment.set_and_align", "Process equipment", "Equipment set, level and alig
 t("instrument.loop", "Instrumentation", "Instrument loop (per loop)", "loop", "Number of loops on the instrument index", [
     ("install_labour", "Instrument installation hours per loop", LAB, HR), ("cable_pull", "Cable supply per loop", MAT, M), ("tubing", "Tubing and fittings per loop", MAT, M),
     ("loop_check", "Loop-check hours per loop", LAB, HR), ("calibration", "Calibration hours per loop", LAB, HR), ("jb_glands", "Junction box / glands per loop", MAT, NR),
-    ("dcs_config", "DCS/PLC configuration hours per loop", SUB, HR)], "PRC-03")
+    ("dcs_config", "DCS/PLC configuration hours per loop", LAB, HR)], "PRC-03")
 t("electrical.cable", "Industrial electrical", "Cable supply, pulling and termination (per metre)", "m", "Metres of cable measured by the estimator from the cable schedule", [
     ("cable_material", "Cable per metre (allowing for the estimator's stated cut-length basis)", MAT, M), ("pull_labour", "Pulling hours per metre", LAB, HR),
     ("tray_labour", "Tray/support hours per metre", LAB, HR), ("pull_plant", "Cable-pulling plant hours per metre", PLT, TM)], "PRC-04")

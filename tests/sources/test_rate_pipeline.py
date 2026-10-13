@@ -523,3 +523,36 @@ def test_generated_rate_dataset_template_can_be_used_for_candidate_import(res, t
     assert rep["accepted"] == 1 and rep["rejected"] == 0, rep
     c = cand.get(res, rep["candidate_ids"][0])
     assert c["original_price"] == "301.25" and c["evidence_snippet"].startswith("Supplier letter ref 77") and c["tax_basis"] == "Excluded"
+
+
+def test_index_data_cannot_be_imported_or_approved_as_unit_prices(res, tmp_path):
+    """Index points are reference data only: refused as rate candidates by source, by source type and by shape; observations never create rates."""
+    from app.core.errors import ValidationFailed
+    from app.rate_updates import importer
+    f = tmp_path / "prices.csv"
+    f.write_text("description,unit,unit price,currency\nRebar,t,104.89,SAR\n", encoding="utf-8")
+    for sid in ("SRC-001", "SRC-002", "SRC-003"):                                                    # GASTAT / KAPSARC index sources
+        with pytest.raises(ValidationFailed) as e:
+            importer.import_rates_file(res, ESTIMATOR, f, source_id=sid, dry_run=True)
+        assert e.value.code == "SOURCE_NOT_PRICE"
+    r = importer.import_rates_file(res, ESTIMATOR, f, source_name="Statistics file", source_type="Official statistics", dry_run=True)
+    assert r["accepted"] == 0 and "cannot be rate candidates" in r["errors"][0]["errors"][0]
+    cci = tmp_path / "cci.csv"
+    cci.write_text("time_period,section_and_group,measure,index\n2026-04,Labor Costs,Index,104.89\n", encoding="utf-8")
+    with pytest.raises(ValidationFailed) as e:
+        importer.import_rates_file(res, ESTIMATOR, cci, dry_run=True)                               # an index table has no price column
+    assert e.value.code == "NO_HEADER"
+    before = res.scalar("SELECT COUNT(*) FROM resource_rates WHERE unit_price IS NOT NULL")
+    from app.rate_updates import index_import
+    index_import.import_index_file(res, ESTIMATOR, cci, dataset="test-cci", source_id="SRC-002", source_name="CCI test")
+    assert res.scalar("SELECT COUNT(*) FROM index_observations WHERE dataset='test-cci'") == 1
+    assert res.scalar("SELECT COUNT(*) FROM resource_rates WHERE unit_price IS NOT NULL") == before and res.scalar("SELECT COUNT(*) FROM rate_candidates") == 0
+
+
+def test_pilot_rate_template_headers_are_recognised_and_placeholders_accepted_as_nothing(res):
+    """The shipped pilot template has headers the importer understands; its placeholder row must not become a candidate."""
+    from pathlib import Path
+    from app.rate_updates import importer
+    r = importer.import_rates_file(res, ESTIMATOR, Path("templates/pilot/rates_template.csv"), source_name="Pilot template", dry_run=True)
+    assert r["accepted"] == 0
+    assert res.scalar("SELECT COUNT(*) FROM rate_candidates") == 0

@@ -110,7 +110,7 @@ Migrations 0008-0013 (forward-only). Generated references: GOVERNED_PARAMETERS, 
 * Live run on a scratch DB: `init` -> `demo` -> every registered report via the CLI -> server started on a port -> login, 7 pages (200), CSRF refused without Origin and accepted with it, headers present -> Playwright/Chromium: login, screenshots of the new pages, a real browser form submission (WBS node) succeeded with the Origin check on, no CSP console errors.
 * Master workbook of the demo project recalculated in LibreOffice: **217 formulas, 0 errors, 0 mismatches**, structure OK. `audit-verify`: chain OK (433 entries).
 * Measured at 20,000 BOQ items: estimate 2.7 s; repeat from cache 0.09 ms; freeze + snapshot 4.4 s; **full replay 3.9 s (ok)**; roll-up 2.9 s; master workbook 25.6 s.
-* Capability matrix (131 records): **IT 85, IU 3, PA 40, MI 3** (was IT 56, IU 3, PA 42, MI 30). Levels 5-2 conditionally supported; Level 1 not supported (SAU-07).
+* Capability matrix: <!-- MATRIX_COUNTS_BEGIN -->131 records = 85 IT + 3 IU + 40 PA + 3 MI + 0 NA (IT implemented and tested, IU implemented but unverified, PA partial, MI missing, NA not applicable) - generated from `docs/capability_matrix.json`<!-- MATRIX_COUNTS_END --> (at the first audit: 56 IT, 3 IU, 42 PA, 30 MI). Levels 5-2 conditionally supported; Level 1 not supported (SAU-07).
 
 ### 9.4 What is NOT done and why
 * **Real rates and factors (LIB-07, LIB-08)** - data; only the user can supply and approve them. The new framework ships no value of any kind.
@@ -118,3 +118,12 @@ Migrations 0008-0013 (forward-only). Generated references: GOVERNED_PARAMETERS, 
 * **Microsoft Excel** and **live source retrieval from a normal network** - not available in the sandbox (OUT-03, RTE-05 remain *Implemented but unverified*).
 * Discipline records stay *Partial*: templates and the pack are structure; every factor, pipe-class rule, shutdown logic or camp-sizing rule is the company's to supply. Also not built: schedule-file import and Gantt, withholding tax/zakat, bilingual deliverables, MFA/SSO, per-folder ACLs, server-side pagination, a 50,000-item run.
 * The 2 new skills and the CLI/UI flows were exercised by tests and a live run, **not by a live Claude Code session**.
+
+
+## 10. Pilot validation pass (2026-10-13)
+Scope: validation and readiness only, no new feature breadth.
+* **Matrix reconciliation.** The "131 = 85 + 40 + 3" report omitted the 3 *Implemented/Unit-tested (IU)* records; the generated rollup now states every status and asserts they sum to the record count. Counts in this file, `NEXT_STEPS.md` and `ESTIMATING_GAP_ROADMAP.md` are generated from `capability_matrix.json`, and a test fails if they drift.
+* **Defects found and fixed.** (1) The rate importer would have accepted a price column from an *index* source - now refused (`SOURCE_NOT_PRICE`). (2) Take-off template `instrument.loop/dcs_config` had no compatible pack resource (subcontract with an hour unit) - changed to a labour slot.
+* **Added, minimal:** `governed.import_csv` + `param import` (Drafts only), `templates/pilot/*.csv`, [PILOT_READINESS.md](PILOT_READINESS.md).
+* **Controls re-verified by the full suite** (replay, approvals, provenance, workspace isolation, tender-export gating): see PILOT_READINESS §9 for the tests that prove each. Result recorded in the commit/final report.
+* **Not claimed:** accuracy on real work, any client compliance, Microsoft Excel behaviour, live Claude API behaviour.

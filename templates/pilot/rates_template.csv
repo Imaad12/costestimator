@@ -1,0 +1,2 @@
+Resource ID,Description,Specification,Unit,Unit Price,Currency,Price Date,Valid Until,Retrieved,Publication Date,Source URL,Source Name,VAT,Delivery,Installation,Price Kind,Evidence
+<existing resource id or blank>,<as stated in the source>,<spec>,<unit>,<price exactly as stated>,<currency>,<YYYY-MM-DD>,<YYYY-MM-DD>,<YYYY-MM-DD>,<YYYY-MM-DD>,<url or file reference>,<supplier / publisher>,<included|excluded|unknown>,<basis / incoterm>,<yes|no|unknown>,<price kind>,<verbatim evidence snippet>
