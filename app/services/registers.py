@@ -117,5 +117,29 @@ def add_risk(db: Database, actor: Actor, project_id: str, title: str, *, descrip
     return rid
 
 
+def quantify_risk(db: Database, actor: Actor, risk_id: str, *, prob_pct, cost_low, cost_likely, cost_high, schedule_days=None, category: str | None = None,
+                  response: str | None = None, basis: str) -> None:
+    """Attach human-entered probability and a three-point cost range (SAR) to a register entry. Used only by the risk analysis; changes no estimate."""
+    approvals.require_author(actor)
+    r = db.one("SELECT * FROM risks WHERE id=?", (risk_id,))
+    if not r:
+        raise NotFound(f"Risk {risk_id} not found.")
+    projects.require_active(db, r["project_id"])
+    if not (basis or "").strip():
+        raise ValidationFailed("State the basis of the probability and cost range (experience, analogue, quotation).", code="RISK_BASIS")
+    p, lo, li, hi = D_opt(prob_pct), D_opt(cost_low), D_opt(cost_likely), D_opt(cost_high)
+    if None in (p, lo, li, hi):
+        raise ValidationFailed("prob_pct, cost_low, cost_likely and cost_high are required numbers.", code="RISK_RANGE")
+    if not (0 <= p <= 100) or not (0 <= lo <= li <= hi):
+        raise ValidationFailed("Need 0 <= probability <= 100 and 0 <= low <= most likely <= high.", code="RISK_RANGE")
+    sd = D_opt(schedule_days)
+    if sd is not None and sd < 0:
+        raise ValidationFailed("schedule_days cannot be negative.", code="RISK_RANGE")
+    db.update("risks", {"prob_pct": to_text(p), "cost_low": to_text(lo), "cost_likely": to_text(li), "cost_high": to_text(hi), "schedule_days": to_text(sd),
+                        "category": category, "response": response}, "id=?", (risk_id,))
+    audit.log(db, actor, "risk", risk_id, "quantify", after={"p": to_text(p), "low": to_text(lo), "likely": to_text(li), "high": to_text(hi)}, comment=basis,
+              project_id=r["project_id"])
+
+
 def list_risks(db: Database, project_id: str) -> list[dict]:
     return rows_to_dicts(db.all("SELECT * FROM risks WHERE project_id=? ORDER BY id", (project_id,)))

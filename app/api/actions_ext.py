@@ -158,3 +158,19 @@ def _(db, a, p):
                                    project_id=opt(p, "project_id"), evidence=req(p, "evidence")[0], price_date=opt(p, "price_date"), source_id=opt(p, "source_id"),
                                    submit=str(p.get("submit", "")).lower() in ("1", "true", "on", "yes"), **extra)
     return {"rate_id": r["rate_id"], "hourly_cost": str(r["hourly_cost"])}
+
+
+# ---------------------------------------------------------------- risk / cash flow
+@action("quantify_risk")
+def _(db, a, p):
+    from ..services import registers
+    registers.quantify_risk(db, a, req(p, "risk_id")[0], prob_pct=req(p, "prob_pct")[0], cost_low=req(p, "cost_low")[0], cost_likely=req(p, "cost_likely")[0],
+                            cost_high=req(p, "cost_high")[0], schedule_days=opt(p, "schedule_days"), category=opt(p, "category"), response=opt(p, "response"),
+                            basis=req(p, "basis")[0])
+
+
+@action("propose_financing_indirects")
+def _(db, a, p):
+    from ..services import cashflow
+    r = cashflow.propose_financing_indirects(db, a, req(p, "project_id")[0], terms_code=opt(p, "terms_code"))
+    return {"indirect_codes": r["indirect_codes"], "interest": str(r["interest"]), "bond": str(r["bond"])}

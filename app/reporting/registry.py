@@ -116,3 +116,25 @@ def _boe(db, pid):
 def _exposure(db, pid, shocks="5,10", preliminary="0"):
     from ..services import landed
     return landed.exposure_report(db, pid, shocks=shocks, include_unapproved=str(preliminary) in ("1", "true", "yes"))
+
+
+@report("risk", "Quantified risk: expected value and Monte Carlo", "Seeded simulation over quantified risks and cost ranges; proposes a provision at the chosen confidence level (never applied automatically).",
+        [("trials", "10000", "simulation trials (100-1,000,000)"), ("seed", "20260101", "random seed - same seed gives identical results"), ("target_pct", "80", "confidence level for the proposed provision"),
+         ("preliminary", "0", "1 = include unapproved inputs")], group="Risk and commercial")
+def _risk(db, pid, trials="10000", seed="20260101", target_pct="80", preliminary="0"):
+    from ..services import risk
+    return risk.risk_report(db, pid, trials=int(trials), seed=int(seed), target_pct=int(target_pct), include_unapproved=str(preliminary) in ("1", "true", "yes"))
+
+
+@report("escalation", "Time-phased escalation", "Escalation by programme month from each approved profile's base date; index values shown as information.",
+        [("index_dataset", "", "optional index dataset to show (e.g. the GASTAT CCI dataset name)"), ("preliminary", "0", "1 = include unapproved inputs")], group="Risk and commercial")
+def _escalation(db, pid, index_dataset="", preliminary="0"):
+    from ..services import risk
+    return risk.escalation_report(db, pid, index_dataset=index_dataset or None, include_unapproved=str(preliminary) in ("1", "true", "yes"))
+
+
+@report("cashflow", "Cash flow, retention, bonds and financing", "Monthly cash position from approved payment terms; peak funding, interest and bond cost.",
+        [("terms_code", "", "payment-terms code (default: first approved)"), ("preliminary", "0", "1 = include unapproved inputs")], group="Risk and commercial")
+def _cashflow(db, pid, terms_code="", preliminary="0"):
+    from ..services import cashflow
+    return cashflow.cashflow_report(db, pid, terms_code=terms_code or None, include_unapproved=str(preliminary) in ("1", "true", "yes"))

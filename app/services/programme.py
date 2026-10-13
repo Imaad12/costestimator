@@ -119,7 +119,7 @@ def _bucketer(cal: programme.Calendar | None, period: str, block_days: int):
 
 
 def loading_report(db: Database, project_id: str, *, measure: str = "labour_hours", period: str = "week", block_days: int = 5,
-                   est=None, include_unapproved: bool = False) -> dict:
+                   est=None, include_unapproved: bool = False, line_filter=None) -> dict:
     """Time-phase labour hours / plant hours / cost over the programme. Uniform spread over each task's working days (stated simplification)."""
     from ..estimators.estimate import compute_estimate
     if measure not in ("labour_hours", "plant_hours", "cost"):
@@ -136,6 +136,8 @@ def loading_report(db: Database, project_id: str, *, measure: str = "labour_hour
     durs = {c: t.duration for c, t in sch.tasks.items()}
     loads, source_total = [], ZERO
     for l in est.direct.lines:
+        if line_filter is not None and not line_filter(l):
+            continue
         if measure == "labour_hours":
             if l.kind != "labour" or l.hours is None:
                 continue

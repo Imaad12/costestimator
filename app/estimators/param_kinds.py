@@ -214,3 +214,47 @@ def _nw_target(d: dict) -> dict:
 def _hedge(d: dict) -> dict:
     _no_extra(d, {"currency", "cover_pct", "instrument"}, "hedge_cover")
     return {"currency": text(d, "currency"), "cover_pct": dec(d, "cover_pct", ge="0", le="100"), "instrument": text(d, "instrument")}
+
+
+@kind("escalation_profile", "Escalation profile", {C, A},
+      "Annual escalation percentage applied from a base date to a scope (cost kind or cost-code prefix), with the basis for the figure. The percentage is a "
+      "decision of the company; official indices are shown beside it as information only.")
+def _escalation(d: dict) -> dict:
+    _no_extra(d, {"name", "annual_pct", "base_date", "scope_kind", "scope_cost_prefix", "basis"}, "escalation_profile")
+    bd = text(d, "base_date")
+    try:
+        date.fromisoformat(bd)
+    except ValueError:
+        raise ValidationFailed("base_date must be YYYY-MM-DD.", code="PARAM_FIELD")
+    return {"name": text(d, "name"), "annual_pct": dec(d, "annual_pct"), "base_date": bd,
+            "scope_kind": text(d, "scope_kind", required=False, choices=("labour", "material", "plant", "equipment", "subcontract", "allowance", "all")) or "all",
+            "scope_cost_prefix": text(d, "scope_cost_prefix", required=False), "basis": text(d, "basis")}
+
+
+@kind("range_item", "Cost uncertainty range", {E, C, A},
+      "Three-point range (low / most likely / high, in project currency) for an element of the base estimate whose cost is uncertain, with its basis. "
+      "'Most likely' is assumed to be the value already in the estimate; the simulation adds the deviation from it.")
+def _range_item(d: dict) -> dict:
+    _no_extra(d, {"name", "low", "likely", "high", "basis"}, "range_item")
+    out = {"name": text(d, "name"), "low": dec(d, "low", ge="0"), "likely": dec(d, "likely", ge="0"), "high": dec(d, "high", ge="0"), "basis": text(d, "basis")}
+    if not (Decimal(out["low"]) <= Decimal(out["likely"]) <= Decimal(out["high"])):
+        raise ValidationFailed("Need low <= most likely <= high.", code="PARAM_FIELD")
+    return out
+
+
+@kind("payment_terms", "Contract payment, bond and financing terms", {C, A},
+      "Advance, retention, release, certification/payment lags, supplier credit, performance-bond and financing terms from the contract, bank and supplier "
+      "terms. Every field is required (zero is allowed) so that nothing is silently assumed.")
+def _payment_terms(d: dict) -> dict:
+    from .cashflow import TERM_KEYS
+    _no_extra(d, set(TERM_KEYS) | {"name"}, "payment_terms")
+    out = {"name": text(d, "name")}
+    for k in TERM_KEYS:
+        if k.endswith("_months"):
+            v = dec(d, k, ge="0", le="120")
+            if Decimal(v) != Decimal(v).to_integral_value():
+                raise ValidationFailed(f"'{k}' must be a whole number of months.", code="PARAM_FIELD")
+            out[k] = v
+        else:
+            out[k] = dec(d, k, ge="0", le="100")
+    return out
