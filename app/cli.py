@@ -128,7 +128,10 @@ def cmd_audit_verify(a) -> int:
 
 def cmd_coverage(a) -> int:
     from .reporting.coverage import library_coverage
-    print(json.dumps(library_coverage(get_db()), indent=1, default=str))
+    cov = library_coverage(get_db())
+    print(json.dumps(cov, indent=1, default=str))
+    if not cov["totals"]["resources"]:
+        print("NOTE: the library is empty - this database has not been initialised. Run `python -m app.cli init`.", file=sys.stderr)
     return 0
 
 
@@ -170,6 +173,11 @@ def cmd_project(a) -> int:
         return 0
     if act == "refresh":
         print(workspaces.ensure_workspace(db, a.project))
+        return 0
+    if act == "import-boq":
+        from .imports import boq as boq_import
+        r = boq_import.import_boq(db, _actor(a), a.project, Path(a.file), revision=a.revision)       # auto-detected column mapping; rejects if ambiguous
+        _print(r)
         return 0
     if act == "index":
         r = project_index.index_project(db, _actor(a), a.project)
@@ -285,6 +293,8 @@ def main(argv: list[str] | None = None) -> int:
     q = ps.add_parser("create"); q.add_argument("--name", required=True); q.add_argument("--client"); q.add_argument("--location"); q.add_argument("--tender-ref")
     q.add_argument("--project-type"); q.add_argument("--trades", help="comma-separated"); q.add_argument("--design-stage"); q.add_argument("--id"); q.add_argument("--demo", action="store_true")
     q.add_argument("--user"); q.set_defaults(fn=cmd_project)
+    q = ps.add_parser("import-boq", help="import a human-measured BOQ file (copied into '3. BOQ & Takeoff')"); q.add_argument("project"); q.add_argument("file")
+    q.add_argument("--revision"); q.add_argument("--user"); q.set_defaults(fn=cmd_project)
     for n in ("refresh", "index"):
         q = ps.add_parser(n); q.add_argument("project"); q.add_argument("--user"); q.set_defaults(fn=cmd_project)
     q = ps.add_parser("search"); q.add_argument("project"); q.add_argument("query"); q.set_defaults(fn=cmd_project)

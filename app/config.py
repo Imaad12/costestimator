@@ -61,8 +61,8 @@ class Settings:
 
     @property
     def imports_dir(self) -> Path:
-        """Original public-source files + import manifests (never overwritten)."""
-        return self.data_dir / "public_data" / "imports"
+        """Original public-source files + import manifests (never overwritten); runtime data, included in backups."""
+        return self.var_dir / "imports"
 
     @property
     def source_cache_dir(self) -> Path:

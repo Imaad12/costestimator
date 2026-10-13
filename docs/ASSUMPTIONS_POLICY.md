@@ -31,3 +31,7 @@ Assumptions -> *Show effect* re-runs the strict-or-preliminary estimate with a w
 Tax categories are separate dated records (`tax_categories`): code, rate, validity period, source reference, verification note and status. `VAT-STD` is seeded at 15% **Pending Review** with the
 evidence trail in `data/sources/ACCESS_LOG.md`; a Commercial Approver must record verification evidence before it can be approved. Different supplies may carry different categories (item-level `tax_category`).
 Approving a rate requires evidence text; the rate used is the approved category valid on the estimate date.
+
+## Isolation from the global register, and index data
+A project override lives only in `project_assumptions` (with its reason and approval) and is resolved for that project; other projects and the global default are untouched (tested). Each frozen estimate version stores the resolved assumption values it used (`estimate_snapshots`).
+Escalation: the GASTAT Construction Cost Index observations in `index_observations` are a *reference* a human may cite when deciding an escalation assumption. They are never applied automatically and are not a unit rate.

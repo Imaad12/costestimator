@@ -19,7 +19,7 @@ def list_sources(db: Database) -> list[dict]:
         last = db.one("SELECT * FROM source_access_log WHERE provider=? ORDER BY id DESC LIMIT 1", (i.id,))
         last_ok = db.one("SELECT attempted_at FROM source_access_log WHERE provider=? AND outcome IN ('OK','NOT_MODIFIED') ORDER BY id DESC LIMIT 1", (i.id,))
         out.append({"id": i.id, "name": i.name, "register_id": i.source_id, "kind": i.kind, "status": i.status, "automated_access": p.policy.automated_access,
-                    "produces": i.produces, "docs_url": i.docs_url, "manual_alternative": i.manual_alternative, "description": i.description,
+                    "produces": i.produces, "live_verified": i.live_verified, "docs_url": i.docs_url, "manual_alternative": i.manual_alternative, "description": i.description,
                     "last_attempt": dict(last) if last else None, "last_success": last_ok["attempted_at"] if last_ok else None})
     return out
 

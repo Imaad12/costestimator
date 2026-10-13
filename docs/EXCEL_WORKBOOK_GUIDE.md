@@ -2,7 +2,7 @@
 
 Generated from one specification (`app/excel/spec.py`) so every workbook shares identical headers, keys and IDs. Column-level detail: [EXCEL_DATA_DICTIONARY.md](EXCEL_DATA_DICTIONARY.md).
 
-## Files (`templates/`)
+## Files (`templates/`) — 11 workbooks (the master + 10 standalone) and 2 Word templates
 `estimate_master.xlsx` (27 sheets) · `boq_import_template.xlsx` · `takeoff_import_template.xlsx` (Takeoff + Resource Takeoff) · `resource_rate_template.xlsx` (Rate Dataset + Material Library) · `assembly_library_template.xlsx` ·
 `assumption_register_template.xlsx` · `rfq_template.xlsx` · `vendor_quote_template.xlsx` · `quote_comparison_template.xlsx` · `clarification_register_template.xlsx` · `pricing_schedule_template.xlsx` ·
 `letter_of_offer_template.docx` · `estimate_report_template.docx`. Regenerate with `python -m app.cli templates`. A project-populated master: *Reports -> Download master workbook* or `python -m app.cli export-workbook PRJ-0001 --out wb.xlsx`.
@@ -27,3 +27,9 @@ Data validation lists: statuses, rate types, resource types, canonical units, co
 * Import creates **drafts and proposals only**: new BOQ rows (re-import diff -> pending change requests), mapping, assumption overrides (Pending Review), indirect revisions (new Draft version), clarifications, scope entries, risks, vendors, rate proposals from the library sheets (Draft), assembly edits (new Draft version).
 * Status/approval columns in a file are ignored; read-only values are never imported.
 * Round-trip integrity is tested: export -> edit -> import -> identical BOQ in a fresh project.
+
+## Rate Dataset sheet and the candidate importer
+`resource_rate_template.xlsx` → sheet *Rate Dataset* is accepted by `python -m app.cli rates import` (header row 5 / hidden key row 4). Rows become **rate candidates** for review (not rates); currency and a known resource id are mandatory.
+## Verification status
+Workbooks are verified by LibreOffice headless recalculation (`verify-workbook`). **Microsoft Excel itself has not been available for testing**; recalculation on open (`fullCalcOnLoad`) is relied on there.
+The numbered workspace receives the project master workbook in `5. Estimate & Cost Build-Up/`.

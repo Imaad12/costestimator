@@ -501,3 +501,25 @@ def test_watchlist_refresh_creates_pending_candidates_only_and_handles_blocked_p
     assert res.scalar("SELECT COUNT(*) FROM resource_rates WHERE unit_price IS NOT NULL") == 0
     rep2 = p.refresh(res, ESTIMATOR, f, dry_run=False, watchlist=wl)                                # same page again: duplicate, no second candidate
     assert rep2["candidates_created"] == 0 and rep2["duplicates"] == 1
+
+
+def test_generated_rate_dataset_template_can_be_used_for_candidate_import(res, tmp_path):
+    """The shipped templates/resource_rate_template.xlsx layout (hidden key row 4, headers row 5) is accepted by `rates import`."""
+    import openpyxl
+    from app.excel.templates import generate_all
+    out = generate_all(tmp_path / "tpl", res)
+    f = next(p for p in out if p.name == "resource_rate_template.xlsx")
+    wb = openpyxl.load_workbook(f)
+    ws = wb["Rate Dataset"]
+    hdr = {str(c.value): c.column for c in ws[5] if c.value}
+    row = 6
+    vals = {"Resource ID": "T-MAT-001", "Unit": "m3", "Unit price": 301.25, "Currency": "SAR", "Price date": "2026-09-10", "Tax basis": "Excluded",
+            "Delivery basis": "Delivered", "Evidence / reference": "Supplier letter ref 77 (SYNTHETIC test)"}
+    for k, v in vals.items():
+        ws.cell(row=row, column=hdr[k], value=v)
+    filled = tmp_path / "filled.xlsx"
+    wb.save(filled)
+    rep = importer.import_rates_file(res, ESTIMATOR, filled, source_name="Template test", dry_run=False)
+    assert rep["accepted"] == 1 and rep["rejected"] == 0, rep
+    c = cand.get(res, rep["candidate_ids"][0])
+    assert c["original_price"] == "301.25" and c["evidence_snippet"].startswith("Supplier letter ref 77") and c["tax_basis"] == "Excluded"

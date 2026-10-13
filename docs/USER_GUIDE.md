@@ -53,3 +53,12 @@ Without a key every deterministic feature still works.
 
 ## 5. Adding things without touching code
 See [EXTENDING.md](EXTENDING.md).
+
+## 6. Project workspaces, documents and completeness
+Creating a project (Projects page or `python -m app.cli project create …`) creates `projects/PRJ-nnnn-slug/` with the ten numbered folders, `project.json` and a project `CLAUDE.md`; the page that follows shows the path and the next action.
+*Workspace & documents* lets you upload tender documents (originals are never overwritten), press *Index documents* (read-only scan; versioned extracts in *2. AI Context*), record the trades and approved drawing/specification revisions, and see frozen-estimate input snapshots.
+*Completeness* lists, from the database, what is done, open or blocking (no scores). Details: [PROJECT_WORKSPACES.md](PROJECT_WORKSPACES.md).
+
+## 7. Getting real rates in (Rate updates)
+The global library ships with **no prices**. Open *Rate updates*: import a price list/public dataset as candidates (dry-run first), review each candidate (evidence, VAT, unit, resource), *Approve for publication*, *Publish* (creates a Pending Review rate), then approve the rate (Procurement Reviewer / Commercial Approver).
+Missing rates still go through *Procurement & RFQs*. Index data (GASTAT CCI) can be imported for escalation reference only. Details: [RATE_UPDATE_WORKFLOW.md](RATE_UPDATE_WORKFLOW.md).

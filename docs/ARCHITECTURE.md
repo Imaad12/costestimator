@@ -21,7 +21,9 @@ app/
   estimators/                 PURE engines: direct_cost, rate_build, rate_resolution, indirect, duration (CPM), commercial,
                               pricing_schedule, estimate (orchestrator + fingerprint), context (the only SQL reader)
   services/                   DB-backed domain services: rates, assumptions, assemblies, boq, projects, indirects, commercial (policy/tax/FX),
-                              registers, offers, estimates (versions, gated export), suppliers, suggestions, backup, audit, auth, refdata
+                              registers, offers, estimates (versions, gated export), suppliers, suggestions, backup, audit, auth, refdata,
+                              workspaces (numbered project folders, project CLAUDE.md), project_index (document indexer), snapshots (frozen inputs),
+                              workspace_migration (copy-only legacy migration)
   imports/                    readers (CSV/XLSX), BOQ + takeoff importer, dataset ingestion (stage -> validate -> publish)
   procurement/                needs detection, RFQ drafting/export, quotations, levelling, selection + rate publication
   reconciliation/             rule table (config/reconciliation_rules.json), findings engine, exceptions, final gate
@@ -30,8 +32,11 @@ app/
   ai/                         provider (Null/Claude/Mock), strict schemas, proposal service; deterministic suggesters
   api/                        REST routes, action registry (shared by UI and API), serializers
   web/                        Jinja2 templates + CSS (no external assets)
-  reporting/                  dashboard, coverage, historical analytics (pandas)
-  integrations/               documented integration points (adapters are honest about what is NOT implemented)
+  reporting/                  dashboard, coverage, completeness (per-project open/blocked items), historical analytics (pandas)
+  integrations/               legacy adapter stubs for the dataset-staging flow (honest about what is NOT implemented)
+  sources/                    public-source providers: base (AccessPolicy, polite HttpFetcher with cache/backoff/robots), providers (KAPSARC-GASTAT CCI,
+                              GASTAT site, Etimad, web watchlist), webprice (evidence extraction). Never imported by the estimating path.
+  rate_updates/               import manifests, index import, rate candidates (review queue, publish), normalisation, importer, refresh/status
   cli.py, main.py             command line, FastAPI factory
 ```
 
@@ -41,7 +46,8 @@ Identity/audit: `users`, `audit_log` (hash chain), `approvals`, `change_requests
 `assembly_lines`. Projects: `projects`, `boq_imports`, `boq_items`, `boq_rejected_rows`, `takeoff_resource_lines`, `indirect_items`,
 `project_durations`, `schedule_tasks`, `commercial_policies`, `estimate_versions`, `offers`. Procurement: `procurement_packages/items`, `rfqs`,
 `quotations/lines`, `quote_adjustments`, `quote_selections`. Registers: `clarifications`, `scope_register`, `risks`. Control: `recon_runs/findings/
-exceptions`, `exports`. History/ingestion: `actual_costs`, `dataset_imports`, `rate_staging`, `ai_suggestions`.
+exceptions`, `exports`. History/ingestion: `actual_costs`, `dataset_imports`, `rate_staging`, `ai_suggestions`. Workspaces & sources (0007): `project_documents`, `estimate_snapshots`,
+`import_manifests`, `rate_candidates`, `index_observations`, `source_access_log`. Full data classes and source-of-truth rules: [DATA_MODEL.md](DATA_MODEL.md).
 
 ## Request flow for a priced estimate
 `context.load_inputs` (SQL -> immutable `EstimateInputs`) -> `direct_cost.compute_direct_cost` -> `indirect.compute_indirects` ->
@@ -58,3 +64,16 @@ single-user/small-team tool. Not designed for multi-node or internet exposure (b
 * **Stdlib `sqlite3`** with TEXT decimals: exact money, simple backup (online-backup API), DuckDB-compatible plain SQL for analytics.
 * **HMAC-signed tokens** (PBKDF2 passwords) rather than a user framework: sufficient for the stated MVP; documented as not enterprise security.
 * **Python 3.13 / pandas 3 / pydantic 2** were used for development; `requires-python >= 3.11`.
+
+## Implementation status (what is real today)
+| Area | Status | Notes |
+|---|---|---|
+| Deterministic engines, approvals, audit, BOQ/takeoff import, procurement, reconciliation, Excel (27-sheet master + 10 standalone workbooks + 2 .docx), UI, API, backup | **Implemented**, tested | 210 automated tests (see TESTING.md); LibreOffice-verified workbooks; Microsoft Excel not tested |
+| Numbered project workspaces, project `CLAUDE.md`, document indexer, estimate input snapshots, migration script | **Implemented**, tested | PROJECT_WORKSPACES.md. Snapshot *replay* covers direct cost only (partial) |
+| Rate candidates, manifests, normalisation, review queue, publication, CLI + UI | **Implemented**, tested offline | RATE_UPDATE_WORKFLOW.md |
+| KAPSARC/GASTAT CCI provider | **Implemented, mock-tested, live-unverified** | blocked from the build sandbox |
+| Web price watchlist | **Implemented**, fixture-tested; empty watchlist; never run live | |
+| GASTAT website, Etimad | **Manual-only** (no permitted/documented automatic route) | |
+| Optional Claude AI features | **Partially implemented**: schemas, review gating, mock-tested; live API never exercised | |
+| Real Saudi rate coverage | **Not achieved**: 0 approved real rates | NEXT_STEPS #9 |
+| Full replay of frozen estimates (indirect/commercial), OCR/CAD extraction, multi-user server hardening, per-workspace ACLs | **Planned** | NEXT_STEPS |

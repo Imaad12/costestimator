@@ -63,6 +63,13 @@ Date of research: 2026-10-12. Register: `source_register.csv` (27 sources, SRC-0
 | 34 | firecrawl_search | online building materials store prices | OK - Madar, msamer blog, CEIC, Scribd, and an SCA PDF in results (excerpts). |
 | 35 | firecrawl_scrape | https://open.data.gov.sa/en/pages/policies/license | FAILED - `ERR_TUNNEL_CONNECTION_FAILED`. Licence text NOT read. |
 | 36 | firecrawl_scrape | muqawil.org SCA Q3 2020 PDF | OK - read (34 pp). Disclaimer prohibits reproduction without written SCA permission; nothing copied to the register. |
+| 37 | firecrawl_scrape | KAPSARC catalog API: .../api/explore/v2.1/catalog/datasets/construction-cost-index-series-by-sections-and-groups-at-national-level | OK - dataset metadata JSON: fields (time_period, measure, section_and_group, index), 1,391 records, license "Public Domain", publisher GASTAT, update frequency monthly, attachments (xlsx). |
+| 38 | firecrawl_search | "GASTAT construction cost index dataset download xlsx stats.gov.sa building materials price" | OK - excerpts only: GASTAT methodology page, SPA/GASTAT news releases (CCI bulletins), KAPSARC dataset. No documented download API for stats.gov.sa found. |
+| 39 | firecrawl_scrape | KAPSARC .../records?limit=8&order_by=time_period desc | OK - confirmed record shape; latest period 2026-04. |
+| 40 | firecrawl_scrape | KAPSARC .../records?...where=time_period='2026-04' | FAILED - HTTP 400 IncompatibleTypesInComparisonFilter (time_period is a date field; query was wrong, not blocked). Not repeated in the same form. |
+| 41 | firecrawl_scrape | KAPSARC .../records?limit=100&where=time_period=date'2026-04-01'&order_by=... | OK - 39 records; saved verbatim to data/public_data/gastat_cci/kapsarc_cci_2026-04.records.json. |
+| 42 | curl (HEAD, one attempt each) | https://www.stats.gov.sa, https://datasaudi.sa, https://opendata.stats.gov.sa, https://datasource.kapsarc.org, https://data.gov.sa, https://tenders.etimad.sa | ALL FAILED from the sandbox (curl exit/HTTP code 000 via the agent proxy). Recorded as blocked from the environment; not retried. |
+| 43 | application HTTP client (`python -m app.cli sources refresh --provider kapsarc-gastat-cci`), twice | datasource.kapsarc.org/robots.txt then the records endpoint | BLOCKED - `URLError: Tunnel connection failed: 403 Forbidden` reading robots.txt; no data request made (conservative). Logged in `source_access_log`. First attempt (before the message was clarified) showed the same refusal. |
 
 ## Reuse assessment (short)
 

@@ -69,3 +69,9 @@ Completeness reports `items fully priced / items` (undefined -> "n/a" when there
 
 ## 7. Sensitivity
 `assumption_overrides` re-run the whole estimate in memory (nothing saved) to show the effect of changing an assumption (Assumptions -> Show effect).
+
+## Reproducibility of a frozen estimate
+`freeze_version` stores the results and an input snapshot (`estimate_snapshots`): BOQ rows, assembly definitions with versions, all rate rows of the involved resources with their status at freeze time, resolved assumptions, takeoff lines, FX, policy, tax and indirect rows.
+`snapshots.replay_direct_cost` recomputes direct cost from the snapshot only and must equal the frozen figure, even after newer rates were approved (tested). Indirect/commercial/tax figures are frozen results; their inputs are stored but not re-run automatically.
+## Index data
+Published cost indices (e.g. GASTAT CCI) are not used by any engine formula. They exist only as reference observations for a human deciding an escalation assumption.

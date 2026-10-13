@@ -29,3 +29,10 @@ Resource master data (`resources`) carries the ID, type, trade/sub-trade, catego
 ## Tracing a number
 Every cost line records: BOQ item -> assembly (+version) -> assembly line -> resource -> **rate id** (type, status, currency, FX used) -> assumptions applied -> the calculation `basis` string.
 Change history: `audit_log` (entity `rate`/`resource`), approval records, and `superseded_by` links.
+
+## Candidate stage (public sources, datasets, web pages) — see [RATE_UPDATE_WORKFLOW.md](RATE_UPDATE_WORKFLOW.md)
+Before a price becomes a `resource_rates` version it exists as a `rate_candidates` row with: exact source URL / uploaded-file reference, source type/name/id, retrieval timestamp, source publication and effective dates, geography,
+**original price/currency/unit (immutable)**, separate normalised price + method + steps, tax/delivery/installation basis, price kind, extraction method, evidence snippet, flags, queue/status, reviewer and comments, manifest id.
+The published rate's `evidence` text repeats the candidate ref, URL, retrieval date, original figures, basis, normalisation method and reviewer comment, so a rate can be traced back to the exact page or file.
+Original files and manifests are kept in `var/imports/`. A published rate is VAT-exclusive; its `tax_basis` is `Excluded`. Regional multipliers and index-adjusted unit prices do not exist anywhere.
+Official indices live in `index_observations` and are never rates.

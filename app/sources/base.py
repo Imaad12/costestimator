@@ -124,10 +124,11 @@ class HttpFetcher:
             pass
 
     # ---- robots
-    def _robots_allows(self, url: str, timeout: float) -> bool:
+    def _robots_allows(self, url: str, timeout: float) -> tuple[bool, str]:
         p = urllib.parse.urlsplit(url)
         origin = f"{p.scheme}://{p.netloc}"
         if origin not in self._robots:
+            self._robots_err = getattr(self, "_robots_err", {})
             rp = urllib.robotparser.RobotFileParser()
             try:
                 req = urllib.request.Request(origin + "/robots.txt", headers={"User-Agent": USER_AGENT})
@@ -139,10 +140,15 @@ class HttpFetcher:
                 self._robots[origin] = rp if e.code in (404, 410) else None
                 if e.code in (404, 410):
                     rp.parse([])
-            except Exception:
+                else:
+                    self._robots_err[origin] = f"HTTP {e.code}"
+            except Exception as e:
                 self._robots[origin] = None
+                self._robots_err[origin] = f"{type(e).__name__}: {e}"
         rp = self._robots[origin]
-        return bool(rp and rp.can_fetch(USER_AGENT, url))
+        if rp is None:
+            return False, f"robots.txt could not be read ({self._robots_err.get(origin, 'unknown error')}); not fetched (conservative)"
+        return (True, "") if rp.can_fetch(USER_AGENT, url) else (False, "robots.txt disallows this URL; not fetched")
 
     # ---- fetch
     def fetch(self, url: str, policy: AccessPolicy) -> FetchResult:
@@ -154,8 +160,10 @@ class HttpFetcher:
         cached = self._cache_get(url, policy.cache_ttl_s)
         if cached:
             return cached
-        if policy.respect_robots and not self._robots_allows(url, policy.timeout_s):
-            return FetchResult(url, "BLOCKED", error="robots.txt disallows (or could not be read for) this URL; not fetched.")
+        if policy.respect_robots:
+            allowed, why = self._robots_allows(url, policy.timeout_s)
+            if not allowed:
+                return FetchResult(url, "BLOCKED", error=why)
         wait = policy.min_interval_s - (time.monotonic() - self._last_hit.get(host, -1e9))
         if wait > 0:
             self._sleep(wait)
@@ -199,11 +207,12 @@ class ProviderInfo:
     name: str
     source_id: str | None         # Source Register id (data/sources/source_register.csv)
     kind: str                     # official-index / procurement-records / web-prices / manual
-    status: str                   # functional / manual-only / blocked / stub
+    status: str                   # implemented / manual-only   (see `live_verified` for what has actually been observed)
     description: str
     docs_url: str | None = None
     manual_alternative: str = ""
     produces: str = ""            # index observations / rate candidates
+    live_verified: str = "not verified from the build environment"
 
 
 class Provider(Protocol):

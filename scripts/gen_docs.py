@@ -14,7 +14,8 @@ def taxonomy() -> None:
            "Generated from `data/taxonomy/cost_codes.csv` by `scripts/gen_docs.py`. The taxonomy is **data, not code**: add a trade, sub-trade or",
            "cost code in *Settings -> Add cost code* (Administrator) or by adding rows to the CSV (loaded idempotently by `refdata.load_taxonomy`).",
            "No calculation-engine change is needed. Codes are stable identifiers used in resources, assemblies, BOQ items, workbooks and reports.", "",
-           "Level 1 = division (A-L); level 2 = sub-trade; level 3+ = user-added cost codes (e.g. `D.07.01`).", ""]
+           "Level 1 = division (A-L); level 2 = sub-trade; level 3+ = user-added cost codes (e.g. `D.07.01`).",
+           "A project records its applicable trades (project settings / `project.json`); the cost-code tree itself is global and shared by resources, assemblies, BOQ items and reports.", ""]
     for d in [r for r in rows if r["level"] == "1"]:
         out.append(f"## {d['code']} - {d['name']}")
         out.append("")
@@ -56,5 +57,11 @@ if __name__ == "__main__":
     (ROOT / "docs").mkdir(exist_ok=True)
     taxonomy()
     excel_dictionary()
-    (ROOT / "docs/_sources_table.md").write_text(sources_table(), encoding="utf-8")
+    tbl = sources_table()
+    (ROOT / "docs/_sources_table.md").write_text(tbl, encoding="utf-8")
+    ks = ROOT / "docs/KSA_DATA_SOURCES.md"
+    txt = ks.read_text(encoding="utf-8")
+    b, e = "<!-- SOURCES_TABLE_BEGIN -->", "<!-- SOURCES_TABLE_END -->"
+    if b in txt and e in txt:
+        ks.write_text(txt[:txt.index(b) + len(b)] + "\n## Register (generated)\n" + tbl + "\n" + txt[txt.index(e):], encoding="utf-8")
     print("docs generated")

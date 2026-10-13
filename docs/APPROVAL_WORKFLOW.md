@@ -4,7 +4,7 @@
 | Role | Typical authority |
 |---|---|
 | Estimator | author data; approve BOQ quantity/unit/mapping changes, assemblies, assumptions & project overrides, indirects, durations, exclusions, clarification resolution, pricing decisions, AI-suggestion acceptance; **provisional** (project-scoped) rate approval; low/medium reconciliation exceptions |
-| Procurement Reviewer | approve/reject **rates**, quotations, supplier selections, FX rates, dataset publication, suppliers, adjustments |
+| Procurement Reviewer | approve/reject **rates**, **rate candidates**, quotations, supplier selections, FX rates, dataset publication, suppliers, adjustments |
 | Commercial Approver | commercial policies, tax categories, final estimate, offer, tender export, High-severity exceptions, supplier selections at/above the configured value threshold; plus the Estimator/Procurement authorities |
 | Administrator | everything above plus users, taxonomy, company settings, backups |
 | Viewer | read only |
@@ -32,6 +32,8 @@ entity type, entity id, version, reviewer, reviewer role, action (`approve`, `ap
 | Quotation data | Quotations | Procurement verifies against the supplier document; AI-extracted data requires stated verification |
 | Supplier selection | Quotations | not-lowest/not-like-for-like needs a documented reason; threshold role |
 | Publication of rates from a quote | Quotations | creates *Pending Review* rates; each needs its own approval |
+| Rate candidate from a public source / dataset | Rate updates | **two** human steps: (1) Procurement Reviewer / Commercial Approver / Administrator marks it *Approved for Publication* (entity `rate_candidate`; refused unless price, resource, VAT basis, price kind and normalisation are sound), (2) it is published as a *Pending Review* rate and (3) a human approves that rate. Estimators may edit matching fields and publish, never approve; AI never |
+| Document index entries | Workspace | a human marks new/changed documents *Reviewed* (informational; it approves nothing) |
 | Project duration, indirect allocation | Commercials | AI duration needs a reviewer comment |
 | Commercial policy, tax category | Commercials | tax needs verification evidence |
 | Inclusions/exclusions, clarification resolution | Registers | resolution needs the client response and evidence |
@@ -52,3 +54,7 @@ There is no code path from `app/ai` to an approval function (asserted by `tests/
 
 ## Audit trail
 `audit_log` rows hash the previous row's hash plus their content (`audit.verify_chain`, `python -m app.cli audit-verify`, Settings page). It detects accidental or naive modification. It is **not tamper-proof**: someone with write access to the SQLite file could rebuild the chain.
+
+## Source refresh and imports are not approvals
+`sources refresh`, `rates import`, `index import` and the web watchlist create *proposals* (candidates, index observations, manifests). They never call an approve function. A live refresh needs an authenticated author-role user; a dry run needs none and changes nothing.
+Server-side checks cover every route: UI form posts and API calls go through `api/actions.py` → services → `approvals.authorize` (tested in `tests/integration/test_workspace_ui.py` and `tests/sources/`).

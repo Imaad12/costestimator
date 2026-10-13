@@ -1,6 +1,6 @@
 """Concrete providers.  Status words are literal:
 
-  functional   implemented and exercised against the documented interface (offline tests use recorded/mocked responses)
+  implemented exercised by offline tests against the documented interface (mocked/recorded responses); `live_verified` says what was observed for real
   manual-only  no automated access is permitted or documented; a file the user obtained legitimately can be imported
   blocked      automated access is blocked from the environment/by the operator; manual import remains available
 
@@ -32,12 +32,13 @@ class KapsarcGastatCci:
 
     Output: index observations only (escalation reference). Never rate candidates."""
     info = ProviderInfo(
-        "kapsarc-gastat-cci", "GASTAT Construction Cost Index via KAPSARC Data Portal", "SRC-002", "official-index", "functional",
+        "kapsarc-gastat-cci", "GASTAT Construction Cost Index via KAPSARC Data Portal", "SRC-002", "official-index", "implemented",
         "Monthly CCI index/M-o-M/Y-o-Y series by section and group (basic materials, labour, equipment rental, energy). An INDEX - not a unit price.",
         "https://datasource.kapsarc.org/explore/assets/" + KAPSARC_DATASET + "/",
         "Open the dataset page in a browser, export CSV (or save the API 'records' JSON) and run: python -m app.cli index import <file> --dataset cci --source SRC-002",
-        "index observations")
-    policy = AccessPolicy(min_interval_s=3.0, max_retries=2, allowed_hosts=("datasource.kapsarc.org",), cache_ttl_s=6 * 3600, respect_robots=False,
+        "index observations",
+        live_verified="API shape, fields, licence metadata and 2026-04 records verified 2026-10-12 through a proxy fetch tool; the application's own HTTP client was NOT able to reach the host from the build sandbox (see source_access_log).")
+    policy = AccessPolicy(min_interval_s=3.0, max_retries=2, allowed_hosts=("datasource.kapsarc.org",), cache_ttl_s=6 * 3600, respect_robots=True,
                           terms_note="Dataset metadata states licence 'Public Domain', publisher GASTAT (verified 2026-10-12). Cite the publisher.")
     page_size = 100
     max_pages = 40
@@ -130,7 +131,7 @@ class WebPriceWatchlist:
     """Operator-curated list of public product pages (config/price_sources.json).  Nothing is shipped in the list: the project does not
     invent suppliers.  Each page is fetched politely (robots.txt, rate limit, cache) and read with webprice.extract_candidates."""
     info = ProviderInfo(
-        "web-price-watchlist", "Public supplier/manufacturer product pages (operator watchlist)", None, "web-prices", "functional",
+        "web-price-watchlist", "Public supplier/manufacturer product pages (operator watchlist)", None, "web-prices", "implemented",
         "Fetches only the URLs the operator lists, extracts product/spec/price evidence and creates pending rate candidates. Pages that publish "
         "only specifications yield specification-only candidates (no price inferred).", None,
         "Save the page (HTML) or copy the quoted price into the rate-import template and use `rates import`.", "rate candidates")

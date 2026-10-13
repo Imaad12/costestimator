@@ -67,9 +67,16 @@ def load_sources(db: Database) -> int:
     n = 0
     cols = {c["name"] for c in db.all("PRAGMA table_info(sources)")}
     for r in read_csv(p):
-        if not r.get("source_id") or db.one("SELECT 1 FROM sources WHERE source_id=?", (r["source_id"],)):
+        if not r.get("source_id"):
             continue
-        db.insert("sources", {k: (v or None) for k, v in r.items() if k in cols})
+        vals = {k: (v or None) for k, v in r.items() if k in cols}
+        cur = db.one("SELECT * FROM sources WHERE source_id=?", (r["source_id"],))
+        if cur:                                   # the register is repo-owned reference data: refresh descriptive fields when the CSV changed
+            diff = {k: v for k, v in vals.items() if k != "source_id" and cur[k] != v}
+            if diff:
+                db.update("sources", diff, "source_id=?", (r["source_id"],))
+            continue
+        db.insert("sources", vals)
         n += 1
     return n
 

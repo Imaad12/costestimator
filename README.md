@@ -39,6 +39,9 @@ Helper scripts: `scripts/setup.sh` (venv + install + init), `scripts/run.sh`, `s
 | Optional AI (review-only, schema-validated) and rule-based suggesters | `app/ai/` |
 | Local web UI (16 sections) + REST API | `app/web/`, `app/api/` |
 | Backup / restore / project packages, CLI | `app/services/backup.py`, `app/cli.py` |
+| Numbered project workspaces (`projects/PRJ-nnnn-slug/` with 10 fixed folders, generated project `CLAUDE.md`), document indexer, frozen estimate input snapshots | `app/services/workspaces.py`, `project_index.py`, `snapshots.py` |
+| Public-source rate updates: provider interface, KAPSARC/GASTAT CCI index import, manual price-list import, web evidence extraction, rate-candidate review queue, normalisation, publication as Pending Review | `app/sources/`, `app/rate_updates/` |
+| Claude Code instructions: root `CLAUDE.md`, 14 task skills | `CLAUDE.md`, `.claude/skills/` |
 | Data: 152-node taxonomy, 927 catalogue resources (no prices), 322 assumptions (no invented values), 27 sources, synthetic demo | `data/` |
 | Tests (pytest) | `tests/` |
 
@@ -49,7 +52,11 @@ python -m app.cli init [--admin-password P] [--demo-users]    python -m app.cli 
 python -m app.cli run [--host H --port N]                       python -m app.cli templates [--out DIR]
 python -m app.cli backup | validate-backup F | restore F --yes  python -m app.cli export-workbook PRJ-0001 --out wb.xlsx
 python -m app.cli verify-workbook wb.xlsx [--project PRJ-0001]  python -m app.cli coverage | audit-verify | export-project PRJ-0001
+python -m app.cli project create --name "…" --trades "HVAC,Electrical" | list | index PRJ-0001 | search PRJ-0001 "text" | import-boq PRJ-0001 FILE
+python -m app.cli sources list | status | refresh --dry-run         python -m app.cli rates import|validate FILE … | pending | review RC-… approve | publish RC-…
+python -m app.cli index import FILE --dataset gastat-cci --source SRC-002 [--dry-run]       python -m app.cli migrate-workspaces --dry-run
 pytest                                                          # full automated suite (see docs/TESTING.md)
+# state-changing commands authenticate: --user NAME (or KSA_CLI_USER) and KSA_CLI_PASSWORD (or a prompt)
 ```
 
 ## Configuration
@@ -64,6 +71,7 @@ Secrets are never committed (`.env`, `var/` are git-ignored).
 [Assumptions policy](docs/ASSUMPTIONS_POLICY.md) · [KSA data sources](docs/KSA_DATA_SOURCES.md) · [Rate provenance](docs/RATE_PROVENANCE.md) ·
 [Approval workflow](docs/APPROVAL_WORKFLOW.md) · [Procurement guide](docs/PROCUREMENT_GUIDE.md) · [Excel workbook guide](docs/EXCEL_WORKBOOK_GUIDE.md) ·
 [Trade taxonomy](docs/TRADE_TAXONOMY.md) · [Import/export formats](docs/IMPORT_EXPORT_FORMATS.md) · [Backup/restore](docs/BACKUP_RESTORE.md) ·
+[Project workspaces](docs/PROJECT_WORKSPACES.md) · [Data model](docs/DATA_MODEL.md) · [Rate update workflow](docs/RATE_UPDATE_WORKFLOW.md) · [Development audit](docs/DEVELOPMENT_AUDIT.md) · [Next steps](docs/NEXT_STEPS.md) ·
 [Extending without code changes](docs/EXTENDING.md) · [Known limitations](docs/KNOWN_LIMITATIONS.md) · [Testing](docs/TESTING.md)
 
 ## Licence

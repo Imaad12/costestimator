@@ -3,7 +3,17 @@
 Research date: **2026-10-12**. Full evidence: [`data/sources/source_register.csv`](../data/sources/source_register.csv) (27 sources, loaded into the *Source Register* sheet and Settings page) and the attempt-by-attempt
 [`data/sources/ACCESS_LOG.md`](../data/sources/ACCESS_LOG.md).
 
-## What was actually achieved (honest summary)
+## Second pass (2026-10-12): what changed
+* **GASTAT CCI is reachable through a documented open-data API**: the KAPSARC Data Portal republishes the GASTAT *Construction Cost Index Series by Sections and Groups at National Level* with the Opendatasoft Explore API v2.1
+  (`https://datasource.kapsarc.org/api/explore/v2.1/catalog/datasets/construction-cost-index-series-by-sections-and-groups-at-national-level/records`). Metadata (read 2026-10-12): publisher *General Authority for Statistics*, licence field
+  *Public Domain*, monthly, 1,391 records, `time_period`/`measure` (Index, M-o-M, Y-o-Y)/`section_and_group`/`index`, next release expected 2026-12-28. The 39 records for **2026-04** were saved verbatim
+  (`data/public_data/gastat_cci/`, with `PROVENANCE.md`) as a real, importable sample and as the offline-test fixture. This is an **index** (escalation reference), not a price.
+* **GASTAT's own site (stats.gov.sa)** still returned HTTP 502 to the research tool and no download API is documented → provider `gastat-site` is *manual-only*.
+* **The application's own HTTP client could not reach any of these hosts from the build sandbox** (proxy `403 Tunnel connection failed`; curl returned code 000 for stats.gov.sa, datasaudi.sa, opendata.stats.gov.sa, kapsarc, data.gov.sa, etimad). The adapter therefore refused to fetch (robots.txt unreadable) and logged `BLOCKED`. See `data/sources/ACCESS_LOG.md` rows 37-43 and `source_access_log`.
+* **Etimad**: only the visitor listing was ever viewed (tender metadata/counters). No documented public price API, terms not reviewed → *manual-only*; award values are never treated as market quotes.
+* **Still true: no source of SAR unit rates (labour, plant, materials, subcontract) has been found that can be reused.** Rates must come from supplier quotations, price lists you hold the right to use, or your own historical project actuals — via `rates import`, the RFQ/quotation workflow, or the operator-curated web watchlist.
+
+## What was actually achieved in the first pass (honest summary)
 * **Direct network access** from the build environment to Saudi government hosts (stats.gov.sa, muqawil.org, etimad.sa, zatca.gov.sa, momah.gov.sa, aramco.com, kapsarc.org, sama.gov.sa) was **blocked by the sandbox proxy** (HTTP 403 on CONNECT). Nothing was fetched by circumvention.
 * A search/scrape service (Firecrawl) was used instead. Several pages were returned from its **cache** (dates are those returned by the tool, not necessarily the site's own last update). Of 27 sources, **10 were fully read, 12 only as search excerpts or empty shells, 3 were blocked, 2 not attempted**.
 * **No free, legitimately reusable source of SAR unit rates was found.** The Saudi Contractors Authority price report carries a no-reproduction disclaimer, so no values were taken. SASO standards appear to be sold; Aramco standards were only found as unofficial third-party copies. **No prices, indices or benchmarks were copied into the database.**
@@ -13,11 +23,12 @@ Research date: **2026-10-12**. Full evidence: [`data/sources/source_register.csv
   * HRSD guidance on working hours (8 h/day or 48 h/week; Ramadan 6 h/36 h; overtime at hourly wage plus 50%) is recorded as a *reference* only - it does **not** populate any assumption or rate; hours and calendars remain project decisions.
   * Etimad's public listing shows tender *metadata* (counts, awarded flag) - not rates; platform terms were not reviewed.
 
+<!-- SOURCES_TABLE_BEGIN -->
 ## Register (generated)
 | ID | Source | Organisation | Access status | Accessed | Licence / reuse (as observed) | Data collected |
 |---|---|---|---|---|---|---|
 | SRC-001 | GASTAT Construction Cost Index (CCI) methodology and quality report | General Authority for Statistics (GASTAT) | Partially accessed | 2026-10-12 | Terms not reviewed - verify before reuse | none |
-| SRC-002 | Construction Cost Index series (GASTAT data mirrored on KAPSARC Data Portal) | KAPSARC Data Portal (republishing General Authority for Statistics data) | Accessed | 2026-10-12 | Page credits creator 'General Authority for Statistics'; no licence text seen on the landing page - Terms not reviewed - verify before reuse | fact: dataset 'Last modified 4 months ago (3 Jun 2026)', unit of measure 'Index', creator 'General Authority for Statistics' (KAPSARC landing page metadata) |
+| SRC-002 | Construction Cost Index series (GASTAT data mirrored on KAPSARC Data Portal) | KAPSARC Data Portal (republishing General Authority for Statistics data) | Accessed | 2026-10-12 | Dataset metadata field license='Public Domain' (observed 2026-10-12, via the portal's catalog API); publisher 'General Authority for Statistics'; metadata 'sour | 39 index observations (period 2026-04): General Index 103.69 (Index), Labor Costs 104.90, Basic Materials Costs 100.10, Energy Costs 134.93, Equipment and Machi |
 | SRC-003 | GASTAT CPI and other statistics / building materials price indices | General Authority for Statistics (GASTAT) | Not attempted | - | Unknown - not reviewed | none |
 | SRC-004 | Muqawil platform (Saudi Contractors Authority) - main site and contractor directory | Saudi Contractors Authority (SCA) | Partially accessed | 2026-10-12 | Terms not reviewed - verify before reuse | none |
 | SRC-005 | SCA Statistical Report of Building Materials Prices - Q3 2020 (PDF) | Saudi Contractors Authority (SCA) Information Center | Accessed | 2026-10-12 | Report disclaimer (quoted): 'None of the contents provided on this report may be used, reproduced or transmitted, in whole or in part, in any form or by any mea | none (prices deliberately not extracted because of the copyright disclaimer) |
@@ -43,13 +54,16 @@ Research date: **2026-10-12**. Full evidence: [`data/sources/source_register.csv
 | SRC-025 | Madar Building Materials online catalogue | Madar (private retailer) | Partially accessed | 2026-10-12 | Commercial retailer site; copying prices not reviewed/authorised - Terms not reviewed - verify before reuse; no prices copied | none |
 | SRC-026 | msamer.com blog - Construction Material Prices in Saudi Arabia 2026 | Msamer (private marketplace blog) | Partially accessed | 2026-10-12 | Commercial blog; no licence seen - not for reuse without permission | none |
 | SRC-027 | CEIC Data - Saudi Arabia Construction Materials Price (average) | CEIC Data (commercial aggregator) | Partially accessed | 2026-10-12 | Commercial subscription database; terms not reviewed - assume not freely reusable | none |
+<!-- SOURCES_TABLE_END -->
 
 ## How public data enters the system (when you obtain it legitimately)
 1. Add/verify a **Source Register** entry (URL, organisation, dates, geography, currency, unit/price basis, trades, licence/reuse conditions *you actually read*, extraction method, limitations, confidence).
-2. Save the dataset as CSV/XLSX/JSON (see `templates/resource_rate_template.xlsx`, sheet *Rate Dataset*) and stage it: *Settings -> Rate datasets* or `app/imports/datasets.py`.
+2. Save the dataset as CSV/XLSX/JSON (see `templates/resource_rate_template.xlsx`, sheet *Rate Dataset*) and import it as **candidates**: *Rate updates* page or `python -m app.cli rates import FILE …` (preferred, new). The older direct staging flow (*Settings -> Rate datasets*, `app/imports/datasets.py`) still works.
 3. Staging validates duplicates, missing/invalid units, numeric values, unsupported currencies, stale dates, invalid rate types, missing sources, conflicts, regional validity and unusual changes (>30% vs the current approved rate). **Conflicting rows are never merged**; blocking rows cannot be accepted.
 4. A reviewer accepts rows and publishes; rates are created as **Pending Review** with provenance and then need normal rate approval. A change report (old vs new) is returned, which is the "refresh and report what changed" process.
 5. **Official indices/benchmarks** are stored with rate type *Official Index or Benchmark*: they can never be approved as a unit price. **Foreign prices** keep their original currency; conversion needs an approved FX rate and is not treated as a verified Saudi market rate.
 
-## Integration points that are *not* implemented
-`app/integrations/base.py` lists adapters for GASTAT CCI, Etimad awards and AI document extraction. Only the local-file adapter is implemented; the others raise `INTEGRATION_NOT_CONFIGURED` with the manual alternative. Reason: no stable, permitted, downloadable endpoint could be verified from the build environment, and the design rule is *no brittle scrapers*.
+## Provider status (current)
+See [RATE_UPDATE_WORKFLOW.md](RATE_UPDATE_WORKFLOW.md) for the provider table and commands.
+`app/sources/providers.py`: `kapsarc-gastat-cci` (implemented, mock-tested, live-unverified), `gastat-site` (manual-only), `etimad-awards` (manual-only), `web-price-watchlist` (implemented, empty watchlist).
+`app/integrations/base.py` (the older adapter stubs) is kept for the legacy dataset-staging flow and still raises `INTEGRATION_NOT_CONFIGURED` for GASTAT/Etimad.

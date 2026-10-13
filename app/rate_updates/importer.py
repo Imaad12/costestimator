@@ -20,7 +20,7 @@ from . import manifest as mf
 
 SYN = {
     "resource_id": ["resource id", "resource_id", "resource", "res id"],
-    "description": ["description", "desc", "item", "product", "product name", "name"],
+    "description": ["description", "desc", "item", "product", "product name", "name", "description (for new resources)"],
     "specification": ["specification", "spec", "specs", "specification / notes", "technical specification"],
     "unit": ["unit", "uom"],
     "original_price": ["unit price", "unit_price", "rate", "price", "unit rate", "original price", "price (sar)"],
@@ -35,7 +35,7 @@ SYN = {
     "delivery_basis": ["delivery_basis", "delivery basis", "delivery", "incoterm"],
     "installation_included": ["installation_included", "installation", "installed"],
     "price_kind": ["price_kind", "price kind", "price type"],
-    "evidence_snippet": ["evidence", "snippet", "note", "notes", "remarks"],
+    "evidence_snippet": ["evidence", "evidence / reference", "snippet", "note", "notes", "remarks"],
 }
 FIELDS_REQUIRED_HEADER = ("original_price",)
 
@@ -80,7 +80,7 @@ def read_rows(path: Path, sheet: str | None = None) -> list[tuple[int, dict]]:
                 if str(c or "").strip().lower() in syns and ci not in m.values():
                     m[f] = ci
                     break
-        if "original_price" in m and ("resource_id" in m or "description" in m) and (hidx is None or len(m) > len(cmap)):
+        if "original_price" in m and ("resource_id" in m or "description" in m) and (hidx is None or len(m) >= len(cmap)):
             hidx, cmap = idx, m
     if hidx is None:
         raise ValidationFailed("No header row found: need a price column and a resource id or description column.", code="NO_HEADER")

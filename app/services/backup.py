@@ -67,7 +67,7 @@ def create_backup(settings: Settings | None = None, dest: Path | None = None, la
         with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as z:
             z.write(dbcopy, "ksa_estimator.db")
             files["ksa_estimator.db"] = _sha_file(dbcopy)
-            for base, prefix in ((s.projects_dir, "projects"), (s.outputs_dir, "outputs"), (s.workspaces_dir, "workspaces")):
+            for base, prefix in ((s.projects_dir, "projects"), (s.outputs_dir, "outputs"), (s.workspaces_dir, "workspaces"), (s.imports_dir, "imports")):
                 if base.exists():
                     for p in sorted(base.rglob("*")):
                         if p.is_file() and not p.name.startswith("."):
@@ -156,7 +156,7 @@ def restore_backup(path: Path, *, confirm: bool, settings: Settings | None = Non
         for name in z.namelist():
             if name in ("manifest.json", "ksa_estimator.db") or name.endswith("/"):
                 continue
-            base = {"projects": s.projects_dir, "workspaces": s.workspaces_dir}.get(name.split("/", 1)[0], s.outputs_dir)
+            base = {"projects": s.projects_dir, "workspaces": s.workspaces_dir, "imports": s.imports_dir}.get(name.split("/", 1)[0], s.outputs_dir)
             target = base / name.split("/", 1)[1]
             data = z.read(name)
             if target.exists() and _sha_file(target) != _sha(data):

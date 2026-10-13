@@ -5,6 +5,7 @@ cost code in *Settings -> Add cost code* (Administrator) or by adding rows to th
 No calculation-engine change is needed. Codes are stable identifiers used in resources, assemblies, BOQ items, workbooks and reports.
 
 Level 1 = division (A-L); level 2 = sub-trade; level 3+ = user-added cost codes (e.g. `D.07.01`).
+A project records its applicable trades (project settings / `project.json`); the cost-code tree itself is global and shared by resources, assemblies, BOQ items and reports.
 
 ## A - Preliminaries and general requirements
 

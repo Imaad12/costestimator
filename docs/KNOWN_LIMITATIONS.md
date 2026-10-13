@@ -3,7 +3,7 @@
 ## Data
 * **There is no Saudi rate library.** Measured coverage (`python -m app.cli coverage`, fresh install): 927 catalogue resources (395 material, 99 labour, 64 plant, 149 equipment, 220 subcontract) - **0 with a real approved rate, 0 synthetic, 927 Missing Rate** (0.0% coverage).
   The catalogue defines *what* to price; every price, wage, productivity, consumption and wastage figure must come from you. Only the clearly labelled `DEMO-*` resources in the synthetic demo project carry (invented) prices.
-* **Public-data research was limited.** The build environment could not reach Saudi government sites directly; a search/scrape service was used (some cached results). 27 sources recorded: 10 accessed, 12 partially, 3 blocked, 2 not attempted. **No free reusable source of SAR unit rates was found**; none was copied. See [KSA_DATA_SOURCES.md](KSA_DATA_SOURCES.md).
+* **Public-data research was limited.** The build environment could not reach Saudi government sites directly; a search/scrape service was used (some cached results). 27 sources recorded. **No free reusable source of SAR unit rates was found**; none was copied. The only data stored is a 39-record **index** sample (GASTAT CCI, period 2026-04, via KAPSARC) — not a price. See [KSA_DATA_SOURCES.md](KSA_DATA_SOURCES.md).
 * **Tax and FX are unverified seeds.** `VAT-STD` (15%) and the USD/SAR peg (3.75) are seeded *Pending Review* with evidence; a human must verify against current official guidance before any estimate can resolve tax or convert currency. Tax recoverability is stored but not used in any calculation.
 * The assumptions register (322 definitions) ships with only four methodological defaults; the standard assemblies (26) are structure only and cannot be approved until factors are supplied. No productivity benchmarks are provided.
 * Synthetic figures are round invented numbers for demonstration and tests; they must never be mixed into a real library (reconciliation flags this as Critical in non-demo projects).
@@ -38,5 +38,15 @@
 * The role matrix is defined in code (`approvals/policy.py`), not editable in the UI. Requires running from the repository layout (`config/`, `data/`, `templates/`).
 * Restore is command-line only by design.
 
+## Public sources and rate updates (second iteration)
+* **Still 0 approved real rates.** The pipeline (import → candidates → review → publish → approve) is implemented and tested, but no real price has been loaded or approved.
+* The KAPSARC/GASTAT CCI provider is implemented and tested against mocked/recorded responses; **no live fetch by the application has succeeded from the build sandbox** (proxy refusal). Real-network behaviour is unverified.
+* GASTAT's own site and Etimad are manual-only; the layout of GASTAT's xlsx files was never inspected; Etimad awards are contract values, not quotes.
+* The web-price extractor reads only machine-readable markup and a low-confidence text fallback. It was tested on fixtures, **never on a real supplier page**; many sites need JavaScript rendering (not supported) or forbid automated access.
+* Candidate normalisation covers currency (approved FX), fixed physical unit factors and VAT only. No quantity-break, delivery or installation adjustment.
+* Two overlapping dataset flows exist (legacy `rate_staging`, new `rate_candidates`).
+* Estimate snapshots exist only for versions frozen after migration 0007; snapshot replay re-runs the direct-cost engine, not the commercial tail.
+* The document indexer has no OCR and no CAD/BIM extraction; revision/category/trade come from file names only; summaries are counts, not content summaries.
+
 ## Not implemented (documented integration points)
-GASTAT/KAPSARC index adapter, Etimad award adapter (no verified, permitted, stable endpoint); DuckDB analytics (architecture-compatible); automated tests of the browser UI beyond HTTP-level rendering and form posts.
+DuckDB analytics (architecture-compatible); GASTAT website adapter, Etimad adapter (manual import only); automated tests of the browser UI beyond HTTP-level rendering and form posts.

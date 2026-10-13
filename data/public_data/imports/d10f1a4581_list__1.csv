@@ -1,3 +1,0 @@
-Resource ID,Description,Unit,Unit Price,Currency,Price Date,VAT,Delivery,Source URL
-MAT-C-050,Ready-mix C30,m3,310.50,SAR,2026-09-15,Excluded,Delivered,https://example.invalid/list
-MAT-C-050,bad,m3,x,SAR,2026-09-15,Excluded,Delivered,https://example.invalid/list
