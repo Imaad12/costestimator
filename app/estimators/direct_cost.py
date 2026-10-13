@@ -368,7 +368,46 @@ def _unresolved_assumption(ctx: _Ctx, line: CostLine, ref: str, prob: str) -> No
             item_key=line.item_key, resource_id=line.resource_id)
 
 
+def _wbs_chain(inp: EstimateInputs, item_key: str) -> set[str]:
+    """The item's WBS code and all its ancestors (a factor scoped to an area applies to everything beneath it)."""
+    out, cur, guard = set(), inp.item_wbs.get(item_key), 0
+    while cur and guard < 50:
+        out.add(cur)
+        cur, guard = inp.wbs_parent.get(cur), guard + 1
+    return out
+
+
+def productivity_factors_for(inp: EstimateInputs, item_key: str, cost_code: str | None) -> list[dict]:
+    """Governed productivity factors (labour) whose scope matches the item. Deterministic order (by code)."""
+    chain = _wbs_chain(inp, item_key)
+    out = []
+    for p in sorted(inp.params.get("productivity_factor", []), key=lambda p: p["code"]):
+        d = p["data"]
+        if d.get("applies_to", "labour") != "labour":
+            continue
+        pre, wbs = d.get("scope_cost_prefix"), d.get("scope_wbs")
+        if pre and not (cost_code or "").startswith(pre):
+            continue
+        if wbs and wbs not in chain:
+            continue
+        out.append(p)
+    return out
+
+
 def _labour_price(ctx: _Ctx, line: CostLine, al: dict, hours: Decimal, ot_share, ref: str) -> None:
+    facs = productivity_factors_for(ctx.inp, line.item_key, line.cost_code)
+    if facs:
+        combined = ONE
+        for p in facs:
+            combined *= D(p["data"]["factor"])
+            if p.get("unapproved"):
+                line.flags.append("UNAPPROVED_PRODUCTIVITY_FACTOR")
+                ctx.exc("UNAPPROVED_PRODUCTIVITY_FACTOR", "High", f"{ref}: productivity factor {p['code']} v{p['version']} is '{p['status']}'.",
+                        item_key=line.item_key)
+        base = hours
+        hours = hours * combined
+        line.flags.append("PRODUCTIVITY_ADJUSTED")
+        line.basis += (f" | productivity factors {[p['code'] for p in facs]} (multiplicative) x {combined}: {base} h => {hours} h")
     line.hours = hours
     line.quantity = hours
     line.unit = "hr"
@@ -513,6 +552,7 @@ def compute_direct_cost(inp: EstimateInputs) -> DirectCostResult:
             ic.complete = bool(new) and ic.unpriced_lines == 0 and not any(
                 e.item_key == ik and e.code in _BLOCKING for e in ctx.exceptions)
     _plant_mobilisation(ctx, items)
+    _plant_hire_terms(ctx, items)
     total = sum((l.amount for l in ctx.lines if l.amount is not None), ZERO)
     return DirectCostResult(
         lines=ctx.lines, items=items, exceptions=ctx.exceptions, direct_cost_total=total,
@@ -641,4 +681,46 @@ def _plant_mobilisation(ctx: _Ctx, items: dict[str, ItemCost]) -> None:
             ic = items.get(l.item_key)
             if ic:
                 ic.direct_cost += ml.amount
+                ic.lines += 1
+
+
+def _plant_hire_terms(ctx: _Ctx, items: dict[str, ItemCost]) -> None:
+    """Governed minimum-hire top-up and standby for plant resources actually used, priced at that resource's approved rate.
+    top-up = max(0, min_hire_qty - sum(charged plant qty)) ; standby = standby_qty x rate x standby_pct/100. Only user-supplied terms apply."""
+    for p in sorted(ctx.inp.params.get("plant_hire_terms", []), key=lambda p: p["code"]):
+        d = p["data"]
+        rid = d["resource_id"]
+        used = [l for l in ctx.lines if l.kind == "plant" and l.resource_id == rid and l.amount is not None]
+        if not used:
+            continue
+        ref_line = used[0]
+        total_qty = sum((l.quantity or ZERO for l in used), ZERO)
+        rate = ref_line.rate
+        add: list[tuple[str, Decimal, Decimal, str]] = []
+        shortfall = max(ZERO, D(d.get("min_hire_qty") or "0") - total_qty)
+        if shortfall > 0:
+            add.append(("plant_min_hire_top_up", shortfall, ONE,
+                        f"minimum hire {d['min_hire_qty']} {ref_line.unit} (terms {p['code']} v{p['version']}) - charged {total_qty} => top-up {shortfall}"))
+        sq = D(d.get("standby_qty") or "0")
+        if sq > 0:
+            add.append(("plant_standby", sq, D(d["standby_pct_of_rate"]) / 100,
+                        f"standby {sq} {ref_line.unit} at {d['standby_pct_of_rate']}% of rate (terms {p['code']} v{p['version']})"))
+        for kind, qty, share, why in add:
+            ln = CostLine(item_key=ref_line.item_key, assembly_code=ref_line.assembly_code, assembly_version=ref_line.assembly_version,
+                          path=ref_line.path, line_ref=f"{kind.upper()}:{rid}", kind=kind, resource_id=rid,
+                          description=f"{'Minimum-hire top-up' if kind == 'plant_min_hire_top_up' else 'Standby'}: {ref_line.description}",
+                          quantity=qty, unit=ref_line.unit, rate=rate * share, rate_id=ref_line.rate_id, eligibility=ref_line.eligibility,
+                          rate_type=ref_line.rate_type, rate_status=ref_line.rate_status, rate_currency=ref_line.rate_currency,
+                          is_provisional=ref_line.is_provisional, is_synthetic=ref_line.is_synthetic or bool(p.get("is_synthetic")),
+                          cost_code=ref_line.cost_code, basis=why)
+            ln.amount = quantize(qty * rate * share, ctx.money_dp)
+            ln.basis += f" => {ln.amount}"
+            if p.get("unapproved"):
+                ln.flags.append("UNAPPROVED_PLANT_TERMS")
+                ctx.exc("UNAPPROVED_PLANT_TERMS", "High", f"Plant hire terms {p['code']} v{p['version']} are '{p['status']}'.", item_key=ln.item_key,
+                        resource_id=rid)
+            ctx.lines.append(ln)
+            ic = items.get(ln.item_key)
+            if ic:
+                ic.direct_cost += ln.amount
                 ic.lines += 1

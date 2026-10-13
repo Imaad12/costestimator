@@ -94,6 +94,42 @@ def get_boq(pid: str, q: str | None = None, actor: Actor = Depends(current_actor
     return boq.list_items(db, pid, q=q, only_items=False)
 
 
+@router.get("/reports")
+def list_reports(actor: Actor = Depends(current_actor)):
+    from ..reporting import registry
+    return registry.listing()
+
+
+@router.get("/projects/{pid}/report/{name}")
+def get_report(pid: str, name: str, request: Request, actor: Actor = Depends(current_actor), db: Database = Depends(database)):
+    from ..reporting import registry
+    return ser(registry.run_report(db, name, pid, dict(request.query_params)))
+
+
+@router.get("/projects/{pid}/analysis-runs")
+def get_analysis_runs(pid: str, kind: str | None = None, actor: Actor = Depends(current_actor), db: Database = Depends(database)):
+    from ..services import analysis
+    return analysis.list_runs(db, pid, kind)
+
+
+@router.get("/analysis-runs/{rid}")
+def get_analysis_run(rid: int, actor: Actor = Depends(current_actor), db: Database = Depends(database)):
+    from ..services import analysis
+    return analysis.get_run(db, rid)
+
+
+@router.get("/projects/{pid}/params")
+def get_params(pid: str, kind: str | None = None, actor: Actor = Depends(current_actor), db: Database = Depends(database)):
+    from ..services import governed
+    return ser(governed.list_params(db, kind, pid))
+
+
+@router.get("/param-kinds")
+def get_param_kinds(actor: Actor = Depends(current_actor)):
+    from ..services import governed
+    return governed.kinds()
+
+
 @router.get("/projects/{pid}/changes")
 def get_changes(pid: str, actor: Actor = Depends(current_actor), db: Database = Depends(database)):
     return boq.pending_changes(db, pid)

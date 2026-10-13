@@ -8,8 +8,10 @@ from ..core.units import registry
 from ..database import Database, jload, rows_to_dicts
 from ..services import assemblies as asm_service
 from ..services import assumptions as assumption_service
+from ..services import governed as param_service
 from .types import AssemblyDef, AssumptionValue, EstimateInputs
 
+ENGINE_PARAM_KINDS = ("productivity_factor", "plant_hire_terms")        # governed parameter kinds read by the direct-cost engine
 ASSUMPTION_REF_FIELDS = ("waste_ref", "utilisation_ref", "shift_hours_ref", "productive_hours_ref")
 
 
@@ -94,8 +96,16 @@ def load_inputs(db: Database, project_id: str, *, include_unapproved: bool = Fal
                 ra = assumption_service.resolve(db, project_id, k, as_of.isoformat())
                 assumptions[k] = AssumptionValue(k, str(v), "Approved", "what_if", ra.name, ra.unit, ra.engine_key)
 
+    params: dict[str, list[dict]] = {}
+    for kind in ENGINE_PARAM_KINDS:
+        rows = param_service.effective(db, project_id, kind, include_unapproved=include_unapproved)
+        params[kind] = [dict(code=r["code"], version=r["version"], status=r["status"], unapproved=r["unapproved"], scope=r["scope"],
+                             is_synthetic=bool(r["is_synthetic"]), **{"data": r["data"]}) for r in rows]
+    item_wbs = {r["item_key"]: r["wbs_code"] for r in db.all("SELECT item_key, wbs_code FROM boq_wbs WHERE project_id=?", (project_id,))}
+    wbs_parent = {r["code"]: r["parent_code"] for r in db.all("SELECT code, parent_code FROM wbs_nodes WHERE project_id=?", (project_id,))}
     fx = rows_to_dicts(db.all("SELECT * FROM fx_rates"))
     parents = {r["code"]: r["parent_code"] for r in db.all("SELECT code, parent_code FROM regions")}
     return EstimateInputs(project=project, as_of=as_of, items=items, assemblies=asm_defs, resources=resources, rates=rates,
                           assumptions=assumptions, engine_keys=engine_keys, takeoff=takeoff, fx=fx,
-                          units=registry(db), region_parents=parents, include_unapproved=include_unapproved)
+                          units=registry(db), region_parents=parents, include_unapproved=include_unapproved,
+                          params=params, item_wbs=item_wbs, wbs_parent=wbs_parent)

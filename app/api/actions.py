@@ -748,3 +748,6 @@ def _(db, a, p):
     s = rep["summary"]
     return (f"{'LIVE' if live else 'DRY RUN'}: {s['successful']} ok, {s['blocked']} blocked, {s['skipped_or_dry_run']} skipped/dry, {s['errors']} errors; "
             f"{s['new_candidates']} new candidate(s), {s['new_or_revised_index_rows']} index row(s)")
+
+
+from . import actions_ext  # noqa: E402,F401  (registers the iteration-4 actions)

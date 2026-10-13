@@ -141,32 +141,42 @@ def list_durations(db: Database, project_id: str) -> list[dict]:
 
 # ---------------------------------------------------------------------------- schedule model
 def set_tasks(db: Database, actor: Actor, project_id: str, tasks: list[dict]) -> None:
-    """Replace the draft task list (human-entered). Validates dependencies (no cycles)."""
+    """Replace the draft task list (human-entered). Predecessors may carry a relationship type and lag ('A', 'B-SS+2', 'C-FF-1');
+    optional per-task wbs_code, snet / fnlt constraints. Validates dependencies (no cycles, no unknown predecessors)."""
+    from . import programme as prog_service
     approvals.require_author(actor)
     projects.require_active(db, project_id)
     codes = [t["task_code"] for t in tasks]
     if len(codes) != len(set(codes)):
         raise ValidationFailed("Duplicate task_code in the task list.", code="SCHEDULE_DUPLICATE_TASK")
-    dur.cpm([{**t, "predecessors": t.get("predecessors") or []} for t in tasks])  # validation only
+    norm = []
+    for t in tasks:
+        pre = t.get("predecessors") or []
+        norm.append({**t, "predecessors": ",".join(pre) if isinstance(pre, list) else pre})
+    prog_service.validate_tasks(norm, prog_service.calendar_for(db, project_id, include_unapproved=True))
     with db.tx():
         db.execute("DELETE FROM schedule_tasks WHERE project_id=?", (project_id,))
-        for t in tasks:
+        for t in norm:
+            if t.get("wbs_code") and not db.one("SELECT 1 FROM wbs_nodes WHERE project_id=? AND code=?", (project_id, t["wbs_code"])):
+                raise ValidationFailed(f"Task {t['task_code']}: WBS {t['wbs_code']} not found.", code="WBS_PARENT")
             db.insert("schedule_tasks", dict(project_id=project_id, task_code=t["task_code"], name=t["name"],
                                              duration_days=str(t["duration_days"]),
-                                             predecessors=",".join(t.get("predecessors") or []), cost_code=t.get("cost_code"),
-                                             status=Status.DRAFT.value))
+                                             predecessors=t["predecessors"], cost_code=t.get("cost_code"), wbs_code=t.get("wbs_code"),
+                                             snet=None if t.get("snet") in (None, "") else str(t["snet"]),
+                                             fnlt=None if t.get("fnlt") in (None, "") else str(t["fnlt"]), status=Status.DRAFT.value))
     audit.log(db, actor, "schedule", project_id, "set_tasks", after={"count": len(tasks)}, project_id=project_id)
 
 
 def propose_duration_from_schedule(db: Database, actor: Actor, project_id: str) -> int:
     approvals.require_author(actor)
     projects.require_active(db, project_id)
+    from . import programme as prog_service
     rows = rows_to_dicts(db.all("SELECT * FROM schedule_tasks WHERE project_id=?", (project_id,)))
     if not rows:
         raise ValidationFailed("No schedule tasks.")
-    tasks = [{"task_code": r["task_code"], "duration_days": r["duration_days"],
-              "predecessors": [p for p in (r["predecessors"] or "").split(",") if p]} for r in rows]
-    res = dur.cpm(tasks)
+    out = prog_service.programme.schedule(prog_service.to_engine_tasks(rows, prog_service.calendar_for(db, project_id, include_unapproved=False)))
+    res = dur.ScheduleResult(out.project_days, out.critical_path, {c: t.ef for c, t in out.tasks.items()})
+    tasks = rows
     wdpm = asm_service.resolve_key(db, project_id, "calendar.working_days_per_month")
     if not wdpm or not wdpm.has_value or not wdpm.approved:
         raise ValidationFailed("Approved assumption calendar.working_days_per_month is required to convert days to months.",

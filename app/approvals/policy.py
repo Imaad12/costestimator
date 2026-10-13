@@ -41,6 +41,12 @@ POLICY: dict[str, dict[str, set[str]]] = {
     Entity.AI_SUGGESTION.value: {"approve": {E, P, C, A}, "reject": {E, P, C, A}},
 }
 
+# Governed parameters: one entity type per kind ("param:<kind>"), approver roles defined with the kind.
+from ..estimators.param_kinds import KINDS as _PARAM_KINDS  # noqa: E402
+
+for _k in _PARAM_KINDS.values():
+    POLICY[f"param:{_k.name}"] = {"approve": set(_k.approvers), "reject": set(_k.approvers)}
+
 # Authoring (creating drafts / proposing) permissions by role. Viewers and AI cannot author approved data.
 WRITE_ROLES = {E, P, C, A}
 ADMIN_ONLY = {"user_admin", "taxonomy_admin", "settings", "backup", "restore"}

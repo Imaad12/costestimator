@@ -56,6 +56,9 @@ class EstimateInputs:
     region_parents: dict[str, str | None] = field(default_factory=dict)
     include_unapproved: bool = False            # preliminary "what-if" view; every use is flagged
     max_depth: int = 8
+    params: dict[str, list[dict]] = field(default_factory=dict)      # governed parameters in force, by kind (see param_kinds)
+    item_wbs: dict[str, str] = field(default_factory=dict)           # item_key -> WBS code
+    wbs_parent: dict[str, str | None] = field(default_factory=dict)  # WBS code -> parent code
 
 
 @dataclass

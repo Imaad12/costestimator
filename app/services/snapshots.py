@@ -58,6 +58,7 @@ def build_snapshot(db: Database, est) -> dict:
         "engine_keys": {k: asdict(v) for k, v in inp.engine_keys.items()},
         "fx": inp.fx,
         "region_parents": inp.region_parents,
+        "params": inp.params, "item_wbs": inp.item_wbs, "wbs_parent": inp.wbs_parent,
         "policy": {"row": _policy_row(db, inp.project), "resolved": est.policy},
         "tax": {"status": {k: {"rate": to_text(v.get("rate")), "status": v.get("status"), "note": v.get("note")} for k, v in est.tax_status.items()},
                 "categories": rows_to_dicts(db.all("SELECT * FROM tax_categories"))},
@@ -153,7 +154,8 @@ def replay_direct_cost(db: Database, version_id: int) -> dict:
         assemblies={c: AssemblyDef(**a) for c, a in snap["assemblies"].items()}, resources=snap["resources"], rates=snap["rates"],
         assumptions={k: AssumptionValue(**v) for k, v in snap["assumptions"].items()},
         engine_keys={k: AssumptionValue(**v) for k, v in snap["engine_keys"].items()}, takeoff=snap["takeoff"], fx=snap["fx"],
-        units=registry(db), region_parents=snap["region_parents"], include_unapproved=snap["include_unapproved"])
+        units=registry(db), region_parents=snap["region_parents"], include_unapproved=snap["include_unapproved"],
+        params=snap.get("params", {}), item_wbs=snap.get("item_wbs", {}), wbs_parent=snap.get("wbs_parent", {}))
     res = compute_direct_cost(inp)
     exp = snap["expected"]
     diffs = []
