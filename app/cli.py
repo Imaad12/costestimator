@@ -187,7 +187,8 @@ def cmd_project(a) -> int:
         _print(project_index.search(db, a.project, a.query))
         return 0
     if act == "verify-snapshot":
-        _print({"verify": snapshots.verify_snapshot(db, a.version_id), "replay_direct_cost": snapshots.replay_direct_cost(db, a.version_id)})
+        _print({"verify": snapshots.verify_snapshot(db, a.version_id), "replay_direct_cost": snapshots.replay_direct_cost(db, a.version_id),
+                "replay_estimate": snapshots.replay_estimate(db, a.version_id)})
         return 0
     return 2
 

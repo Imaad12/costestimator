@@ -39,6 +39,7 @@ class EstimateResult:
     flags: dict
     fingerprint: str
     tax_status: dict = field(default_factory=dict)
+    extras: "EstimateExtras | None" = None
 
     def totals(self) -> dict:
         c = self.commercial
@@ -85,10 +86,15 @@ def _effective_indirects(items: list[dict], include_unapproved: bool) -> list[di
 
 
 def effective_duration(db: Database, project_id: str, include_unapproved: bool) -> tuple[Decimal | None, str | None, dict | None]:
-    r = db.one("SELECT * FROM project_durations WHERE project_id=? AND status='Approved' ORDER BY id DESC LIMIT 1", (project_id,))
+    return duration_from_rows(rows_to_dicts(db.all("SELECT * FROM project_durations WHERE project_id=? ORDER BY id", (project_id,))), include_unapproved)
+
+
+def duration_from_rows(rows: list[dict], include_unapproved: bool) -> tuple[Decimal | None, str | None, dict | None]:
+    appr = [r for r in rows if r["status"] == "Approved"]
+    r = appr[-1] if appr else None
     if r is None and include_unapproved:
-        r = db.one("SELECT * FROM project_durations WHERE project_id=? AND status IN ('Pending Review','Draft') ORDER BY id DESC LIMIT 1",
-                   (project_id,))
+        opn = [r for r in rows if r["status"] in ("Pending Review", "Draft")]
+        r = opn[-1] if opn else None
     if r is None:
         return None, None, None
     return D_opt(r["months"]), r["status"], dict(r)
@@ -96,7 +102,11 @@ def effective_duration(db: Database, project_id: str, include_unapproved: bool) 
 
 def tax_rate_for(db: Database, code: str, as_of: date, include_unapproved: bool) -> tuple[Decimal | None, str, str | None]:
     """(rate, status, note). Only Approved categories valid on `as_of` give a rate unless include_unapproved."""
-    rows = rows_to_dicts(db.all("SELECT * FROM tax_categories WHERE code=? ORDER BY valid_from DESC", (code,)))
+    return tax_rate_from_rows(rows_to_dicts(db.all("SELECT * FROM tax_categories WHERE code=?", (code,))), code, as_of, include_unapproved)
+
+
+def tax_rate_from_rows(all_rows: list[dict], code: str, as_of: date, include_unapproved: bool) -> tuple[Decimal | None, str, str | None]:
+    rows = sorted((r for r in all_rows if r["code"] == code), key=lambda r: r["valid_from"] or "", reverse=True)
     for r in rows:
         vf, vt = parse_date(r["valid_from"]), parse_date(r["valid_to"])
         if vf and vf <= as_of and (not vt or vt >= as_of):
@@ -108,11 +118,45 @@ def tax_rate_for(db: Database, code: str, as_of: date, include_unapproved: bool)
     return None, "Missing", f"No tax category {code} valid on {as_of}."
 
 
+@dataclass
+class EstimateExtras:
+    """Everything compute_estimate reads besides EstimateInputs - so that a frozen estimate can be replayed from its snapshot with no database."""
+    duration_rows: list[dict]
+    indirect_rows: list[dict]                 # non-superseded rows, all versions
+    policy_row: dict | None
+    policy_resolved: dict | None
+    policy_used: list[tuple[str, str]]         # (assumption id, status) referenced by the policy
+    policy_unresolved: list[str]
+    tax_rows: list[dict]
+
+
+def load_extras(db: Database, inp: EstimateInputs) -> EstimateExtras:
+    project_id = inp.project["id"]
+    policy_row, policy, used, unresolved = None, None, [], []
+    if inp.project.get("commercial_policy_id"):
+        r = db.one("SELECT * FROM commercial_policies WHERE id=?", (inp.project["commercial_policy_id"],))
+        policy_row = dict(r) if r else None
+        if policy_row:
+            policy = _resolve_refs(db, project_id, jload(policy_row["config_json"], {}), used, unresolved)
+    return EstimateExtras(
+        duration_rows=rows_to_dicts(db.all("SELECT * FROM project_durations WHERE project_id=? ORDER BY id", (project_id,))),
+        indirect_rows=rows_to_dicts(db.all("SELECT * FROM indirect_items WHERE project_id=? AND status<>'Superseded' ORDER BY code", (project_id,))),
+        policy_row=policy_row, policy_resolved=policy, policy_used=[(a, b) for a, b in used], policy_unresolved=list(unresolved),
+        tax_rows=rows_to_dicts(db.all("SELECT * FROM tax_categories")))
+
+
 def compute_estimate(db: Database, project_id: str, *, include_unapproved: bool = False, as_of: date | None = None,
                      assumption_overrides: dict[str, str] | None = None, policy_override: dict | None = None
                      ) -> EstimateResult:
     inp = load_inputs(db, project_id, include_unapproved=include_unapproved, as_of=as_of,
                       assumption_overrides=assumption_overrides)
+    return compute_estimate_from(inp, load_extras(db, inp), policy_override=policy_override)
+
+
+def compute_estimate_from(inp: EstimateInputs, ex: EstimateExtras, *, policy_override: dict | None = None) -> EstimateResult:
+    """Pure: no database, no clock. Same inputs + extras -> same result and fingerprint."""
+    project_id = inp.project["id"]
+    include_unapproved = inp.include_unapproved
     direct = compute_direct_cost(inp)
     ek = inp.engine_keys
 
@@ -122,9 +166,8 @@ def compute_estimate(db: Database, project_id: str, *, include_unapproved: bool 
             return D_opt(av.value)
         return None
 
-    dur_months, dur_status, dur_row = effective_duration(db, project_id, include_unapproved)
-    ind_items = rows_to_dicts(db.all("SELECT * FROM indirect_items WHERE project_id=? AND status<>'Superseded' ORDER BY code",
-                                     (project_id,)))
+    dur_months, dur_status, dur_row = duration_from_rows(ex.duration_rows, include_unapproved)
+    ind_items = list(ex.indirect_rows)
     wdpm, wdpw = ek_num("calendar.working_days_per_month"), ek_num("calendar.working_days_per_week")
     ind_items = _effective_indirects(ind_items, include_unapproved)
     indirect = compute_indirects(ind_items, direct_cost_total=direct.direct_cost_total, duration_months=dur_months,
@@ -147,19 +190,16 @@ def compute_estimate(db: Database, project_id: str, *, include_unapproved: bool 
     policy = None
     if policy_override is not None:
         policy, policy_row = policy_override, {"id": None, "name": "override", "status": "Draft", "code": "OVERRIDE", "version": 0}
-    elif inp.project.get("commercial_policy_id"):
-        policy_row = db.one("SELECT * FROM commercial_policies WHERE id=?", (inp.project["commercial_policy_id"],))
-        policy_row = dict(policy_row) if policy_row else None
-        if policy_row:
-            used, unresolved = [], []
-            policy = _resolve_refs(db, project_id, jload(policy_row["config_json"], {}), used, unresolved)
-            for u in unresolved:
-                exceptions.append(dict(code="POLICY_ASSUMPTION_UNRESOLVED", severity="High", message=u, source="commercial"))
-            for aid, st in used:
-                if st != Status.APPROVED.value:
-                    exceptions.append(dict(code="POLICY_ASSUMPTION_NOT_APPROVED", severity="High", assumption_id=aid,
-                                           message=f"Commercial policy uses assumption {aid} in status '{st}'.", source="commercial"))
-                direct.used_assumptions.add(aid)
+    elif ex.policy_row:
+        policy_row = ex.policy_row
+        policy = ex.policy_resolved
+        for u in ex.policy_unresolved:
+            exceptions.append(dict(code="POLICY_ASSUMPTION_UNRESOLVED", severity="High", message=u, source="commercial"))
+        for aid, st in ex.policy_used:
+            if st != Status.APPROVED.value:
+                exceptions.append(dict(code="POLICY_ASSUMPTION_NOT_APPROVED", severity="High", assumption_id=aid,
+                                       message=f"Commercial policy uses assumption {aid} in status '{st}'.", source="commercial"))
+            direct.used_assumptions.add(aid)
     commercial = None
     schedule = None
     tax_status: dict = {}
@@ -186,7 +226,7 @@ def compute_estimate(db: Database, project_id: str, *, include_unapproved: bool 
                     exceptions.append(dict(code="TAX_CATEGORY_MISSING", severity="High", source="commercial",
                                            message="No tax category on the project / policy."))
                     continue
-                r, st, note = tax_rate_for(db, c, inp.as_of, include_unapproved)
+                r, st, note = tax_rate_from_rows(ex.tax_rows, c, inp.as_of, include_unapproved)
                 rates[c] = r
                 tax_status[c] = {"rate": r, "status": st, "note": note}
                 if note:
@@ -241,7 +281,7 @@ def compute_estimate(db: Database, project_id: str, *, include_unapproved: bool 
     flags = dict(synthetic=direct.synthetic_used, provisional=direct.provisional_used, include_unapproved=include_unapproved,
                  duration_status=dur_status)
     res = EstimateResult(inp.project, inp.as_of, inp, direct, indirect, commercial, schedule, policy, exceptions, state,
-                         blockers, completeness, flags, "", tax_status)
+                         blockers, completeness, flags, "", tax_status, ex)
     res.fingerprint = fingerprint(res)
     return res
 

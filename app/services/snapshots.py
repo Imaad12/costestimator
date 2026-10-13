@@ -64,6 +64,7 @@ def build_snapshot(db: Database, est) -> dict:
                 "categories": rows_to_dicts(db.all("SELECT * FROM tax_categories"))},
         "indirect_items": rows_to_dicts(db.all("SELECT * FROM indirect_items WHERE project_id=? ORDER BY code, version", (pid,))),
         "duration": rows_to_dicts(db.all("SELECT * FROM project_durations WHERE project_id=? ORDER BY id", (pid,))),
+        "extras": _extras_dict(est),
         "libraries": workspaces.library_versions(db),
         "expected": {
             "state": est.state, "fingerprint": est.fingerprint,
@@ -74,6 +75,14 @@ def build_snapshot(db: Database, est) -> dict:
     }
     snap["inputs_sha256"] = hashlib.sha256(_canon({k: v for k, v in snap.items() if k != "expected"}).encode()).hexdigest()
     return snap
+
+
+def _extras_dict(est) -> dict | None:
+    ex = est.extras
+    if ex is None:
+        return None
+    return {"duration_rows": ex.duration_rows, "indirect_rows": ex.indirect_rows, "policy_row": ex.policy_row, "policy_resolved": ex.policy_resolved,
+            "policy_used": [list(x) for x in ex.policy_used], "policy_unresolved": ex.policy_unresolved, "tax_rows": ex.tax_rows}
 
 
 def _policy_row(db: Database, project: dict) -> dict | None:
@@ -143,19 +152,61 @@ def verify_snapshot(db: Database, version_id: int) -> dict:
     return {"ok": not problems, "problems": problems, "newer_rates_available": newer, "inputs_sha256": snap["inputs_sha256"]}
 
 
-def replay_direct_cost(db: Database, version_id: int) -> dict:
-    """Re-run the direct-cost engine on the snapshot only and compare with the frozen result."""
-    from ..estimators.direct_cost import compute_direct_cost
-    snap = get_snapshot(db, version_id)
-    if snap is None:
-        return {"ok": False, "problems": ["No snapshot stored for this estimate version."]}
-    inp = EstimateInputs(
+def inputs_from_snapshot(db: Database, snap: dict) -> EstimateInputs:
+    return EstimateInputs(
         project=snap["project"], as_of=date.fromisoformat(snap["as_of"]), items=snap["items"],
         assemblies={c: AssemblyDef(**a) for c, a in snap["assemblies"].items()}, resources=snap["resources"], rates=snap["rates"],
         assumptions={k: AssumptionValue(**v) for k, v in snap["assumptions"].items()},
         engine_keys={k: AssumptionValue(**v) for k, v in snap["engine_keys"].items()}, takeoff=snap["takeoff"], fx=snap["fx"],
         units=registry(db), region_parents=snap["region_parents"], include_unapproved=snap["include_unapproved"],
         params=snap.get("params", {}), item_wbs=snap.get("item_wbs", {}), wbs_parent=snap.get("wbs_parent", {}))
+
+
+def extras_from_snapshot(snap: dict):
+    """EstimateExtras from a snapshot (snapshots frozen before `extras` existed are rebuilt from their older keys)."""
+    from ..estimators.estimate import EstimateExtras
+    ex = snap.get("extras")
+    if ex:
+        return EstimateExtras(ex["duration_rows"], ex["indirect_rows"], ex["policy_row"], ex["policy_resolved"], [tuple(x) for x in ex["policy_used"]],
+                              ex["policy_unresolved"], ex["tax_rows"])
+    pol = snap.get("policy") or {}
+    return EstimateExtras(snap.get("duration", []), [r for r in snap.get("indirect_items", []) if r["status"] != "Superseded"], pol.get("row"), pol.get("resolved"), [], [],
+                          (snap.get("tax") or {}).get("categories", []))
+
+
+def replay_estimate(db: Database, version_id: int) -> dict:
+    """Re-run the WHOLE deterministic estimate (direct cost, indirects, commercial policy, pricing schedule, tax) on the stored snapshot only - no live
+    rates, assumptions, policy or tax rows are read - and compare state, fingerprint and every total with what was frozen."""
+    from ..estimators.estimate import compute_estimate_from
+    snap = get_snapshot(db, version_id)
+    if snap is None:
+        return {"ok": False, "problems": ["No snapshot stored for this estimate version."]}
+    inp = inputs_from_snapshot(db, snap)
+    res = compute_estimate_from(inp, extras_from_snapshot(snap))
+    exp = snap["expected"]
+    diffs = []
+    if res.fingerprint != exp["fingerprint"]:
+        diffs.append(f"fingerprint {res.fingerprint[:12]} != frozen {exp['fingerprint'][:12]}")
+    if res.state != exp["state"]:
+        diffs.append(f"state {res.state} != frozen {exp['state']}")
+    now = {k: to_text(v) for k, v in res.totals().items()}
+    for k, v in exp["totals"].items():
+        if now.get(k) != v:
+            diffs.append(f"total {k}: {now.get(k)} != frozen {v}")
+    for k, ic in res.direct.items.items():
+        if to_text(ic.direct_cost) != exp["item_direct_cost"].get(k):
+            diffs.append(f"item {k}: {to_text(ic.direct_cost)} != frozen {exp['item_direct_cost'].get(k)}")
+    return {"ok": not diffs, "differences": diffs, "replayed": now, "frozen": exp["totals"], "fingerprint": res.fingerprint, "state": res.state,
+            "legacy_snapshot": not snap.get("extras")}
+
+
+def replay_direct_cost(db: Database, version_id: int) -> dict:
+    """Re-run the direct-cost engine on the snapshot only and compare with the frozen result."""
+    from ..estimators.direct_cost import compute_direct_cost
+    snap = get_snapshot(db, version_id)
+    if snap is None:
+        return {"ok": False, "problems": ["No snapshot stored for this estimate version."]}
+    inp = inputs_from_snapshot(db, snap)
     res = compute_direct_cost(inp)
     exp = snap["expected"]
     diffs = []
