@@ -31,8 +31,9 @@ The change request; `git status` (never overwrite uncommitted user changes); the
 2. Locate the owning layer (estimators pure / services DB / api actions / web / cli). Keep calculation pure, approvals in services via `authorize`, exposure through `api/actions.py`.
 3. Schema change → new numbered SQL file in `app/migrations/` (never edit an applied one); update `docs/DATA_MODEL.md` and any backup/export code that lists tables.
 4. Add tests first or alongside (independent expected values for money; fake fetchers for network; `tmp_path` for files; nothing may write into the repo).
-5. Update docs: the specific doc, the status table in `docs/ARCHITECTURE.md` (implemented / partial / planned), `docs/NEXT_STEPS.md`, `docs/KNOWN_LIMITATIONS.md`, root `CLAUDE.md` if commands/structure/rules changed; run `python scripts/gen_docs.py`.
-6. Run the full suite; commit on the designated branch with a clear message; push with `git push -u origin <branch>`; report the real outcome. Do not open a PR unless asked; never touch `main`.
+5. Update the capability record in `docs/capability_matrix.json` (status only changes with its acceptance test automated), then `python scripts/gen_capability_matrix.py`; `tests/unit/test_capability_matrix.py` must stay green.
+6. Update docs: the specific doc, the status table in `docs/ARCHITECTURE.md` (implemented / partial / planned), `docs/NEXT_STEPS.md`, `docs/KNOWN_LIMITATIONS.md`, root `CLAUDE.md` if commands/structure/rules changed; run `python scripts/gen_docs.py`.
+7. Run the full suite; commit on the designated branch with a clear message; push with `git push -u origin <branch>`; report the real outcome. Do not open a PR unless asked; never touch `main`.
 
 ## Outputs and schemas
 Code + migration + tests + docs in one commit series; an updated `docs/DEVELOPMENT_AUDIT.md` entry for anything that deviated from earlier claims.

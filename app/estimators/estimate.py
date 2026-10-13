@@ -194,9 +194,12 @@ def compute_estimate(db: Database, project_id: str, *, include_unapproved: bool 
                                            severity="High", source="commercial", message=note))
             # preliminary tax shares by direct-cost weight (final tax is recomputed from the schedule below)
             shares: dict[str, Decimal] = {}
+            item_tax: dict[str, str | None] = {}                    # first row per item_key (O(n) lookup instead of a scan per item)
+            for i in inp.items:
+                item_tax.setdefault(i["item_key"], i.get("tax_category"))
             for k, ic in direct.items.items():
                 if ic.complete and ic.pricing_method != "excluded":
-                    tc = next((i.get("tax_category") for i in inp.items if i["item_key"] == k), None) or default_tax or ""
+                    tc = item_tax.get(k) or default_tax or ""
                     shares[tc] = shares.get(tc, ZERO) + ic.direct_cost
             commercial = com.compute_commercial(policy, direct=direct.direct_cost_total, indirect=indirect.total,
                                                 money_dp=direct.money_dp, tax_shares=shares or {default_tax or "": Decimal(1)},

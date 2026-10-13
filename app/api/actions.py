@@ -306,6 +306,37 @@ def _(db, a, p):
     return indirects.propose_duration(db, a, req(p, "project_id")[0], req(p, "months")[0], opt(p, "source_type") or "estimator_input", req(p, "basis_note")[0])
 
 
+@action("set_schedule_tasks")
+def _(db, a, p):
+    """Replace the project's human-entered task list. `tasks`: list (API) or JSON text (UI) of
+    {task_code, name, duration_days, predecessors: [codes] | "A,B", cost_code?}. Durations are the estimator's inputs; nothing is derived."""
+    import json
+    raw = p.get("tasks")
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except ValueError as e:
+            raise ValidationFailed(f"tasks is not valid JSON: {e}")
+    if not isinstance(raw, list) or not raw:
+        raise ValidationFailed("tasks must be a non-empty list.", code="FIELD_REQUIRED")
+    tasks = []
+    for t in raw:
+        pre = t.get("predecessors") or []
+        if isinstance(pre, str):
+            pre = [x.strip() for x in pre.split(",") if x.strip()]
+        tasks.append({"task_code": str(t.get("task_code", "")).strip(), "name": t.get("name") or t.get("task_code"), "duration_days": t.get("duration_days"),
+                      "predecessors": pre, "cost_code": t.get("cost_code")})
+        if not tasks[-1]["task_code"] or tasks[-1]["duration_days"] in (None, ""):
+            raise ValidationFailed("Every task needs task_code and duration_days.", code="FIELD_REQUIRED")
+    indirects.set_tasks(db, a, req(p, "project_id")[0], tasks)
+    return len(tasks)
+
+
+@action("propose_duration_from_schedule")
+def _(db, a, p):
+    return indirects.propose_duration_from_schedule(db, a, req(p, "project_id")[0])
+
+
 @action("approve_duration")
 def _(db, a, p):
     indirects.approve_duration(db, a, int(req(p, "duration_id")[0]), comments=opt(p, "comments"))

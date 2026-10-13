@@ -1,11 +1,13 @@
 # Next steps (prioritised roadmap)
 
+> **2026-10-13 update:** a five-level capability audit was completed — see [ESTIMATING_CAPABILITY_MATRIX.md](ESTIMATING_CAPABILITY_MATRIX.md) (131 evidence-checked capability records) and the dependency-ordered [ESTIMATING_GAP_ROADMAP.md](ESTIMATING_GAP_ROADMAP.md) (work packages WP-00a … WP-22). The table below is the original iteration-2 roadmap and is kept; the audit adds the section *"Capability audit follow-ups"* at the end, and the audit-driven priority order replaces the old "next three" list (retained below for history).
+
 Status words: **Done** (implemented and verified as stated), **Partial**, **Not started**, **Blocked** (needs something outside the code). "Done" never means "a class exists": each row says how it was validated.
 Priority: P0 = prerequisite for real use, P1 = high value next, P2 = valuable, P3 = later.
 
 | # | Task | Pri | Status | Why | Depends on | Acceptance criteria | Validation method | Human approval needed? | Needs credentials / internet? |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Verify and document the existing implementation | P0 | **Done** (2026-10-12/13) | Reported results had to be re-checked | — | Tests re-run, claims compared to code, gaps listed | Full suite 164→current count green; `DEVELOPMENT_AUDIT.md` lists every discrepancy found | No | No |
+| 1 | Verify and document the existing implementation | P0 | **Done** (2026-10-12/13; capability audit 2026-10-13) | Reported results had to be re-checked | — | Tests re-run, claims compared to code, gaps listed | Full suite 164→current count green; `DEVELOPMENT_AUDIT.md` lists every discrepancy found | No | No |
 | 2 | Root and project-specific CLAUDE.md | P0 | **Done** | Future sessions must not rediscover the codebase | 1 | Root file covers the 15 required topics; each project gets a generated file with preserved human notes | `tests/workspaces` (content, idempotency, notes preserved), `tests/unit/test_instruction_system.py` (all referenced paths exist) | No (content facts must be human-recorded) | No |
 | 3 | Task-specific skills (14) | P0 | **Done** (documents, structurally tested) | Repeatable, safe procedures | 2 | Each has purpose/when/inputs/reads/steps/outputs/validation/approval/failure/prohibited | `tests/unit/test_instruction_system.py`. **Not run end-to-end by a live Claude Code session** — treat as untested procedures until used | No | No |
 | 4 | Numbered project workspaces + indexer + snapshots + migration | P0 | **Done** | Project isolation, reproducibility | 1 | Ten fixed folders created automatically, idempotent, never overwrite; document index; frozen inputs; copy-only migration | `tests/workspaces/*`, `tests/integration/test_workspace_ui.py`; live CLI run on a scratch DB | No | No |
@@ -26,7 +28,34 @@ Priority: P0 = prerequisite for real use, P1 = high value next, P2 = valuable, P
 ## Production-readiness definition (item "remaining work")
 Before relying on the system for a real tender: (a) real approved rates with evidence for every priced resource (#9); (b) VAT category and FX rate verified and approved by a Commercial Approver/Procurement Reviewer; (c) all required assumptions approved; (d) workbooks opened in Microsoft Excel (#5); (e) live source refresh confirmed on a normal network (#7); (f) a pilot project reconciled end-to-end by humans (#10); (g) security hardening if more than one person or any network exposure (#16).
 
-## Next three highest-priority tasks
+## Previous "next three" list (iteration 2, kept for history; superseded by the audit-driven list below)
 1. **#9 + #6/#8:** load a first set of evidence-backed rates (supplier quotations through the RFQ/quotation workflow, permitted price lists through `rates import`) and approve them — nothing prices without this.
 2. **#7:** run `python -m app.cli sources refresh --provider kapsarc-gastat-cci` (and `--dry-run` first) on a normal network to confirm the live KAPSARC/GASTAT path; record the outcome in `data/sources/ACCESS_LOG.md`.
 3. **#5:** open the generated master workbook and the Rate Dataset template in Microsoft Excel, confirm recalculation, and record the result (then #12 consolidation).
+
+## Capability audit follow-ups (2026-10-13)
+Result of the audit (details and evidence in the matrix): **Levels 5–4 conditionally supported, Levels 3–1 not supported; 0 approved real rates; no industrial/EPC modules; strongest area is governance.** Defects found and already fixed (with regression tests): O(n²) estimate computation, missing `pypdf` dependency (PDFs were never text-extracted on a default install), schedule→duration path untested/unreachable and not protected for archived projects, several untested claims now tested.
+
+### Next three highest-priority tasks (current)
+1. **WP-00a — load evidence-backed rates and productivity/consumption factors** for a named pilot BOQ (through RFQs, quotations, permitted price lists, company actuals). Nothing real prices without this; it is data and human approval, not code.
+2. **WP-01 + WP-02 — units/dimensions management and the WBS/CBS cross-walk with roll-ups.** These are the foundational code blockers for every industrial and large-project module (piping and instrument BOQs cannot even be imported today; no WBS exists).
+3. **WP-11 + WP-00b — verification that needs a normal environment:** run `sources refresh` on an unrestricted network and open the workbooks in Microsoft Excel; record both outcomes.
+
+### Mapping of the original items to the audit work packages
+| Original item | Audit work package(s) |
+|---|---|
+| #5 Excel validation | WP-00b |
+| #7 GASTAT integration | WP-11 (live check), WP-09 (use of index data for escalation) |
+| #8 Rate discovery & review queues | WP-11 |
+| #9 Real rate coverage | WP-00a |
+| #10 Procurement on a real project | WP-16, WP-17 |
+| #11 Usability and reporting | WP-02 (roll-ups), WP-04 (man-hour reports), WP-22 |
+| #12 Consolidate dataset flows | unchanged (not an estimating capability) |
+| #13 Full replay | WP-15 (GOV-05) |
+| #14 OCR / CAD extraction | WP-18 (SCO-10) |
+| #15 Live Claude test | WP-18 (SCO-11) |
+| #16 Production hardening | WP-22 (GOV-12) |
+| #17 Arabic UI / RTL | not scheduled; SAU-01 limitation |
+
+### Constraints that do not change
+No invented prices, no automatic approval, no silent overwrite of approved rates, no automated quantity takeoff, no autonomous tender submission, no compliance claim for any client without that client's controlled documents loaded and traced.

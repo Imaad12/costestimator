@@ -73,3 +73,56 @@ def test_cpm():
 
 def test_labour_derived_duration_is_a_formula():
     assert labour_derived_months(Decimal("52000"), Decimal("20"), Decimal("10"), Decimal("26")) == Decimal("10")
+
+
+# ---- schedule model -> duration proposal (audit: previously untested and not reachable from the UI/API; archived projects were not protected)
+def test_schedule_tasks_to_duration_proposal_needs_approved_calendar_and_human_approval(seeded):
+    import pytest
+    from app.core.errors import Conflict, ValidationFailed
+    from app.services import indirects, projects
+    from tests.conftest import COMMERCIAL, ESTIMATOR
+    from tests.helpers import approve_assumption
+    db = seeded
+    pid = projects.create_project(db, ESTIMATOR, name="CPM (SYNTHETIC)", is_demo=True)
+    tasks = [{"task_code": "A", "name": "Excavate", "duration_days": "10", "predecessors": []},
+             {"task_code": "B", "name": "Foundations", "duration_days": "20", "predecessors": ["A"]},
+             {"task_code": "C", "name": "Services in parallel", "duration_days": "5", "predecessors": ["A"]},
+             {"task_code": "D", "name": "Finish", "duration_days": "7", "predecessors": ["B", "C"]}]
+    with pytest.raises(ValidationFailed):                                                    # cycle rejected
+        indirects.set_tasks(db, ESTIMATOR, pid, tasks + [{"task_code": "E", "name": "x", "duration_days": "1", "predecessors": ["F"]},
+                                                         {"task_code": "F", "name": "y", "duration_days": "1", "predecessors": ["E"]}])
+    with pytest.raises(ValidationFailed) as e:                                               # duplicate codes rejected
+        indirects.set_tasks(db, ESTIMATOR, pid, tasks + [tasks[0]])
+    assert e.value.code == "SCHEDULE_DUPLICATE_TASK"
+    indirects.set_tasks(db, ESTIMATOR, pid, tasks)
+    with pytest.raises(ValidationFailed) as e:                                               # no approved calendar -> no conversion to months
+        indirects.propose_duration_from_schedule(db, ESTIMATOR, pid)
+    assert e.value.code == "CALENDAR_REQUIRED"
+    key = db.scalar("SELECT id FROM assumptions WHERE engine_key='calendar.working_days_per_month' ORDER BY version DESC LIMIT 1")
+    approve_assumption(db, key, "26")
+    did = indirects.propose_duration_from_schedule(db, ESTIMATOR, pid)
+    r = db.one("SELECT * FROM project_durations WHERE id=?", (did,))
+    # critical path A(10) > B(20) > D(7) = 37 working days; 37 / 26 months; stays Pending Review until a human approves
+    assert r["status"] == "Pending Review" and r["source_type"] == "schedule_model" and "A > B > D" in r["basis_note"]
+    from decimal import Decimal
+    assert Decimal(r["months"]).quantize(Decimal("0.001")) == (Decimal(37) / Decimal(26)).quantize(Decimal("0.001"))
+    indirects.approve_duration(db, COMMERCIAL, did)
+    assert db.scalar("SELECT status FROM project_durations WHERE id=?", (did,)) == "Approved"
+    with pytest.raises(Conflict):
+        indirects.approve_duration(db, COMMERCIAL, did)
+
+
+def test_archived_project_refuses_schedule_and_duration_changes(seeded):
+    import pytest
+    from app.core.errors import Conflict
+    from app.services import indirects, projects
+    from tests.conftest import COMMERCIAL, ESTIMATOR
+    db = seeded
+    pid = projects.create_project(db, ESTIMATOR, name="Archived (SYNTHETIC)", is_demo=True)
+    projects.archive_project(db, COMMERCIAL, pid, "test")
+    for fn in (lambda: indirects.set_tasks(db, ESTIMATOR, pid, [{"task_code": "A", "name": "a", "duration_days": "1", "predecessors": []}]),
+               lambda: indirects.propose_duration(db, ESTIMATOR, pid, "3", "estimator_input", "basis"),
+               lambda: indirects.propose_duration_from_schedule(db, ESTIMATOR, pid)):
+        with pytest.raises(Conflict) as e:
+            fn()
+        assert e.value.code == "PROJECT_ARCHIVED"

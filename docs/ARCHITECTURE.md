@@ -68,7 +68,7 @@ single-user/small-team tool. Not designed for multi-node or internet exposure (b
 ## Implementation status (what is real today)
 | Area | Status | Notes |
 |---|---|---|
-| Deterministic engines, approvals, audit, BOQ/takeoff import, procurement, reconciliation, Excel (27-sheet master + 10 standalone workbooks + 2 .docx), UI, API, backup | **Implemented**, tested | 210 automated tests (see TESTING.md); LibreOffice-verified workbooks; Microsoft Excel not tested |
+| Deterministic engines, approvals, audit, BOQ/takeoff import, procurement, reconciliation, Excel (27-sheet master + 10 standalone workbooks + 2 .docx), UI, API, backup | **Implemented**, tested | 230 automated tests (see TESTING.md); LibreOffice-verified workbooks; Microsoft Excel not tested |
 | Numbered project workspaces, project `CLAUDE.md`, document indexer, estimate input snapshots, migration script | **Implemented**, tested | PROJECT_WORKSPACES.md. Snapshot *replay* covers direct cost only (partial) |
 | Rate candidates, manifests, normalisation, review queue, publication, CLI + UI | **Implemented**, tested offline | RATE_UPDATE_WORKFLOW.md |
 | KAPSARC/GASTAT CCI provider | **Implemented, mock-tested, live-unverified** | blocked from the build sandbox |

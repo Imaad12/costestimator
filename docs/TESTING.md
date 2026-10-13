@@ -2,7 +2,7 @@
 
 ```
 . .venv/bin/activate
-pytest                      # or scripts/test.sh ; 210 tests, ~65-120 s
+pytest                      # or scripts/test.sh ; 230 tests, ~80 s
 pytest tests/unit -q        # fast engine tests
 pytest -k workflow -s       # the end-to-end nine-package scenario
 pytest -m libreoffice       # (marker registered; LibreOffice tests auto-skip when `soffice` is missing)
@@ -26,3 +26,11 @@ Tests never write into the repository: databases are in-memory or in `tmp_path`,
 
 Financial tests use fixed expected values computed independently (separate arithmetic in the test, not the engine). All test data is labelled SYNTHETIC.
 Not covered: the live Claude API, Microsoft Excel, browsers (only HTTP-level), very large BOQs.
+
+## Audit-added tests (2026-10-13)
+| File | What is proven |
+|---|---|
+| `tests/workspaces/test_audit_regressions.py` | estimate scaling ratio guard (fails on the old O(n²) code), real PDF/DOCX/XLSX extraction and image-only PDF reporting, `pypdf` declared, non-SAR project currency, what-if numbers, takeoff-resource pricing, preliminaries-overlap finding, no autonomous submission channel (static import scan) |
+| `tests/unit/test_indirect_duration.py` (additions) | schedule tasks → CPM → duration proposal needs an approved calendar and human approval; archived projects refuse schedule/duration changes |
+| `tests/integration/test_workspace_ui.py` (additions) | schedule actions via API with roles; standard indirect categories created as amount-less drafts |
+| `tests/unit/test_capability_matrix.py` | the capability matrix cites only existing code/symbols/tests, status claims match evidence, no Aramco compliance claim, roadmap covers every open gap, rendered page is current |

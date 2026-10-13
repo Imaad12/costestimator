@@ -103,6 +103,7 @@ def list_indirects(db: Database, project_id: str) -> list[dict]:
 # ---------------------------------------------------------------------------- duration
 def propose_duration(db: Database, actor: Actor, project_id: str, months, source_type: str, basis_note: str) -> int:
     approvals.require_author(actor)
+    projects.require_active(db, project_id)
     if source_type not in ("estimator_input", "labour_derived", "schedule_model", "ai_proposal"):
         raise ValidationFailed("Invalid duration source_type.")
     m = D_opt(months)
@@ -142,6 +143,10 @@ def list_durations(db: Database, project_id: str) -> list[dict]:
 def set_tasks(db: Database, actor: Actor, project_id: str, tasks: list[dict]) -> None:
     """Replace the draft task list (human-entered). Validates dependencies (no cycles)."""
     approvals.require_author(actor)
+    projects.require_active(db, project_id)
+    codes = [t["task_code"] for t in tasks]
+    if len(codes) != len(set(codes)):
+        raise ValidationFailed("Duplicate task_code in the task list.", code="SCHEDULE_DUPLICATE_TASK")
     dur.cpm([{**t, "predecessors": t.get("predecessors") or []} for t in tasks])  # validation only
     with db.tx():
         db.execute("DELETE FROM schedule_tasks WHERE project_id=?", (project_id,))
@@ -154,6 +159,8 @@ def set_tasks(db: Database, actor: Actor, project_id: str, tasks: list[dict]) ->
 
 
 def propose_duration_from_schedule(db: Database, actor: Actor, project_id: str) -> int:
+    approvals.require_author(actor)
+    projects.require_active(db, project_id)
     rows = rows_to_dicts(db.all("SELECT * FROM schedule_tasks WHERE project_id=?", (project_id,)))
     if not rows:
         raise ValidationFailed("No schedule tasks.")

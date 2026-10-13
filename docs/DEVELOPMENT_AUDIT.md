@@ -1,4 +1,4 @@
-# Development audit (second iteration, 2026-10-12/13)
+# Development audit (second iteration, 2026-10-12/13; capability audit appended 2026-10-13)
 
 Purpose: record what was found when the existing implementation was inspected, what was verified by actually running it, what is incomplete or broken, and where the earlier report did not match the code.
 Method: inspect before changing; re-run; compare claims with code; then implement.
@@ -64,3 +64,11 @@ CLI (`project`, `sources`, `rates`, `index`, `migrate-workspaces`, authenticated
 
 ## 7. What should be changed next
 See [NEXT_STEPS.md](NEXT_STEPS.md): (1) load evidence-backed rates, (2) confirm the live KAPSARC path on a normal network, (3) test workbooks in Microsoft Excel; then consolidate the two dataset flows and extend snapshot replay.
+
+## 8. Five-level capability audit (2026-10-13)
+Full results: [ESTIMATING_CAPABILITY_MATRIX.md](ESTIMATING_CAPABILITY_MATRIX.md); gaps and order of work: [ESTIMATING_GAP_ROADMAP.md](ESTIMATING_GAP_ROADMAP.md).
+* **Verdicts (software capability):** Level 5 and 4 conditionally supported; Levels 3, 2, 1 not supported (Missing capabilities). Data readiness (0 approved real rates, no productivity data) applies to every level.
+* **Defects found and fixed, each with a regression test:** O(n²) estimate computation (20,000 items: 13.8 s → 2.7 s); `pypdf` undeclared so tender PDFs were never extracted on a default install; schedule→duration path untested, unreachable from API/UI and unprotected for archived projects (+ duplicate task codes); previously untested claims (what-if numbers, non-SAR project currency, takeoff-resource pricing, standard indirects, preliminaries-overlap rule, no outbound submission channel) now tested.
+* **Corrections to earlier claims:** the glossary of "capabilities" in earlier docs counted cost codes, assumption definitions and templates; the matrix counts only implemented, tested behaviour. Division-level "support" (e.g. HVAC, electrical) is *definitions + generic engine*, not discipline-specific estimating logic.
+* **Not claimed:** any Saudi Aramco or other client compliance; any AACE class or accuracy range (no classification exists); any live source retrieval by the application.
+* A guard test (`tests/unit/test_capability_matrix.py`) now prevents the matrix from citing code, symbols or tests that do not exist and from claiming "tested" without a test that verifies the behaviour.

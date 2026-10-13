@@ -99,3 +99,33 @@ def test_rate_update_screens_import_review_publish_and_approval_separation(clien
     r = client.post("/rates/updates/index", data={"dataset": "gastat-cci", "source_id": "SRC-002", "dry_run": ""}, files={"file": (cci.name, cci.read_bytes(), "application/json")},
                     follow_redirects=False)
     assert "ok=" in r.headers["location"] and db.scalar("SELECT COUNT(*) FROM index_observations") == 39
+
+
+def test_schedule_actions_are_reachable_from_the_api_and_respect_roles(client):
+    from tests.integration.test_api_ui import login
+    est, view = login(client, "est"), login(client, "view")
+    client.cookies.clear()
+    pid = client.post("/api/actions/create_project", json={"name": "Sched (SYNTHETIC)"}, headers=est).json()["result"]
+    tasks = [{"task_code": "A", "name": "a", "duration_days": 10, "predecessors": []}, {"task_code": "B", "name": "b", "duration_days": 5, "predecessors": "A"}]
+    assert client.post("/api/actions/set_schedule_tasks", json={"project_id": pid, "tasks": tasks}, headers=view).status_code == 403
+    r = client.post("/api/actions/set_schedule_tasks", json={"project_id": pid, "tasks": tasks}, headers=est)
+    assert r.status_code == 200 and r.json()["result"] == 2
+    bad = client.post("/api/actions/set_schedule_tasks", json={"project_id": pid, "tasks": [{"task_code": "A", "name": "a", "duration_days": 1, "predecessors": ["Z"]}]}, headers=est)
+    assert bad.status_code == 422
+    r = client.post("/api/actions/propose_duration_from_schedule", json={"project_id": pid}, headers=est)
+    assert r.status_code == 422 and r.json()["error"] == "CALENDAR_REQUIRED"            # no approved calendar assumption: nothing is guessed
+
+
+def test_standard_indirect_categories_are_created_as_drafts_without_amounts_and_block_a_complete_estimate(client):
+    from app.estimators.estimate import compute_estimate
+    from tests.integration.test_api_ui import login
+    est = login(client, "est")
+    client.cookies.clear()
+    pid = client.post("/api/actions/create_project", json={"name": "Ind (SYNTHETIC)"}, headers=est).json()["result"]
+    assert client.post("/api/actions/add_standard_indirects", json={"project_id": pid}, headers=est).status_code == 200
+    rows = get_db().all("SELECT code, amount, status FROM indirect_items WHERE project_id=?", (pid,))
+    assert len(rows) == 16 and all(r["amount"] is None and r["status"] == "Draft" for r in rows)       # nothing defaulted, nothing approved
+    assert client.post("/api/actions/add_standard_indirects", json={"project_id": pid}, headers=est).status_code == 200
+    assert get_db().scalar("SELECT COUNT(*) FROM indirect_items WHERE project_id=?", (pid,)) == 16       # idempotent
+    e = compute_estimate(get_db(), pid)
+    assert e.indirect.total == 0 and not e.indirect.resolved and any("Indirect costs have unresolved inputs" in b for b in e.blockers)
