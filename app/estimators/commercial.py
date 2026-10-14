@@ -18,6 +18,7 @@ from decimal import Decimal
 
 from ..core.errors import ValidationFailed
 from ..core.money import HUNDRED, ONE, ZERO, D, D_opt, pct, quantize
+from . import eligibility as elig
 from .types import EngineException
 
 BASES = ("direct", "direct_indirect", "cost_before_escalation")
@@ -103,10 +104,20 @@ def validate_policy(policy: dict) -> list[str]:
             probs.append("margin_pct is required for the gross-margin method.")
         elif not (ZERO <= g < HUNDRED):
             probs.append("margin_pct must be >= 0 and < 100.")
+    def _check_elig(label: str, c: dict) -> None:
+        if c.get("eligibility"):
+            try:
+                elig.validate_spec(c["eligibility"])
+            except ValidationFailed as e:
+                probs.append(f"{label}.eligibility: {e.message}")
+            if c.get("base") == "cost_before_escalation":
+                probs.append(f"{label}.eligibility cannot be combined with base 'cost_before_escalation' (use 'direct' or 'direct_indirect').")
+
     for k in ("contingency", "escalation"):
         c = policy.get(k)
         if c is None:
             continue
+        _check_elig(k, c)
         if D_opt(c.get("pct")) is None:
             probs.append(f"{k}.pct is required when {k} is present (use pct 0 for none).")
         if c.get("base") not in (BASES if k == "escalation" else BASES[:2]):
@@ -123,6 +134,7 @@ def validate_policy(policy: dict) -> list[str]:
             probs.append(f"Risk item '{r.get('name')}' needs pct or amount.")
         if D_opt(r.get("pct")) is not None and r.get("base") not in BASES[:2]:
             probs.append(f"Risk item '{r.get('name')}' needs base 'direct' or 'direct_indirect'.")
+        _check_elig(f"risk '{r.get('name')}'", r)
     dsc = policy.get("discount")
     if dsc and D_opt(dsc.get("pct")) is None and D_opt(dsc.get("amount")) is None:
         probs.append("discount needs pct or amount.")
@@ -131,29 +143,39 @@ def validate_policy(policy: dict) -> list[str]:
 
 def compute_commercial(policy: dict, *, direct: Decimal, indirect: Decimal, money_dp: int,
                        tax_shares: dict[str, Decimal] | None, tax_rates: dict[str, Decimal | None],
-                       policy_name: str = "", policy_status: str = "") -> CommercialResult:
+                       policy_name: str = "", policy_status: str = "", direct_lines: list[dict] | None = None) -> CommercialResult:
     probs = validate_policy(policy)
     if probs:
         raise ValidationFailed("Commercial policy invalid: " + " ".join(probs), code="POLICY_INVALID", details=probs)
     exc: list[EngineException] = []
     trace: list[TraceStep] = []
     q = lambda v: quantize(v, money_dp)  # noqa: E731
+
+    def eligible_direct(c: dict) -> tuple[Decimal, str]:
+        """Direct cost that this adder's percentage applies to: the whole direct cost unless the adder states an eligibility spec (then the eligible part, with a note)."""
+        spec = elig.validate_spec(c.get("eligibility")) if c.get("eligibility") else None
+        if spec is None or direct_lines is None:
+            return direct, ""
+        bd = elig.eligible_base(direct_lines, spec)
+        return bd["eligible"], f" [eligible direct {bd['eligible']} of {bd['total']}; excluded {bd['excluded']}; unclassified {bd['unclassified']}]"
     c0 = q(direct + indirect)
     trace.append(TraceStep("Pre-contingency cost (C0)", "Direct + Indirect", None, None, None, c0))
 
     ct = ZERO
     if policy.get("contingency"):
         c = policy["contingency"]
-        b = _base(c["base"], direct, indirect)
+        ed, note = eligible_direct(c)
+        b = _base(c["base"], ed, indirect)
         ct = q(b * pct(c["pct"]))
-        trace.append(TraceStep("Contingency", f"{c['pct']}% x base[{c['base']}]", c["base"], b, str(c["pct"]), ct))
+        trace.append(TraceStep("Contingency", f"{c['pct']}% x base[{c['base']}]{note}", c["base"], b, str(c["pct"]), ct))
     risk = ZERO
     risk_detail = []
     for r in policy.get("risk_items", []) or []:
         if D_opt(r.get("pct")) is not None:
-            b = _base(r["base"], direct, indirect)
+            ed, note = eligible_direct(r)
+            b = _base(r["base"], ed, indirect)
             amt = q(b * pct(r["pct"]))
-            trace.append(TraceStep(f"Risk: {r['name']}", f"{r['pct']}% x base[{r['base']}]", r["base"], b, str(r["pct"]), amt))
+            trace.append(TraceStep(f"Risk: {r['name']}", f"{r['pct']}% x base[{r['base']}]{note}", r["base"], b, str(r["pct"]), amt))
         else:
             amt = q(D(r["amount"]))
             trace.append(TraceStep(f"Risk: {r['name']}", "fixed amount", None, None, None, amt))
@@ -162,9 +184,10 @@ def compute_commercial(policy: dict, *, direct: Decimal, indirect: Decimal, mone
     esc = ZERO
     if policy.get("escalation"):
         e = policy["escalation"]
-        b = _base(e["base"], direct, indirect, ct, risk)
+        ed, note = eligible_direct(e)
+        b = _base(e["base"], ed, indirect, ct, risk)
         esc = q(b * pct(e["pct"]))
-        trace.append(TraceStep("Escalation", f"{e['pct']}% x base[{e['base']}]", e["base"], b, str(e["pct"]), esc))
+        trace.append(TraceStep("Escalation", f"{e['pct']}% x base[{e['base']}]{note}", e["base"], b, str(e["pct"]), esc))
     total_cost = q(c0 + ct + risk + esc)
     trace.append(TraceStep("Total cost (T)", "C0 + contingency + risk + escalation", None, None, None, total_cost))
 

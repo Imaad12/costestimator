@@ -37,15 +37,17 @@ def verify_password(password: str, stored: str | None) -> bool:
 
 
 def create_user(db: Database, username: str, display_name: str, role: str, password: str | None,
-                *, creator: Actor | str = "system", is_ai: bool = False) -> int:
+                *, creator: Actor | str = "system", is_ai: bool = False, actor_type: str = "human") -> int:
+    if actor_type not in ("human", "test", "ai"):
+        raise ValidationFailed("actor_type must be 'human' (a real accountable person) or 'test' (software-validation principal).")
     if role not in ROLE_VALUES:
         raise ValidationFailed(f"Unknown role '{role}'. Valid: {ROLE_VALUES}")
     if is_ai or role == Role.AI.value:
-        is_ai, role, password = True, Role.AI.value, None  # AI principals never get a password / login
+        is_ai, role, password, actor_type = True, Role.AI.value, None, "ai"  # AI principals never get a password / login
     uid = db.insert("users", dict(username=username, display_name=display_name, role=role,
                                   password_hash=hash_password(password) if password else None,
-                                  is_active=1, is_ai=int(is_ai), created_at=now_iso()))
-    audit.log(db, creator, "user", username, "create", after={"role": role, "is_ai": is_ai})
+                                  is_active=1, is_ai=int(is_ai), actor_type=actor_type, created_at=now_iso()))
+    audit.log(db, creator, "user", username, "create", after={"role": role, "is_ai": is_ai, "actor_type": actor_type})
     return uid
 
 

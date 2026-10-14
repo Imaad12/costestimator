@@ -73,7 +73,8 @@ def escalation_report(db: Database, project_id: str, *, est=None, include_unappr
     over = sorted({f"{l.item_key}:{l.kind}" for l in est.direct.lines if l.amount is not None and sum(1 for _, f in scopes if f(l)) > 1})
     if over:
         raise ValidationFailed(f"Escalation profiles overlap on {len(over)} cost line(s), e.g. {over[:3]}: escalation would be applied twice. Narrow the scopes.", code="ESC_OVERLAP")
-    rows, tot_base, tot_esc, covered = [], ZERO, ZERO, ZERO
+    rows, tot_base, tot_esc = [], ZERO, ZERO
+    unesc_lines: list[dict] = []
     for p, f in scopes:
         rep = programme.loading_report(db, project_id, measure="cost", period="month", est=est, include_unapproved=include_unapproved, line_filter=f)
         amounts = {b: sum((rep["series"][k].get(b, ZERO) for k in rep["series"]), ZERO) for b in rep["buckets"]}
@@ -81,19 +82,28 @@ def escalation_report(db: Database, project_id: str, *, est=None, include_unappr
         d = p["data"]
         res = esc.phase(amounts, mid, date.fromisoformat(d["base_date"]), D(d["annual_pct"]))
         unsched = rep["unscheduled_total"]
+        unesc_lines += [dict(profile=p["code"], **u) for u in rep["unscheduled_lines"]]
         rows.append(dict(profile=p["code"], name=d["name"], annual_pct=D(d["annual_pct"]), base_date=d["base_date"], basis=d["basis"], scope_kind=d["scope_kind"],
                          scope_cost_prefix=d.get("scope_cost_prefix"), periods=res["rows"], base_total=res["base_total"], escalation_total=res["escalation_total"],
-                         escalated_total=res["escalated_total"], unscheduled_not_escalated=unsched))
+                         escalated_total=res["escalated_total"], unscheduled_not_escalated=unsched, allocated_by_rule=rep["allocated_by_rule"]))
         tot_base += res["base_total"]
         tot_esc += res["escalation_total"]
-        covered += res["base_total"] + unsched
+    outside = [dict(item_key=l.item_key, cost_code=l.cost_code, kind=l.kind, resource_id=l.resource_id, amount=l.amount) for l in est.direct.lines
+               if l.amount is not None and not any(f(l) for _, f in scopes)]
+    outside_total = sum((o["amount"] for o in outside), ZERO)
+    unesc_total = sum((u["amount"] for u in unesc_lines), ZERO)
     direct = est.direct.direct_cost_total
     idx = []
     if index_dataset:
         for o in index_import.latest_observations(db, index_dataset, "Y-o-Y")[-12:]:
             idx.append(dict(series=o["series"], period=o["period"], value=o["value"]))
     c = est.commercial
+    complete = unesc_total == 0
+    status = "COMPLETE for the cost within profile scope" if complete else (f"INCOMPLETE - NOT FOR RELIANCE: SAR {unesc_total:,.2f} of eligible cost has no time allocation and is NOT escalated "
+                                                                         f"(see unescalated_lines)")
     return dict(project_id=project_id, profiles=rows, escalation_total=tot_esc, scheduled_base_total=tot_base, direct_cost_total=direct,
-                not_covered_by_any_profile=direct - covered, policy_escalation=(c.escalation if c else None),
+                complete=complete, status=status, unescalated_eligible_cost=unesc_total, unescalated_lines=unesc_lines,
+                outside_profile_scope_cost=outside_total, outside_profile_scope_lines=outside,
+                not_covered_by_any_profile=outside_total, policy_escalation=(c.escalation if c else None),
                 index_reference=idx, note="Escalation is compounded from each profile's base date to mid-month of each programme month. Cost not tied to a task by cost-code/WBS scope "
                 "is NOT escalated and is listed. Index values (if shown) are information; the percentages are the company's decision.", estimate_state=est.state)

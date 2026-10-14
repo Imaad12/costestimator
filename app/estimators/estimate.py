@@ -199,7 +199,8 @@ def compute_estimate_from(inp: EstimateInputs, ex: EstimateExtras, *, policy_ove
     ind_items = _effective_indirects(ind_items, include_unapproved)
     indirect = compute_indirects(ind_items, direct_cost_total=direct.direct_cost_total, duration_months=dur_months,
                                  duration_status=dur_status, working_days_per_month=wdpm, working_days_per_week=wdpw,
-                                 money_dp=direct.money_dp, include_unapproved=include_unapproved)
+                                 money_dp=direct.money_dp, include_unapproved=include_unapproved,
+                                 direct_lines=[dict(item_key=l.item_key, cost_code=l.cost_code, kind=l.kind, amount=l.amount) for l in direct.lines if l.amount is not None])
     exceptions: list[dict] = []
 
     def add(e: EngineException, src: str):
@@ -268,7 +269,8 @@ def compute_estimate_from(inp: EstimateInputs, ex: EstimateExtras, *, policy_ove
                 if ic.complete and ic.pricing_method != "excluded":
                     tc = item_tax.get(k) or default_tax or ""
                     shares[tc] = shares.get(tc, ZERO) + ic.direct_cost
-            commercial = com.compute_commercial(policy, direct=direct.direct_cost_total, indirect=indirect.total,
+            commercial = com.compute_commercial(policy, direct_lines=[dict(item_key=l.item_key, cost_code=l.cost_code, kind=l.kind, amount=l.amount) for l in direct.lines if l.amount is not None],
+                                                 direct=direct.direct_cost_total, indirect=indirect.total,
                                                 money_dp=direct.money_dp, tax_shares=shares or {default_tax or "": Decimal(1)},
                                                 tax_rates=rates, policy_name=policy_row["name"] if policy_row else "",
                                                 policy_status=policy_row["status"] if policy_row else "")

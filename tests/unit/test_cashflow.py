@@ -72,7 +72,10 @@ def test_service_report_proposals_and_estimate_unchanged(seeded, proj):
     est = compute_estimate(seeded, proj)
     r = cashflow.cashflow_report(seeded, proj, est=est)
     assert r["price"] == est.commercial.net_price and r["total_cost"] == est.direct.direct_cost_total and r["terms"]["code"] == "CONTRACT"
-    assert r["final_balance"] == r["price"] - r["total_cost"] - r["interest_total"]                                              # money conserved
+    # money conserved under the documented convention: indirects (500) are paid with the direct cost; contingency/margin are not cash-out
+    rc = r["reconciliation"]
+    assert r["complete"] and abs(rc["cash_out_total"] - (est.direct.direct_cost_total + est.indirect.total)) < D("0.0001") and all(c["ok"] for c in rc["checks"])
+    assert abs(r["final_balance"] - (r["price"] - rc["cash_out_total"] - r["interest_total"])) < D("0.0001")
     before = compute_estimate(seeded, proj)
     out = cashflow.propose_financing_indirects(seeded, ESTIMATOR, proj)
     rows = {i["code"]: i for i in indirects.list_indirects(seeded, proj)}

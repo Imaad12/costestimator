@@ -54,6 +54,21 @@ def authorize(actor: Actor, entity_type: str, action: str, *, created_by: str | 
                 f"(configured threshold).", code="THRESHOLD_ROLE_REQUIRED")
 
 
+def resolve_actor_type(db: Database, actor: Actor) -> str:
+    """The durable classification of the principal behind `actor`, read from the users table (never from a display name or from the Actor object alone):
+    'human' | 'test' | 'ai' | 'unregistered' (no such user) | 'inactive' | 'role_mismatch' (the claimed role is not the registered one)."""
+    r = db.one("SELECT role, actor_type, is_active, is_ai FROM users WHERE username=?", (actor.username,))
+    if actor.is_ai or actor.role == Role.AI.value or (r and r["is_ai"]):
+        return "ai"
+    if not r:
+        return "unregistered"
+    if not r["is_active"]:
+        return "inactive"
+    if r["role"] != actor.role:
+        return "role_mismatch"
+    return r["actor_type"]
+
+
 def record(db: Database, actor: Actor, entity_type: str, entity_id: Any, action: str, *, project_id: str | None = None,
            version: Any = None, previous_value: Any = None, approved_value: Any = None, evidence: str | None = None,
            comments: str | None = None, override_reason: str | None = None) -> int:
@@ -67,10 +82,22 @@ def record(db: Database, actor: Actor, entity_type: str, entity_id: Any, action:
         project_id=project_id, entity_type=entity_type, entity_id=str(entity_id),
         version=None if version is None else str(version), reviewer=actor.username, reviewer_role=actor.role,
         action=action, ts=now_iso(), previous_value=s(previous_value), approved_value=s(approved_value),
-        evidence=evidence, comments=comments, override_reason=override_reason))
+        evidence=evidence, comments=comments, override_reason=override_reason,
+        actor_type=resolve_actor_type(db, actor), environment=get_settings().environment))
     audit.log(db, actor, entity_type, entity_id, f"approval:{action}", before=previous_value, after=approved_value,
               comment=comments or override_reason, project_id=project_id)
     return aid
+
+
+def require_production_actor(db: Database, actor: Actor, project_id: str, what: str) -> None:
+    """Final-stage decisions on a real (non-demonstration) project in a production environment need a registered, active HUMAN user whose registered role matches.
+    Test and unregistered principals may still act on demonstration projects or in a test environment, but their approvals are recorded as such and never count towards readiness."""
+    from ..core.errors import ApprovalBlocked as _AB
+    s = get_settings()
+    demo = db.scalar("SELECT is_demo FROM projects WHERE id=?", (project_id,))
+    kind = resolve_actor_type(db, actor)
+    if kind != "human" and not demo and s.environment == "production":
+        raise _AB(f"{what.capitalize()} on a real project requires a registered human user (this principal is '{kind}').", code="NON_HUMAN_ACTOR")
 
 
 def decide(db: Database, actor: Actor, entity_type: str, entity_id: Any, action: str, **kw) -> int:

@@ -39,7 +39,7 @@ def bootstrap(workdir: Path):
     workdir = Path(workdir)
     workdir.mkdir(parents=True, exist_ok=True)
     s = cfg.load_settings(env={"KSA_DB_PATH": str(workdir / "scratch_pilot.db"), "KSA_WORKSPACES_DIR": str(workdir / "workspaces"),
-                               "KSA_SECRET_KEY": "synthetic-pilot", "KSA_ALLOW_SELF_APPROVAL": "true"})
+                               "KSA_SECRET_KEY": "synthetic-pilot", "KSA_ALLOW_SELF_APPROVAL": "true", "KSA_ENVIRONMENT": "test"})
     cfg.set_settings(s)
     if Path(s.db_path).exists():
         raise RuntimeError(f"{s.db_path} already exists: the pilot needs a fresh scratch directory")
@@ -47,6 +47,9 @@ def bootstrap(workdir: Path):
     db.migrate()
     set_db(db)
     refdata.seed_reference(db)
+    from app.services import auth
+    for u, role in (("test-estimator", "Estimator"), ("test-procurement", "Procurement Reviewer"), ("test-commercial", "Commercial Approver"), ("test-admin", "Administrator")):
+        auth.create_user(db, u, f"TEST ACTOR {role}", role, None, actor_type="test")          # registered as TEST principals: durable marker, not a display name
     return db, s
 
 
@@ -182,6 +185,8 @@ def _line_for(item: str) -> dict:
     ln = dict(line_type=t, resource_id=f"SYN-{item}", factor="1")
     if t == "material":
         ln["factor_includes_waste"] = 1
+    if t == "plant":
+        ln["factor_unit"] = "day"                                           # the factor is days per BOQ day: stated, so no PLANT_UNIT assumption
     if t == "labour":
         ln["productivity_basis"] = "paid_hours_per_unit"
     return ln
@@ -223,7 +228,7 @@ def stage_params(db, ev: Evidence, A: dict, pid: str = PROJECT_ID) -> dict:
     for i in ids:
         governed.submit(db, A["est"], i)
         governed.approve(db, A["com"], i, comments="TEST ACTOR: SYNTHETIC parameter approved to exercise the workflow (not a real approval)")
-    ev.stage("8_governed_parameters", "PASS" if (dry["would_create"] == 6 and not dry["errors"] and after_dry == before and all_draft and not in_force and len(ids) == 6) else "FAIL",
+    ev.stage("8_governed_parameters", "PASS" if (dry["would_create"] == 7 and not dry["errors"] and after_dry == before and all_draft and not in_force and len(ids) == 7) else "FAIL",
              dry_run=dry, rows_before_dry_run=before, rows_after_dry_run=after_dry, imported=res, all_imported_as_draft=all_draft, draft_in_force_before_approval=bool(in_force),
              approved_via_test_actor=len(ids), kinds_unsupported_as_governed=["site indirects %", "home-office overhead %", "contingency %", "target profit %", "VAT % (tax category record)", "FX (SAR-only)"])
     return {"ids": ids}
@@ -242,12 +247,17 @@ TASKS = [   # scope tie for loading: a task declares a cost-code prefix and/or a
 ]
 
 
+# Explicit eligibility (SYNTHETIC test decision): the percentage indirects apply to the E/D/F BOQ scope only; preliminaries (division A) are priced as BOQ lines and are excluded.
+INDIRECT_ELIGIBILITY = {"default": "exclude", "rules": [{"cost_prefix": "A", "eligible_pct": 0, "note": "preliminaries are BOQ lines"}, {"cost_prefix": "E", "eligible_pct": 100},
+                                                        {"cost_prefix": "D", "eligible_pct": 100}, {"cost_prefix": "F", "eligible_pct": 100}]}
+
+
 def stage_commercial_setup(db, ev: Evidence, A: dict, pid: str = PROJECT_ID, *, approve_tax: bool = True, approve_duration: bool = True) -> None:
     from app.services import commercial, indirects
-    for code, cat, desc, amt in (("IND-SITE", "Site indirects", "SYNTHETIC site indirects, 8% of total direct cost (engine base: ALL direct cost)", "8"),
-                                 ("IND-HO", "Home-office overhead", "SYNTHETIC home-office overhead, 3% of total direct cost (engine base: ALL direct cost)", "3")):
+    for code, cat, desc, amt in (("IND-SITE", "Site indirects", "SYNTHETIC site indirects, 8% of the ELIGIBLE direct cost (preliminaries division A excluded: supervision, mobilisation, plant, access are BOQ lines)", "8"),
+                                 ("IND-HO", "Home-office overhead", "SYNTHETIC home-office overhead, 3% of the ELIGIBLE direct cost (division A excluded)", "3")):
         indirects.add_indirect(db, A["est"], pid, code=code, category=cat, description=desc, method="percent_of_direct", amount=amt, is_synthetic=True,
-                               source="SYNTHETIC TEST ASSUMPTION - NOT COMPANY DATA")
+                               source="SYNTHETIC TEST ASSUMPTION - NOT COMPANY DATA", eligibility=INDIRECT_ELIGIBILITY)
         indirects.submit_indirect(db, A["est"], pid, code)
         indirects.approve_indirect(db, A["com"], pid, code, comments="TEST ACTOR: SYNTHETIC")
     cfg = {"method": "markup", "markup_pct": "7", "default_tax_category": "VAT-STD", "contingency": {"pct": "5", "base": "direct_indirect"}, "risk_items": [],
@@ -444,6 +454,52 @@ def stage_takeoff(db, ev: Evidence, A: dict, workdir: Path) -> None:
              note="structural/mechanical derivation with SYNTHETIC factors only; not real estimating validation")
 
 
+TIME_ALLOCATION_RULES = [
+    ("SUP-ALL", {"name": "Site supervision over the whole programme", "scope_cost_prefix": "A.03", "tasks": ["ALL"], "basis": "SYNTHETIC TEST ASSUMPTION: supervision runs for the whole programme (duration-weighted over every activity)"}),
+    ("LIFT-INST-WELD", {"name": "Crane and forklift on installation and welding", "scope_cost_prefix": "A.07", "tasks": ["INST", "WELD"], "shares": {"INST": "60", "WELD": "40"},
+                        "basis": "SYNTHETIC TEST ASSUMPTION: lifting plant is used 60 % on installation, 40 % on welding"}),
+    ("SCAFFOLD", {"name": "Scaffolding on installation, welding and painting", "scope_cost_prefix": "A.06", "tasks": ["INST", "WELD", "PAINT"],
+                  "basis": "SYNTHETIC TEST ASSUMPTION: scaffolding access is needed by these activities, weighted by their duration"}),
+]
+
+
+def stage_time_allocation(db, ev: Evidence, A: dict, pid: str = PROJECT_ID) -> None:
+    """Untied cost (supervision, crane, forklift, scaffolding): BEFORE any allocation rule the cash flow / escalation are marked INCOMPLETE with the exact amount and the gate blocks;
+    AFTER explicit approved time_allocation rules they are complete, reconciled and the finding is gone."""
+    from app.core.errors import ValidationFailed
+    from app.reconciliation import engine as recon
+    from app.reporting import registry
+    from app.services import cashflow, governed
+    from app.api.serializers import ser
+
+    def snap():
+        cf = ser(registry.run_report(db, "cashflow", pid, {"terms_code": "PAY-SYNTH"}))
+        es = ser(registry.run_report(db, "escalation", pid, {}))
+        run = recon.run_reconciliation(db, A["est"], pid)
+        f = [(x["severity"], x["rule_code"], x["status"]) for x in recon.get_run(db, run["run_id"])["findings"]]
+        return cf, es, f
+    cf0, es0, f0 = snap()
+    try:
+        cashflow.propose_financing_indirects(db, A["est"], pid, terms_code="PAY-SYNTH")
+        refused = "NOT REFUSED (defect)"
+    except ValidationFailed as e:
+        refused = e.code
+    gate0 = recon.final_gate(db, A["com"], pid)
+    for code, data in TIME_ALLOCATION_RULES:
+        i = governed.propose(db, A["est"], "time_allocation", code, data, project_id=pid, source="SYNTHETIC TEST DATA - NOT COMPANY RECORDS", is_synthetic=True, submit=True)
+        governed.approve(db, A["com"], i, comments="TEST ACTOR: SYNTHETIC")
+    cf1, es1, f1 = snap()
+    ev.stage("13d_time_allocation", "PASS" if (cf0["complete"] is False and es0["complete"] is False and refused == "TIMEPHASING_INCOMPLETE" and cf1["complete"] and es1["complete"]
+                                              and all(c["ok"] for c in cf1["reconciliation"]["checks"]) and not any(r == "TIMEPHASING_INCOMPLETE" for _, r, _ in f1)
+                                              and any(b["rule_code"] == "TIMEPHASING_INCOMPLETE" for b in gate0["blockers"])) else "FAIL",
+             before=dict(cashflow_status=cf0["status"], unallocated_direct_cost=cf0["unscheduled_cost"], unallocated_lines=[(u["item_key"], u["kind"], u["amount"], u["reason"]) for u in cf0["unallocated_lines"]],
+                         valued_price=cf0["reconciliation"]["valued_price"], unallocated_price_share=cf0["reconciliation"]["unallocated_price_share"], closing_balance=cf0["final_balance"],
+                         escalation_status=es0["status"], unescalated_cost=es0["unescalated_eligible_cost"], escalation_total=es0["escalation_total"], financing_proposal_refused_with=refused,
+                         findings=[x for x in f0 if x[1] == "TIMEPHASING_INCOMPLETE"], final_gate_blocked_by_it=any(b["rule_code"] == "TIMEPHASING_INCOMPLETE" for b in gate0["blockers"])),
+             after=dict(rules=[c for c, _ in TIME_ALLOCATION_RULES], allocated_by_rule=cf1["allocated_by_rule"], cashflow_status=cf1["status"], reconciliation=cf1["reconciliation"],
+                        escalation_status=es1["status"], escalation_total=es1["escalation_total"], escalation_base=es1["scheduled_base_total"], findings_remaining=[x for x in f1 if x[1] == "TIMEPHASING_INCOMPLETE"]))
+
+
 def stage_estimate_outputs(db, ev: Evidence, A: dict, pid: str = PROJECT_ID) -> dict:
     from app.api.serializers import ser
     from app.estimators.estimate import compute_estimate
@@ -462,12 +518,14 @@ def stage_estimate_outputs(db, ev: Evidence, A: dict, pid: str = PROJECT_ID) -> 
     explained_only = line_diffs == {"P-020": "900.00"}                                         # the approved TEST-ONLY crane standby is booked on the crane line
     # independent commercial chain (Decimal): D -> indirects (each % of D, rounded) -> contingency 5% of D+I -> markup 7% on total cost -> VAT on the tendered schedule
     Dd = tot + D(900)                                                                        # + crane standby (1 day x 1,800 x 50%) from the approved test-only plant terms
-    I = r2(Dd * D("0.08")) + r2(Dd * D("0.03"))
+    elig_base = sum((e for (k, e), b in zip(ext, boq_rows()) if b["cost_code"][0] in "EDF"), D(0))              # division A (preliminaries) excluded by the approved eligibility rules
+    I = r2(elig_base * D("0.08")) + r2(elig_base * D("0.03"))
+    I_legacy = r2(Dd * D("0.08")) + r2(Dd * D("0.03"))                                                   # what the same 8 % + 3 % gave on the whole direct cost (previous pilot run)
     Ct = r2((Dd + I) * D("0.05"))
     T = Dd + I + Ct
     S = r2(T * D("1.07"))
     c, s = est.commercial, est.schedule
-    chain = dict(direct=str(Dd), indirect=str(I), contingency=str(Ct), total_cost=str(T), selling_price=str(S), engine=dict(direct=str(est.direct.direct_cost_total), indirect=str(est.indirect.total), contingency=str(c.contingency),
+    chain = dict(direct=str(Dd), eligible_base=str(elig_base), indirect=str(I), indirect_on_whole_direct_cost_legacy=str(I_legacy), indirect_base_report=ser(registry.run_report(db, "indirect_base", pid, {})), contingency=str(Ct), total_cost=str(T), selling_price=str(S), engine=dict(direct=str(est.direct.direct_cost_total), indirect=str(est.indirect.total), contingency=str(c.contingency),
                  total_cost=str(c.total_cost), selling_price=str(c.selling_price_pre_discount), net_price=str(c.net_price), schedule_total=str(s.total_pre_tax), rounding_variance=str(s.rounding_variance),
                  tax_total=str(c.tax_total), final_payable=str(c.final_payable)), tax_check_15pct_of_schedule=str(r2(s.total_pre_tax * D("0.15"))))
     chain_ok = (Dd, I, Ct, T, S) == (est.direct.direct_cost_total, est.indirect.total, c.contingency, c.total_cost, c.selling_price_pre_discount) and r2(s.total_pre_tax * D("0.15")) == c.tax_total
@@ -491,7 +549,7 @@ def stage_estimate_outputs(db, ev: Evidence, A: dict, pid: str = PROJECT_ID) -> 
              direct_by_resource={k: str(v) for k, v in sorted(by_res.items())}, commercial_chain=chain, chain_matches_independent=chain_ok, unpriced_items=unpriced,
              unapproved_or_flagged_exceptions=sorted({e.code for e in est.direct.exceptions}), rollup_tie_out=roll.get("tie_out"),
              rollup_cbs_nodes={n["code"]: n["total"] for n in roll["cbs"]["nodes"]}, rollup_wbs_nodes={n["code"]: n["total"] for n in roll["wbs"]["nodes"]} if "wbs" in roll else None,
-             risk=dict(seed="20260101", trials=5000, repeat_identical=(rk == rk2), report={k: v for k, v in rk.items() if k != "histogram"}), escalation=esc, cashflow={k: v for k, v in cf.items() if k != "rows"},
+             plant_hire=ser(registry.run_report(db, "plant_hire", pid, {})["rows"]), risk=dict(seed="20260101", trials=5000, repeat_identical=(rk == rk2), report={k: v for k, v in rk.items() if k != "histogram"}), escalation=esc, cashflow={k: v for k, v in cf.items() if k != "rows"},
              cashflow_rows=cf.get("rows"), schedule_rows=[dict(item=l.item_key, amount=str(l.amount)) for l in s.lines[:3]] if hasattr(s, "lines") else None)
     return {"est": est, "risk": rk, "cashflow": cf}
 
@@ -663,6 +721,43 @@ def stage_takeoff_replay(db, ev: Evidence, A: dict, pid: str = "PRJ-9003") -> No
              replayed_fingerprint_equals_frozen=rp["fingerprint"] == v1["inputs_hash"], not_covered="landed cost / FX (SAR-only) and escalation (a read-only report, not an estimate input) are not in this replay")
 
 
+def stage_production_isolation(db, ev: Evidence, A: dict, ctx: dict) -> None:
+    """The synthetic pilot can never produce a production-ready status: approval identity, role, actor type, environment and project class are read from durable records."""
+    from app.approvals import engine as ap
+    from app.config import get_settings
+    from app.core.errors import ApprovalBlocked
+    from app.models.actor import Actor
+    from app.services import estimates, readiness
+    r = readiness.evaluate(db, PROJECT_ID, ctx["vid"], ctx["ap"])
+    chain_types = [dict(r_) for r_ in db.all("SELECT actor_type, environment, COUNT(*) n FROM approvals WHERE project_id=? GROUP BY actor_type, environment", (PROJECT_ID,))]
+    forged = Actor("forged-human", "Commercial Approver", "Real Human Commercial Approver (identity verified)")          # nobody registered under this username
+    liar = Actor("test-estimator", "Commercial Approver", "claims another role")                                          # registered, but not as a Commercial Approver
+    kinds = dict(forged_display_name=ap.resolve_actor_type(db, forged), role_mismatch=ap.resolve_actor_type(db, liar), registered_test_actor=ap.resolve_actor_type(db, A["com"]),
+                 missing_actor=ap.resolve_actor_type(db, Actor("nobody", "Estimator")))
+    s = get_settings()
+    s.environment = "production"                                                                                          # what a real installation would run as
+    try:
+        prod = readiness.evaluate(db, PROJECT_ID, ctx["vid"], ctx["ap"])
+        try:
+            estimates.approve_tender_export(db, A["com"], "PRJ-9004", 1)
+            non_human = "NOT REFUSED (defect)"
+        except ApprovalBlocked as e:
+            non_human = e.code
+        try:
+            estimates.export_submission(db, A["est"], "PRJ-9004", 1, 1)
+            direct = "NOT REFUSED (defect)"
+        except ApprovalBlocked as e:
+            direct = e.code
+    finally:
+        s.environment = "test"
+    ok = (not r["production_ready"] and not prod["production_ready"] and r["classification"] == "demonstration" and all(v != "human" for v in kinds.values())
+          and non_human == "NON_HUMAN_ACTOR" and direct == "NON_HUMAN_ACTOR" and db.scalar("SELECT COUNT(*) FROM exports WHERE submission_ready=1") == 0)
+    ev.stage("19_production_isolation", "PASS" if ok else "FAIL", classification_in_pilot_environment=r["classification"], production_ready=r["production_ready"], reasons_in_pilot_environment=r["reasons"][:12],
+             classification_if_environment_were_production=prod["classification"], reasons_if_production=prod["reasons"][:12], approvals_by_actor_type_and_environment=chain_types, resolved_actor_types=kinds,
+             test_actor_approving_a_real_project_in_production=non_human, direct_export_attempt_on_a_real_project_by_a_test_actor=direct,
+             exports_marked_submission_ready=db.scalar("SELECT COUNT(*) FROM exports WHERE submission_ready=1"), export_readiness_labels=[dict(r_) for r_ in db.all("SELECT readiness, COUNT(*) n FROM exports GROUP BY readiness")])
+
+
 def stage_boe(db, ev: Evidence, A: dict, pid: str = PROJECT_ID) -> dict:
     from app.services import boe
     out = boe.generate_boe(db, A["est"], pid)
@@ -785,6 +880,7 @@ def run(workdir: Path) -> Evidence:
     stage_commercial_setup(db, ev, A, approve_tax=False)
     stage_tax_gate(db, ev, A)
     stage_programme(db, ev, A)
+    stage_time_allocation(db, ev, A)
     out = stage_estimate_outputs(db, ev, A)
     stage_wbs_check(db, ev, __import__("app.api.serializers", fromlist=["ser"]).ser(__import__("app.reporting.registry", fromlist=["x"]).run_report(db, "rollup", PROJECT_ID, {})))
     stage_variant_assemblies(db, ev, A, workdir)
@@ -792,6 +888,7 @@ def run(workdir: Path) -> Evidence:
     stage_takeoff(db, ev, A, workdir)
     stage_takeoff_replay(db, ev, A)
     ctx = stage_gates_freeze_export(db, ev, A)
+    stage_production_isolation(db, ev, A, ctx)
     stage_boe(db, ev, A)
     stage_replay(db, ev, A, ctx)
     stage_negative_controls(db, ev, A, workdir)

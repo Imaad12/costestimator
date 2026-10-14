@@ -34,8 +34,10 @@ def test_independent_boq_total_and_engine_reconcile(ev):
     e = ev["11_12_13_cost_commercial_risk_cashflow"]
     assert e["direct_total_engine"] == "366261.00" and e["line_extension_differences"] == {"P-020": "900.00"}      # + crane standby: 1 day x 1,800 x 50%
     c = e["commercial_chain"]["engine"]
-    # indirects 8% + 3% of 366,261 = 29,300.88 + 10,987.83 ; contingency 5% of 406,549.71 = 20,327.49 ; markup 7% of 426,877.20 = 456,758.60
-    assert (c["indirect"], c["contingency"], c["total_cost"], c["net_price"]) == ("40288.71", "20327.49", "426877.20", "456758.60")
+    # eligible base = E/D/F scope 302,691 (division A, 63,570 incl. the standby, excluded by the approved eligibility rules); indirects 8% + 3% of it = 24,215.28 + 9,080.73 = 33,296.01
+    # (the legacy whole-direct-cost base gave 40,288.71) ; contingency 5% of 399,557.01 = 19,977.85 ; markup 7% of 419,534.86 = 448,902.30
+    assert (c["indirect"], c["contingency"], c["total_cost"], c["net_price"]) == ("33296.01", "19977.85", "419534.86", "448902.30")
+    assert e["commercial_chain"]["indirect_on_whole_direct_cost_legacy"] == "40288.71" and e["commercial_chain"]["eligible_base"] == "302691"
 
 
 def test_quotation_levelling_recommends_a_not_the_headline_lowest_b(ev):
@@ -57,6 +59,7 @@ def test_preliminary_estimate_cannot_become_final_or_exportable(ev):
     assert n["state"].startswith("Preliminary") and n["approve_version"] == "ESTIMATE_PRELIMINARY" and n["export_submission"] == "EXPORT_NOT_APPROVED"
     assert ("Critical", "SYNTHETIC_IN_REAL_PROJECT") in [tuple(x) for x in n["reconciliation_findings"]]
     g = ev["15_gates_and_17_export"]
+    assert [f for f in g["findings_before"] if f[1] == "PLANT_HIRE_DAYS"] and not [f for f in g["findings_before"] if f[1] in ("TIMEPHASING_INCOMPLETE", "SYSTEM_EXCEPTION")]
     assert g["approve_before_exceptions"] == "RECON_BLOCKED" and g["ai_cannot_approve"] == "AI_CANNOT_APPROVE" and g["export_without_approval"] == "EXPORT_NOT_APPROVED"
 
 
@@ -79,3 +82,28 @@ def test_actual_cli_import_commands_dry_run_then_draft_and_index_refusal(ev):
     assert [c["exit"] for c in cli] == [0, 0, 0, 0, 0, 1]
     assert '"would_create": 1' in cli[0]["out"] and '"status": "Draft"' in cli[1]["out"] and "SOURCE_NOT_PRICE" in cli[5]["out"]
     assert ev["17_reports_api_ui_export"]["cross_checks"]["cli_rollup_tie_out"]["cbs"] is True
+
+
+def test_untied_costs_block_until_explicit_allocation_then_reconcile(ev):
+    t = ev["13d_time_allocation"]
+    b, a = t["before"], t["after"]
+    assert b["unallocated_direct_cost"] == "37950.00" and b["cashflow_status"].startswith("INCOMPLETE - NOT FOR RELIANCE") and b["escalation_status"].startswith("INCOMPLETE - NOT FOR RELIANCE")
+    assert sorted(u[0] for u in b["unallocated_lines"]) == ["P-020", "P-020", "P-021", "P-022", "P-030"] and b["financing_proposal_refused_with"] == "TIMEPHASING_INCOMPLETE" and b["final_gate_blocked_by_it"]
+    # 17,000 + 4,050 + 10,800 + 900 + 5,200 = 37,950 ; price share not valued = price x 37,950/366,261 (stated, never smeared)
+    assert a["cashflow_status"] == "COMPLETE" and a["escalation_status"].startswith("COMPLETE") and not a["findings_remaining"]
+    assert a["allocated_by_rule"] == {"SUP-ALL": "17000.00", "LIFT-INST-WELD": "16900.00", "SCAFFOLD": "4050.00"} and all(c["ok"] for c in a["reconciliation"]["checks"])
+
+
+def test_day_priced_plant_terms_and_programme_window(ev):
+    g = ev["15_gates_and_17_export"]["findings_before"]
+    assert sum(1 for f in g if f[1] == "PLANT_HIRE_DAYS") == 2                           # BOQ bills 6 / 8 days; the programme window INST..WELD is 10 working days (hand check in the report)
+
+
+def test_pilot_can_never_be_production_ready(ev):
+    p = ev["19_production_isolation"]
+    assert p["verdict"] == "PASS" and not p["production_ready"] and p["classification_in_pilot_environment"] == "demonstration" and p["exports_marked_submission_ready"] == 0
+    assert p["approvals_by_actor_type_and_environment"] == [{"actor_type": "test", "environment": "test", "n": p["approvals_by_actor_type_and_environment"][0]["n"]}]
+    assert p["resolved_actor_types"]["forged_display_name"] == "unregistered" and p["resolved_actor_types"]["role_mismatch"] == "role_mismatch"
+    assert p["test_actor_approving_a_real_project_in_production"] == "NON_HUMAN_ACTOR" and p["direct_export_attempt_on_a_real_project_by_a_test_actor"] == "NON_HUMAN_ACTOR"
+    banner = ev["15_gates_and_17_export"]["submission_banner_cells"][1]
+    assert banner.startswith("DEMONSTRATION EXPORT - NOT SUBMISSION READY - NOT APPROVED FOR ANY REAL TENDER") and "test principals" in banner

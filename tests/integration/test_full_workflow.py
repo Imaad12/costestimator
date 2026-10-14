@@ -258,6 +258,8 @@ def test_complete_workflow_to_gated_submission_export(demo):
         registers.resolve_clarification(db, ESTIMATOR, cl["id"], "Confirmed by client: lift 1000 kg / 1.6 m/s; temp power by main contractor (synthetic)", "Addendum 02, ref SYN-ADD-02")
     for f in by_rule["BOQ_ROWS_REJECTED"] + by_rule["UNAPPROVED_ADOPTED_ASSUMPTION"] + by_rule["PROVISIONAL_INPUTS"]:
         recon.accept_exception(db, ESTIMATOR, f["id"], "Documented: row 'TBA' is a client placeholder; remaining assumptions are not used by this synthetic estimate; provisional inputs are as per client")
+    for f in by_rule.get("INDIRECT_BASE_OVERLAP", []):                           # a High finding: only a Commercial Approver may accept it
+        recon.accept_exception(db, COMMERCIAL, f["id"], "Documented: the percentage indirect is intentionally applied to the whole direct cost incl. one preliminaries line (synthetic)")
     gate = recon.final_gate(db, ESTIMATOR, pid)
     assert not gate["blocked"] and any(f["rule_code"] == "OFFER_MISSING" for f in recon.get_run(db, gate["run_id"])["findings"])
     # offer
@@ -288,13 +290,13 @@ def test_complete_workflow_to_gated_submission_export(demo):
     files = estimates.export_submission(db, ESTIMATOR, pid, vid2, ap)
     assert set(files) == {"pricing_schedule", "estimate_report", "letter_of_offer", "reconciliation_report"} and all(Path(f).exists() for f in files.values())
     ws = openpyxl.load_workbook(files["pricing_schedule"]).active
-    assert ws["A2"].value.startswith("SUBMISSION READY") and "NOT A MARKET QUOTE" in ws["A2"].value and "PROVISIONAL" in ws["A2"].value
+    assert ws["A2"].value.startswith("DEMONSTRATION EXPORT - NOT SUBMISSION READY") and "unregistered" in ws["A2"].value and "NOT A MARKET QUOTE" in ws["A2"].value and "PROVISIONAL" in ws["A2"].value
     amounts = [ws.cell(r, 6).value for r in range(6, 6 + len(sch.lines) + len(sch.separate_lines)) if ws.cell(r, 6).value]
     assert abs(D(str(sum(amounts))) - sch.total_pre_tax) < D("0.01")                   # client file adds up to the offer total
     # client-facing file carries no internal cost information
     flat = " ".join(str(c.value) for row in ws.iter_rows() for c in row if c.value is not None).lower()
     assert "markup" not in flat and "contingency" not in flat and "direct cost" not in flat
-    assert db.scalar("SELECT COUNT(*) FROM exports WHERE submission_ready=1") == 4
+    assert db.scalar("SELECT COUNT(*) FROM exports WHERE submission_ready=1") == 0 and db.scalar("SELECT COUNT(*) FROM exports WHERE readiness='demonstration'") == 4      # demo project + unregistered approvers: never submission-ready
     # ---- client-supplied tender form (OUT-05): matched on item code, only mapped cells written, formulas untouched, gated like every submission-ready file
     from openpyxl import Workbook, load_workbook
     tpl = Path(files["pricing_schedule"]).parent / "client_template_test.xlsx"
@@ -316,9 +318,9 @@ def test_complete_workflow_to_gated_submission_export(demo):
     assert pre["submission_ready"] is False and pre["file"].endswith("_PRELIMINARY.xlsx")
     assert load_workbook(pre["file"])["Schedule of Rates"]["A1"].value.startswith("PRELIMINARY - NOT FOR SUBMISSION")
     rep = estimates.export_client_form(db, ESTIMATOR, pid, tpl, mapping, version_id=vid2, approval_id=ap)
-    assert rep["submission_ready"] and rep["rows_filled"] == len(priced) and rep["template_rows_without_schedule_item"] == [dict(row=8 + len(priced), key="ZZ.9")]
+    assert rep["submission_ready"] is False and rep["rows_filled"] == len(priced) and rep["template_rows_without_schedule_item"] == [dict(row=8 + len(priced), key="ZZ.9")]
     out_ws = load_workbook(rep["file"])["Schedule of Rates"]
-    assert out_ws["A1"].value == "CLIENT TENDER FORM" and out_ws.cell(8, 5).value == '=B8&""'                                   # no banner on the final; client formula untouched
+    assert out_ws["A1"].value.startswith("DEMONSTRATION EXPORT - NOT SUBMISSION READY") and out_ws.cell(8, 5).value == '=B8&""'          # banner states the real status; client formula untouched
     assert any("formula" in x["reason"] for x in rep["skipped"]) and rep["ties_out"] is False
     assert abs(D(str(sum(out_ws.cell(8 + i, 6).value for i in range(len(priced))))) - rep["filled_amount_total"]) < D("0.01")
     assert abs(D(str(out_ws["F90"].value)) - sch.total_pre_tax) < D("0.01") and out_ws.cell(8, 2).value == "client wording 0"     # totals cell written; client wording preserved

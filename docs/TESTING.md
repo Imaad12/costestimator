@@ -66,3 +66,13 @@ Every numeric test uses figures worked out by hand in the test (comments show th
 
 ## Synthetic end-to-end pilot (2026-10-14)
 `tests/synthetic_pilot/pilot.py` drives a SYNTHETIC 30-line piping project through the real services, CLI, REST API and UI against a scratch database (fixtures in `tests/fixtures/synthetic_pilot/`; run it with `python scripts/run_synthetic_pilot.py [FRESH_DIR]`). `tests/integration/test_synthetic_pilot.py` asserts the stage verdicts and the independently computed figures (BOQ total 365,361; commercial chain; quotation levelling 86,350.40 / 88,019.55 / 90,065.70; frozen-estimate replay after a parameter and a rate change; preliminary estimate cannot be approved or exported; index sources refused; unit flags). Every number is SYNTHETIC and every approval is a `TEST ACTOR`; passing proves the software path, not estimating accuracy. Evidence and findings: [SYNTHETIC_PILOT_RUN.md](SYNTHETIC_PILOT_RUN.md).
+
+
+## Iteration 5: pilot findings closed (2026-10-14)
+| File | Covers |
+|---|---|
+| `tests/unit/test_time_allocation.py` | untied supervision/crane/forklift/scaffolding exposed to the exact amount, INCOMPLETE labels, refusal of financing proposals, blocking finding; explicit `time_allocation` rules (shares, ALL, duration weights), cash flow reconciliation (cash-out, valuations, retention, closing balance) and escalation completeness; missing task, conflicting/duplicate rules, shares exceeding 100 %, zero-duration activities, unapproved rules |
+| `tests/unit/test_indirect_eligibility.py` | included / excluded / partially eligible / unclassified cost, first-rule-wins, validation, overlap with preliminaries, unspecified legacy base, revision as a new Draft (approved version and frozen estimate replay unchanged), commercial adder eligibility |
+| `tests/unit/test_plant_hire.py` | missing hire terms, minimum hire, standby, mobilisation/demobilisation lines, working vs calendar days from the programme window, programme delay |
+| `tests/approvals/test_actor_isolation.py`, `tests/integration/test_actor_isolation_api.py` | registered human chain is ready; test principals, forged display names, unregistered/role-mismatched/inactive principals, wrong environment, copied/hand-written approval rows, demo projects, exceptions by test principals; the same refusals through the REST API |
+| `tests/integration/test_synthetic_pilot.py` (additions) | before/after time allocation, eligibility base, plant windows, production isolation of the pilot |

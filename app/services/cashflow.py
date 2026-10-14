@@ -34,12 +34,42 @@ def cashflow_report(db: Database, project_id: str, *, terms_code: str | None = N
     labels = sorted(by_label)
     y0, m0 = int(labels[0][:4]), int(labels[0][5:7])
     cost_by_month = {(int(b[:4]) - y0) * 12 + int(b[5:7]) - m0: v for b, v in by_label.items()}
-    out = engine.build(cost_by_month, est.commercial.net_price, pt["data"])
+    direct_total = est.direct.direct_cost_total
+    allocated = sum(cost_by_month.values(), ZERO)
+    unallocated = rep["unscheduled_total"]
+    complete = unallocated == 0 and abs(allocated - direct_total) < Decimal("0.01")
+    indirect_total = est.indirect.total or ZERO
+    # ACCOUNTING CONVENTIONS (stated with every result): cash-out = allocated direct cost x (1 + indirect/direct), i.e. indirect cost follows the direct cost it is a percentage of;
+    # contingency, risk allowances and margin are NOT cash-out (reserve / profit); only the ALLOCATED share of the price is valued (cost that no period claims is neither paid
+    # nor valued), so cash-out, valuations, retention and the closing balance are always on one base.
+    factor = (1 + indirect_total / direct_total) if direct_total else Decimal(1)
+    price_full = est.commercial.net_price
+    valued_price = price_full * allocated / direct_total if direct_total else price_full
+    out = engine.build({m: v * factor for m, v in cost_by_month.items()}, valued_price, pt["data"])
+    t = out["terms"]
+    out["performance_bond_cost"] = price_full * t["performance_bond_pct"] / 100 * t["performance_bond_fee_annual_pct"] / 100 * out["bond_months"] / 12     # bond is on the full contract value
+    out["total_cost"] = allocated                                                    # direct cost placed in periods; cash-out total (incl. indirects) is in `reconciliation`
+    cash_in = sum((r["cash_in"] for r in out["rows"]), ZERO)
+    cash_out = sum((r["cash_out"] for r in out["rows"]), ZERO)
+    interest = out["interest_total"]
+    checks = [("valuations sum to the valued price", abs(sum((v["value"] for v in out["valuations"]), ZERO) - valued_price) < Decimal("0.01")),
+              ("cash received equals the valued price", abs(cash_in - valued_price) < Decimal("0.01")),
+              ("cash paid equals allocated direct cost x (1 + indirect/direct)", abs(cash_out - allocated * factor) < Decimal("0.01")),
+              ("closing balance = valued price - cash paid - interest", abs(out["final_balance"] - (valued_price - cash_out - interest)) < Decimal("0.01"))]
+    status = "COMPLETE" if complete else (f"INCOMPLETE - NOT FOR RELIANCE: SAR {unallocated:,.2f} of direct cost is allocated to no period (see unallocated_lines); "
+                                           f"SAR {price_full - valued_price:,.2f} of the price is not valued and the closing balance excludes it")
     out.update(project_id=project_id, terms=dict(code=pt["code"], version=pt["version"], name=pt["data"]["name"], **{k: v for k, v in out["terms"].items()}),
-               first_month=labels[0], unscheduled_cost=rep["unscheduled_total"], estimate_state=est.state,
-               note="Analysis only. Unscheduled cost (not tied to a task) is excluded from the time-phasing and listed. Financing and bond cost may be proposed as Draft indirect items.")
-    if rep["unscheduled_total"] != 0:
-        out["note"] += f" Unscheduled cost: {rep['unscheduled_total']}."
+               first_month=labels[0], unscheduled_cost=unallocated, unallocated_lines=rep["unscheduled_lines"], allocated_by_rule=rep["allocated_by_rule"], complete=complete,
+               status=status, estimate_state=est.state,
+               reconciliation=dict(net_price=price_full, valued_price=valued_price, unallocated_price_share=price_full - valued_price, direct_cost=direct_total, allocated_direct_cost=allocated,
+                                   unallocated_direct_cost=unallocated, indirect_cost=indirect_total, indirect_cash_factor=factor, cash_out_total=cash_out, cash_in_total=cash_in,
+                                   retention_total=out["retention_total"], interest_total=interest, closing_balance=out["final_balance"], contingency_and_risk_reserve_not_cash_out=est.commercial.contingency + est.commercial.risk,
+                                   checks=[dict(check=c, ok=ok) for c, ok in checks]),
+               note="Analysis only. Conventions: indirects are paid with the direct cost they follow; contingency/risk/margin are not cash-out; only allocated cost is valued. "
+                    + ("" if complete else f"INCOMPLETE: {unallocated} of direct cost has no time allocation - add an approved 'time_allocation' rule or tie it to a programme activity. ")
+                    + "Financing and bond cost may be proposed as Draft indirect items (refused while incomplete).")
+    out["assumptions"] = out["assumptions"] + ["Indirect cost is paid in proportion to the direct cost it is calculated from; contingency, risk allowances and margin are not cash-out.",
+                                               "Only cost allocated to a period (by an activity's scope or an approved time_allocation rule) is paid and valued."]
     return out
 
 
@@ -49,6 +79,8 @@ def propose_financing_indirects(db: Database, actor: Actor, project_id: str, *, 
     approvals.require_author(actor)
     projects.require_active(db, project_id)
     cf = cashflow_report(db, project_id, terms_code=terms_code)
+    if not cf["complete"]:
+        raise ValidationFailed(f"The cash flow is incomplete ({cf['unscheduled_cost']} of direct cost has no time allocation): financing and bond costs cannot be proposed from it.", code="TIMEPHASING_INCOMPLETE")
     made = []
     for code, cat, desc, amt in (("FIN-BOND", "Bonds and insurances", "Performance bond fee (cash-flow analysis)", cf["performance_bond_cost"]),
                                  ("FIN-INTEREST", "Financing", "Financing cost of negative cash position (cash-flow analysis)", cf["interest_total"])):

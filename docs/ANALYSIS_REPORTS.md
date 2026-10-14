@@ -6,6 +6,8 @@ Generated from `app/reporting/registry.py` by `scripts/gen_docs.py`. Every repor
 
 | Report | Group | What it shows | Parameters |
 |---|---|---|---|
+| `indirect_base` | Risk and commercial | **Percentage-indirect eligibility base** - What each percentage indirect is applied to: eligible, excluded and unclassified direct cost by cost code, BOQ line and kind, and preliminaries inside the base. | - |
+| `plant_hire` | Programme | **Day-priced plant: billable days vs programme window** - Working days vs calendar days, minimum hire, standby, mobilisation and the on-site window read from the programme. | - |
 | `rollup` | Structure | **Cost roll-up (CBS / WBS / client cross-walk)** - Direct cost rolled up by cost-code tree, WBS, WBS x division matrix and each client code system; ties out to the estimate. | `preliminary`=0 |
 | `schedule` | Programme | **Programme: dates, float, critical path** - CPM with relationship types, lags and an optional working calendar. | - |
 | `loading` | Programme | **Resource loading histogram** - Labour hours, plant hours or cost spread over the programme and bucketed by week / month / block. | `measure`=labour_hours, `period`=week, `block_days`=5, `preliminary`=0 |

@@ -49,6 +49,7 @@ Seed CSVs are insert-only into the DB. Table groups and the 11 data classes: `do
 
 ## 6. Estimating flow
 `context.load_inputs` (SQL → immutable `EstimateInputs`) → `compute_direct_cost` → `compute_indirects` → `compute_commercial` → `build_schedule` → tax on the tendered schedule → state/blockers/completeness + SHA-256 fingerprint. A rate prices a line only if Approved (or project-Provisional), in date, in region, a real price type, FX approved; else the line is unpriced with an exception.
+Cost with no time allocation is never spread (`time_allocation` rules or INCOMPLETE + blocking finding); percentage indirects/adders may carry an explicit `eligibility` base; day-priced plant uses `plant_hire_terms` read against the programme window.
 Reconciliation (configurable severities) gates final approval; `export_submission` re-checks everything and needs the Commercial Approver's tender-export approval. Money is `Decimal`, rounded half-up per line.
 
 ## 7. Excel conventions
@@ -58,6 +59,7 @@ Imports create **drafts/proposals only**; status columns in files are ignored. A
 ## 8. Approvals and audit
 Roles → actions in `app/approvals/policy.py`. Self-approval can be blocked (`KSA_ALLOW_SELF_APPROVAL=false`). Every approval writes `approvals` + a hash-chained `audit_log` row (`python -m app.cli audit-verify`; tamper-evident only). Reconciliation Critical findings can never be waived.
 Rate path: candidate → *Approved for Publication* (human) → published as *Pending Review* rate → `approve_rate` (human).
+**Actor types:** `users.actor_type` = `human` | `test` | `ai`; `approvals.actor_type`/`environment` are resolved from the users table at record time (never from a display name). An export is SUBMISSION READY only via `services/readiness.py` (registered human approvers, production environment, no demo/synthetic data); demo projects get a DEMONSTRATION export; test principals never count. Never bypass it.
 
 ## 9. Project workspaces
 `projects/PRJ-nnnn-slug/` with fixed folders `1. Tender Documents`, `2. AI Context`, `3. BOQ & Takeoff`, `4. Clarifications & Assumptions`, `5. Estimate & Cost Build-Up`, `6. Procurement & Quotations`, `7. Programme & Indirects`, `8. Commercial Submission`, `9. Reconciliation & Approvals`, `10. Exports & Archive`, plus `CLAUDE.md` and `project.json`.

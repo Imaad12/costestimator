@@ -36,7 +36,7 @@ def cmd_init(a) -> int:
     if a.demo_users:
         for u, n, r in DEMO_USERS:
             if not db.one("SELECT 1 FROM users WHERE username=?", (u,)):
-                auth.create_user(db, u, n, r, a.demo_password)
+                auth.create_user(db, u, n, r, a.demo_password, actor_type="test")        # published demo credentials: never a production approver
         print(f"Demo users created ({', '.join(u for u, _, _ in DEMO_USERS)}) with password '{a.demo_password}'. "
               "LOCAL DEMO ONLY - change or remove for any real use.")
     return 0
@@ -49,7 +49,7 @@ def cmd_create_user(a) -> int:
         db.update("users", {"password_hash": auth.hash_password(pw)}, "username=?", (a.username,))
         print("Password reset.")
     else:
-        auth.create_user(db, a.username, a.display_name or a.username, a.role, pw)
+        auth.create_user(db, a.username, a.display_name or a.username, a.role, pw, actor_type=a.actor_type)
         print("User created.")
     return 0
 
@@ -379,6 +379,7 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(fn=cmd_init)
     s = sub.add_parser("create-user")
     s.add_argument("username"); s.add_argument("role"); s.add_argument("--display-name"); s.add_argument("--password"); s.add_argument("--reset", action="store_true")
+    s.add_argument("--actor-type", choices=["human", "test"], default="human", help="'test' principals can never satisfy a production approval")
     s.set_defaults(fn=cmd_create_user)
     s = sub.add_parser("run", help="start the local web application")
     s.add_argument("--host"); s.add_argument("--port", type=int)

@@ -469,8 +469,9 @@ def _plant(ctx: _Ctx, item, al, line: CostLine, qty: Decimal, factor: Decimal, r
         line.basis += f" | utilisation {u}% => charged {charged} h"
     line.quantity = charged
     line.unit = ctx.inp.resources[line.resource_id]["unit"]
-    if line.unit != "hr":
-        ctx.exc("PLANT_UNIT", "Medium", f"{ref}: plant resource unit is {line.unit}; hours-based factor assumed to be in that unit.",
+    if line.unit != "hr" and al.get("factor_unit") != line.unit:
+        # a day/week/month-priced plant line must DECLARE its factor unit (factor_unit = the resource unit); otherwise the hours-based factor is only assumed to be in that unit
+        ctx.exc("PLANT_UNIT", "Medium", f"{ref}: plant resource unit is {line.unit}; hours-based factor assumed to be in that unit (declare factor_unit='{line.unit}' on the assembly line to state a {line.unit}-based factor).",
                 item_key=line.item_key, resource_id=line.resource_id)
     _price_line(ctx, line, line.resource_id, hours, line.unit, charged_qty=charged)
     if line.amount is not None:
@@ -701,7 +702,21 @@ def _plant_mobilisation(ctx: _Ctx, items: dict[str, ItemCost]) -> None:
                 ic.lines += 1
 
 
+TIME_PRICED_UNITS = ("day", "week", "month")
+
+
 def _plant_hire_terms(ctx: _Ctx, items: dict[str, ItemCost]) -> None:
+    termed = {p["data"]["resource_id"] for p in ctx.inp.params.get("plant_hire_terms", [])}
+    seen_missing: set[str] = set()
+    for l in ctx.lines:
+        if l.kind == "plant" and l.resource_id and l.amount is not None and l.unit in TIME_PRICED_UNITS and l.resource_id not in termed and l.resource_id not in seen_missing:
+            seen_missing.add(l.resource_id)
+            ctx.exc("PLANT_TERMS_MISSING", "High", f"Plant {l.resource_id} is priced per {l.unit} but has no approved hire terms (billing basis, minimum hire, standby, "
+                    "mobilisation): the billable days cannot be verified against the programme.", item_key=l.item_key, resource_id=l.resource_id)
+    _plant_hire_terms_lines(ctx, items)
+
+
+def _plant_hire_terms_lines(ctx: _Ctx, items: dict[str, ItemCost]) -> None:
     """Governed minimum-hire top-up and standby for plant resources actually used, priced at that resource's approved rate.
     top-up = max(0, min_hire_qty - sum(charged plant qty)) ; standby = standby_qty x rate x standby_pct/100. Only user-supplied terms apply."""
     for p in sorted(ctx.inp.params.get("plant_hire_terms", []), key=lambda p: p["code"]):
@@ -722,10 +737,13 @@ def _plant_hire_terms(ctx: _Ctx, items: dict[str, ItemCost]) -> None:
         if sq > 0:
             add.append(("plant_standby", sq, D(d["standby_pct_of_rate"]) / 100,
                         f"standby {sq} {ref_line.unit} at {d['standby_pct_of_rate']}% of rate (terms {p['code']} v{p['version']})"))
+        for kind_, label_, q_ in (("plant_mob_days", "Mobilisation days", D(d.get("mobilisation_qty") or "0")), ("plant_demob_days", "Demobilisation days", D(d.get("demobilisation_qty") or "0"))):
+            if q_ > 0:
+                add.append((kind_, q_, ONE, f"{label_.lower()} {q_} {ref_line.unit} at the full rate (hire terms {p['code']} v{p['version']})"))
         for kind, qty, share, why in add:
             ln = CostLine(item_key=ref_line.item_key, assembly_code=ref_line.assembly_code, assembly_version=ref_line.assembly_version,
                           path=ref_line.path, line_ref=f"{kind.upper()}:{rid}", kind=kind, resource_id=rid,
-                          description=f"{'Minimum-hire top-up' if kind == 'plant_min_hire_top_up' else 'Standby'}: {ref_line.description}",
+                          description=f"{ {'plant_min_hire_top_up': 'Minimum-hire top-up', 'plant_mob_days': 'Mobilisation days', 'plant_demob_days': 'Demobilisation days'}.get(kind, 'Standby') }: {ref_line.description}",
                           quantity=qty, unit=ref_line.unit, rate=rate * share, rate_id=ref_line.rate_id, eligibility=ref_line.eligibility,
                           rate_type=ref_line.rate_type, rate_status=ref_line.rate_status, rate_currency=ref_line.rate_currency,
                           is_provisional=ref_line.is_provisional, is_synthetic=ref_line.is_synthetic or bool(p.get("is_synthetic")),

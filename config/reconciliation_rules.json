@@ -233,6 +233,26 @@
    "severity": "Low",
    "exception_allowed": true,
    "title": "Governed parameter awaiting approval (not used in the strict estimate)"
+  },
+  "TIMEPHASING_INCOMPLETE": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Cost with no time allocation in cash flow / escalation"
+  },
+  "INDIRECT_BASE_OVERLAP": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Percentage indirect base overlaps a standalone preliminaries / indirect item"
+  },
+  "PLANT_HIRE_DAYS": {
+   "severity": "High",
+   "exception_allowed": true,
+   "title": "Plant billable days differ from the programme hire window"
+  },
+  "INDIRECT_ELIGIBILITY_UNSPECIFIED": {
+   "severity": "Medium",
+   "exception_allowed": true,
+   "title": "Percentage indirect has no explicit eligibility base"
   }
  }
 }

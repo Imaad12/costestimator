@@ -40,6 +40,7 @@ class Settings:
     security_headers: bool = True
     login_max_failures: int = 5
     login_lock_minutes: int = 15
+    environment: str = "production"            # 'production' | 'test'. Approvals record it; only 'production' approvals by registered human users can make an export submission-ready
     tls: bool = False                           # set when the app is served over TLS (cookies Secure, HSTS)
     ai_enabled: bool = False
     ai_model: str = "claude-sonnet-5-5"
@@ -135,6 +136,7 @@ def load_settings(config_file: Path | None = None, env: dict | None = None) -> S
         security_headers=_truthy(pick("KSA_SECURITY_HEADERS", sec.get("security_headers", True))),
         login_max_failures=int(pick("KSA_LOGIN_MAX_FAILURES", sec.get("login_max_failures", 5))),
         login_lock_minutes=int(pick("KSA_LOGIN_LOCK_MINUTES", sec.get("login_lock_minutes", 15))),
+        environment=str(pick("KSA_ENVIRONMENT", sec.get("environment", "production"))).strip().lower() or "production",
         tls=_truthy(pick("KSA_TLS", sec.get("tls", False))),
         ai_enabled=_truthy(pick("KSA_AI_ENABLED", ai.get("enabled", False))),
         ai_model=str(pick("KSA_AI_MODEL", ai.get("model", "claude-sonnet-5-5"))),

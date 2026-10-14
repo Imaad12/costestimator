@@ -11,9 +11,11 @@ Items flagged included_in_subcontract are excluded (shown with a reason) to avoi
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
 from decimal import Decimal
 
 from ..core.money import ZERO, D, D_opt, pct, quantize
+from . import eligibility as elig
 from .types import EngineException
 
 
@@ -31,6 +33,7 @@ class IndirectLine:
     flags: list[str] = field(default_factory=list)
     excluded_reason: str | None = None
     provisional: bool = False
+    eligibility: dict | None = None            # audit breakdown of the base for percentage methods (never part of the fingerprint)
 
 
 @dataclass
@@ -48,8 +51,8 @@ class IndirectResult:
 
 def compute_indirects(items: list[dict], *, direct_cost_total: Decimal, duration_months: Decimal | None,
                       duration_status: str | None, working_days_per_month: Decimal | None,
-                      working_days_per_week: Decimal | None, money_dp: int = 2, include_unapproved: bool = False
-                      ) -> IndirectResult:
+                      working_days_per_week: Decimal | None, money_dp: int = 2, include_unapproved: bool = False,
+                      direct_lines: list[dict] | None = None) -> IndirectResult:
     out: list[IndirectLine] = []
     exc: list[EngineException] = []
     dur_ok = duration_months is not None and (duration_status == "Approved" or include_unapproved)
@@ -84,7 +87,20 @@ def compute_indirects(items: list[dict], *, direct_cost_total: Decimal, duration
         if m == "fixed":
             val, basis = amount * qty, f"fixed {amount} x {qty}"
         elif m == "percent_of_direct":
-            val, basis = pct(amount) * direct_cost_total, f"{amount}% x direct cost {direct_cost_total}"
+            spec = elig.validate_spec(json.loads(it["eligibility_json"])) if it.get("eligibility_json") else None
+            if spec is None or direct_lines is None:
+                base, bd = direct_cost_total, None
+                if direct_lines is not None:
+                    bd = elig.eligible_base(direct_lines, None)
+            else:
+                bd = elig.eligible_base(direct_lines, spec)
+                base = bd["eligible"]
+            if bd is not None:
+                bd = {**bd, "rate_pct": amount}
+            ln.eligibility = bd
+            val = pct(amount) * base
+            basis = (f"{amount}% x direct cost {direct_cost_total}" if spec is None else
+                     f"{amount}% x eligible direct cost {base} (of {direct_cost_total}; excluded {bd['excluded']}, unclassified {bd['unclassified']})")
         else:
             if months is None or not (dur_ok or it.get("duration_override_months")):
                 ln.flags.append("DURATION_NOT_APPROVED")

@@ -101,6 +101,42 @@ def assign_lines_to_tasks(task_rows: list[dict], line_cost_code: str | None, wbs
     return [(t["task_code"], w / tot) for t, w in zip(best, weights)]
 
 
+def allocate_by_rules(rules: list[dict], line_cost_code: str | None, wbs_chain: set[str], task_codes: list[str], durs: dict[str, Decimal]) -> tuple[list[tuple[str, Decimal]], str | None, str | None]:
+    """Explicit allocation of a line that no activity claims, from APPROVED `time_allocation` rules. Returns (allocation, rule_code, problem).
+    Most specific rule wins (longest cost-code prefix, then WBS-scoped); equally specific rules that both match are a conflict (nothing is allocated); a rule naming an
+    activity that is not in the programme allocates nothing. Weights sum to exactly 1 (percent shares, or activity durations, equal if all are zero)."""
+    best_score, best = None, []
+    for r in rules:
+        d = r["data"]
+        pre, w = d.get("scope_cost_prefix") or "", d.get("scope_wbs") or ""
+        if pre and not (line_cost_code or "").startswith(pre):
+            continue
+        if w and w not in wbs_chain:
+            continue
+        score = (len(pre), 1 if w else 0)
+        if best_score is None or score > best_score:
+            best_score, best = score, [r]
+        elif score == best_score:
+            best.append(r)
+    if not best:
+        return [], None, None
+    if len(best) > 1:
+        return [], None, "rule_conflict: " + ", ".join(sorted(r["code"] for r in best))
+    r = best[0]
+    d = r["data"]
+    names = list(task_codes) if d["tasks"] == ["ALL"] else d["tasks"]
+    missing = [t for t in names if t not in task_codes]
+    if missing:
+        return [], r["code"], f"rule_task_missing: {r['code']} names {missing} which are not in the programme"
+    if d.get("shares"):
+        return [(t, Decimal(d["shares"][t]) / 100) for t in names], r["code"], None
+    weights = [durs.get(t, ZERO) for t in names]
+    tot = sum(weights, ZERO)
+    if tot == 0:
+        return [(t, Decimal(1) / len(names)) for t in names], r["code"], None
+    return [(t, w / tot) for t, w in zip(names, weights)], r["code"], None
+
+
 def _wbs_chain(inp, item_key: str) -> set[str]:
     from ..estimators.direct_cost import _wbs_chain as chain
     return chain(inp, item_key)
@@ -133,6 +169,10 @@ def loading_report(db: Database, project_id: str, *, measure: str = "labour_hour
     sched = {c: (t.es, t.ef) for c, t in sch.tasks.items()}
     durs = {c: t.duration for c, t in sch.tasks.items()}
     loads, source_total = [], ZERO
+    rules = governed.effective(db, project_id, "time_allocation", include_unapproved=include_unapproved)
+    task_codes = [r["task_code"] for r in rows]
+    unalloc_lines: list[dict] = []
+    by_rule: dict[str, Decimal] = {}
     for l in est.direct.lines:
         if line_filter is not None and not line_filter(l):
             continue
@@ -149,8 +189,19 @@ def loading_report(db: Database, project_id: str, *, measure: str = "labour_hour
                 continue
             q, key = l.amount, l.kind
         source_total += q
-        alloc = assign_lines_to_tasks(rows, l.cost_code, _wbs_chain(est.inputs, l.item_key), durs)
+        chain = _wbs_chain(est.inputs, l.item_key)
+        alloc = assign_lines_to_tasks(rows, l.cost_code, chain, durs)
+        logged = False
+        if not alloc and rules:
+            alloc, rule_code, problem = allocate_by_rules(rules, l.cost_code, chain, task_codes, durs)
+            if alloc:
+                by_rule[rule_code] = by_rule.get(rule_code, ZERO) + q
+            elif problem:
+                logged = True
+                unalloc_lines.append(dict(item_key=l.item_key, cost_code=l.cost_code, kind=l.kind, resource_id=l.resource_id, amount=q, reason=problem))
         if not alloc:
+            if not logged:
+                unalloc_lines.append(dict(item_key=l.item_key, cost_code=l.cost_code, kind=l.kind, resource_id=l.resource_id, amount=q, reason="no_task_and_no_allocation_rule"))
             loads.append(loading.Load(key, None, q))
         else:
             for tc, w in alloc:
@@ -161,7 +212,7 @@ def loading_report(db: Database, project_id: str, *, measure: str = "labour_hour
     names = {r["resource_id"]: r["description"] for r in db.all("SELECT id resource_id, description FROM resources")} if measure != "cost" else {}
     return dict(project_id=project_id, measure=measure, period=period if cal or period == "block" else "block", calendar_used=bool(cal),
                 note="Uniform spread of each quantity over its task's working days; lines allocated to tasks by cost-code prefix / WBS scope.",
-                **h, source_total=source_total, scheduled_total=scheduled, unscheduled_total=uns,
+                **h, source_total=source_total, scheduled_total=scheduled, unscheduled_total=uns, unscheduled_lines=unalloc_lines, allocated_by_rule=by_rule,
                 tie_out=abs(source_total - scheduled - uns) < Decimal("0.0001"), names=names, estimate_state=est.state)
 
 

@@ -10,6 +10,7 @@ from decimal import Decimal
 from typing import Any
 
 from ..approvals import engine as approvals
+from ..config import get_settings
 from ..core.errors import Conflict, NotFound, PermissionDenied, ValidationFailed
 from ..core.money import ZERO, D, D_opt, quantize, to_text
 from ..core.timeutil import now_iso, parse_date
@@ -247,6 +248,8 @@ def collect_findings(db: Database, project_id: str, est: EstimateResult) -> list
         F.append(Finding("STALE_WORKBOOK", "The latest exported master workbook was generated from different estimate data; re-export.", "export", str(wb["id"])))
     from .ext_rules import collect_extended          # extended controls (benchmarks, take-off derivations, package interfaces, long-lead, risk, client profile)
     F.extend(collect_extended(db, project_id, est))
+    from .phasing_rules import collect_phasing        # time-phasing completeness, percentage-indirect bases, day-priced plant
+    F.extend(collect_phasing(db, project_id, est))
     return F
 
 
@@ -339,7 +342,8 @@ def accept_exception(db: Database, actor: Actor, finding_id: int, reason: str) -
     with db.tx():
         eid = db.insert("recon_exceptions", dict(project_id=f["project_id"], rule_code=f["rule_code"], entity_type=f["entity_type"],
                                                   entity_id=f["entity_id"], fingerprint=f["fingerprint"], reason=reason,
-                                                  accepted_by=actor.username, accepted_role=actor.role, accepted_at=now_iso()))
+                                                  accepted_by=actor.username, accepted_role=actor.role, accepted_at=now_iso(),
+                                                  accepted_actor_type=approvals.resolve_actor_type(db, actor), environment=get_settings().environment))
         db.update("recon_findings", {"status": "Accepted Exception", "exception_id": eid}, "id=?", (finding_id,))
         approvals.record(db, actor, Entity.RECON_EXCEPTION.value, f"{f['rule_code']}:{f['entity_id']}", "accept_exception",
                          project_id=f["project_id"], approved_value={"severity": f["severity"], "impact": f["financial_impact"]},

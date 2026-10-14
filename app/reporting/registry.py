@@ -49,6 +49,18 @@ def listing() -> list[dict]:
 
 
 # ------------------------------------------------------------------------------------------------ registrations
+@report("indirect_base", "Percentage-indirect eligibility base", "What each percentage indirect is applied to: eligible, excluded and unclassified direct cost by cost code, BOQ line and kind, and preliminaries inside the base.", group="Risk and commercial")
+def _indirect_base(db, pid):
+    from ..services import indirect_base
+    return indirect_base.indirect_base_report(db, pid)
+
+
+@report("plant_hire", "Day-priced plant: billable days vs programme window", "Working days vs calendar days, minimum hire, standby, mobilisation and the on-site window read from the programme.", group="Programme")
+def _plant_hire(db, pid):
+    from ..services import plant_hire
+    return plant_hire.plant_hire_report(db, pid)
+
+
 @report("rollup", "Cost roll-up (CBS / WBS / client cross-walk)", "Direct cost rolled up by cost-code tree, WBS, WBS x division matrix and each client code system; ties out to the estimate.",
         [("preliminary", "0", "1 = include unapproved inputs (flagged)")], group="Structure")
 def _rollup(db, pid, preliminary="0"):

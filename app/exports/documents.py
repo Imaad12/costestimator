@@ -23,9 +23,16 @@ GREY = PatternFill("solid", fgColor="EDEDED")
 THIN = Side(style="thin", color="BFBFBF")
 
 
-def banner_text(est: EstimateResult, submission_ready: bool) -> str:
-    if submission_ready:
-        t = "SUBMISSION READY - approved by an authorised human reviewer"
+def _suffix(ready: bool, readiness: dict | None) -> str:
+    return '_FINAL' if ready else ('_DEMONSTRATION' if readiness and readiness.get('classification') == 'demonstration' else '_PRELIMINARY')
+
+
+def banner_text(est: EstimateResult, submission_ready: bool, readiness: dict | None = None) -> str:
+    if readiness is not None:                                            # exact statement of the verified approval chain (services/readiness.py)
+        from ..services import readiness as _r
+        t = _r.banner(readiness)
+    elif submission_ready:
+        t = "SUBMISSION READY"
     elif est.blockers or est.state.startswith("Preliminary"):
         t = "PRELIMINARY - NOT FOR SUBMISSION"
     else:
@@ -39,7 +46,7 @@ def banner_text(est: EstimateResult, submission_ready: bool) -> str:
     return t
 
 
-def client_pricing_schedule(est: EstimateResult, path: Path | None = None, *, submission_ready: bool = False) -> Path:
+def client_pricing_schedule(est: EstimateResult, path: Path | None = None, *, submission_ready: bool = False, readiness: dict | None = None) -> Path:
     """Client-facing schedule: quantities, rates and amounts only (no internal cost, markup or allocation detail)."""
     wb = Workbook()
     ws = wb.active
@@ -48,7 +55,7 @@ def client_pricing_schedule(est: EstimateResult, path: Path | None = None, *, su
     p = est.project
     ws["A1"] = f"PRICING SCHEDULE - {p['name']} ({p['id']})"
     ws["A1"].font = Font(bold=True, size=14)
-    ws["A2"] = banner_text(est, submission_ready)
+    ws["A2"] = banner_text(est, submission_ready, readiness)
     ws["A2"].font = Font(bold=True, color="C00000")
     ws["A3"] = f"Currency: {p['currency']} | Prices exclude tax unless stated | Generated {today_iso()}"
     r = 5
@@ -101,19 +108,19 @@ def client_pricing_schedule(est: EstimateResult, path: Path | None = None, *, su
     ws.auto_filter.ref = f"A5:G{max(r, 6)}"
     ws.protection.sheet = True
     ws.protection.password = ""
-    out = path or (projects.output_dir(p["id"], "commercial") / f"pricing_schedule_{p['id']}{'_FINAL' if submission_ready else '_PRELIMINARY'}.xlsx")
+    out = path or (projects.output_dir(p["id"], "commercial") / f"pricing_schedule_{p['id']}{_suffix(submission_ready, readiness)}.xlsx")
     wb.save(out)
     return out
 
 
 def estimate_report_docx(est: EstimateResult, path: Path | None = None, *, submission_ready: bool = False, version_label: str = "-",
-                         assumptions: list[dict] | None = None) -> Path:
+                         assumptions: list[dict] | None = None, readiness: dict | None = None) -> Path:
     tmpl = get_settings().templates_dir / "estimate_report_template.docx"
     if not tmpl.exists():
         from .docx_templates import generate_docx_templates
         generate_docx_templates(get_settings().templates_dir)
     p, c, d = est.project, est.commercial, est.direct
-    mapping = dict(status_banner=banner_text(est, submission_ready), project_name=p["name"], project_id=p["id"], client=p.get("client") or "",
+    mapping = dict(status_banner=banner_text(est, submission_ready, readiness), project_name=p["name"], project_id=p["id"], client=p.get("client") or "",
                    version=version_label, date=today_iso(), state=est.state)
     doc = fill_template(tmpl, mapping)
     summ = [f"Direct cost: {fmt(d.direct_cost_total)} {p['currency']}", f"Indirect cost: {fmt(est.indirect.total)}"]
@@ -140,7 +147,7 @@ def estimate_report_docx(est: EstimateResult, path: Path | None = None, *, submi
     insert_list_after(doc, "EXCEPTIONS", exc + [f"BLOCKER: {b}" for b in est.blockers], empty_text="No exceptions.")
     insert_list_after(doc, "ASSUMPTIONS", [f"{a['id']} {a['name']}: {a['value']} {a.get('unit') or ''} [{a['status']}]" for a in (assumptions or [])],
                       empty_text="None.")
-    out = path or (projects.output_dir(p["id"], "commercial") / f"estimate_report_{p['id']}{'_FINAL' if submission_ready else '_PRELIMINARY'}.docx")
+    out = path or (projects.output_dir(p["id"], "commercial") / f"estimate_report_{p['id']}{_suffix(submission_ready, readiness)}.docx")
     doc.save(str(out))
     return out
 

@@ -659,7 +659,7 @@ def _(db, a, p):
     if len(pw) < 8:
         raise ValidationFailed("Password must be at least 8 characters.")
     from ..services import auth
-    auth.create_user(db, username, opt(p, "display_name") or username, role, pw, creator=a)
+    auth.create_user(db, username, opt(p, "display_name") or username, role, pw, creator=a, actor_type=opt(p, "actor_type") or "human")
     return username
 
 

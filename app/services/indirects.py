@@ -1,6 +1,8 @@
 """Indirect cost items, project duration proposals/approval, and the optional deterministic schedule model."""
 from __future__ import annotations
 
+import json
+
 from decimal import Decimal
 
 from ..approvals import engine as approvals
@@ -12,6 +14,7 @@ from ..estimators import duration as dur
 from ..models.actor import Actor
 from ..models.enums import Entity, Status
 from . import assumptions as asm_service
+from ..estimators import eligibility as elig
 from . import audit, projects
 
 METHODS = ("fixed", "percent_of_direct", "per_day", "per_week", "per_month", "per_duration_month")
@@ -21,9 +24,12 @@ ALLOCATIONS = ("pro_rata_direct", "separate_line", "direct_trade")
 def add_indirect(db: Database, actor: Actor, project_id: str, *, code: str, category: str, description: str, method: str,
                  amount=None, quantity="1", allocation_method: str = "pro_rata_direct", allocation_target: str | None = None,
                  included_in_subcontract: bool = False, duration_override_months=None, notes: str | None = None,
-                 source: str | None = None, is_synthetic: bool = False) -> int:
+                 source: str | None = None, is_synthetic: bool = False, eligibility: dict | None = None) -> int:
     approvals.require_author(actor)
     projects.require_active(db, project_id)
+    spec = elig.validate_spec(eligibility)
+    if spec and method != "percent_of_direct":
+        raise ValidationFailed("An eligibility base applies only to percent_of_direct indirects.", code="ELIGIBILITY")
     if method not in METHODS:
         raise ValidationFailed(f"method must be one of {METHODS}")
     if allocation_method not in ALLOCATIONS:
@@ -39,8 +45,9 @@ def add_indirect(db: Database, actor: Actor, project_id: str, *, code: str, cate
         amount=to_text(D_opt(amount)), quantity=str(quantity), allocation_method=allocation_method,
         allocation_target=allocation_target, included_in_subcontract=int(included_in_subcontract),
         duration_override_months=to_text(D_opt(duration_override_months)), status=Status.DRAFT.value, version=1,
-        notes=notes, source=source, is_synthetic=int(is_synthetic), created_by=actor.username, created_at=now_iso()))
-    audit.log(db, actor, "indirect", f"{project_id}/{code}", "create", after={"method": method, "amount": amount}, project_id=project_id)
+        notes=notes, source=source, is_synthetic=int(is_synthetic), created_by=actor.username, created_at=now_iso(),
+        eligibility_json=json.dumps(spec, sort_keys=True) if spec else None))
+    audit.log(db, actor, "indirect", f"{project_id}/{code}", "create", after={"method": method, "amount": amount, "eligibility": spec}, project_id=project_id)
     return iid
 
 
@@ -52,8 +59,14 @@ def revise_indirect(db: Database, actor: Actor, project_id: str, code: str, **ch
     if not cur:
         raise NotFound(f"Indirect {code} not found.")
     allowed = {"category", "description", "method", "amount", "quantity", "allocation_method", "allocation_target",
-               "included_in_subcontract", "duration_override_months", "notes", "source"}
+               "included_in_subcontract", "duration_override_months", "notes", "source", "eligibility"}
     bad = set(changes) - allowed
+    if "eligibility" in changes:
+        spec = elig.validate_spec(changes.pop("eligibility"))
+        if spec and (changes.get("method") or cur["method"]) != "percent_of_direct":
+            raise ValidationFailed("An eligibility base applies only to percent_of_direct indirects.", code="ELIGIBILITY")
+        changes["eligibility_json"] = json.dumps(spec, sort_keys=True) if spec else None
+        bad = set(changes) - allowed - {"eligibility_json"}
     if bad:
         raise ValidationFailed(f"Not editable: {sorted(bad)}")
     if "amount" in changes and changes["amount"] not in (None, ""):

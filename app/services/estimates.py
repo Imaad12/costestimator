@@ -16,7 +16,7 @@ from ..models.actor import Actor
 from ..models.enums import Entity, Status
 from ..reconciliation.engine import final_gate, get_run
 from . import assumptions as assumption_service
-from . import audit, offers, projects, snapshots
+from . import audit, offers, projects, readiness, snapshots
 
 
 def _totals_json(est: EstimateResult) -> dict:
@@ -75,6 +75,7 @@ def approve_version(db: Database, actor: Actor, version_id: int, comments: str |
     """Final estimate approval. Blocked by: open blocking reconciliation findings, preliminary state, or changed inputs."""
     v = get_version(db, version_id)
     approvals.authorize(actor, Entity.ESTIMATE.value, "approve", created_by=v["created_by"])
+    approvals.require_production_actor(db, actor, v["project_id"], "approve an estimate")
     if v["status"] != Status.PENDING.value:
         raise Conflict(f"Version must be Pending Review (is {v['status']}).", code="NOT_PENDING")
     gate = final_gate(db, actor, v["project_id"])
@@ -120,6 +121,7 @@ def approve_tender_export(db: Database, actor: Actor, project_id: str, version_i
     """Explicit human approval to release a submission-ready export. Re-validates every gate at approval time."""
     v = get_version(db, version_id)
     approvals.authorize(actor, Entity.TENDER_EXPORT.value, "approve")
+    approvals.require_production_actor(db, actor, project_id, "approve a tender export")
     if v["project_id"] != project_id or v["status"] != Status.APPROVED.value:
         raise ApprovalBlocked("The estimate version must be Approved before a tender export can be approved.", code="ESTIMATE_NOT_APPROVED")
     gate = final_gate(db, actor, project_id)
@@ -149,23 +151,31 @@ def require_export_gate(db: Database, actor: Actor, project_id: str, version_id:
 
 
 def export_submission(db: Database, actor: Actor, project_id: str, version_id: int, approval_id: int) -> dict[str, str]:
-    """Produce the submission-ready package. Requires a valid tender-export approval record that is still current."""
+    """Produce the export package. It is SUBMISSION READY only when `readiness.evaluate` verifies a production approval chain (registered human approvers, production
+    environment, no synthetic/demo data, clear gate). A demonstration project gets a clearly labelled DEMONSTRATION export instead; any other project that fails is refused."""
+    approvals.require_production_actor(db, actor, project_id, "export a submission package")
     v, gate = require_export_gate(db, actor, project_id, version_id, approval_id)
+    r = readiness.evaluate(db, project_id, version_id, approval_id, gate=gate)
+    if r["classification"] == "not_ready":
+        raise ApprovalBlocked("Submission export refused: the production approval chain is not satisfied - " + "; ".join(r["reasons"][:6]), code="NOT_PRODUCTION_READY", details=r["reasons"])
+    ready = r["production_ready"]
     est = gate["estimate"]
     assum = assumption_service.project_assumption_status(db, project_id)
     o = offers.latest_offer(db, project_id)
     files = {
-        "pricing_schedule": str(documents.client_pricing_schedule(est, submission_ready=True)),
-        "estimate_report": str(documents.estimate_report_docx(est, submission_ready=True, version_label=f"v{v['version_no']}", assumptions=assum)),
+        "pricing_schedule": str(documents.client_pricing_schedule(est, submission_ready=ready, readiness=r)),
+        "estimate_report": str(documents.estimate_report_docx(est, submission_ready=ready, version_label=f"v{v['version_no']}", assumptions=assum, readiness=r)),
         "letter_of_offer": o["file_path"],
     }
     run = get_run(db, gate["run_id"])
     files["reconciliation_report"] = str(documents.reconciliation_report_xlsx(run, est.project))
     for kind, f in files.items():
-        db.insert("exports", dict(project_id=project_id, kind=kind, submission_ready=1, estimate_version_id=version_id, file_path=f,
-                                  sha256=_sha(f), created_by=actor.username, created_at=now_iso(), approval_ref=str(approval_id)))
-    db.update("estimate_versions", {"submitted_at": now_iso()}, "id=?", (version_id,))
-    audit.log(db, actor, "export", project_id, "submission_export", after=files, project_id=project_id)
+        db.insert("exports", dict(project_id=project_id, kind=kind, submission_ready=int(ready), estimate_version_id=version_id, file_path=f,
+                                  sha256=_sha(f), created_by=actor.username, created_at=now_iso(), approval_ref=str(approval_id),
+                                  readiness=r["classification"], readiness_json=json.dumps(r, default=str)))
+    if ready:
+        db.update("estimate_versions", {"submitted_at": now_iso()}, "id=?", (version_id,))
+    audit.log(db, actor, "export", project_id, "submission_export" if ready else "demonstration_export", after={**files, "readiness": r["classification"], "reasons": r["reasons"][:10]}, project_id=project_id)
     return files
 
 
@@ -188,8 +198,12 @@ def export_client_form(db: Database, actor: Actor, project_id: str, template_pat
     if (version_id is None) != (approval_id is None):
         raise ValidationFailed("Give both version_id and approval_id for a submission-ready form, or neither for a preliminary copy.", code="FORM_ARGS")
     if version_id is not None:
+        approvals.require_production_actor(db, actor, project_id, "export a client form")
         v, gate = require_export_gate(db, actor, project_id, version_id, approval_id)
-        est, ready, banner = gate["estimate"], True, None
+        r = readiness.evaluate(db, project_id, version_id, approval_id, gate=gate)
+        if r["classification"] == "not_ready":
+            raise ApprovalBlocked("Client-form export refused: the production approval chain is not satisfied - " + "; ".join(r["reasons"][:6]), code="NOT_PRODUCTION_READY", details=r["reasons"])
+        est, ready, banner = gate["estimate"], r["production_ready"], (None if r["production_ready"] else readiness.banner(r))
     else:
         est, ready = compute_estimate(db, project_id), False
         banner = "PRELIMINARY - NOT FOR SUBMISSION" + (" - DEMONSTRATION / SYNTHETIC DATA" if est.project.get("is_demo") else "")

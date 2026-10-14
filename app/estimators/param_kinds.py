@@ -95,12 +95,23 @@ def _productivity(d: dict) -> dict:
       "Per plant resource: minimum chargeable quantity (in the resource's rate unit) over the project and a standby quantity charged at a "
       "percentage of the approved rate. Values come from the hire contract or quotation.")
 def _plant_terms(d: dict) -> dict:
-    _no_extra(d, {"resource_id", "min_hire_qty", "standby_qty", "standby_pct_of_rate"}, "plant_hire_terms")
+    _no_extra(d, {"resource_id", "min_hire_qty", "standby_qty", "standby_pct_of_rate", "billing_basis", "programme_tasks", "mobilisation_qty", "demobilisation_qty"}, "plant_hire_terms")
+    tasks = d.get("programme_tasks") or []
+    if isinstance(tasks, str):
+        tasks = [x for x in re.split(r"[,\s]+", tasks) if x]
     out = {"resource_id": text(d, "resource_id"), "min_hire_qty": dec(d, "min_hire_qty", required=False, ge="0") or "0",
            "standby_qty": dec(d, "standby_qty", required=False, ge="0") or "0",
-           "standby_pct_of_rate": dec(d, "standby_pct_of_rate", required=False, ge="0", le="100")}
+           "standby_pct_of_rate": dec(d, "standby_pct_of_rate", required=False, ge="0", le="100"),
+           # how the hire contract counts days: 'working_day' (only programme working days are billed) or 'calendar_day' (every day on site, incl. non-working days)
+           "billing_basis": text(d, "billing_basis", required=False, choices=("working_day", "calendar_day")),
+           # the programme activities between whose start and finish the plant is on site (the hire window is read from the programme, never assumed)
+           "programme_tasks": [str(t) for t in tasks],
+           # billable units (rate unit) charged at the full rate for bringing the plant to / from site, from the hire contract
+           "mobilisation_qty": dec(d, "mobilisation_qty", required=False, ge="0") or "0", "demobilisation_qty": dec(d, "demobilisation_qty", required=False, ge="0") or "0"}
     if Decimal(out["standby_qty"]) > 0 and out["standby_pct_of_rate"] is None:
         raise ValidationFailed("standby_qty > 0 requires standby_pct_of_rate (from the hire terms).", code="PARAM_FIELD")
+    if out["programme_tasks"] and not out["billing_basis"]:
+        raise ValidationFailed("programme_tasks needs billing_basis: say whether the contract bills working days or calendar days.", code="PARAM_FIELD")
     return out
 
 
@@ -358,7 +369,7 @@ def _method_alt(d: dict) -> dict:
 # Field skeletons shown on the input form: names and the shape of nested values only - never a number.
 EXAMPLES: dict[str, dict] = {
     "productivity_factor": {"category": "height", "factor": "", "scope_cost_prefix": "", "scope_wbs": ""},
-    "plant_hire_terms": {"resource_id": "", "min_hire_qty": "", "standby_qty": "", "standby_pct_of_rate": ""},
+    "plant_hire_terms": {"resource_id": "", "min_hire_qty": "", "standby_qty": "", "standby_pct_of_rate": "", "billing_basis": "working_day | calendar_day", "programme_tasks": [], "mobilisation_qty": "", "demobilisation_qty": ""},
     "calendar": {"start_date": "YYYY-MM-DD", "work_weekdays": [], "holidays": []},
     "mto_factor": {"template": "", "slot": "", "resource_id": "", "factor": "", "waste_pct": "", "basis": ""},
     "classification_scheme": {"name": "", "source_document": "", "classes": [{"class_id": "", "name": "", "min_definition_pct": "", "max_definition_pct": "", "low_pct": "", "high_pct": ""}]},
@@ -378,6 +389,46 @@ EXAMPLES: dict[str, dict] = {
     "benchmark_range": {"name": "", "metric": "item_unit_cost", "cost_prefix": "", "unit": "", "kind": "", "low": "", "high": "", "currency": "", "source_note": ""},
     "reserve_rule": {"name": "", "base": "direct", "pct": "", "category": "", "basis": ""},
     "engineering_basis": {"discipline": "", "deliverable": "", "count": "", "hours_each": "", "resource_id": "", "basis": ""},
+    "time_allocation": {"name": "", "scope_cost_prefix": "", "scope_wbs": "", "tasks": ["<task code>"], "shares": {"<task code>": "<percent>"}, "basis": ""},
     "method_alternative": {"name": "", "item_assemblies": {"<BOQ item key>": "<assembly code>"}, "duration_months": "", "basis": ""},
     "overhead_pool": {"name": "", "annual_cost": "", "annual_base": "", "base_kind": "direct_cost", "basis": ""},
 }
+
+
+@kind("time_allocation", "Time allocation of cost not tied to a programme activity", {E, C, A},
+      "States, for cost that no programme activity claims by its own cost-code/WBS scope (site supervision, lifting plant, access ...), which activities it is spread over in "
+      "cash-flow, escalation and loading. Cost-code prefix and/or WBS scope, the activities (or ALL) and optionally an explicit percentage per activity (summing to exactly 100) "
+      "with the basis. Without a rule the cost stays UNALLOCATED and is reported, never spread silently.")
+def _time_allocation(d: dict) -> dict:
+    _no_extra(d, {"name", "scope_cost_prefix", "scope_wbs", "tasks", "shares", "basis"}, "time_allocation")
+    out = {"name": text(d, "name"), "scope_cost_prefix": text(d, "scope_cost_prefix", required=False), "scope_wbs": text(d, "scope_wbs", required=False), "basis": text(d, "basis")}
+    if not out["scope_cost_prefix"] and not out["scope_wbs"]:
+        raise ValidationFailed("A time allocation needs a scope: scope_cost_prefix and/or scope_wbs.", code="PARAM_FIELD")
+    tasks = d.get("tasks")
+    if isinstance(tasks, str):
+        tasks = ["ALL"] if tasks.strip().upper() == "ALL" else [x for x in re.split(r"[,\s]+", tasks) if x]
+    tasks = [str(t) for t in (tasks or [])]
+    if not tasks:
+        raise ValidationFailed("'tasks' is required: a list of activity codes, or 'ALL'.", code="PARAM_FIELD")
+    if len(set(tasks)) != len(tasks):
+        raise ValidationFailed("'tasks' lists an activity twice (duplicate allocation).", code="PARAM_FIELD")
+    if "ALL" in tasks and len(tasks) > 1:
+        raise ValidationFailed("'ALL' cannot be combined with named activities.", code="PARAM_FIELD")
+    out["tasks"] = tasks
+    shares = d.get("shares") or {}
+    if shares:
+        if "ALL" in tasks:
+            raise ValidationFailed("Explicit shares need named activities, not ALL.", code="PARAM_FIELD")
+        if set(shares) != set(tasks):
+            raise ValidationFailed("'shares' must have exactly one entry per listed activity.", code="PARAM_FIELD")
+        norm = {}
+        for k, v in shares.items():
+            x = dec({"v": v}, "v", ge="0")
+            norm[str(k)] = x
+        tot = sum((Decimal(v) for v in norm.values()), Decimal(0))
+        if tot != Decimal(100):
+            raise ValidationFailed(f"'shares' sum to {tot}%: an allocation must account for exactly 100% of the cost ({'exceeds' if tot > 100 else 'does not cover'} the underlying cost).", code="PARAM_FIELD")
+        out["shares"] = norm
+    else:
+        out["shares"] = {}
+    return out

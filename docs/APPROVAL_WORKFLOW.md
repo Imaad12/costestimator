@@ -43,6 +43,9 @@ entity type, entity id, version, reviewer, reviewer role, action (`approve`, `ap
 | Offer letter | Reports | must match the pricing schedule hash |
 | Tender export | Reports | requires approved version + approved offer + fresh reconciliation; re-checked at export time |
 
+## Actor type and submission readiness
+Every approval row stores the **actor type** (`human`, `test`, `ai`, `unregistered`, `inactive`, `role_mismatch`) resolved from the users table and the **environment** at that moment. Only registered human approvals made in a production environment can make an export SUBMISSION READY; demonstration/synthetic projects get a DEMONSTRATION export; see [SECURITY.md](SECURITY.md) and `services/readiness.py`.
+
 ## Final submission gate
 `export_submission` produces files stamped **SUBMISSION READY** only if: (1) a Commercial Approver's `tender_export` approval record exists for the approved version; (2) a *fresh* reconciliation run has no open
 findings in `blocking_severities` (default Critical + High, configurable in `config/reconciliation_rules.json` or the `recon_rules_override` setting); (3) the estimate fingerprint still equals the approved version's; (4) an approved offer matches the schedule.

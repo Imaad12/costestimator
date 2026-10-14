@@ -37,6 +37,11 @@ quantities are never rounded for costing (only for display, `qty.rounding_dp`). 
 Labour rate build-up: `hourly = (base + allowances + accommodation + transport + employer costs + other, per month) / normal paid hours per month`.
 Plant hire per hour from the supplied calendar: day = `rate / hours_per_day`; week = `/ (hours_per_day x days_per_week)`; month = `/ (hours_per_day x days_per_month)` - none assumed.
 
+## 3a. Eligibility bases, time allocation and day-priced plant (iteration 5)
+* `percent_of_direct` indirects (and contingency/risk/escalation percentages) apply to `eligible direct cost = sum(line amount x eligible_pct)` from `estimators/eligibility.py`: the first matching rule (cost-code prefix / BOQ item / cost kind) decides a line's eligible share; lines no rule names take the explicit default and are reported UNCLASSIFIED; no spec = legacy whole direct cost (reported unspecified). The breakdown by cost code, BOQ line and kind is on the indirect line (`indirect_base` report).
+* Time allocation: a cost line reaches the programme through an activity's own scope or an approved `time_allocation` rule; otherwise it is unallocated and exposed. Cash flow conventions: cash-out = allocated direct x (1 + indirect/direct); only the allocated share of the net price is valued; contingency, risk and margin are not cash-out; identities checked: valuations = valued price, cash received = valued price, cash paid = cash-out, closing balance = valued price - cash paid - interest.
+* Day-priced plant: `on-site window` = earliest start .. latest finish of the terms' programme activities on the approved calendar; working-day billing bills the working days, calendar-day billing bills every date in the window; compared with BOQ days (>= minimum hire); standby, mobilisation and demobilisation days are separate lines at the approved rate.
+
 ## 3. Indirects (`indirect.py`)
 `fixed = amount x qty`; `percent_of_direct = pct x direct`; `per_month = amount x qty x M`; `per_week = amount x qty x M x wd_month / wd_week`; `per_day = amount x qty x M x wd_month`,
 with `M` the **approved** project duration (months). Duration sources (all *proposals* until approved): estimator input, labour-derived (`hours / (crew x h/day) / wd_month`), CPM schedule model
