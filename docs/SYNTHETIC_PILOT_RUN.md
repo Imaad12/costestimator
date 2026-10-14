@@ -10,8 +10,8 @@ The run is reproducible: `python scripts/run_synthetic_pilot.py [FRESH_DIR]` (dr
 | item | value |
 |---|---|
 | Branch | `claude/wizardly-einstein-w4ykwd` |
-| Starting commit | `bd05f7e` (Pilot validation: reconcile capability matrix, pilot readiness, import guards) |
-| Code commit for this run | `4265168` (driver, fixtures, defect fixes, tests). This report is committed after it; `git log` shows the final commit. |
+| Starting commit (this iteration) | `d688a1e` (previous pilot run; code commit `4265168`, before that `bd05f7e`) |
+| Code commit for this run | `5421c6d` (fixes, tests, driver changes). This report is committed after it; `git log` shows the final commit. |
 | Scratch database | `scratch_pilot.db` inside a fresh temporary directory (this run: `$WORK`); the shared `var/` database, `projects/`, `data/` libraries and the public-data archive were not touched |
 | Temporary projects | `PRJ-9001` main project (30-line BOQ); `PRJ-9002` bottom-up variant + supply sourcing; `PRJ-9003` take-off derivation check; `PRJ-9004` negative control (not flagged demo). IDs follow the application's `PRJ-nnnn` rule. |
 | External access | None. No website, live API, email or supplier contact. No network was used by the run or the tests. |
@@ -24,8 +24,8 @@ Service-level stages call the real service functions in-process (the same functi
 | command | exit status |
 |---|---|
 | `python scripts/run_synthetic_pilot.py <fresh dir>` | 0 (all stage verdicts PASS) |
-| `python -m pytest -o addopts="" -q` (before changes, at `bd05f7e`) | 0 — 349 passed in 76.01s (recorded in the previous pass) |
-| `python -m pytest -o addopts="" -q` (after changes) | 0 — 359 passed in 121.53s (0:02:01) |
+| `python -m pytest -o addopts="" -q` (before changes, at `d688a1e`) | 0 — 359 passed in 121.53s (recorded in the previous pass) |
+| `python -m pytest -o addopts="" -q` (after changes) | 0 — 385 passed in 142.38s (0:02:22) |
 | `python -m app.cli param import $WORK/cli_params_SYNTHETIC.csv --project PRJ-9004 --dry-run` | 0 |
 | `python -m app.cli param import $WORK/cli_params_SYNTHETIC.csv --project PRJ-9004` | 0 |
 | `python -m app.cli param import tests/fixtures/synthetic_pilot/governed_parameters_SYNTHETIC_TEST_ONLY.csv --dry-run` | 0 |
@@ -50,11 +50,11 @@ State-changing CLI commands ran as `cli-est`, a TEST ACTOR Estimator created in 
 
 |  | result |
 |---|---|
-| Before (starting commit `bd05f7e`) | 349 passed |
-| After | 359 passed in 121.53s (0:02:01) |
-| New tests | `tests/integration/test_synthetic_pilot.py` (8: all-stage verdicts, independent totals, quotation levelling, frozen replay, preliminary-vs-final gating, index/unit rules, take-off replay, CLI imports); `tests/sources/test_rate_pipeline.py::test_synthetic_flag_survives_publication_as_a_synthetic_rate_not_a_market_price`; `tests/unit/test_pilot_templates.py::test_governed_csv_dry_run_validates_without_writing_anything` |
+| Before (starting commit `d688a1e`) | 359 passed |
+| After | 385 passed in 142.38s (0:02:22) |
+| New / changed tests | `tests/unit/test_time_allocation.py` (4), `tests/unit/test_indirect_eligibility.py` (5), `tests/unit/test_plant_hire.py` (5), `tests/approvals/test_actor_isolation.py` (8), `tests/integration/test_actor_isolation_api.py` (1), `tests/integration/test_synthetic_pilot.py` (+3, updated figures); changed expectations: `tests/integration/test_full_workflow.py` (demo exports are DEMONSTRATION, a High overlap finding must be accepted by a Commercial Approver), `tests/unit/test_cashflow.py` (money-conservation identity under the documented convention) |
 
-No existing test was weakened or removed; no gate, role or severity was changed.
+No test was removed. Two tests changed their expectations because behaviour changed on purpose (see above); no role, gate or severity was weakened: new rules are *additional* blockers, and demo exports are now *less* privileged (never submission-ready).
 
 ## 4. Stage verdicts (summary)
 
@@ -68,22 +68,77 @@ No existing test was weakened or removed; no gate, role or severity was changed.
 | 5 | Synthetic resources and assemblies | PASS | 10 library resources + 30 installed-rate resources; 3 required assemblies + 2 valve assemblies with explicit synthetic norms (§9) |
 | 6 | Rate import and approval workflow | PASS | dry-run, import, pending, index refusal, synthetic labelling (defect D-1 fixed) |
 | 7 | Supplier quotations and levelling | PASS | A recommended; selection stayed Pending Review until the TEST ACTOR decision |
-| 8 | Governed parameters | PASS | dry-run, Draft-only import, approval via TEST ACTOR; site indirects, overhead, contingency and profit have no governed kind (modelled as approved indirects / policy), VAT is a tax-category record (§8) |
-| 9 | Programme and loading | PASS | 29 working days / 33 calendar days; man-hours 1,220 tie out; 37,950 of cost unscheduled |
+| 8 | Governed parameters | PASS | 7 rows (incl. forklift terms and the extended crane terms); dry-run, Draft-only import, approval via TEST ACTOR; site indirects, overhead, contingency and profit have no governed kind (modelled as approved indirects / policy), VAT is a tax-category record (§8) |
+| 9 | Programme and loading | PASS | 29 working days / 33 calendar days; man-hours 1,220 tie out; the 37,950.00 untied cost is now allocated by explicit rules (13d) |
 | 10 | Take-off templates | PASS | 6 templates derived mechanically, all Pending Review; STRUCTURAL/MECHANICAL validation only |
-| 11 | Direct cost and commercial build-up | PASS | 366,261.00 = independent 365,361 + 900.00 explained; chain reproduced independently |
+| 11 | Direct cost and commercial build-up | PASS | 366,261.00 = independent 365,361 + 900.00 explained; chain reproduced independently with the eligible indirect base |
 | 12 | Independent BOQ total | PASS | 365,361.00 (Decimal arithmetic), compared line by line: only P-020 differs (+900.00 standby) |
 | 13a | Risk (seeded Monte Carlo) | PASS | reproducible with the seed; expected value checked by hand; proposal only |
-| 13b | Time-phased escalation | PASS | factors checked independently; covers scheduled cost only (37,950.00 unscheduled is not escalated, O-2) |
-| 13c | Cash flow, retention, bond | FAIL | retention checked (5 % × price); but cash-out excludes unscheduled cost while valuations include its price share, so the balance is overstated (O-2) |
+| 13b | Time-phased escalation | PASS | factors checked independently; covers ALL direct cost after the allocation rules; INCOMPLETE label and block without them (13d) |
+| 13c | Cash flow, retention, bond | PASS | reconciled: valuations, cash paid, cash received, retention and closing balance on one base (previous run: FAIL, balance overstated) |
+| 13d | Untied cost: allocation, exposure and blocking | PASS | before: 37,950.00 exposed, INCOMPLETE labels, financing refused, gate blocked; after explicit rules: complete and reconciled |
 | 14 | Basis of Estimate | PASS | all required sections present incl. the validation-only statement (via the new PROJECT NOTE banner, D-3) |
-| 15 | Completeness, reconciliation, approval gates | PASS / PASS | preliminary estimate cannot be approved or exported; Critical findings in the non-demo control; role gates verified |
+| 15 | Completeness, reconciliation, approval gates | PASS / PASS | preliminary estimate cannot be approved or exported; Critical findings in the non-demo control; role gates verified; PLANT_HIRE_DAYS (High) needs a Commercial Approver |
 | 16 | Freeze and replay | PASS | frozen v1 replays with the identical fingerprint and totals after a parameter and a rate change; take-off replay PASS (16b) |
 | 17 | Reports, API, UI, export | PASS | CLI/API/UI agree; workbook recalculated by LibreOffice (192 formulas, no mismatch). Microsoft Excel NOT TESTED |
-| 18 | Tests and defect handling | PASS | 3 defects fixed with regression tests; full suite green |
+| 18 | Tests and defect handling | PASS | 4 further findings (D-4..D-7) fixed with regression tests; full suite green |
+| 19 | Production isolation of the pilot | PASS | classification `demonstration`; never production ready; test actors/forged names/role mismatch resolved as non-human; real-project attempts refused |
 
 
 Other items: client requirements / owner profile **NOT TESTED** (no controlled owner document exists; no compliance with any client is claimed). Landed cost, FX and hedge **NOT TESTED** (SAR-only brief). File import of quotation lines **NOT TESTED** in this pilot (quotation lines were entered as structured data; the importer has its own tests). AI features **NOT TESTED**. Microsoft Excel **NOT TESTED**.
+
+## 4b. Closure of the four pilot findings — what was run and what changed
+### Finding 1 — cash flow and escalation (release-blocking): PASS
+
+|  | before the allocation rules | after explicit approved rules |
+|---|---|---|
+| Untied cost (exact) | 37,950.00 | 0.00 |
+| Untied lines | P-020 plant 10,800.00; P-021 plant 5,200.00; P-022 subcontract 4,050.00; P-030 subcontract 17,000.00; P-020 plant_standby 900.00 | none (rules: SUP-ALL, LIFT-INST-WELD, SCAFFOLD) |
+| Cash-flow status | INCOMPLETE - NOT FOR RELIANCE: SAR 37,950.00 of direct cost is allocated to no period (see unallocated_lines); SAR 46,512.85 of the price is not valued and the closing balance excludes it | COMPLETE |
+| Escalation status | INCOMPLETE - NOT FOR RELIANCE: SAR 37,950.00 of eligible cost has no time allocation and is NOT escalated (see unescalated_lines) | COMPLETE for the cost within profile scope |
+| Price valued | 402,389.45 (unvalued share 46,512.85) | 448,902.30 |
+| Escalation total / base | 1,609.55 / 328,311.00 (37,950.00 not escalated) | 1,798.67 / 366,261.00 |
+| Closing balance | 44,232.40 (excludes the unallocated share; flagged) | 49,345.29 |
+| Financing proposal | TIMEPHASING_INCOMPLETE (refused) | allowed |
+| Final gate | blocked by `TIMEPHASING_INCOMPLETE` (High) | finding gone |
+
+The rules are governed `time_allocation` parameters: `SUP-ALL` (A.03 → all activities, duration-weighted), `LIFT-INST-WELD` (A.07 → INST 60 % / WELD 40 %), `SCAFFOLD` (A.06 → INST, WELD, PAINT, duration-weighted); allocated: LIFT-INST-WELD 16,900.00, SCAFFOLD 4,050.00, SUP-ALL 17,000.00. **Without them nothing is spread:** the cash flow says INCOMPLETE - NOT FOR RELIANCE and the gate blocks. Also tested: missing task, conflicting/duplicate rules, shares summing to ≠ 100 %, zero-duration activities, unapproved rules (`tests/unit/test_time_allocation.py`).
+### Finding 2 — percentage indirects: PASS (stage 11; unit tests)
+
+|  | previous run (`d688a1e`) | this run |
+|---|---|---|
+| Indirect base | whole direct cost 366,261.00 | eligible base 302,691.00 (division A excluded) |
+| Indirect (8 % + 3 %) | 40,288.71 | 33,296.01 |
+| Contingency 5 % of (D + I) | 20,327.49 | 19,977.85 |
+| Total cost | 426,877.20 | 419,534.86 |
+| Net price | 456,758.60 | 448,902.30 |
+| VAT 15 % on the schedule | 68,513.90 | 67,335.76 |
+| Final payable | 525,273.26 | 516,240.81 |
+
+The net price falls by 7,856.30 because the percentage indirects no longer apply to preliminaries priced as BOQ lines — a *consequence of the synthetic eligibility decision*, not a correction toward a market figure. Overlap detection, partial eligibility, unclassified cost and the unspecified legacy base are proven in `tests/unit/test_indirect_eligibility.py` (e.g. 8 % on 5,500 = 440.00 legacy; excluding A.* = 80.00; overlap exposure 360.00).
+### Finding 3 — day-priced plant: PASS (stage 11; unit tests)
+
+| plant | billing basis | window (from the programme: INST..WELD) | working days | calendar days | required | billed | difference | exposure SAR | status |
+|---|---|---|---|---|---|---|---|---|---|
+| SYN-P-020 | working_day | 2026-11-13 .. 2026-11-24 | 10 | 12 | 10 | 6 | 4 | 7,200.00 | PRICED_BELOW_PROGRAMME_WINDOW |
+| SYN-P-021 | working_day | 2026-11-13 .. 2026-11-24 | 10 | 12 | 10 | 8 | 2 | 1,300.00 | PRICED_BELOW_PROGRAMME_WINDOW |
+
+The BOQ quantities (crane 6 days, forklift 8 days) are human-supplied and were **not** changed; the programme window needs 10 working days, so both plant lines raised `PLANT_HIRE_DAYS` (High) and blocked the estimate approval until a Commercial Approver (TEST ACTOR) accepted them with a documented reason (an Estimator was refused). No PLANT_UNIT assumption remains (the assembly lines declare `factor_unit = day`), and the earlier `SYSTEM_EXCEPTION`s are gone. Minimum hire, standby, mobilisation/demobilisation, calendar-day billing, programme delay and missing terms: `tests/unit/test_plant_hire.py` (e.g. working 10 days vs calendar 12; a 3-day slip makes the calendar window 17 days).
+### Finding 4 — test-actor and synthetic isolation (release-blocking): PASS
+
+| check | result |
+|---|---|
+| Pilot classification | `demonstration`; production_ready = False |
+| Why (pilot environment) | the project is flagged as a demonstration project; synthetic data is used in the estimate; the environment is 'test', not 'production'; estimate approval: approved by a 'test' principal (test-commercial); only registered human users count; estimate approval: recorded in environment 'test', not 'production' … |
+| If the environment were `production` | still `demonstration` — the project is flagged as a demonstration project; synthetic data is used in the estimate … |
+| Approvals by actor type / environment | 54 × test/test |
+| Forged display name / role mismatch / registered test actor / missing actor | `unregistered`, `role_mismatch`, `test`, `unregistered` |
+| Test actor approving a tender export on the real-project control (production) | NON_HUMAN_ACTOR |
+| Direct export attempt by a test actor (production) | NON_HUMAN_ACTOR |
+| Exports marked submission-ready | 0 |
+| Export readiness labels | 2 × preliminary, 4 × demonstration |
+
+Production readiness (the only route to SUBMISSION READY) is covered by tests with registered human users (`tests/approvals/test_actor_isolation.py`): the human chain is ready; test principals, unregistered/forged names, role mismatch, a `test` environment, copied or hand-written approval rows, demo projects and exceptions by test principals are not.
 
 ## 5. BOQ import, units and independent total (stages 2, 12)
 Unit rules: the standard registry has no `dia-in`, `m2-day` or `test`. On import these three lines were **flagged** (`unit_status=unknown`, unit left empty) and not converted:
@@ -174,7 +229,7 @@ Bottom-up vs baseline for the five lines (informational; not forced to agree):
 The differences are a property of the synthetic norms, not an error; they show why installed BOQ rates and resource build-ups must be reconciled by a person before use.
 
 ## 8. Governed parameters (stage 8)
-`param import` dry run: would create 6, errors none, **rows and audit entries unchanged** (rolled-back transaction; test added). Import created 6 rows, all `Draft`; a Draft calendar was **not** in force; after TEST ACTOR submit/approve they were. Items from the brief:
+`param import` dry run: would create 7, errors none, **rows and audit entries unchanged** (rolled-back transaction; test added). Import created 7 rows, all `Draft`; a Draft calendar was **not** in force; after TEST ACTOR submit/approve they were. Items from the brief:
 
 | brief item | how it was recorded | status |
 |---|---|---|
@@ -245,24 +300,41 @@ Links used: FS, SS (MOB→PROC), SS+3 and FF+2 (INST→WELD overlap), SS+2 (WELD
 
 | step | SAR | basis |
 |---|---|---|
-| Direct cost (D) | 366,261.00 | approved rates × quantities (+ 900.00 standby) |
-| Site indirects | 29,300.88 | 8 % × D (base: **all** direct cost) |
-| Home-office overhead | 10,987.83 | 3 % × D (base: **all** direct cost) |
-| Indirect total (I) | 40,288.71 |  |
-| Contingency | 20,327.49 | 5 % × (D + I) = 5 % × 406,549.71; applied once; no risk adder; no escalation adder |
-| Total cost (T) | 426,877.20 | D + I + contingency |
-| Selling price (markup 7 %) | 456,758.60 | T × 1.07 (method label: markup on total cost) |
-| Net price after commercial rounding | 456,758.60 | no discount |
-| Tendered pricing schedule total | 456,759.36 | unit-rate rounding variance 0.76 (reported, bounded) |
-| VAT 15 % (synthetic parameter) | 68,513.90 | 15 % × tendered schedule total = 68,513.90 (tax base is the **schedule**, not the net price) |
-| Final payable | 525,273.26 | schedule + VAT |
+| Direct cost (D) | 366,261.00 | approved rates × quantities (+ 900.00 standby on P-020) |
+| Eligible base for the percentage indirects | 302,691.00 | E/D/F scope: 302,691.00 = D − division A (preliminaries, 63,570.00 incl. standby); explicit rules approved in the project |
+| Site indirects | 24,215.28 | 8 % × eligible base |
+| Home-office overhead | 9,080.73 | 3 % × eligible base |
+| Indirect total (I) | 33,296.01 | was 40,288.71 on the whole direct cost (previous run) |
+| Contingency | 19,977.85 | 5 % × (D + I); applied once; no risk adder; no escalation adder |
+| Total cost (T) | 419,534.86 | D + I + contingency |
+| Selling price (markup 7 %) | 448,902.30 | T × 1.07 (method label: markup on total cost) |
+| Net price after commercial rounding | 448,902.30 | no discount |
+| Tendered pricing schedule total | 448,905.05 | unit-rate rounding variance 2.75 (reported, bounded) |
+| VAT 15 % (synthetic parameter) | 67,335.76 | 15 % × tendered schedule total = 67,335.76 (tax base is the **schedule**, not the net price) |
+| Final payable | 516,240.81 | schedule + VAT |
 
 The commercial chain was re-derived independently in Decimal before comparison; every figure above matches (`chain_matches_independent: true`).
-**Double-count review.** Quotations are not added on top of installed rates (PRJ-9002 is a separate project). Contingency is applied once, and the Monte Carlo output is a *proposal* that changes nothing. Escalation is **not** in the selling price (no policy escalation adder; the 4 % profile feeds only the report). Plant hire counted once (rate line + configured standby). **Unresolved ambiguity (O-5):** the engine's `percent_of_direct` indirect has no eligibility filter, so the 8 % site indirect is applied to a base that includes P-029 mobilisation and P-030 supervision (17,000 as a BOQ line). Whether that duplicates supervision cost is a commercial-policy decision that the engine cannot express; it was not silently resolved, and no reconciliation rule flagged it.
+**Double-count review.** Quotations are not added on top of installed rates (PRJ-9002 is a separate project). Contingency is applied once, and the Monte Carlo output is a *proposal* that changes nothing. Escalation is **not** in the selling price (no policy escalation adder; the 4 % profile feeds only the report). Plant hire counted once (rate line + configured standby; mobilisation/demobilisation days are 0). **Percentage-indirect base (finding O-5, now closed):** the indirect eligibility base states that division A (supervision P-030, mobilisation P-029, crane/forklift, scaffolding, PMI/RT in A.08) is excluded, so those BOQ lines are no longer inside the 8 % / 3 % base; the `indirect_base` report lists eligible, excluded and unclassified cost by cost code, BOQ line and kind (unclassified: 0.00).
 
-**Escalation (4 %, base 2026-10-01):** engine total 1,609.55 on the scheduled base of 328,311.00 (Nov 2026 factor 1.0048052, Dec 2026 1.0080946). Independent check: factor = 1.04^((months from 1 Oct to mid-month)/12) = 1.04^((1+14/30)/12) = 1.004805 and 1.04^((2+14/30)/12) = 1.008095 ✓. The remaining **37,950.00** of direct cost (supervision, crane, forklift, scaffolding) is tied to no programme activity and is **not escalated** (O-2).
-**Risk (seed 20260101, 5000 simulations; three SYNTHETIC risks, probability 100 %):** SAR ranges were derived from the estimate's own subtotals because the engine accepts SAR ranges only: material 0/8,446.24/21,115.60 (0/4/10 % of 211,156.00), productivity 0/2,940/8,820 (0/5/15 % of labour 58,800.00), rework 0/5,000/15,000. Expected value (hand: (0+8,446.24+21,115.60)/3 + (0+2,940+8,820)/3 + 20,000/3) = **20,440.61**; simulated mean 20,403.43, P10 13,080.13, **P50 20,273.07, P80 25,355.38, P90 28,023.02**; re-run with the same seed identical: **True**. Proposed provision at P80 25,355.38 vs policy contingency 20,327.49 (difference 5,027.89) — proposal only, not applied. Limitations: independent risks, no correlation, no schedule logic, triangular shapes assumed by the brief. This is a software exercise, not a forecast.
-**Cash flow (payment terms PAY-SYNTH):** price 456,758.60; retention withheld 22,837.93 (= 5 % × price ✓); no advance, no interest, no peak funding; performance-bond cost 0.00 (fee percentage is a test value of 0); bond months 14 (2 programme months + 12 defects). **Finding O-2:** the cash-out covers only scheduled cost (328,311.00) while the valuations spread the whole price, so the final balance (128,447.60) is overstated by the price share of the 37,950.00 of unscheduled cost; the report lists the unscheduled amount but does not correct the balance.
+**Escalation (4 %, base 2026-10-01), after the time-allocation rules (§4b):** engine total 1,798.67 on a base of 366,261.00 (**all** direct cost; previously 328,311.00 with 37,950.00 not escalated). Independent check of the factors: 1.04^((months from 1 Oct to mid-month)/12) = 1.04^((1+14/30)/12) = 1.004805 (Nov) and 1.04^((2+14/30)/12) = 1.008095 (Dec) ✓; status `COMPLETE for the cost within profile scope`.
+**Risk (seed 20260101, 5000 simulations; three SYNTHETIC risks, probability 100 %):** SAR ranges were derived from the estimate's own subtotals because the engine accepts SAR ranges only: material 0/8,446.24/21,115.60 (0/4/10 % of 211,156.00), productivity 0/2,940/8,820 (0/5/15 % of labour 58,800.00), rework 0/5,000/15,000. Expected value (hand: (0+8,446.24+21,115.60)/3 + (0+2,940+8,820)/3 + 20,000/3) = **20,440.61**; simulated mean 20,403.43, P10 13,080.13, **P50 20,273.07, P80 25,355.38, P90 28,023.02**; re-run with the same seed identical: **True**. Proposed provision at P80 25,355.38 vs policy contingency 19,977.85 (difference 5,377.53) — proposal only, not applied. Limitations: independent risks, no correlation, no schedule logic, triangular shapes assumed by the brief. This is a software exercise, not a forecast.
+**Cash flow (payment terms PAY-SYNTH), reconciled under the documented conventions** (indirects are paid with the direct cost they follow; contingency, risk allowances and margin are not cash-out; only allocated cost is paid and valued):
+
+| item | SAR |
+|---|---|
+| Net price | 448,902.30 |
+| Valued price (= net price: nothing unallocated) | 448,902.30 |
+| Allocated direct cost | 366,261.00 |
+| Indirect cost / cash factor | 33,296.01 / 1.090908 |
+| Cash paid (direct × factor) | 399,557.01 |
+| Cash received | 448,902.30 |
+| Retention withheld (5 % × price) | 22,445.11 |
+| Interest | 0.00 |
+| Closing balance | 49,345.29 |
+| Reserve not cash-out (contingency + risk) | 19,977.85 |
+| Identity checks | valuations sum to the valued price: OK; cash received equals the valued price: OK; cash paid equals allocated direct cost x (1 + indirect/direct): OK; closing balance = valued price - cash paid - interest: OK |
+
+Hand check: closing balance = valued price − cash paid − interest = 448,902.30 − 399,557.01 − 0 = 49,345.29 (= margin 29,367.44 + contingency 19,977.85, since indirects are paid and contingency is not). Retention 5 % × 448,902.30 = 22,445.11 ✓. Performance-bond cost 0.00 (fee percentage is a test value of 0); bond months 14 (2 programme months + 12 defects).
 
 ## 13. Take-off templates (stage 10, project PRJ-9003)
 Industrial pack loaded (definitions only, no prices). For each of six templates the driver is the **human BOQ quantity**; factors are SYNTHETIC mechanical-test norms approved by a TEST ACTOR in the project; every application left its item `Pending Review`, no item priced until a person decides, and the measured BOQ quantities were unchanged.
@@ -281,7 +353,7 @@ Industrial pack loaded (definitions only, no prices). For each of six templates 
 ## 14. Basis of Estimate and completeness (stages 14, 15)
 BOE generated by the application (`generate_boe`, files BoE_PRJ-9001_draft01.md, BoE_PRJ-9001_draft01.docx). Sections present: project scope, exclusions/scope register, BOQ source, estimate date and currency, synthetic rate designation, assemblies, productivity assumptions, programme, indirects/duration, commercial, risk, classification, client profile / no compliance claim, validation-only statement. Missing: none. The validation-only statement appears as a banner via the project note (D-3). The BOE contains 6 placeholders for judgement sections that only a person can write — by design they are not filled. The estimate classification is **not determined**: there is no approved classification scheme (governed kind `classification_scheme` ships empty) and none was invented. No client profile is linked: "no compliance statement can be made". The BOE was generated at the frozen v1 state (before the §15 changes).
 
-**Reconciliation / completeness on the main project (PRJ-9001), before exceptions:** High SYSTEM_EXCEPTION; High SYSTEM_EXCEPTION; Medium OFFER_MISSING; Medium UNAPPROVED_ADOPTED_ASSUMPTION; Low SYNTHETIC_DEMO. Two High `SYSTEM_EXCEPTION`s come from the plant lines (day-priced plant with hours-based wording, `PLANT_UNIT`); they blocked final approval (`RECON_BLOCKED`) until a Commercial Approver TEST ACTOR accepted them with a documented reason (an Estimator attempting it was refused, `EXCEPTION_ROLE`). The Medium `UNAPPROVED_ADOPTED_ASSUMPTION` stays open: the mandatory company assumptions have no values (none may be invented).
+**Reconciliation / completeness on the main project (PRJ-9001), before exceptions:** High PLANT_HIRE_DAYS; High PLANT_HIRE_DAYS; Medium OFFER_MISSING; Medium POSSIBLE_DUPLICATE_INDIRECT; Medium UNAPPROVED_ADOPTED_ASSUMPTION; Low SYNTHETIC_DEMO. Two High `PLANT_HIRE_DAYS` findings come from the crane and forklift (BOQ days differ from the programme window, §4b); they blocked final approval (`RECON_BLOCKED`) until a Commercial Approver TEST ACTOR accepted them with a documented reason (an Estimator attempting it was refused, `EXCEPTION_ROLE`). `POSSIBLE_DUPLICATE_INDIRECT` (Medium, an existing keyword-overlap rule) and `OFFER_MISSING` are non-blocking; the Medium `UNAPPROVED_ADOPTED_ASSUMPTION` stays open: the mandatory company assumptions have no values (none may be invented).
 
 **Negative control PRJ-9004 (not a demo project):**
 
@@ -305,25 +377,25 @@ Covered by the control: missing rate (`MISSING_RATE`), unmapped line (`UNPRICED_
 
 | check | result |
 |---|---|
-| v1 fingerprint | `3ad22f10566f61e7f50350300634039b509097b731a0465e285f83903832dc5a` |
-| v1 totals | commercial_net_price 456758.6, direct_cost 366261, final_payable 525273.26, indirect_cost 40288.71, selling_price_pre_tax 456759.36, tax 68513.9, total_cost 426877.2 |
+| v1 fingerprint | `87f41514c281c89539d5bcb9b1d424ec5040e3f4c18f5dac45d978d35fdb5d6b` |
+| v1 totals | commercial_net_price 448902.3, direct_cost 366261, final_payable 516240.81, indirect_cost 33296.01, selling_price_pre_tax 448905.05, tax 67335.76, total_cost 419534.86 |
 | v1 status | Approved |
 | changes made | productivity_factor PIPEFIT-SYNTH 1.00 -> 1.10 (new version, approved by TEST ACTOR); SYN-P-017 welder rate 65 -> 70 (new rate version, approved by TEST ACTOR) |
-| current fingerprint after changes | `0fd132fc783c55a7b0f2b96f0c7421ee9080808df600c01a0fa58da680cf8c2e` (different) |
-| current totals after changes | direct_cost 373901.00, indirect_cost 41129.11, total_cost 435781.62, selling_price_pre_tax 466288.76, commercial_net_price 466286.33, tax 69943.31, final_payable 536232.07 |
+| current fingerprint after changes | `be58fb017f4cfc76c9adcb8b8cadd00aaae9d6228d71770e18c651dac9e32d81` (different) |
+| current totals after changes | direct_cost 373901.00, indirect_cost 34136.41, total_cost 428439.28, selling_price_pre_tax 458433.09, commercial_net_price 458430.03, tax 68764.96, final_payable 527198.05 |
 | v1 row unchanged | True |
-| replay of v1 after changes | ok=True, differences none, fingerprint `3ad22f10566f61e7f50350300634039b509097b731a0465e285f83903832dc5a` = frozen |
+| replay of v1 after changes | ok=True, differences none, fingerprint `87f41514c281c89539d5bcb9b1d424ec5040e3f4c18f5dac45d978d35fdb5d6b` = frozen |
 | direct-cost-only replay | ok=True (366261) |
 | snapshot drift report | ok; `newer_rates_available`: [{"resource_id": "SYN-P-017", "used_rate_id": 944, "used_price": "65", "newer_rate_id": 1228, "newer_price": "70"}] |
 | export of frozen v1 after the change | EXPORT_BLOCKED |
-| audit chain | ok, 791 rows verified |
+| audit chain | ok, 809 rows verified |
 
 The new inputs moved the current direct cost by +7,640.00 (hours ×1.10: welder 352 h × 70, fitter 440 h × 55, helper 550 h × 32 vs 20,800 + 22,000 + 16,000), exactly as hand-computed; the frozen version still reproduces its original totals. A new frozen version v2 (Draft) was created from the changed inputs; v1 stays `Approved`.
 **Take-off replay (16b, PRJ-9003):** frozen state `Complete`, direct 102876.5. Revising the approved `mto_factor` flagged the application stale (`[['P-023', 'piping.weld_joint', ['FACTORS_CHANGED']]]`) but did **not** change the estimate until a person re-applied the template and re-approved its pricing (then 104,241.50); replay of the frozen version reproduced the original fingerprint and totals. Landed cost/FX and escalation are not part of this replay (**NOT TESTED**: escalation is a read-only report and not an estimate input; the brief is SAR-only).
 
 ## 16. Export and gating (stage 17)
 Preliminary export banner: `DRAFT - NOT YET APPROVED FOR SUBMISSION | DEMONSTRATION PROJECT - SYNTHETIC DATA - NOT A MARKET QUOTE`. Gate sequence on PRJ-9001 (all approvals by TEST ACTORS): approve_before_exceptions → RECON_BLOCKED; self_role_cannot_approve → PERMISSION_DENIED; ai_cannot_approve → AI_CANNOT_APPROVE; tender_export_approval_before_estimate_approved → ESTIMATE_NOT_APPROVED; export_without_approval → EXPORT_NOT_APPROVED; exception_by_estimator_refused → EXCEPTION_ROLE; tender_export_before_offer → OFFER_NOT_APPROVED.
-After the exceptions, the estimate approval, an approved offer and a TEST ACTOR tender-export approval, `export_submission` produced the package in the scratch workspace (pricing schedule, estimate report, letter of offer, reconciliation report). Its pricing-schedule banner reads: *SUBMISSION READY - approved by an authorised human reviewer | DEMONSTRATION PROJECT - SYNTHETIC DATA - NOT A MARKET QUOTE*. **Caution:** the generic wording "approved by an authorised human reviewer" is produced by the application whenever the approval record exists; here that record is a TEST ACTOR's. The `DEMONSTRATION PROJECT / SYNTHETIC DATA / NOT A MARKET QUOTE` text is carried through, and a project not flagged demo is blocked outright by the Critical `SYNTHETIC_IN_REAL_PROJECT` finding (PRJ-9004). **Nothing was sent, published or submitted.**
+After the exceptions, the estimate approval, an approved offer and a TEST ACTOR tender-export approval, `export_submission` produced a **demonstration** package in the scratch workspace (pricing schedule `*_DEMONSTRATION.xlsx`, estimate report, letter of offer, reconciliation report). Its pricing-schedule banner now reads: *DEMONSTRATION EXPORT - NOT SUBMISSION READY - NOT APPROVED FOR ANY REAL TENDER | approvals by: test principals in environment 'test' | DEMONSTRATION PROJECT - SYNTHETIC DATA - NOT A MARKET QUOTE*. The wording is generated from the verified approval chain (actor types and environment), so it can no longer say "approved by an authorised human reviewer" for a test approval; `exports.submission_ready` is 0 for all of them and `exports.readiness` = `demonstration`. **Nothing was sent, published or submitted.**
 Workbook: the master workbook (28 sheets, including Vendor Quotations, Quote Comparison, Risk Register, Reconciliation, Approval Log) exported for PRJ-9001 and recalculated with LibreOffice: structure ok, 192 formulas, **0 formula errors, 0 mismatches**. The BOE is a separate `.md`/`.docx` in `5. Estimate & Cost Build-Up/basis_of_estimate`; the Monte Carlo output is not a workbook sheet (only the register is). PRJ-9001 has no quotations (those live in PRJ-9002), so its quotation sheets are empty. Microsoft Excel was **not** available.
 
 ## 17. UI / API / CLI evidence
@@ -331,7 +403,7 @@ Workbook: the master workbook (28 sheets, including Vendor Quotations, Quote Com
 | interface | result |
 |---|---|
 | CLI reports | rollup, manhours, schedule, project verify-snapshot, audit-verify, coverage, param list, rates pending — all exit 0; CLI man-hours total equals the engine's, CLI rollup tie-out true: {"cli_manhours_total": "1342.0", "engine_manhours_total": "1342.0", "cli_rollup_tie_out": {"cbs": true, "wbs": true, "crosswalk": {"FICTIONAL-CLIENT-CBS": true}}, "cli_programme_working_days": "29"} |
-| REST API | `/api/projects/PRJ-9001/estimate` totals equal the engine's current totals; rollup tie-out `{"cbs": true, "wbs": true, "crosswalk": {"FICTIONAL-CLIENT-CBS": true}}`; versions [[1, "Approved"], [2, "Draft"]]; audit verify ok (817 rows) |
+| REST API | `/api/projects/PRJ-9001/estimate` totals equal the engine's current totals; rollup tie-out `{"cbs": true, "wbs": true, "crosswalk": {"FICTIONAL-CLIENT-CBS": true}}`; versions [[1, "Approved"], [2, "Draft"]]; audit verify ok (835 rows) |
 | API permission checks | Viewer `approve_tender_export` → [403, 'PERMISSION_DENIED']; Estimator `approve_tender_export` → [403, 'PERMISSION_DENIED']; Estimator `approve_rate` → [403, 'PERMISSION_DENIED'] |
 | UI (TestClient, signed-in Estimator) | /projects/PRJ-9001/ 200; /projects/PRJ-9001/estimate 200; /projects/PRJ-9001/boq 200; /projects/PRJ-9001/reconciliation 200; /projects/PRJ-9001/analysis 200; /projects/PRJ-9001/analysis/rollup 200; /projects/PRJ-9001/analysis/schedule 200; /projects/PRJ-9001/completeness 200; /projects/PRJ-9001/workspace 200; /projects/PRJ-9002/quotes 200; no tracebacks; every page shows the SYNTHETIC designation; the estimate page shows the direct-cost total |
 
@@ -340,24 +412,27 @@ Workbook: the master workbook (28 sheets, including Vendor Quotations, Quote Com
 
 | id | finding | fix | regression test |
 |---|---|---|---|
-| D-1 | **Fixed.** A synthetic rate file imported through the controlled candidate path was published as `Published Market Price` with `is_synthetic=0` and no marker, i.e. synthetic data could not be told from a market price after publication. | candidates carry a `SYNTHETIC_DATA` flag (`--synthetic` on the CLI, `extra_flags` in code); publication creates a `Synthetic Demonstration Rate`, `is_synthetic=1`, evidence prefixed `SYNTHETIC / TEST ONLY / NOT A MARKET QUOTE`; still `Pending Review` | `test_synthetic_flag_survives_publication_as_a_synthetic_rate_not_a_market_price`; pilot stage 6 |
-| D-2 | **Fixed (gap).** `param import` had no dry run although the pilot (and the pilot-readiness document) need to validate before writing. | `--dry-run`: validates inside a rolled-back transaction; no row and no audit entry survive | `test_governed_csv_dry_run_validates_without_writing_anything`; pilot stage 8 |
-| D-3 | **Fixed.** The Basis of Estimate could not carry a project's own label/limitation statement; the required validation-only statement was absent. | the project's note is shown as a `PROJECT NOTE` banner in the BOE | pilot stage 14 (`validation-only statement`) |
+| D-1 | **Fixed (previous pass).** Synthetic rate candidates were published as `Published Market Price` with no synthetic marker. | `SYNTHETIC_DATA` flag; published as Synthetic Demonstration Rate | `test_synthetic_flag_survives_publication_as_a_synthetic_rate_not_a_market_price` |
+| D-2 | **Fixed (previous pass).** `param import` had no dry run. | `--dry-run` in a rolled-back transaction | `test_governed_csv_dry_run_validates_without_writing_anything` |
+| D-3 | **Fixed (previous pass).** The BOE could not carry a project's own validation-only statement. | `PROJECT NOTE` banner | pilot stage 14 |
+| D-4 | **Fixed (release-blocking).** Cost not tied to a programme activity was excluded from cash-out and escalation while the valuations spread the whole price (SAR 37,950.00 here; closing balance overstated). | explicit approved `time_allocation` rules; unallocated cost exposed by line; INCOMPLETE labels; only allocated price valued; financing proposals refused; High `TIMEPHASING_INCOMPLETE` finding; documented cash-flow conventions and identity checks | `tests/unit/test_time_allocation.py`; pilot stage 13d |
+| D-5 | **Fixed.** The 8 % indirect included supervision/mobilisation/preliminaries BOQ lines with no way to exclude them or detect the overlap. | `eligibility` base on percentage indirects and commercial adders; `indirect_base` report; `INDIRECT_BASE_OVERLAP` (High) and `INDIRECT_ELIGIBILITY_UNSPECIFIED` (Medium); legacy bases unchanged and reported as unspecified; approved items/frozen estimates untouched | `tests/unit/test_indirect_eligibility.py`; pilot stage 11 |
+| D-6 | **Fixed.** Day-priced plant was handled through an hours-based assumption (`PLANT_UNIT`) and a High exception that only a Commercial Approver could waive; working days, calendar days, minimum hire, standby, mobilisation were not distinguished. | extended `plant_hire_terms` (billing basis, programme activities, mobilisation/demobilisation days); `plant_hire` report reads the on-site window from the programme; `PLANT_HIRE_DAYS` (High) and `PLANT_TERMS_MISSING` (High); `factor_unit` declares a day basis | `tests/unit/test_plant_hire.py`; pilot stage 11 |
+| D-7 | **Fixed (release-blocking).** A demonstration/synthetic project could reach `SUBMISSION READY` output with test-actor approvals, and the banner described an approval as coming from an authorised human reviewer. | durable `users.actor_type`, `approvals.actor_type`/`environment`, `recon_exceptions.accepted_actor_type`; `services/readiness.py`; production readiness needs registered human approvers in a production environment, no demo/synthetic data, verifying audit entries; banner states the real status; enforced in the services (UI/API/CLI share them) | `tests/approvals/test_actor_isolation.py`, `tests/integration/test_actor_isolation_api.py`; pilot stage 19 |
 
 
-**Observations not fixed (design decisions or out of scope; none was masked):**
+**Observations (not fixed or accepted by design):**
 
 | id | observation |
 |---|---|
-| O-1 | Rates with `Unverified` confidence raise `RATE_WARNING` exceptions and a procurement 're-confirm' need for every priced resource; the RFQ package then mixes unrelated needs and levelling reports 'missing' items. The pilot imported synthetic rates at `Medium` to keep the comparison clean. |
-| O-2 | Cash flow and escalation only cover cost tied to programme activities. 37,950.00 (supervision, crane, forklift, scaffolding) is unscheduled; the cash-flow valuations still include its price share, overstating the balance. Needs a task for every cost, or a refusal/allocation rule. |
-| O-3 | Loading, escalation and cash-flow reports expose 28-digit Decimal residue (e.g. 319.9999999999999999999999999 h, 1E-22); tie-outs use a tolerance. Cosmetic, but displayed values should be quantised. |
-| O-4 | Day-priced plant raises `PLANT_UNIT` (Medium engine exception → High reconciliation finding) because plant factors are hours-based; final approval needs a Commercial Approver's documented exception. |
-| O-5 | `percent_of_direct` indirects have no eligibility base; possible duplication of supervision (BOQ line + 8 % site indirect) cannot be excluded or detected. |
-| O-6 | A demo project can reach 'SUBMISSION READY' output with TEST ACTOR approvals (SYNTHETIC_DEMO is Low in a demo project). By design for demonstrations, but the banner wording ('approved by an authorised human reviewer') is generic. |
+| O-1 | Rates with `Unverified` confidence raise `RATE_WARNING` exceptions and a procurement 're-confirm' need for every priced resource; the pilot imported synthetic rates at `Medium` to keep the comparison clean. |
+| O-3 | Loading, escalation and cash-flow reports still expose 28-digit Decimal residue (e.g. 319.9999999999999999999999999 h); tie-outs use a tolerance. Cosmetic; displayed values should be quantised. |
 | O-7 | Supplier selection is package-level only (no split award); delivery adjustments are package-level. |
-| O-8 | Programme: no resource levelling or calendar-aware plant/labour loading beyond the working-day calendar; the SS-linked MOB shows as critical. |
-| O-9 | Tax is computed on the tendered schedule total (456,759.36), not the net price (456,758.60); the 0.76 difference is the reported rounding variance. |
+| O-8 | Programme: no resource levelling; the SS-linked MOB shows as critical although it is not on the driving path. |
+| O-9 | Tax is computed on the tendered schedule total, not the net price; the difference is the reported rounding variance. |
+| O-10 | The allocation rules, eligibility rules and plant terms used in the pilot are SYNTHETIC test decisions; a real project needs company/contract inputs for each (no default is supplied). |
+| O-11 | A person with administrator or database access can register a `human` user or edit rows; actor types are a control against mistakes and test data, not identity assurance. |
+| O-12 | Only day-priced plant is compared with the programme window; week/month-priced plant is reported as unsupported. |
 
 
 ## 19. Skipped steps and limits of this run
@@ -375,6 +450,7 @@ Workbook: the master workbook (28 sheets, including Vendor Quotations, Quote Com
 Everything that makes an estimate usable: real approved rates and quotations, company productivity/norms and wages, a real calendar, commercial policy, payment terms, tax verification by a competent person, an approved classification scheme, owner requirements and attestations, the mandatory company assumptions (currently without values), and the human approvals themselves (estimate, offer, tender export). See [PILOT_READINESS.md](PILOT_READINESS.md). The synthetic numbers here must not be reused.
 
 ## 21. Three most important remaining defects / verification steps
-1. **Cash flow / escalation completeness (O-2):** require every cost to be tied to an activity (or allocate/flag its price share) so that balances are not overstated; add a reconciliation finding for unscheduled cost above a threshold set by the company.
-2. **Indirect eligibility and supervision duplication (O-5) with plant-unit handling (O-4):** let an approved indirect state its eligible base (and exclude preliminaries lines) and make day-priced plant a first-class case, so that neither needs an exception to pass the gate.
-3. **Repeat this pilot with real, authorised data** on a 30–100 line package (see PILOT_READINESS §4) and compare it with the company's independent estimate line by line; until that variance is explained, nothing in the suite is validated for estimating accuracy.
+1. **Repeat this pilot with real, authorised data** on a 30–100 line package and registered human approvers in a production environment (PILOT_READINESS §4); compare with the company's independent estimate line by line. Until then nothing is validated for estimating accuracy and no output can be submission ready.
+2. **Display precision (O-3) and rate-confidence noise (O-1):** quantise time-phased report values and decide how `Unverified` approved rates should surface (warning vs procurement need).
+3. **Identity assurance (O-11):** MFA/SSO and administrator separation of duties if the suite is ever shared beyond a trusted team; and company-specific allocation/eligibility policies loaded as approved parameters.
+
