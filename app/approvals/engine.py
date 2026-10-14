@@ -40,8 +40,10 @@ def authorize(actor: Actor, entity_type: str, action: str, *, created_by: str | 
         raise PermissionDenied(
             f"Role '{actor.role}' may not '{action}' {entity_type}. Allowed: {', '.join(sorted(roles)) or 'none'}.")
     settings = get_settings()
+    from .policy import SEPARATION_ENTITIES
     if (not settings.allow_self_approval and created_by and created_by == actor.username
-            and action in ("approve", "approve_provisional") and actor.role != Role.ADMIN.value):
+            and action in ("approve", "approve_provisional")
+            and (actor.role != Role.ADMIN.value or entity_type in SEPARATION_ENTITIES)):
         raise ApprovalBlocked("Self-approval is disabled (KSA_ALLOW_SELF_APPROVAL=false). Another reviewer must approve.",
                               code="SELF_APPROVAL_BLOCKED")
     if entity_type == Entity.SUPPLIER_SELECTION.value and value_sar is not None:

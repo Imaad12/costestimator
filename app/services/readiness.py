@@ -59,6 +59,41 @@ def _latest(db: Database, entity_type: str, entity_id: str, actions=("approve",)
     return db.one(f"SELECT * FROM approvals WHERE entity_type=? AND entity_id=? AND action IN ({q}) ORDER BY id DESC LIMIT 1", (entity_type, str(entity_id), *actions))
 
 
+def _closure_gate(db: Database, project_id: str, est) -> list[str]:
+    """Stage J: tender-delivery controls. Each applies only where the project uses the corresponding register, so legacy projects are unaffected; none can be waived here."""
+    from . import assumptions as asm, tender, workforce
+    out: list[str] = []
+    openq = tender.open_material_queries(db, project_id)
+    if openq:
+        out.append(f"{len(openq)} unresolved material technical/commercial quer{'y' if len(openq) == 1 else 'ies'}: " + ", ".join(q["id"] for q in openq[:6]))
+    missing_docs = [d["doc_ref"] for d in tender.list_documents(db, project_id) if d["status"] == "Missing"]
+    if missing_docs:
+        out.append("required tender document(s) not received: " + ", ".join(missing_docs))
+    used = sorted(set(getattr(est.direct, "used_assumptions", set()) or set()))
+    syn = [r["id"] for r in db.all(f"SELECT DISTINCT id FROM assumptions WHERE is_synthetic=1 AND id IN ({','.join('?' * len(used)) or 'NULL'})", tuple(used))] if used else []
+    if syn:
+        out.append("synthetic assumption(s) feed the estimate: " + ", ".join(syn[:6]))
+    # Unapproved material assumptions are reconciliation findings (High); they can only be accepted as exceptions by a registered human Commercial Approver, never silently.
+    if workforce.list_activities(db, project_id):
+        b = workforce.latest_baseline(db, project_id, approved_only=True)
+        if not b:
+            out.append("programme baseline: none approved")
+        elif b["result"].get("synthetic") or b["provisional"]:
+            out.append("programme baseline rests on synthetic or provisional norms / profile / calendar")
+        pend = [n for n in db.all("SELECT n.id, n.status FROM productivity_norms n JOIN work_activities a ON a.norm_id=n.id WHERE a.project_id=? AND n.version=(SELECT MAX(version) FROM productivity_norms WHERE id=n.id) GROUP BY n.id", (project_id,)) if n["status"] != "Approved"]
+        if pend:
+            out.append("productivity norms not approved: " + ", ".join(n["id"] for n in pend))
+    pk = db.one("SELECT pk FROM tender_packs WHERE project_id=? AND kind='tender' ORDER BY revision DESC LIMIT 1", (project_id,))
+    if pk:
+        for code in ("D16", "D06"):
+            g = db.one("SELECT doc_id FROM generated_documents WHERE pack_pk=? AND doc_code=? AND status<>'Not Applicable'", (pk["pk"], code))
+            if g:
+                row = db.one("SELECT * FROM approvals WHERE entity_type=? AND entity_id=? AND action='approve' ORDER BY id DESC LIMIT 1", (Entity.TENDER_DOCUMENT.value, f"{project_id}/{g['doc_id']}"))
+                probs, _ = check_approval(db, row, f"document {g['doc_id']} approval", entity_type=Entity.TENDER_DOCUMENT.value, entity_id=f"{project_id}/{g['doc_id']}")
+                out.extend(probs)
+    return out
+
+
 def evaluate(db: Database, project_id: str, version_id: int, export_approval_id: int, *, gate: dict | None = None) -> dict:
     """Structured readiness verdict: {'classification': 'production'|'demonstration'|'not_ready', 'production_ready': bool, 'reasons': [...], 'chain': [...]}."""
     from ..reconciliation import engine as recon
@@ -135,6 +170,7 @@ def evaluate(db: Database, project_id: str, version_id: int, export_approval_id:
     comp = profiles.compliance_report(db, project_id, est=est)
     if comp.get("linked") and comp.get("mandatory_unmet"):
         reasons.append(f"client profile: {len(comp['mandatory_unmet'])} mandatory requirement(s) unmet or unassessed")
+    reasons.extend(_closure_gate(db, project_id, est))
     ar = audit.verify_chain(db)
     if not ar["ok"]:
         reasons.append(f"audit chain does not verify (first bad row {ar.get('first_bad_id')})")

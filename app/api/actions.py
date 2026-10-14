@@ -751,3 +751,4 @@ def _(db, a, p):
 
 
 from . import actions_ext  # noqa: E402,F401  (registers the iteration-4 actions)
+from . import actions_closure  # noqa: E402,F401  (registers the end-to-end closure actions)

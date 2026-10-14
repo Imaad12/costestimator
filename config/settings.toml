@@ -11,7 +11,7 @@ host = "127.0.0.1"
 port = 8000
 
 [security]
-allow_self_approval = true       # single-user MVP. Set false for small teams (creator cannot approve own item).
+allow_self_approval = false      # four-eyes by default: the creator cannot approve their own item (set true only for a single-user local demo).
 token_ttl_hours = 12
 csrf_origin_check = true          # cookie-authenticated writes must come from the same origin (see docs/SECURITY.md)
 security_headers = true

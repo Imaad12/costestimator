@@ -106,3 +106,17 @@ def largest_remainder_allocate(total: Decimal, weights: list[Decimal], dp: int =
     for k in range(abs(remainder_units)):
         out[order[k % n]] += step
     return out
+
+
+def quantise_tree(obj: Any, dp: int = 2) -> Any:
+    """Presentation precision for time-phased reports: every Decimal in a nested report is rounded half-up to `dp` places. Calculation precision is kept inside the engines;
+    only the returned report is quantised (a 28-digit residue such as 3E-21 is never shown to a reader)."""
+    from decimal import ROUND_HALF_UP
+    q = Decimal(1).scaleb(-dp)
+    if isinstance(obj, Decimal):
+        return obj.quantize(q, rounding=ROUND_HALF_UP) if obj.is_finite() else obj
+    if isinstance(obj, dict):
+        return {k: quantise_tree(v, dp) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return type(obj)(quantise_tree(v, dp) for v in obj)
+    return obj

@@ -115,6 +115,7 @@ def load_resource_catalogues(db: Database) -> dict[str, int]:
 
 
 def load_assumption_register(db: Database) -> int:
+    from .assumptions import FAMILY_DEFAULT_CATEGORY
     p = _data("assumptions", "assumptions_register.csv")
     if not p.exists():
         return 0
@@ -129,7 +130,7 @@ def load_assumption_register(db: Database) -> int:
             unit=r.get("unit") or None, engine_key=r.get("engine_key") or None,
             mandatory_for_projects=int(r.get("mandatory_for_projects") or 0), confidence=r.get("confidence") or "Low",
             source=r.get("source"), status="Pending Review", notes=r.get("notes"), is_synthetic=0,
-            created_by="system:seed", created_at=now_iso()))
+            created_by="system:seed", created_at=now_iso(), origin="seed", category=FAMILY_DEFAULT_CATEGORY.get(r["family"])))
         n += 1
     return n
 

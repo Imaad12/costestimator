@@ -62,6 +62,17 @@ def seed_demo(db: Database, project_name: str = "DEMO - Synthetic Mixed-Use Buil
     existing = db.one("SELECT id FROM projects WHERE name=?", (project_name,))
     if existing:
         return {"project_id": existing["id"], "note": "Demo project already exists."}
+    # The loader authors AND approves as the single 'demo-seed' principal (synthetic data only; recorded as an unregistered, non-human principal on a demonstration project).
+    # Four-eyes is the default everywhere else, so it is relaxed only for the duration of this seeding and always restored.
+    prior = s.allow_self_approval
+    s.allow_self_approval = True
+    try:
+        return _seed_demo(db, project_name, s)
+    finally:
+        s.allow_self_approval = prior
+
+
+def _seed_demo(db: Database, project_name: str, s) -> dict:
     with db.tx():
         for rid, rtype, desc, unit, cc, price, rate_unit, state in D.RESOURCES:
             rates.create_resource(db, SEED, resource_type=rtype, description=desc, unit=unit, cost_code=cc, id=rid, is_synthetic=True,

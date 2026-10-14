@@ -41,6 +41,17 @@ POLICY: dict[str, dict[str, set[str]]] = {
     Entity.AI_SUGGESTION.value: {"approve": {E, P, C, A}, "reject": {E, P, C, A}},
 }
 
+POLICY[Entity.PRODUCTIVITY_NORM.value] = {"approve": {E, C, A}, "reject": {E, C, A}}
+POLICY[Entity.WORKFORCE_PROFILE.value] = {"approve": {E, C, A}, "reject": {E, C, A}}
+POLICY[Entity.PROGRAMME_BASELINE.value] = {"approve": {E, C, A}, "reject": {E, C, A}}
+POLICY[Entity.TENDER_QUERY.value] = {"approve": {E, C, A}, "reject": {E, C, A}}                 # approval = release for issue to the customer
+POLICY[Entity.TENDER_REGISTER_ITEM.value] = {"approve": {E, C, A}, "reject": {E, C, A}}
+POLICY[Entity.TENDER_DOCUMENT.value] = {"approve": {C, A}, "reject": {C, A}}                     # technical / commercial proposal and final submission documents
+
+# Commercially material records for which an Administrator is NOT exempt from the four-eyes rule (KSA_ALLOW_SELF_APPROVAL=false).
+SEPARATION_ENTITIES = {Entity.ASSUMPTION.value, Entity.PROJECT_ASSUMPTION.value, Entity.PRODUCTIVITY_NORM.value, Entity.WORKFORCE_PROFILE.value,
+                       Entity.PROGRAMME_BASELINE.value, Entity.TENDER_QUERY.value, Entity.TENDER_DOCUMENT.value, Entity.RATE.value}
+
 POLICY["client_profile"] = {"approve": {C, A}, "reject": {C, A}}
 POLICY["variation"] = {"approve": {C, A}, "reject": {C, A}}
 

@@ -93,6 +93,15 @@ def cmd_report(a) -> int:
     return 0
 
 
+def cmd_action(a) -> int:
+    """Run any registered action as a real user (same registry and server-side checks as the REST API and the UI)."""
+    from .api import actions
+    from .api.serializers import ser
+    params = json.loads(Path(a.params[1:]).read_text(encoding="utf-8")) if a.params.startswith("@") else json.loads(a.params)
+    _print(ser(actions.run(get_db(), _actor(a), a.name, params)))
+    return 0
+
+
 def cmd_param(a) -> int:
     from .services import governed
     db = get_db()
@@ -389,6 +398,8 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("report", help="run a registered project report / analysis (use 'report list x y' to list)")
     s.add_argument("project"); s.add_argument("name"); s.add_argument("--param", action="append", help="name=value"); s.add_argument("--save", action="store_true"); s.add_argument("--user")
     s.set_defaults(fn=cmd_report)
+    s = sub.add_parser("action", help="run a registered action as a real user: action NAME 'JSON' | @file.json  (see /api/actions)")
+    s.add_argument("name"); s.add_argument("params"); s.add_argument("--user"); s.set_defaults(fn=cmd_action)
     s = sub.add_parser("param", help="governed parameters: kinds / list / propose / submit / approve / reject")
     ps_ = s.add_subparsers(dest="pcmd3", required=True)
     ps_.add_parser("kinds").set_defaults(fn=cmd_param)

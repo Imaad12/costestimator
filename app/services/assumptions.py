@@ -20,6 +20,49 @@ FAMILIES = {
 }
 
 
+# Register categories (brief section 5.1). Families A-L are the legacy library grouping; `category` is the governance classification.
+CATEGORIES = [
+    "Scope and design", "Quantities and measurement", "Productivity and workforce", "Programme and work calendar",
+    "Material, labour, plant and equipment rates", "Supplier and subcontractor quotes", "Logistics, transport and landed cost",
+    "Currency and exchange rates", "Taxes and statutory costs", "Preliminaries and indirects", "Risk and contingency",
+    "Escalation and inflation", "Commercial terms and payment", "Retention, bonds and financing",
+    "Technical standards and client specifications", "Exclusions, interfaces and responsibilities", "Commissioning, testing and handover",
+]
+FAMILY_DEFAULT_CATEGORY = {"A": "Scope and design", "B": "Quantities and measurement", "C": "Material, labour, plant and equipment rates",
+                           "D": "Productivity and workforce", "E": "Material, labour, plant and equipment rates", "F": "Logistics, transport and landed cost",
+                           "G": "Scope and design", "H": "Preliminaries and indirects", "I": "Commercial terms and payment", "J": "Taxes and statutory costs",
+                           "K": "Commissioning, testing and handover", "L": "Risk and contingency"}
+ORIGINS = ("manual", "import", "seed", "calculated", "ai", "synthetic")
+
+# What a reader may be told about the standing of a value (brief section 5.3). Never "Verified" unless a person approved it with evidence.
+DATA_CLASSES = ("Verified source data", "Company-approved internal data", "Project-approved data", "Imported but unverified", "Pending human review",
+                "AI-proposed data", "Explicitly synthetic test data", "Missing data")
+
+
+def category_of(row: dict) -> str:
+    return row.get("category") or FAMILY_DEFAULT_CATEGORY.get(row.get("family"), "Scope and design")
+
+
+def data_class(row: dict, *, project_override: bool = False) -> str:
+    """Classify an assumption row (global version or project override row). Order matters: synthetic and AI origin never read as verified."""
+    if row.get("is_synthetic") or row.get("origin") == "synthetic":
+        return "Explicitly synthetic test data"
+    val = row.get("override_value") if "override_value" in row else row.get("default_value")
+    if val in (None, ""):
+        return "Missing data"
+    if row.get("origin") == "ai":
+        return "AI-proposed data" if row.get("status") != Status.APPROVED.value else "Company-approved internal data"
+    if row.get("status") in (Status.DRAFT.value, Status.PENDING.value):
+        return "Imported but unverified" if row.get("origin") in ("import", "seed") and row.get("status") == Status.DRAFT.value else "Pending human review"
+    if row.get("status") != Status.APPROVED.value:
+        return "Missing data"
+    if project_override:
+        return "Project-approved data"
+    if row.get("evidence") and str(row.get("confidence")) in ("High", "Medium") and row.get("origin") == "manual":
+        return "Verified source data"
+    return "Company-approved internal data"
+
+
 @dataclass
 class ResolvedAssumption:
     id: str
@@ -71,8 +114,18 @@ def create_assumption(db: Database, actor: Actor, *, id: str, family: str, name:
                       unit: str | None = None, engine_key: str | None = None, source: str | None = None,
                       evidence: str | None = None, confidence: str = "Low", mandatory_for_projects: bool = False,
                       valid_from: str | None = None, valid_to: str | None = None, is_synthetic: bool = False,
-                      applicability: str | None = None, notes: str | None = None) -> str:
+                      applicability: str | None = None, notes: str | None = None, category: str | None = None, origin: str = "manual",
+                      reason: str | None = None, business_impact: str | None = None, uncertainty: str | None = None,
+                      consequence_if_missing: str | None = None, affects: str | None = None) -> str:
     approvals.require_author(actor)
+    if category is not None and category not in CATEGORIES:
+        raise ValidationFailed(f"category must be one of {CATEGORIES}")
+    if origin not in ORIGINS:
+        raise ValidationFailed(f"origin must be one of {list(ORIGINS)}")
+    if origin == "ai" or actor.is_ai:
+        raise ValidationFailed("AI-proposed assumptions enter only through ai_suggestions (review-pending), never as register rows.", code="AI_FORBIDDEN")
+    if is_synthetic:
+        origin = "synthetic"
     if family not in FAMILIES:
         raise ValidationFailed(f"family must be one of {list(FAMILIES)}")
     if db.one("SELECT 1 FROM assumptions WHERE id=?", (id,)):
@@ -84,7 +137,8 @@ def create_assumption(db: Database, actor: Actor, *, id: str, family: str, name:
         applicability=applicability, value_type=value_type, default_value=default_value or None, unit=unit,
         engine_key=engine_key, mandatory_for_projects=int(mandatory_for_projects), confidence=confidence,
         source=source, evidence=evidence, valid_from=valid_from, valid_to=valid_to, status=Status.DRAFT.value,
-        notes=notes, is_synthetic=int(is_synthetic), created_by=actor.username, created_at=now_iso()))
+        notes=notes, is_synthetic=int(is_synthetic), created_by=actor.username, created_at=now_iso(), category=category or FAMILY_DEFAULT_CATEGORY[family],
+        origin=origin, reason=reason, business_impact=business_impact, uncertainty=uncertainty, consequence_if_missing=consequence_if_missing, affects=affects))
     audit.log(db, actor, "assumption", id, "create", after={"name": name, "default": default_value})
     return id
 
@@ -94,7 +148,8 @@ def revise_assumption(db: Database, actor: Actor, aid: str, **changes) -> int:
     approvals.require_author(actor)
     cur = get_latest(db, aid)
     allowed = {"name", "description", "default_value", "unit", "source", "evidence", "confidence", "valid_from",
-               "valid_to", "notes", "applicability", "applies_to", "mandatory_for_projects"}
+               "valid_to", "notes", "applicability", "applies_to", "mandatory_for_projects", "category", "reason", "business_impact",
+               "uncertainty", "consequence_if_missing", "affects"}
     bad = set(changes) - allowed
     if bad:
         raise ValidationFailed(f"Not editable: {sorted(bad)}")
@@ -104,6 +159,7 @@ def revise_assumption(db: Database, actor: Actor, aid: str, **changes) -> int:
         return cur["version"]
     new = {k: v for k, v in cur.items() if k not in ("pk",)}
     new.update(changes)
+    new.update(supersedes_version=cur["version"], reviewed_by=None, reviewed_at=None)
     new.update(version=cur["version"] + 1, status=Status.DRAFT.value, created_by=actor.username,
                created_at=now_iso(), approved_by=None, approved_at=None)
     db.insert("assumptions", new)
@@ -261,6 +317,46 @@ def resolve(db: Database, project_id: str | None, aid: str, as_of: str | None = 
 def resolve_key(db: Database, project_id: str | None, engine_key: str, as_of: str | None = None) -> ResolvedAssumption | None:
     r = db.one("SELECT id FROM assumptions WHERE engine_key=? ORDER BY version DESC LIMIT 1", (engine_key,))
     return resolve(db, project_id, r["id"], as_of) if r else None
+
+
+def assumption_history(db: Database, aid: str) -> list[dict]:
+    """Every version of an assumption with its approvals and audit events (append-only record)."""
+    vers = rows_to_dicts(db.all("SELECT * FROM assumptions WHERE id=? ORDER BY version", (aid,)))
+    if not vers:
+        raise NotFound(f"Assumption {aid} not found.")
+    ap = approvals.approval_history(db, Entity.ASSUMPTION.value, aid)
+    ev = rows_to_dicts(db.all("SELECT ts, actor, action, comment FROM audit_log WHERE entity_type='assumption' AND entity_id=? ORDER BY id", (aid,)))
+    for v in vers:
+        v["approvals"] = [a for a in ap if str(a.get("version")) == str(v["version"])]
+    return [dict(versions=vers, audit=ev)]
+
+
+def evidence_report(db: Database, project_id: str, *, adopted_only: bool = False) -> dict:
+    """The standing of every assumption the project adopted or that is mandatory, classified (never 'verified' when synthetic / unverified / missing)."""
+    rows, problems = [], []
+    seen = set()
+    for r in db.all("SELECT DISTINCT assumption_id FROM project_assumptions WHERE project_id=? ORDER BY assumption_id", (project_id,)):
+        seen.add(r["assumption_id"])
+    if not adopted_only:
+        for a in list_assumptions(db):
+            if a["mandatory_for_projects"]:
+                seen.add(a["id"])
+    for aid in sorted(seen):
+        ra = resolve(db, project_id, aid)
+        g = get_latest(db, aid)
+        row = dict(g)
+        if ra.origin == "project_override":
+            prow = _latest_project_row(db, project_id, aid) or {}
+            cls = data_class({**prow, "is_synthetic": g["is_synthetic"], "origin": g["origin"], "status": ra.status, "override_value": ra.value}, project_override=True)
+        else:
+            row.update(status=ra.status, default_value=ra.value)
+            cls = data_class(row)
+        rows.append(dict(id=aid, name=ra.name, category=category_of(g), value=ra.value, unit=ra.unit, status=ra.status, origin=ra.origin, version=ra.version,
+                         data_class=cls, mandatory=bool(g["mandatory_for_projects"]), consequence_if_missing=g.get("consequence_if_missing")))
+        if cls not in ("Verified source data", "Company-approved internal data", "Project-approved data"):
+            problems.append(f"{aid}: {cls}" + (" (mandatory)" if g["mandatory_for_projects"] else ""))
+    return dict(project_id=project_id, rows=rows, problems=problems, fully_verified=not problems,
+                by_class={c: sum(1 for r in rows if r["data_class"] == c) for c in DATA_CLASSES})
 
 
 def project_assumption_status(db: Database, project_id: str) -> list[dict]:

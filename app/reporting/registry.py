@@ -79,7 +79,8 @@ def _schedule(db, pid):
          ("preliminary", "0", "1 = include unapproved inputs")], group="Programme")
 def _loading(db, pid, measure="labour_hours", period="week", block_days="5", preliminary="0"):
     from ..services import programme
-    return programme.loading_report(db, pid, measure=measure, period=period, block_days=int(block_days), include_unapproved=str(preliminary) in ("1", "true", "yes"))
+    from ..core.money import quantise_tree
+    return quantise_tree(programme.loading_report(db, pid, measure=measure, period=period, block_days=int(block_days), include_unapproved=str(preliminary) in ("1", "true", "yes")))
 
 
 @report("manhours", "Man-hour aggregation", "Own-labour hours by craft, cost code, division and WBS (subcontract labour is not included).",
@@ -142,14 +143,16 @@ def _risk(db, pid, trials="10000", seed="20260101", target_pct="80", preliminary
         [("index_dataset", "", "optional index dataset to show (e.g. the GASTAT CCI dataset name)"), ("preliminary", "0", "1 = include unapproved inputs")], group="Risk and commercial")
 def _escalation(db, pid, index_dataset="", preliminary="0"):
     from ..services import risk
-    return risk.escalation_report(db, pid, index_dataset=index_dataset or None, include_unapproved=str(preliminary) in ("1", "true", "yes"))
+    from ..core.money import quantise_tree
+    return quantise_tree(risk.escalation_report(db, pid, index_dataset=index_dataset or None, include_unapproved=str(preliminary) in ("1", "true", "yes")))
 
 
 @report("cashflow", "Cash flow, retention, bonds and financing", "Monthly cash position from approved payment terms; peak funding, interest and bond cost.",
         [("terms_code", "", "payment-terms code (default: first approved)"), ("preliminary", "0", "1 = include unapproved inputs")], group="Risk and commercial")
 def _cashflow(db, pid, terms_code="", preliminary="0"):
     from ..services import cashflow
-    return cashflow.cashflow_report(db, pid, terms_code=terms_code or None, include_unapproved=str(preliminary) in ("1", "true", "yes"))
+    from ..core.money import quantise_tree
+    return quantise_tree(cashflow.cashflow_report(db, pid, terms_code=terms_code or None, include_unapproved=str(preliminary) in ("1", "true", "yes")))
 
 
 def _flag(v) -> bool:
@@ -212,3 +215,51 @@ def _oh(db, pid, pool_code=""):
 def _methods(db, pid, preliminary="0"):
     from ..services import methods
     return methods.comparison_report(db, pid, include_unapproved=_flag(preliminary))
+
+
+# ------------------------------------------------------------------------------------------------ end-to-end closure reports
+@report("assumption_evidence", "Assumptions: standing of every adopted value", "Each adopted/mandatory assumption classified as verified, company-approved, project-approved, imported-unverified, pending review, AI-proposed, synthetic or missing.", group="Governance")
+def _assumption_evidence(db, pid):
+    from ..services import assumptions
+    return assumptions.evidence_report(db, pid)
+
+
+@report("productivity_programme", "Productivity-based, resource-constrained programme", "Activities scheduled from approved (or explicitly provisional) productivity norms, a workforce profile and the project calendar; reports gaps and what they do to the programme.",
+        [("profile", "", "workforce profile id"), ("provisional", "false", "true = include unapproved norms/profile (result is labelled provisional)")], group="Programme")
+def _productivity_programme(db, pid, profile, provisional):
+    from ..services import workforce
+    if not profile:
+        raise ValidationFailed("profile is required (a workforce profile id).", code="FIELD_REQUIRED")
+    prov = str(provisional).lower() in ("1", "true", "yes")
+    r = workforce.build_programme(db, pid, profile, allow_provisional=prov, allow_unconfirmed_calendar=prov)
+    r.pop("workers_by_day", None)
+    return r
+
+
+@report("crew_scenarios", "Crew-size scenarios", "The same activities, norms and calendar scheduled for several workforce profiles: duration, staffing, labour-hours, critical path, constraints and (when role costs are entered) cost.",
+        [("profiles", "", "comma separated workforce profile ids"), ("provisional", "false", "true = include unapproved inputs (labelled)")], group="Programme")
+def _crew_scenarios(db, pid, profiles, provisional):
+    from ..services import workforce
+    ids = [x.strip() for x in profiles.split(",") if x.strip()]
+    if len(ids) < 1:
+        raise ValidationFailed("profiles is required.", code="FIELD_REQUIRED")
+    prov = str(provisional).lower() in ("1", "true", "yes")
+    return workforce.crew_scenarios(db, pid, ids, allow_provisional=prov, allow_unconfirmed_calendar=prov)
+
+
+@report("tender_queries", "Technical / commercial query registers", "All draft and issued queries by register and status; unresolved material queries block submission.", group="Tender")
+def _tender_queries(db, pid):
+    from ..services import tender
+    return tender.queries_report(db, pid)
+
+
+@report("tender_documents", "Received tender documents and revisions", "Documents received, revisions, superseded and missing ones, BOQ-vs-register revision conflicts; says what was only registered, not interpreted.", group="Tender")
+def _tender_documents(db, pid):
+    from ..services import tender
+    return tender.documents_report(db, pid)
+
+
+@report("applicability", "Tender document applicability matrix", "Each of the 45 tender documents classified Required / Conditional / Not Applicable / Missing Customer Requirement with a reason.", group="Tender")
+def _applicability(db, pid):
+    from ..tender import catalogue
+    return catalogue.matrix(db, pid)

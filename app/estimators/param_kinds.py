@@ -116,10 +116,10 @@ def _plant_terms(d: dict) -> dict:
 
 
 @kind("calendar", "Project calendar", {E, C, A},
-      "Start date, working weekdays (0=Mon..6=Sun) and non-working dates. Working weekdays and holidays are entered by the estimator from the "
-      "contract / client calendar - none are assumed.")
+      "Start date, working weekdays (0=Mon..6=Sun), non-working dates, daily hours, approved reduced-hour windows (e.g. Ramadan) and shutdowns. All of it is entered by the "
+      "estimator from the contract / client calendar - none is assumed; a default Saudi profile is only a starting point that the project must confirm.")
 def _calendar(d: dict) -> dict:
-    _no_extra(d, {"start_date", "work_weekdays", "holidays", "hours_per_day"}, "calendar")
+    _no_extra(d, {"start_date", "work_weekdays", "holidays", "hours_per_day", "reduced_hours", "shutdowns", "calendar_source", "requires_confirmation"}, "calendar")
     sd = text(d, "start_date")
     try:
         date.fromisoformat(sd)
@@ -142,8 +142,33 @@ def _calendar(d: dict) -> dict:
             date.fromisoformat(str(h))
         except ValueError:
             raise ValidationFailed(f"holiday {h!r} must be YYYY-MM-DD.", code="PARAM_FIELD")
-    return {"start_date": sd, "work_weekdays": wd, "holidays": sorted({str(h) for h in hol}),
-            "hours_per_day": dec(d, "hours_per_day", required=False, gt="0")}
+    hpd = dec(d, "hours_per_day", required=False, gt="0")
+
+    def _windows(key: str, need_hours: bool) -> list[dict]:
+        out = []
+        for w in d.get(key) or []:
+            if not isinstance(w, dict) or not {"from", "to"} <= set(w):
+                raise ValidationFailed(f"{key} entries need 'from' and 'to' (YYYY-MM-DD).", code="PARAM_FIELD")
+            try:
+                a, b = date.fromisoformat(str(w["from"])), date.fromisoformat(str(w["to"]))
+            except ValueError:
+                raise ValidationFailed(f"{key}: dates must be YYYY-MM-DD.", code="PARAM_FIELD")
+            if b < a:
+                raise ValidationFailed(f"{key}: 'to' is before 'from'.", code="PARAM_FIELD")
+            e = {"from": a.isoformat(), "to": b.isoformat(), "reason": str(w.get("reason") or "")}
+            if need_hours:
+                e["hours"] = dec(w, "hours", gt="0")
+                if hpd is None:
+                    raise ValidationFailed("reduced_hours needs hours_per_day (the standard day) to be stated.", code="PARAM_FIELD")
+                if Decimal(e["hours"]) > Decimal(hpd):
+                    raise ValidationFailed("a reduced-hours window cannot exceed hours_per_day.", code="PARAM_FIELD")
+                if not e["reason"]:
+                    raise ValidationFailed("reduced_hours needs a reason / approval reference.", code="PARAM_FIELD")
+            out.append(e)
+        return out
+    return {"start_date": sd, "work_weekdays": wd, "holidays": sorted({str(h) for h in hol}), "hours_per_day": hpd,
+            "reduced_hours": _windows("reduced_hours", True), "shutdowns": _windows("shutdowns", False),
+            "calendar_source": str(d.get("calendar_source") or ""), "requires_confirmation": bool(d.get("requires_confirmation", False))}
 
 
 @kind("mto_factor", "Take-off derivation factor", {E, C, A},
@@ -370,7 +395,7 @@ def _method_alt(d: dict) -> dict:
 EXAMPLES: dict[str, dict] = {
     "productivity_factor": {"category": "height", "factor": "", "scope_cost_prefix": "", "scope_wbs": ""},
     "plant_hire_terms": {"resource_id": "", "min_hire_qty": "", "standby_qty": "", "standby_pct_of_rate": "", "billing_basis": "working_day | calendar_day", "programme_tasks": [], "mobilisation_qty": "", "demobilisation_qty": ""},
-    "calendar": {"start_date": "YYYY-MM-DD", "work_weekdays": [], "holidays": []},
+    "calendar": {"start_date": "YYYY-MM-DD", "work_weekdays": [], "holidays": [], "hours_per_day": "", "reduced_hours": [{"from": "YYYY-MM-DD", "to": "YYYY-MM-DD", "hours": "", "reason": ""}], "shutdowns": [{"from": "YYYY-MM-DD", "to": "YYYY-MM-DD", "reason": ""}], "calendar_source": "", "requires_confirmation": False},
     "mto_factor": {"template": "", "slot": "", "resource_id": "", "factor": "", "waste_pct": "", "basis": ""},
     "classification_scheme": {"name": "", "source_document": "", "classes": [{"class_id": "", "name": "", "min_definition_pct": "", "max_definition_pct": "", "low_pct": "", "high_pct": ""}]},
     "maturity_input": {"definition_pct": "", "basis": "", "deliverables_status": ""},

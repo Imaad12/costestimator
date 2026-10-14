@@ -228,8 +228,13 @@ class Calendar:
 
 
 def calendar_from_param(data: dict) -> Calendar:
-    return Calendar(date.fromisoformat(data["start_date"]), frozenset(int(x) for x in data["work_weekdays"]),
-                    frozenset(date.fromisoformat(h) for h in data.get("holidays") or []))
+    hol = {date.fromisoformat(h) for h in data.get("holidays") or []}
+    for w in data.get("shutdowns") or []:                       # a shutdown is a non-working window: it never silently shortens the programme
+        d, end = date.fromisoformat(w["from"]), date.fromisoformat(w["to"])
+        while d <= end:
+            hol.add(d)
+            d += timedelta(days=1)
+    return Calendar(date.fromisoformat(data["start_date"]), frozenset(int(x) for x in data["work_weekdays"]), frozenset(hol))
 
 
 def task_dates(cal: Calendar, es: Decimal, ef: Decimal) -> tuple[date, date]:
