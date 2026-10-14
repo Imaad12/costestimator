@@ -13,6 +13,7 @@ Anything else is either a 'demonstration' export (demo projects only, never desc
 """
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from ..approvals.policy import allowed_roles
@@ -136,6 +137,11 @@ def evaluate(db: Database, project_id: str, version_id: int, export_approval_id:
 
     if proj.get("basis_defaulted"):
         reasons.append(f"project region/currency ({proj.get('region')} / {proj.get('currency')}) are system defaults, not confirmed by a person")
+
+    for imp in db.all("SELECT id, summary_json FROM boq_imports WHERE project_id=?", (project_id,)):
+        sm = json.loads(imp["summary_json"] or "{}")
+        if sm.get("unverified_transcription"):
+            reasons.append(f"BOQ import #{imp['id']} is a transcription from '{(sm.get('derived_from') or {}).get('source_file')}' that no second person has checked")
 
     def need(problems_info):
         problems, info = problems_info

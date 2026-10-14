@@ -78,3 +78,9 @@ DuckDB analytics (architecture-compatible); GASTAT website adapter, Etimad adapt
 * **Cash flow and escalation are not part of the frozen snapshot** (they read the current approved payment terms and programme); the estimate totals and every printed estimate figure are frozen. Tax is charged on the tendered pricing schedule, which differs from the commercial net price by the reported rounding variance (O-9).
 * **Interfaces**: the closure registers are reachable through reports (UI/REST/CLI), REST actions and the CLI `action` command; there are no bespoke UI forms for norms, profiles, queries or registers.
 * **Identity**: in-process service calls trust the `Actor` they receive (the approval is *recorded* as `unregistered`/`role_mismatch`/`test` and never counts for readiness); there is no MFA/SSO; an Administrator can register a user typed `human`. A hypothetical handover pack is a simulation: no award is recorded and none is assumed.
+
+## Practice-test follow-ups (2026-10-14)
+* PDF/image BOQs are not read (no OCR by design); transcribe to CSV/XLSX and import with `derived_from`; a second person must check it before production readiness.
+* Estimate totals show `None` (not 0) for direct cost when nothing is priced and for indirect cost when no indirect item exists; a partially priced estimate still shows the partial direct-cost sum, labelled by the estimate state (Incomplete).
+* The estimate state does not itself consider an unchecked transcription or placeholder rates; the readiness gate and banners do.
+* A demonstration project on non-synthetic data is labelled DEMONSTRATION / PRACTICE, not SYNTHETIC; synthetic content is detected from the customer flag, synthetic rates in the frozen estimate and synthetic registers.

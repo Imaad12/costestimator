@@ -44,7 +44,9 @@ class EstimateResult:
     def totals(self) -> dict:
         c = self.commercial
         return {
-            "direct_cost": self.direct.direct_cost_total, "indirect_cost": self.indirect.total,
+            # unknown is not zero: nothing priced -> None; no indirect item defined -> None
+            "direct_cost": self.direct.direct_cost_total if any(i.complete for i in self.direct.items.values() if i.pricing_method != "excluded") or not self.direct.items else None,
+            "indirect_cost": self.indirect.total if self.indirect.lines else None,
             "total_cost": c.total_cost if c else None, "selling_price_pre_tax": self.schedule.total_pre_tax if self.schedule else None,
             "commercial_net_price": c.net_price if c else None, "tax": c.tax_total if c else None,
             "final_payable": c.final_payable if c else None,

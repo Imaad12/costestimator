@@ -19,3 +19,5 @@ projects/*
 !projects/.gitkeep
 !projects/README.md
 practice_test/input/*.pdf
+practice_test/real_document/generated/
+practice_test/real_document/priced_run/

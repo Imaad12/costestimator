@@ -24,6 +24,7 @@ from .catalogue import COND, MCR, NA, REQ, TEMPLATE_VERSION
 CONFIDENTIAL_REAL = "CONFIDENTIAL - commercial and technical tender information"
 CONFIDENTIAL_SYN = "CONFIDENTIAL (synthetic test data) - no real customer or supplier data"
 SYN_MARK = "SYNTHETIC TEST DATA - FICTIONAL CUSTOMER - NOT A REAL TENDER - NOT A MARKET QUOTE - NOT FOR SUBMISSION"
+DEMO_MARK = "DEMONSTRATION / PRACTICE PROJECT - NOT A TENDER - NOT FOR SUBMISSION"
 HYPO_BANNER = "HYPOTHETICAL POST-AWARD HANDOVER - SIMULATION ONLY - NO AWARD HAS BEEN MADE"
 
 
@@ -138,7 +139,7 @@ def generate_pack(db: Database, actor: Actor, project_id: str, *, out_root: Path
         status = doc_status(pack_class, pack_ready, bool(miss), _doc_approved(db, project_id, doc_id))
         blocked_reason = "; ".join(miss) if miss else None
         meta = dict(project_id=project_id, project_name=proj["name"], customer=c.customer, doc_id=doc_id, title=doc.title, revision=rev, issue_date=issue_date, status=status, author=actor.username,
-                    reviewer=reviewer, estimate_version=f"v{v['version_no']}", fingerprint=v["inputs_hash"][:16], template=tmpl, banner=banner, synthetic_mark=SYN_MARK if c.synthetic else "",
+                    reviewer=reviewer, estimate_version=f"v{v['version_no']}", fingerprint=v["inputs_hash"][:16], template=tmpl, banner=banner, synthetic_mark=SYN_MARK if c.synthetic else (DEMO_MARK if c.demo else ""),
                     confidentiality=CONFIDENTIAL_SYN if c.synthetic else CONFIDENTIAL_REAL)
         fmts = ("docx", "pdf") + (("xlsx",) if m["xlsx"] else ())
         files = _render(doc, meta, out, fmts)
@@ -181,7 +182,7 @@ def generate_handover_pack(db: Database, actor: Actor, project_id: str, *, out_r
         doc_id = f"{project_id}-{code}"
         tmpl = f"{tid}@{TEMPLATE_VERSION}"
         meta = dict(project_id=project_id, project_name=c.project["name"], customer=c.customer, doc_id=doc_id, title=doc.title, revision=rev, issue_date=issue_date, status=status, author=actor.username,
-                    reviewer="not yet reviewed", estimate_version=f"v{v['version_no']}", fingerprint=v["inputs_hash"][:16], template=tmpl, banner=banner, synthetic_mark=SYN_MARK if c.synthetic else "",
+                    reviewer="not yet reviewed", estimate_version=f"v{v['version_no']}", fingerprint=v["inputs_hash"][:16], template=tmpl, banner=banner, synthetic_mark=SYN_MARK if c.synthetic else (DEMO_MARK if c.demo else ""),
                     confidentiality=CONFIDENTIAL_SYN if c.synthetic else CONFIDENTIAL_REAL)
         fmts = ("docx", "pdf") + (("xlsx",) if doc.xlsx else ())
         files = _render(doc, meta, out, fmts)

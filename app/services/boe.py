@@ -70,7 +70,7 @@ def build_boe(db: Database, project_id: str, est=None) -> dict:
     appr = rows_to_dicts(db.all("SELECT entity_type, COUNT(*) n FROM approvals WHERE project_id=? GROUP BY entity_type ORDER BY entity_type", (project_id,)))
     banner = []
     if p["is_demo"]:
-        banner.append("DEMONSTRATION PROJECT - SYNTHETIC DATA - NOT A MARKET QUOTE")
+        banner.append("DEMONSTRATION PROJECT - NOT A MARKET QUOTE" + (" - SYNTHETIC DATA" if est.flags.get("synthetic") else ""))
     if est.state != "Complete":
         banner.append(f"ESTIMATE STATE: {est.state.upper()} - NOT FOR SUBMISSION")
     if p.get("basis_defaulted"):

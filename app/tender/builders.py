@@ -52,8 +52,16 @@ class Ctx:
         return n or missing("customer name")
 
     @property
+    def demo(self) -> bool:
+        return bool(self.project.get("is_demo"))
+
+    @property
     def synthetic(self) -> bool:
-        return bool(self.project.get("is_demo")) or bool((self.enq or {}).get("customer_is_synthetic"))
+        """True only when the content really is synthetic (fictional customer, synthetic rates in the frozen estimate, synthetic registers) - a demonstration/practice project on real data is NOT synthetic."""
+        if (self.enq or {}).get("customer_is_synthetic") or (self.res.get("flags") or {}).get("synthetic"):
+            return True
+        return bool(self.db.scalar("SELECT 1 FROM tender_documents WHERE project_id=? AND is_synthetic=1 LIMIT 1", (self.pid,))
+                    or self.db.scalar("SELECT 1 FROM tender_register_items WHERE project_id=? AND is_synthetic=1 LIMIT 1", (self.pid,)))
 
     def rep(self, name: str, **params):
         key = (name, tuple(sorted(params.items())))
@@ -113,6 +121,8 @@ def _lim(c: Ctx, *extra: str) -> list[str]:
     base = ["Quantities are human-measured BOQ quantities; the application does not measure drawings.", f"Figures are taken from frozen estimate version v{c.v['version_no']} (fingerprint {c.v['inputs_hash'][:16]})."]
     if c.synthetic:
         base.append("SYNTHETIC / DEMONSTRATION data: rates, quotations, productivity norms, customer and responses are fictional test inputs, not market evidence.")
+    elif c.demo:
+        base.append("DEMONSTRATION / PRACTICE project: not a tender and not for submission; any quantity taken from a third-party document is unverified until a person checks it.")
     return base + list(extra)
 
 

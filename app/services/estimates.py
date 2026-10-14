@@ -206,7 +206,7 @@ def export_client_form(db: Database, actor: Actor, project_id: str, template_pat
         est, ready, banner = gate["estimate"], r["production_ready"], (None if r["production_ready"] else readiness.banner(r))
     else:
         est, ready = compute_estimate(db, project_id), False
-        banner = "PRELIMINARY - NOT FOR SUBMISSION" + (" - DEMONSTRATION / SYNTHETIC DATA" if est.project.get("is_demo") else "")
+        banner = "PRELIMINARY - NOT FOR SUBMISSION" + ((" - DEMONSTRATION" + (" / SYNTHETIC DATA" if est.flags.get("synthetic") else "")) if est.project.get("is_demo") else "")
     d = workspaces.area_dir(project_id, "commercial", db)
     n = 1
     while (d / f"ClientForm_{project_id}_{n:02d}{'' if ready else '_PRELIMINARY'}.xlsx").exists():

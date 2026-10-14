@@ -25,6 +25,21 @@ Sign in as `admin` (password printed by `init`) or, if you used `--demo-users`, 
 
 Helper scripts: `scripts/setup.sh` (venv + install + init), `scripts/run.sh`, `scripts/test.sh`.
 
+## Where we left off (read this first)
+
+```
+ BUILT ✅   engines · approvals/audit · BOQ import · rates/assumptions · procurement · reconciliation
+            productivity + programme + crew scenarios · draft-only query registers
+            45-document tender pack + hypothetical handover pack (DOCX/XLSX/PDF) · readiness gate
+ NEEDS PEOPLE'S DATA 🟡   real rates · norms · calendars · workforce profiles · quotes · payment terms · human approvers
+ MISSING ⬜  MFA/SSO · off-box audit anchor · forms for the newest records · real quality/HSE content
+            SBC + procurement law not read · open defects D-9, O-1, O-2, O-3
+ NEVER (by design)   OCR / drawing reading · automatic takeoff · AI approvals · invented prices
+```
+* Diagrams of what exists and what is missing: [docs/SYSTEM_MAP_BUILT_VS_MISSING.md](docs/SYSTEM_MAP_BUILT_VS_MISSING.md)
+* History, evidence, defect ledger, to-do list and how to keep the project lean: [docs/PROJECT_HISTORY_AND_NEXT_STEPS.md](docs/PROJECT_HISTORY_AND_NEXT_STEPS.md)
+* See it run: the Quick start below, then `python scripts/run_closure_scenario.py /tmp/scn --out /tmp/scn_out` for the whole synthetic tender loop (≈1 min).
+
 ## What is in the box
 
 | Area | Where |
@@ -78,7 +93,7 @@ Secrets are never committed (`.env`, `var/` are git-ignored).
 [Trade taxonomy](docs/TRADE_TAXONOMY.md) · [Import/export formats](docs/IMPORT_EXPORT_FORMATS.md) · [Backup/restore](docs/BACKUP_RESTORE.md) ·
 [Project workspaces](docs/PROJECT_WORKSPACES.md) · [Data model](docs/DATA_MODEL.md) · [Rate update workflow](docs/RATE_UPDATE_WORKFLOW.md) · [Development audit](docs/DEVELOPMENT_AUDIT.md) · [Next steps](docs/NEXT_STEPS.md) ·
 [Extending without code changes](docs/EXTENDING.md) · [Known limitations](docs/KNOWN_LIMITATIONS.md) · [Testing](docs/TESTING.md) ·
-[Capability matrix](docs/ESTIMATING_CAPABILITY_MATRIX.md) · [Gap roadmap](docs/ESTIMATING_GAP_ROADMAP.md) · [Governed parameters](docs/GOVERNED_PARAMETERS.md) · [Analysis reports](docs/ANALYSIS_REPORTS.md) · [Take-off templates](docs/MTO_TEMPLATES.md) · [Security](docs/SECURITY.md)
+[Capability matrix](docs/ESTIMATING_CAPABILITY_MATRIX.md) · [Gap roadmap](docs/ESTIMATING_GAP_ROADMAP.md) · [Governed parameters](docs/GOVERNED_PARAMETERS.md) · [Analysis reports](docs/ANALYSIS_REPORTS.md) · [Take-off templates](docs/MTO_TEMPLATES.md) · [Security](docs/SECURITY.md) · [System map](docs/SYSTEM_MAP_BUILT_VS_MISSING.md) · [History & next steps](docs/PROJECT_HISTORY_AND_NEXT_STEPS.md)
 
 ## Licence
 

@@ -35,7 +35,7 @@ def generate_offer(db: Database, actor: Actor, project_id: str, *, validity_days
     offer_ref = f"OFR-{project_id}-{v:02d}"
     banner = ("DRAFT - PRELIMINARY - NOT FOR SUBMISSION" if (est.blockers or total is None) else "DRAFT FOR COMMERCIAL REVIEW")
     if p["is_demo"]:
-        banner += " - DEMONSTRATION PROJECT / SYNTHETIC DATA / NOT A MARKET QUOTE"
+        banner += " - DEMONSTRATION PROJECT" + (" / SYNTHETIC DATA" if est.flags.get("synthetic") else "") + " / NOT A MARKET QUOTE"
     co = get_settings().company
     tax_lines = "; ".join(f"{k or 'tax'}: {fmt(v['tax'])} SAR @ {v['rate_pct']}%" if v["tax"] is not None else f"{k}: rate unresolved"
                           for k, v in (c.tax_by_category.items() if c else []))

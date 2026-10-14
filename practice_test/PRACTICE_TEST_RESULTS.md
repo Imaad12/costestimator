@@ -200,4 +200,22 @@ Notes and limits:
 * D-1 is a heuristic (needs a Quantity header and ≥5 unit tokens); it only ever downgrades a status, never blocks indexing.
 * D-7 is a behaviour change: a project created without explicit region **and** currency cannot reach production readiness until a person confirms them. Three existing fixture tests that build a production "human chain" had to pass region/currency explicitly (they represent that confirmation); no gate was weakened. Existing projects are unflagged.
 * Not fixed (unchanged): D-2, D-5, D-6, D-8, D-9, O-1, O-2.
-* Full suite after the fixes: 464 passed (4 min 24 s).
+* Full suite after these fixes: 464 passed (4 min 24 s); after the later D-2/5/6/8 round: 469 passed.
+
+## 16. Update — remaining defects D-2, D-5, D-6, D-8 and a priced run with verifiable arithmetic
+
+Direction given: the application must **not** grow an OCR / PDF-extraction tool; the values are extracted independently (outside the application) and the container runs them to produce an estimate that can be verified. Done as follows (practice test re-run; `practice_test/real_document/` holds the latest run):
+
+| # | Resolution |
+|---|---|
+| D-2 | **Resolved by design, not by a PDF reader.** A `.pdf` is still refused (`UNSUPPORTED_FILE`, tested). The independently produced CSV is imported with `derived_from` (source file, SHA-256, method). The import is flagged *unverified transcription*: Open row in the completeness report, a readiness reason, cleared only by `record_transcription_check` from a *different* person (self-check refused). PRJ-9201 and PRJ-9203 carry this flag. |
+| D-5 | Completeness "Lines priced from eligible rates" is **Blocked** whenever any BOQ line is unpriced/unmapped (was OK with 0/48), its text reports unmapped lines and says exposure is "not computable" for them; the global-library row no longer asserts "this demonstration project uses SYNTHETIC rates". |
+| D-6 | Synthetic is detected from content (synthetic customer flag, synthetic rates in the frozen estimate, synthetic registers). A demonstration project on non-synthetic data now gets "DEMONSTRATION / PRACTICE PROJECT - NOT A TENDER - NOT FOR SUBMISSION" and the ordinary confidentiality line; banners in the BOE, offer, estimate preview and client-form export say SYNTHETIC only when it is. The synthetic scenario still carries the synthetic marks. |
+| D-8 | `totals()` returns `None` for direct cost when no line is priced and for indirect cost when no indirect item exists (was "0"); completeness exposure text states it is not computable for unmapped lines. |
+
+**Priced run (stage K1, project PRJ-9203):** the same 48 real (transcribed) quantities, priced with **SYNTHETIC placeholder unit rates = 100 × BOQ section number SAR per unit** (labelled, no source, not a price), a placeholder commercial policy (10 % markup, 5 % contingency) and the fixture VAT approval, all by test actors.
+* Direct cost from the engine **1,274,224.00** = independent recomputation from the transcription (48/48 lines equal; per-section: 57,295.00 / 25,886.00 / 524,004.00 / 582,636.00 / 24,000.00 / 26,208.00 / 34,195.00). Contingency 5 % 63,711.20; total cost 1,337,935.20 (engine = independent). Pricing-schedule total 1,471,728.74, net price 1,471,728.72 (the known 0.02 schedule/net rounding variance), VAT 220,759.31, payable 1,692,488.05; identity schedule total + VAT = payable holds. Verification file: `priced_run_verification.csv`; documents: `priced_run/PRJ-9203_tender_pack_r1/` (demonstration pack, not production-ready, D05 "Preliminary (DEMONSTRATION)").
+* **These figures say nothing about what the building costs** and must not be quoted; they prove the pipeline computes what the quantities × rates say. For a real estimate, enter sourced rates through the normal rate workflow (propose → approve) and map the lines; PRJ-9201 stays rate-free as the honest "missing rates" case.
+* Observation O-3: the engine reports state **Complete** for PRJ-9203 although quantities are an unchecked transcription, the rates are placeholders and no indirect cost exists; only the banners, completeness report and readiness gate carry those caveats.
+
+Still open: D-9, O-1, O-2, O-3. Regression tests for these fixes are in `tests/integration/test_practice_test_defect_fixes.py` (11 tests in total).

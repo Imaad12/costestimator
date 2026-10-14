@@ -90,6 +90,82 @@ def inventory(inp: Path) -> list[dict]:
     return rows
 
 
+# ------------------------------------------------------------------------------------------------ K: priced run with SYNTHETIC placeholder rates
+PLACEHOLDER_NOTE = "SYNTHETIC / DEMO / NOT A MARKET QUOTE - placeholder unit rate = 100 x BOQ section number (SAR per unit) so the pipeline can be verified; it is NOT a price and has no source"
+
+
+def priced_run(db, ev, A, out, csv_path, derived, scratch):
+    """Same real quantities as PRJ-9201, priced with labelled SYNTHETIC placeholder rates so that the estimate can be independently re-computed. Separate project; PRJ-9201 stays rate-free."""
+    from decimal import ROUND_HALF_UP
+    from app.estimators.estimate import compute_estimate
+    from app.imports import boq as bi
+    from app.services import assemblies, boq, commercial, estimates, projects, rates
+    from app.tender import packs
+    PID3 = "PRJ-9203"
+    pid = projects.create_project(db, A["est"], name="PRACTICE TEST - priced run (real quantities, SYNTHETIC placeholder rates)", client="NONE - practice exercise", id=PID3, is_demo=True, tax_category="VAT-STD",
+                                  region="KSA-ALL", currency="SAR", tender_ref="PRACTICE-TEST-NOT-A-TENDER", notes=BANNER + " " + PLACEHOLDER_NOTE)
+    imp = bi.import_boq(db, A["est"], pid, csv_path, derived_from=derived)
+    items = db.all("SELECT item_key, description, quantity_original, unit FROM boq_items WHERE project_id=? AND item_type='item' ORDER BY id", (pid,))
+    rate_of = {}
+    for r in items:
+        key = r["item_key"]
+        sec = int(key.split(".")[0])
+        rid, acode = f"PT-{key}", f"PTA-{key}"
+        rates.create_resource(db, A["est"], resource_type="subcontract", description=f"PLACEHOLDER installed baseline: {r['description']}", unit=r["unit"], cost_code="C.01", id=rid, is_synthetic=True)
+        assemblies.create_assembly(db, A["est"], code=acode, description=f"PLACEHOLDER installed-rate assembly {key}", unit=r["unit"], cost_code="C.01", is_synthetic=True,
+                                   source="SYNTHETIC placeholder assembly - one installed-rate line", lines_=[dict(line_type="subcontract", resource_id=rid, factor="1")])
+        assemblies.submit_assembly(db, A["est"], acode)
+        assemblies.approve_assembly(db, A["com"], acode, comments="TEST ACTOR: SYNTHETIC placeholder")
+        price = Decimal(100 * sec)
+        rate_of[key] = price
+        rid_rate = rates.propose_rate(db, A["est"], rid, unit_price=str(price), rate_type="Synthetic Demonstration Rate", unit=r["unit"], price_date="2026-10-01", confidence="Low", is_synthetic=True,
+                                      evidence=PLACEHOLDER_NOTE, submit=True)
+        rates.approve_rate(db, A["proc"], rid_rate, comments="TEST ACTOR: SYNTHETIC placeholder rate (not a real procurement approval)")
+        boq.map_to_assembly(db, A["est"], pid, key, acode)
+        boq.set_cost_code(db, A["est"], pid, key, "C.01")
+    cfg = {"method": "markup", "markup_pct": "10", "margin_pct": "10", "default_tax_category": "VAT-STD", "contingency": {"pct": "5", "base": "direct_indirect"}, "risk_items": [], "rounding": {"dp": 2}}
+    pol = commercial.create_policy(db, A["est"], code="POL-PT", name="PLACEHOLDER policy (SYNTHETIC): 10 % markup, 5 % contingency", config=cfg, is_synthetic=True)
+    commercial.submit_policy(db, A["est"], pol)
+    commercial.approve_policy(db, A["com"], pol)
+    commercial.assign_policy(db, A["est"], pid, pol)
+    tid = db.scalar("SELECT id FROM tax_categories WHERE code='VAT-STD'")
+    commercial.approve_tax_category(db, A["com"], tid, evidence="TEST ACTOR: fixture approval for the practice run (not an official verification)")
+    est = compute_estimate(db, pid)
+    t = est.totals()
+    r2 = lambda x: Decimal(x).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)           # noqa: E731
+    # ---- independent re-computation: from the transcription (not from the database), half-up per line
+    tr = {x[0]: x for x in T.R}
+    rows, direct = [], Decimal(0)
+    for key, row in tr.items():
+        amt = r2(Decimal(row[3]) * rate_of[key])
+        direct += amt
+        eng = next((i for i in (est.direct.items.values()) if i.item_key == key), None)
+        rows.append(dict(item=key, description=row[1], unit=row[2], quantity=row[3], placeholder_rate=str(rate_of[key]), independent_amount=str(amt), engine_amount=str(eng.direct_cost) if eng else None,
+                         match=bool(eng) and r2(eng.direct_cost) == amt))
+    cont = r2(direct * Decimal("0.05"))
+    total_cost = direct + cont
+    with open(out / "priced_run_verification.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+    by_sec = {}
+    for k, row in tr.items():
+        by_sec[k.split(".")[0]] = by_sec.get(k.split(".")[0], Decimal(0)) + r2(Decimal(row[3]) * rate_of[k])
+    ident = {}
+    if t.get("selling_price_pre_tax") is not None and t.get("tax") is not None and t.get("final_payable") is not None:
+        ident["schedule_total_plus_tax_equals_payable"] = Decimal(str(t["selling_price_pre_tax"])) + Decimal(str(t["tax"])) == Decimal(str(t["final_payable"]))
+    vid = estimates.freeze_version(db, A["est"], pid, "practice-priced-v1", "PRACTICE TEST: priced with SYNTHETIC placeholder rates")
+    pack = packs.generate_pack(db, A["est"], pid, out_root=out / "priced_run", issue_date="2026-10-14", version_id=vid)
+    d05 = next(d for d in pack["documents"] if d["code"] == "D05")
+    ok = Decimal(str(t["direct_cost"])) == direct and all(x["match"] for x in rows)
+    ev.stage("K1_priced_run_synthetic_placeholder_rates", "PASS" if ok else "FAIL", project=pid, placeholder_rule=PLACEHOLDER_NOTE, import_flag=dict(unverified_transcription=imp.get("unverified_transcription"), derived_from=imp.get("derived_from")),
+             lines=len(rows), lines_matching_independent_amount=sum(1 for x in rows if x["match"]), engine=dict((k, (str(v) if v is not None else None)) for k, v in t.items()), state=est.state, blockers=[str(b)[:120] for b in est.blockers][:8],
+             independent=dict(direct_cost=str(direct), contingency_5pct=str(cont), total_cost_before_markup=str(total_cost), direct_by_section={k: str(v) for k, v in sorted(by_sec.items())}),
+             direct_cost_agrees=Decimal(str(t["direct_cost"])) == direct, identities=ident, pack_dir=pack["out_dir"], pack_classification=pack["classification"], pack_production_ready=pack["production_ready"],
+             d05_status=d05["status"], verification_file="priced_run_verification.csv",
+             note="These amounts are arithmetic on placeholder rates. They are NOT an estimate of what the building costs and must never be quoted. Swap in approved, sourced rates through the normal rate workflow to get a real estimate.")
+
+
 # ------------------------------------------------------------------------------------------------ main run
 def run(scratch: Path, inp: Path, out: Path) -> Ev:
     from tests.closure import scenario as S                    # bootstrap/actors only; none of the synthetic data is used
@@ -161,7 +237,9 @@ def run(scratch: Path, inp: Path, out: Path) -> Ev:
                 w.writerow([sec, T.SECTIONS[sec][0], T.SECTIONS[sec][1], "", "", "", ""])
                 last = sec
             w.writerow([no, desc, T.SECTIONS[sec][1], unit, qty, basis, f"source PDF p.{page}; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED" + (f"; {note}" if note else "")])
-    imp = guarded(ev, "C1_boq_import", bi.import_boq, db, A["est"], pid, csv_path)
+    DERIVED = dict(source_file=inv[0]["filename"] if inv else "", source_sha256=inv[0]["sha256"] if inv else "", method="read by eye from the rendered PDF pages (pdftoppm 80 dpi, pp.3-5) by one reader; text layer has no quantity column",
+                   note="TRANSCRIBED - NOT VERIFIED by a second person")
+    imp = guarded(ev, "C1_boq_import", bi.import_boq, db, A["est"], pid, csv_path, derived_from=DERIVED)
     rows = db.all("SELECT * FROM boq_items WHERE project_id=? ORDER BY id", (pid,))
     items = [r for r in rows if r["item_type"] == "item"]
     heads = [r for r in rows if r["item_type"] == "heading"]
@@ -363,6 +441,7 @@ def run(scratch: Path, inp: Path, out: Path) -> Ev:
     ev.stage("I1_gates_and_negative_tests", "PASS" if ok else "FAIL", readiness_test_env=dict(classification=r_test["classification"], production_ready=r_test["production_ready"], reasons=r_test["reasons"][:14]),
              readiness_if_production_env=dict(classification=r_prod["classification"], production_ready=r_prod["production_ready"], structural=r_prod.get("structural"), reasons=r_prod["reasons"][:14]), negative_service_calls=neg,
              real_project_with_registered_human_users_in_production_env=hn, exports_marked_submission_ready=sub_ready, pack_validator_blocks_production_label=(pack["classification"] != "production"))
+    priced_run(db, ev, A, out, csv_path, DERIVED, scratch)
     # ---- originals unchanged
     post = {r["filename"]: sha256(inp / r["filename"]) for r in inv}
     post_copy = {c["file"]: sha256(dest_dir / c["file"]) for c in copied}

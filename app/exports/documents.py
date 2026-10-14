@@ -38,7 +38,7 @@ def banner_text(est: EstimateResult, submission_ready: bool, readiness: dict | N
     else:
         t = "DRAFT - NOT YET APPROVED FOR SUBMISSION"
     if est.project.get("is_demo"):
-        t += " | DEMONSTRATION PROJECT - SYNTHETIC DATA - NOT A MARKET QUOTE"
+        t += " | DEMONSTRATION PROJECT" + (" - SYNTHETIC DATA" if est.flags.get("synthetic") else "") + " - NOT A MARKET QUOTE"
     elif est.flags.get("synthetic"):
         t += " | CONTAINS SYNTHETIC DATA"
     if est.flags.get("provisional"):

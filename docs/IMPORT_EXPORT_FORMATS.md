@@ -28,3 +28,7 @@ Header with a unit-rate column plus `Item`/`Description`: `Item` (procurement it
 * **Estimate report** `.docx` (summary, cost-to-price reconciliation, exceptions, assumptions) and **reconciliation/audit report** `.xlsx`.
 * **Master workbook** `.xlsx`; **project package** `.zip` (JSON of all project tables + uploads + outputs + manifest hashes); **backup** `.zip`.
 * Files are written under `data/outputs/<PROJECT>/`; uploads under `data/projects/<PROJECT>/uploads/` and are never overwritten or modified (a same-named upload gets a numeric suffix; the importer also keeps a hashed copy).
+
+## PDFs and images are not read by the application (by design)
+There is deliberately **no OCR and no PDF-table extraction** in the application. The importer reads `.xlsx` and `.csv` only (a `.pdf` is refused with `UNSUPPORTED_FILE`). When a BOQ arrives as a PDF, a person - or any outside tool - extracts the table into CSV/XLSX, and that file is imported with provenance:
+`import_boq(..., derived_from={"source_file", "source_sha256", "method", "note"})` (REST/CLI: the same keys). Such an import is flagged **UNVERIFIED TRANSCRIPTION**: the completeness report shows an Open row, the readiness gate lists it as a reason, and it clears only when a *different* person records `record_transcription_check` (what was compared with what). The project indexer still extracts a PDF's text layer for searching; if the layer has a Quantity header and units but no numbers it is stored as `Extracted - incomplete`.

@@ -1,0 +1,49 @@
+item,description,unit,quantity,placeholder_rate,independent_amount,engine_amount,match
+1.1,Excavation in pits for footings,m³,314.04,100,31404.00,31404.00,True
+1.2,PCC blinding 50 mm under footings,m³,18.33,100,1833.00,1833.00,True
+1.3,Backfill around footings,m³,240.58,100,24058.00,24058.00,True
+2.1,Isolated footings,m³,55.40,200,11080.00,11080.00,True
+2.2,Columns — Foundation,m³,1.90,200,380.00,380.00,True
+2.3,Columns — Ground floor,m³,3.30,200,660.00,660.00,True
+2.4,Columns — First floor,m³,1.56,200,312.00,312.00,True
+2.5,First-floor beams 200x450,m³,5.21,200,1042.00,1042.00,True
+2.6,Roof beams 200x300,m³,2.15,200,430.00,430.00,True
+2.7,Slab — Ground floor,m³,22.14,200,4428.00,4428.00,True
+2.8,Slab — First floor,m³,22.35,200,4470.00,4470.00,True
+2.9,Slab — Roof,m³,11.29,200,2258.00,2258.00,True
+2.10,RC stairs (flights + landings),m³,4.13,200,826.00,826.00,True
+3.1,Footing sides,m²,249.59,300,74877.00,74877.00,True
+3.2,Column faces,m²,119.38,300,35814.00,35814.00,True
+3.3,Beam sides and soffit,m²,493.69,300,148107.00,148107.00,True
+3.4,Slab soffit and edges,m²,884.02,300,265206.00,265206.00,True
+4.1,Walls — Ground floor,m³,58.94,400,23576.00,23576.00,True
+4.2,Walls — First floor,m³,43.41,400,17364.00,17364.00,True
+4.3,Walls — Roof,m³,9.04,400,3616.00,3616.00,True
+4.4,"Wall plaster area, both faces (gross)",m²,1345.20,400,538080.00,538080.00,True
+5.1,Door 900 × 2400 mm,nos,7,500,3500.00,3500.00,True
+5.2,Door 800 × 2400 mm,nos,4,500,2000.00,2000.00,True
+5.3,Door 802 × 2400 mm,nos,1,500,500.00,500.00,True
+5.4,Door 6467 × 3140 mm,nos,1,500,500.00,500.00,True
+5.5,Door 2400 × 2400 mm,nos,1,500,500.00,500.00,True
+5.6,Door 736 × 2400 mm,nos,1,500,500.00,500.00,True
+5.7,Door 1300 × 2400 mm,nos,1,500,500.00,500.00,True
+5.8,Window 800 × 400 mm,nos,3,500,1500.00,1500.00,True
+5.9,Window 2460 × 600 mm,nos,2,500,1000.00,1000.00,True
+5.10,Window 3000 × 600 mm,nos,2,500,1000.00,1000.00,True
+5.11,Window 2600 × 600 mm,nos,2,500,1000.00,1000.00,True
+5.12,Window 387 × 3140 mm,nos,2,500,1000.00,1000.00,True
+5.13,Window 368 × 3140 mm,nos,2,500,1000.00,1000.00,True
+5.14,Window 1500 × 400 mm,nos,2,500,1000.00,1000.00,True
+5.15,Window 600 × 2950 mm,nos,2,500,1000.00,1000.00,True
+5.16,Window 1206 × 2000 mm,nos,2,500,1000.00,1000.00,True
+5.17,Window 1800 × 2000 mm,nos,2,500,1000.00,1000.00,True
+5.18,Window 2400 × 2000 mm,nos,2,500,1000.00,1000.00,True
+5.19,Window 1160 × 2750 mm,nos,2,500,1000.00,1000.00,True
+5.20,Window 1200 × 2000 mm,nos,2,500,1000.00,1000.00,True
+5.21,Window 4274 × 2000 mm,nos,1,500,500.00,500.00,True
+5.22,Window 2500 × 1600 mm,nos,1,500,500.00,500.00,True
+5.23,Window 4000 × 2000 mm,nos,1,500,500.00,500.00,True
+5.24,Window 2400 × 2100 mm,nos,1,500,500.00,500.00,True
+5.25,Window 2400 × 1600 mm,nos,1,500,500.00,500.00,True
+6.1,Railings and balustrades,m,43.68,600,26208.00,26208.00,True
+7.1,Roof and canopy members,m,48.85,700,34195.00,34195.00,True

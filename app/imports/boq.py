@@ -222,9 +222,17 @@ def _clean(v):
 
 def import_boq(db: Database, actor: Actor, project_id: str, path: Path, *, mapping: dict[str, int | None] | None = None,
                sheet: str | None = None, header_row: int | None = None, revision: str | None = None,
-               allow_negative: bool = False) -> dict:
-    """Import a measured BOQ. Returns an import summary. Source file is copied (never moved/modified)."""
+               allow_negative: bool = False, derived_from: dict | None = None) -> dict:
+    """Import a measured BOQ. Returns an import summary. Source file is copied (never moved/modified).
+
+    The application does not read PDFs or images (by design: no OCR / PDF-table extraction). A person - or any outside tool - extracts the table into CSV/XLSX and imports THAT file;
+    `derived_from` records where it came from: {'source_file', 'source_sha256', 'method', 'note'?}. Such an import is flagged as an UNVERIFIED TRANSCRIPTION until a second person records a check
+    (`record_transcription_check`)."""
     approvals.require_author(actor)
+    if derived_from is not None:
+        need = [k for k in ("source_file", "source_sha256", "method") if not str(derived_from.get(k) or "").strip()]
+        if need:
+            raise ValidationFailed(f"derived_from needs {need}: say which document the values were taken from, its SHA-256 and how.", code="DERIVED_FROM_INCOMPLETE")
     projects.require_active(db, project_id)
     path = Path(path)
     reg = registry(db)
@@ -256,11 +264,33 @@ def import_boq(db: Database, actor: Actor, project_id: str, path: Path, *, mappi
         summary["warnings"] = rs.warnings
         summary["mapping"] = mapping
         summary["sha256"] = sha
+        if derived_from is not None:
+            summary["derived_from"] = {k: derived_from.get(k) for k in ("source_file", "source_sha256", "method", "note")}
+            summary["unverified_transcription"] = True
         db.update("boq_imports", {"summary_json": summary}, "id=?", (iid,))
         audit.log(db, actor, "boq_import", iid, "import", after={k: summary[k] for k in (
             "rows_read", "items_new", "items_unchanged", "rejected", "change_requests")}, project_id=project_id)
     summary["import_id"] = iid
     return summary
+
+
+def record_transcription_check(db: Database, actor: Actor, import_id: int, comment: str) -> None:
+    """A SECOND person states that the transcribed quantities were compared with the source document. The importer cannot check their own import."""
+    approvals.require_author(actor)
+    row = db.one("SELECT * FROM boq_imports WHERE id=?", (import_id,))
+    if not row:
+        raise ValidationFailed(f"Import {import_id} not found.", code="NOT_FOUND")
+    summary = json.loads(row["summary_json"] or "{}")
+    if not summary.get("unverified_transcription"):
+        raise ValidationFailed("This import was not flagged as a transcription.", code="NOT_A_TRANSCRIPTION")
+    if not (comment or "").strip():
+        raise ValidationFailed("State what was compared with what.", code="FIELD_REQUIRED")
+    if actor.username == row["imported_by"]:
+        raise ValidationFailed("The person who imported the transcription cannot be the one who checks it.", code="SELF_CHECK_BLOCKED")
+    summary["transcription_check"] = {"by": actor.username, "at": now_iso(), "comment": comment.strip()}
+    summary["unverified_transcription"] = False
+    db.update("boq_imports", {"summary_json": summary}, "id=?", (import_id,))
+    audit.log(db, actor, "boq_import", import_id, "transcription_check", after=summary["transcription_check"], project_id=row["project_id"])
 
 
 def _persist(db: Database, actor: Actor, pid: str, iid: int, fname: str, sheet: str, parsed: list[ParsedRow],

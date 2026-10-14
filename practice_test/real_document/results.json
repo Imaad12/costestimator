@@ -32,7 +32,7 @@
  },
  "A1_workspace_index": {
   "verdict": "PASS",
-  "workspace": "/tmp/claude-0/pt2/workspaces/PRJ-9201-practice-test-sample-residential-buildin",
+  "workspace": "/tmp/claude-0/pt3/workspaces/PRJ-9201-practice-test-sample-residential-buildin",
   "originals_copied": [
    {
     "file": "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
@@ -59,7 +59,7 @@
      "reason": "The text layer has a Quantity column header and 89 unit tokens but only 1 unit/number pairs: the table's quantities are probably NOT in the extracted text (numbers drawn as unmapped glyphs or images). Do not search or rely on this extract for quantities; obtain the BOQ as XLSX/CSV or have a person transcribe it from the page images."
     }
    ],
-   "index_file": "/tmp/claude-0/pt2/workspaces/PRJ-9201-practice-test-sample-residential-buildin/2. AI Context/project_index.json"
+   "index_file": "/tmp/claude-0/pt3/workspaces/PRJ-9201-practice-test-sample-residential-buildin/2. AI Context/project_index.json"
   },
   "indexed": [
    {
@@ -153,6 +153,7 @@
    "missing_in_revision": 0,
    "total_client_amount": "0",
    "sha256": "83a1dbe4b0c1ec40a25c2a56c25e7ebbfed0c6b6ff31ca92d2ce73b017505990",
+   "unverified_transcription": true,
    "import_id": 1
   },
   "items": 48,
@@ -267,13 +268,13 @@
    "Draft": 40
   },
   "by_register": {
-   "assumption_confirmation": 10,
-   "design_interface": 1,
-   "commercial": 1,
-   "boq_discrepancy": 6,
-   "technical": 5,
    "scope_exclusion": 3,
-   "missing_input": 14
+   "design_interface": 1,
+   "missing_input": 14,
+   "commercial": 1,
+   "assumption_confirmation": 10,
+   "technical": 5,
+   "boq_discrepancy": 6
   },
   "takeoff_required_tasks": [
    "ACT-PRJ-9201-001",
@@ -561,8 +562,8 @@
   "verdict": "PASS (INCOMPLETE as expected)",
   "state": "Preliminary \u2014 Incomplete",
   "totals": {
-   "direct_cost": "0",
-   "indirect_cost": "0",
+   "direct_cost": "None",
+   "indirect_cost": "None",
    "total_cost": "None",
    "selling_price_pre_tax": "None",
    "commercial_net_price": "None",
@@ -690,7 +691,7 @@
      "area": "Global library",
      "check": "Approved real (non-synthetic) rates",
      "status": "Info",
-     "detail": "The global library has 927 catalogue resources but 0 approved real rates (this demonstration project uses SYNTHETIC rates).",
+     "detail": "The global library has 927 catalogue resources but 0 approved real rates. Any rate used by this demonstration project is labelled in the estimate (see 'Synthetic data in use').",
      "where": "/rates/updates"
     },
     {
@@ -751,6 +752,13 @@
     },
     {
      "area": "BOQ",
+     "check": "Transcribed BOQ import #1 checked by a second person",
+     "status": "Open",
+     "detail": "quantities were transcribed from '1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf' (sha256 9e55f9772171...) by read by eye from the rendered PDF pages (pdftoppm 80 dpi, pp.3-5) by one reader; text layer has no quantity column; no second-person check recorded - treat every quantity as UNVERIFIED.",
+     "where": "/projects/PRJ-9201/boq"
+    },
+    {
+     "area": "BOQ",
      "check": "Pending BOQ change requests",
      "status": "OK",
      "detail": "0 awaiting human decision.",
@@ -759,8 +767,8 @@
     {
      "area": "Rates",
      "check": "Lines priced from eligible rates",
-     "status": "OK",
-     "detail": "0/48 items fully priced; 0 unpriced line(s); indicative exposure from unapproved/expired rates SAR 0 (not in totals); 0 line(s) with unknown exposure.",
+     "status": "Blocked",
+     "detail": "0/48 items fully priced; 48 item(s) unpriced or incomplete (48 of them unmapped); 0 priced line(s) lack an eligible rate; indicative exposure from unapproved/expired rates SAR 0 for mapped lines only (not computable for 48 unmapped line(s)) (not in totals); 0 line(s) with unknown exposure.",
      "where": "/projects/PRJ-9201/procurement"
     },
     {
@@ -841,8 +849,8 @@
      "where": "/projects/PRJ-9201/reports"
     }
    ],
-   "blocked": 4,
-   "open": 9,
+   "blocked": 5,
+   "open": 10,
    "final_approval_possible": false,
    "note": "Final approval additionally re-runs every server-side gate; this report is a guide, not the gate."
   },
@@ -1092,6 +1100,57 @@
   "exports_marked_submission_ready": 0,
   "pack_validator_blocks_production_label": true
  },
+ "K1_priced_run_synthetic_placeholder_rates": {
+  "verdict": "PASS",
+  "project": "PRJ-9203",
+  "placeholder_rule": "SYNTHETIC / DEMO / NOT A MARKET QUOTE - placeholder unit rate = 100 x BOQ section number (SAR per unit) so the pipeline can be verified; it is NOT a price and has no source",
+  "import_flag": {
+   "unverified_transcription": true,
+   "derived_from": {
+    "source_file": "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
+    "source_sha256": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0",
+    "method": "read by eye from the rendered PDF pages (pdftoppm 80 dpi, pp.3-5) by one reader; text layer has no quantity column",
+    "note": "TRANSCRIBED - NOT VERIFIED by a second person"
+   }
+  },
+  "lines": 48,
+  "lines_matching_independent_amount": 48,
+  "engine": {
+   "direct_cost": "1274224.00",
+   "indirect_cost": null,
+   "total_cost": "1337935.20",
+   "selling_price_pre_tax": "1471728.74",
+   "commercial_net_price": "1471728.72",
+   "tax": "220759.31",
+   "final_payable": "1692488.05"
+  },
+  "state": "Complete",
+  "blockers": [],
+  "independent": {
+   "direct_cost": "1274224.00",
+   "contingency_5pct": "63711.20",
+   "total_cost_before_markup": "1337935.20",
+   "direct_by_section": {
+    "1": "57295.00",
+    "2": "25886.00",
+    "3": "524004.00",
+    "4": "582636.00",
+    "5": "24000.00",
+    "6": "26208.00",
+    "7": "34195.00"
+   }
+  },
+  "direct_cost_agrees": true,
+  "identities": {
+   "schedule_total_plus_tax_equals_payable": true
+  },
+  "pack_dir": "/home/user/costestimator/practice_test/real_document/priced_run/PRJ-9203_tender_pack_r1",
+  "pack_classification": "demonstration",
+  "pack_production_ready": false,
+  "d05_status": "Preliminary (DEMONSTRATION)",
+  "verification_file": "priced_run_verification.csv",
+  "note": "These amounts are arithmetic on placeholder rates. They are NOT an estimate of what the building costs and must never be quoted. Swap in approved, sourced rates through the normal rate workflow to get a real estimate."
+ },
  "A2_originals_unchanged": {
   "verdict": "PASS",
   "before": {
@@ -1108,12 +1167,12 @@
   "verdict": "PASS",
   "result": {
    "ok": true,
-   "checked": 218
+   "checked": 709
   }
  },
  "_meta": {
   "project": "PRJ-9201",
-  "scratch": "/tmp/claude-0/pt2",
+  "scratch": "/tmp/claude-0/pt3",
   "settings_environment": "test",
   "banner": "PRACTICE TEST - NOT A TENDER - NOT FOR SUBMISSION. Third-party sample BOQ; quantities TRANSCRIBED, NOT VERIFIED; no rates, no productivity values."
  }

@@ -23,7 +23,7 @@ def project_completeness(db: Database, project_id: str) -> dict:
     if lv["rates_approved_real"] == 0:
         rows.append(_row("Global library", "Approved real (non-synthetic) rates", BLOCKED if not p["is_demo"] else INFO,
                          f"The global library has {lv['resources']} catalogue resources but 0 approved real rates"
-                         + (" (this demonstration project uses SYNTHETIC rates)." if p["is_demo"] else
+                         + (". Any rate used by this demonstration project is labelled in the estimate (see 'Synthetic data in use')." if p["is_demo"] else
                             ". Every priced line must come from rates you import, quote and approve - see Rate updates."), "/rates/updates"))
     else:
         rows.append(_row("Global library", "Approved real rates", INFO, f"{lv['rates_approved_real']} approved real rate record(s) in the global library.", "/libraries"))
@@ -58,12 +58,23 @@ def project_completeness(db: Database, project_id: str) -> dict:
         pend = db.scalar("SELECT COUNT(*) FROM change_requests WHERE project_id=? AND status='Pending Review'", (project_id,)) or 0
         rows.append(_row("BOQ", "BOQ items", INFO, f"{n_items} item(s) imported (human-measured quantities as supplied).", f"{base}/boq"))
         rows.append(_row("BOQ", "Items mapped to an assembly or priced resource", OK if not unmapped else BLOCKED, f"{unmapped} unmapped item(s)." if unmapped else "All items mapped.", f"{base}/mapping"))
+        for imp in db.all("SELECT id, source_file, summary_json FROM boq_imports WHERE project_id=? ORDER BY id", (project_id,)):
+            sm = jload(imp["summary_json"], {})
+            if sm.get("derived_from"):
+                df = sm["derived_from"]
+                chk = sm.get("transcription_check")
+                rows.append(_row("BOQ", f"Transcribed BOQ import #{imp['id']} checked by a second person", OK if chk else OPEN,
+                                 (f"checked by {chk['by']} at {chk['at']}: {chk['comment']}" if chk else f"quantities were transcribed from '{df['source_file']}' (sha256 {str(df['source_sha256'])[:12]}...) by {df['method']}; no second-person check recorded - treat every quantity as UNVERIFIED."),
+                                 f"{base}/boq"))
         rows.append(_row("BOQ", "Pending BOQ change requests", OK if not pend else OPEN, f"{pend} awaiting human decision.", f"{base}/boq"))
         est = compute_estimate_cached(db, project_id)
         c = est.completeness
-        rows.append(_row("Rates", "Lines priced from eligible rates", OK if not c["missing_rate_lines"] else BLOCKED,
-                         f"{c['items_complete']}/{c['items_total']} items fully priced; {c['missing_rate_lines']} unpriced line(s); indicative exposure from unapproved/expired rates SAR {c['indicative_exposure']} "
-                         f"(not in totals); {c['unknown_exposure_lines']} line(s) with unknown exposure.", f"{base}/procurement"))
+        incomplete = c["items_total"] - c["items_complete"]
+        # OK only when every BOQ line is fully priced; unmapped lines count (they have no rate at all and no exposure can be estimated for them)
+        exposure = (f"SAR {c['indicative_exposure']}" if not unmapped else f"SAR {c['indicative_exposure']} for mapped lines only (not computable for {unmapped} unmapped line(s))")
+        rows.append(_row("Rates", "Lines priced from eligible rates", OK if c["items_total"] and not incomplete else (INFO if not c["items_total"] else BLOCKED),
+                         f"{c['items_complete']}/{c['items_total']} items fully priced; {incomplete} item(s) unpriced or incomplete ({unmapped} of them unmapped); {c['missing_rate_lines']} priced line(s) lack an eligible rate; "
+                         f"indicative exposure from unapproved/expired rates {exposure} (not in totals); {c['unknown_exposure_lines']} line(s) with unknown exposure.", f"{base}/procurement"))
         if est.flags["provisional"]:
             rows.append(_row("Rates", "Provisional (project-scoped) inputs in use", INFO, "Approved provisional rates/allowances are used and disclosed in the estimate state.", f"{base}/estimate"))
         if est.flags["synthetic"]:
