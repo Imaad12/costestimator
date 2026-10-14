@@ -124,6 +124,8 @@ Honest reading of `tests/integration/test_industrial_flow.py` and the data it us
 
 Known missing tests (not claimed as covered): a second trade end to end through programme/loading (e.g. electrical cable pulling); a multi-package industrial BOQ with WBS cross-walk to a client structure; negative paths in the flow (unapproved factor ignored in the approved view, missing rate leaves the line unpriced, stale take-off after a factor revision) are proven in unit tests, not repeated in the flow; real-file BOQ with Arabic descriptions and mixed units; replay of an estimate that uses take-off + landed cost + escalation together in one frozen version; load test with a few thousand lines.
 
+A SYNTHETIC mechanical run of the whole chain exists ([SYNTHETIC_PILOT_RUN.md](SYNTHETIC_PILOT_RUN.md), `scripts/run_synthetic_pilot.py`). It exercises the engine path with invented numbers and test actors; it does not turn any template slot or structural placeholder into validated practice, and it does not change the readiness gaps above.
+
 ## 8. Real-data import preparation
 
 Everything below creates **Drafts / candidates only**. A status column in any file is ignored.
