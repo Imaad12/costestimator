@@ -32,7 +32,7 @@
  },
  "A1_workspace_index": {
   "verdict": "PASS",
-  "workspace": "/tmp/claude-0/pt1/workspaces/PRJ-9201-practice-test-sample-residential-buildin",
+  "workspace": "/tmp/claude-0/pt2/workspaces/PRJ-9201-practice-test-sample-residential-buildin",
   "originals_copied": [
    {
     "file": "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
@@ -49,22 +49,23 @@
    "extracted": 1,
    "not_extracted": 0,
    "errors": 0,
+   "incomplete": 1,
    "documents": 1,
    "changes": [
     {
      "file": "1. Tender Documents/1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
      "event": "new",
-     "status": "Extracted",
-     "reason": null
+     "status": "Extracted - incomplete",
+     "reason": "The text layer has a Quantity column header and 89 unit tokens but only 1 unit/number pairs: the table's quantities are probably NOT in the extracted text (numbers drawn as unmapped glyphs or images). Do not search or rely on this extract for quantities; obtain the BOQ as XLSX/CSV or have a person transcribe it from the page images."
     }
    ],
-   "index_file": "/tmp/claude-0/pt1/workspaces/PRJ-9201-practice-test-sample-residential-buildin/2. AI Context/project_index.json"
+   "index_file": "/tmp/claude-0/pt2/workspaces/PRJ-9201-practice-test-sample-residential-buildin/2. AI Context/project_index.json"
   },
   "indexed": [
    {
     "rel_path": "1. Tender Documents/1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
     "category": "boq",
-    "extraction_status": "Extracted",
+    "extraction_status": "Extracted - incomplete",
     "text_chars": 8929,
     "review_status": "New",
     "sha256": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0"
@@ -254,20 +255,24 @@
    "TQ-PRJ-9201-018",
    "TQ-PRJ-9201-019",
    "TQ-PRJ-9201-020",
-   "TQ-PRJ-9201-021"
+   "TQ-PRJ-9201-021",
+   "TQ-PRJ-9201-022",
+   "TQ-PRJ-9201-023",
+   "TQ-PRJ-9201-024",
+   "TQ-PRJ-9201-025"
   ],
   "manual_drafts": 15,
-  "total": 36,
+  "total": 40,
   "statuses": {
-   "Draft": 36
+   "Draft": 40
   },
   "by_register": {
-   "scope_exclusion": 3,
-   "boq_discrepancy": 4,
-   "commercial": 1,
-   "technical": 3,
-   "design_interface": 1,
    "assumption_confirmation": 10,
+   "design_interface": 1,
+   "commercial": 1,
+   "boq_discrepancy": 6,
+   "technical": 5,
+   "scope_exclusion": 3,
    "missing_input": 14
   },
   "takeoff_required_tasks": [
@@ -286,22 +291,22 @@
   "query_ids": [
    [
     "TQ-PRJ-9201-001",
-    "missing_input",
+    "technical",
     "system:detector"
    ],
    [
     "TQ-PRJ-9201-002",
-    "missing_input",
+    "technical",
     "system:detector"
    ],
    [
     "TQ-PRJ-9201-003",
-    "missing_input",
+    "boq_discrepancy",
     "system:detector"
    ],
    [
     "TQ-PRJ-9201-004",
-    "missing_input",
+    "boq_discrepancy",
     "system:detector"
    ],
    [
@@ -341,22 +346,22 @@
    ],
    [
     "TQ-PRJ-9201-012",
-    "assumption_confirmation",
+    "missing_input",
     "system:detector"
    ],
    [
     "TQ-PRJ-9201-013",
-    "assumption_confirmation",
+    "missing_input",
     "system:detector"
    ],
    [
     "TQ-PRJ-9201-014",
-    "assumption_confirmation",
+    "missing_input",
     "system:detector"
    ],
    [
     "TQ-PRJ-9201-015",
-    "assumption_confirmation",
+    "missing_input",
     "system:detector"
    ],
    [
@@ -391,42 +396,42 @@
    ],
    [
     "TQ-PRJ-9201-022",
-    "boq_discrepancy",
-    "user (practice-test operator)"
+    "assumption_confirmation",
+    "system:detector"
    ],
    [
     "TQ-PRJ-9201-023",
-    "boq_discrepancy",
-    "user (practice-test operator)"
+    "assumption_confirmation",
+    "system:detector"
    ],
    [
     "TQ-PRJ-9201-024",
-    "missing_input",
-    "user (practice-test operator)"
+    "assumption_confirmation",
+    "system:detector"
    ],
    [
     "TQ-PRJ-9201-025",
-    "missing_input",
-    "user (practice-test operator)"
+    "assumption_confirmation",
+    "system:detector"
    ],
    [
     "TQ-PRJ-9201-026",
-    "technical",
+    "boq_discrepancy",
     "user (practice-test operator)"
    ],
    [
     "TQ-PRJ-9201-027",
-    "scope_exclusion",
+    "boq_discrepancy",
     "user (practice-test operator)"
    ],
    [
     "TQ-PRJ-9201-028",
-    "scope_exclusion",
+    "missing_input",
     "user (practice-test operator)"
    ],
    [
     "TQ-PRJ-9201-029",
-    "scope_exclusion",
+    "missing_input",
     "user (practice-test operator)"
    ],
    [
@@ -436,22 +441,22 @@
    ],
    [
     "TQ-PRJ-9201-031",
-    "boq_discrepancy",
+    "scope_exclusion",
     "user (practice-test operator)"
    ],
    [
     "TQ-PRJ-9201-032",
-    "missing_input",
+    "scope_exclusion",
     "user (practice-test operator)"
    ],
    [
     "TQ-PRJ-9201-033",
-    "technical",
+    "scope_exclusion",
     "user (practice-test operator)"
    ],
    [
     "TQ-PRJ-9201-034",
-    "design_interface",
+    "technical",
     "user (practice-test operator)"
    ],
    [
@@ -461,6 +466,26 @@
    ],
    [
     "TQ-PRJ-9201-036",
+    "missing_input",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-037",
+    "technical",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-038",
+    "design_interface",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-039",
+    "boq_discrepancy",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-040",
     "commercial",
     "user (practice-test operator)"
    ]
@@ -685,8 +710,15 @@
     {
      "area": "Workspace",
      "check": "Document index",
-     "status": "OK",
-     "detail": "1 indexed; 0 new/changed/missing awaiting human review; 0 not text-extracted.",
+     "status": "Open",
+     "detail": "1 indexed; 0 new/changed/missing awaiting human review; 0 not text-extracted; 1 extracted but INCOMPLETE (numeric table columns missing from the text layer).",
+     "where": "/projects/PRJ-9201/workspace"
+    },
+    {
+     "area": "Project context",
+     "check": "Region and currency confirmed by a person",
+     "status": "Open",
+     "detail": "KSA-ALL / SAR are system defaults, not confirmed.",
      "where": "/projects/PRJ-9201/workspace"
     },
     {
@@ -810,7 +842,7 @@
     }
    ],
    "blocked": 4,
-   "open": 7,
+   "open": 9,
    "final_approval_possible": false,
    "note": "Final approval additionally re-runs every server-side gate; this report is a guide, not the gate."
   },
@@ -969,12 +1001,13 @@
    "reasons": [
     "the project is flagged as a demonstration project",
     "the environment is 'test', not 'production'",
+    "project region/currency (KSA-ALL / SAR) are system defaults, not confirmed by a person",
     "estimate approval: no approval record",
     "letter of offer: none generated",
     "tender-export approval: no approval record",
     "reconciliation gate blocked by 50 finding(s)",
     "estimate state is 'Preliminary \u2014 Incomplete'",
-    "36 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
+    "40 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
     "required tender document(s) not received: ITT-CONTRACT, DWG-ARCH-SET, DWG-MEP, DWG-STR-COLUMN, DWG-STR-FOOTING, DWG-STR-SLABBEAM, DWG-STR-STAIR, BBS-REINF, SPEC-ARCH, SPEC-STRUCT, DWG-SITE-LEVELS",
     "document PRJ-9201-D16 approval: no approval record",
     "document PRJ-9201-D06 approval: no approval record"
@@ -988,12 +1021,13 @@
    ],
    "reasons": [
     "the project is flagged as a demonstration project",
+    "project region/currency (KSA-ALL / SAR) are system defaults, not confirmed by a person",
     "estimate approval: no approval record",
     "letter of offer: none generated",
     "tender-export approval: no approval record",
     "reconciliation gate blocked by 50 finding(s)",
     "estimate state is 'Preliminary \u2014 Incomplete'",
-    "36 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
+    "40 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
     "required tender document(s) not received: ITT-CONTRACT, DWG-ARCH-SET, DWG-MEP, DWG-STR-COLUMN, DWG-STR-FOOTING, DWG-STR-SLABBEAM, DWG-STR-STAIR, BBS-REINF, SPEC-ARCH, SPEC-STRUCT, DWG-SITE-LEVELS",
     "document PRJ-9201-D16 approval: no approval record",
     "document PRJ-9201-D06 approval: no approval record"
@@ -1044,6 +1078,7 @@
     "classification": "not_ready",
     "production_ready": false,
     "reasons": [
+     "project region/currency (KSA-ALL / SAR) are system defaults, not confirmed by a person",
      "estimate approval: no approval record",
      "letter of offer: none generated",
      "tender-export approval: no approval record",
@@ -1073,12 +1108,12 @@
   "verdict": "PASS",
   "result": {
    "ok": true,
-   "checked": 214
+   "checked": 218
   }
  },
  "_meta": {
   "project": "PRJ-9201",
-  "scratch": "/tmp/claude-0/pt1",
+  "scratch": "/tmp/claude-0/pt2",
   "settings_environment": "test",
   "banner": "PRACTICE TEST - NOT A TENDER - NOT FOR SUBMISSION. Third-party sample BOQ; quantities TRANSCRIBED, NOT VERIFIED; no rates, no productivity values."
  }

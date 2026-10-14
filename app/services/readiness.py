@@ -134,6 +134,9 @@ def evaluate(db: Database, project_id: str, version_id: int, export_approval_id:
     if get_settings().environment != "production":
         structural.append(f"the environment is '{get_settings().environment}', not 'production'")
 
+    if proj.get("basis_defaulted"):
+        reasons.append(f"project region/currency ({proj.get('region')} / {proj.get('currency')}) are system defaults, not confirmed by a person")
+
     def need(problems_info):
         problems, info = problems_info
         reasons.extend(problems)

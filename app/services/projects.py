@@ -42,13 +42,15 @@ def output_dir(project_id: str, area: str = "exports") -> Path:
 
 
 def create_project(db: Database, actor: Actor, *, name: str, client: str = "", location: str = "",
-                   region: str = "KSA-ALL", currency: str = "SAR", design_stage: str = "", tax_category: str | None = None,
+                   region: str | None = None, currency: str | None = None, design_stage: str = "", tax_category: str | None = None,
                    is_demo: bool = False, tender_ref: str = "", notes: str = "", id: str | None = None,
                    rate_as_of_date: str | None = None, project_type: str = "", trades: list[str] | None = None,
                    drawing_revision: str = "", spec_revision: str = "") -> str:
     approvals.require_author(actor)
     if not name.strip():
         raise ValidationFailed("Project name is required.")
+    basis_defaulted = int(not region or not currency)       # a default is applied for convenience; it is flagged until a person confirms region and currency
+    region, currency = region or "KSA-ALL", currency or "SAR"
     if not db.one("SELECT 1 FROM regions WHERE code=?", (region,)):
         raise ValidationFailed(f"Unknown region '{region}'.")
     pid = id or next_project_id(db)
@@ -60,7 +62,7 @@ def create_project(db: Database, actor: Actor, *, name: str, client: str = "", l
                                    project_type=project_type or None, trades=json.dumps(trades or []),
                                    drawing_revision=drawing_revision or None, spec_revision=spec_revision or None,
                                    tax_category=tax_category, tender_ref=tender_ref, notes=notes,
-                                   rate_as_of_date=rate_as_of_date, created_by=actor.username, created_at=now_iso()))
+                                   rate_as_of_date=rate_as_of_date, basis_defaulted=basis_defaulted, created_by=actor.username, created_at=now_iso()))
         n = asm_service.adopt_mandatory(db, actor, pid)
         audit.log(db, actor, "project", pid, "create", after={"name": name, "adopted_assumptions": n}, project_id=pid)
     workspaces.ensure_workspace(db, pid)          # numbered folders + project.json + CLAUDE.md (idempotent, never overwrites)
@@ -101,6 +103,21 @@ def update_project(db: Database, actor: Actor, pid: str, **changes) -> None:
     db.update("projects", changes, "id=?", (pid,))
     audit.log(db, actor, "project", pid, "update", before={k: before[k] for k in changes}, after=changes, project_id=pid)
     workspaces.ensure_workspace(db, pid)
+
+
+def confirm_basis(db: Database, actor: Actor, pid: str, region: str, currency: str) -> None:
+    """A person states the project's region and currency (clears the 'system default' flag). Once an estimate version is frozen a different value is refused: change = new project/version."""
+    approvals.require_author(actor)
+    p = require_active(db, pid)
+    region, currency = (region or "").strip(), (currency or "").strip().upper()
+    if not region or not currency:
+        raise ValidationFailed("Region and currency are both required to confirm the project basis.", code="FIELD_REQUIRED")
+    if not db.one("SELECT 1 FROM regions WHERE code=?", (region,)):
+        raise ValidationFailed(f"Unknown region '{region}'.")
+    if (region, currency) != (p["region"], p["currency"]) and db.scalar("SELECT COUNT(*) FROM estimate_versions WHERE project_id=?", (pid,)):
+        raise Conflict("The project has a frozen estimate version: region/currency cannot be changed (create a new project or version).", code="BASIS_LOCKED")
+    db.update("projects", {"region": region, "currency": currency, "basis_defaulted": 0}, "id=?", (pid,))
+    audit.log(db, actor, "project", pid, "confirm_basis", before={"region": p["region"], "currency": p["currency"], "defaulted": p.get("basis_defaulted")}, after={"region": region, "currency": currency}, project_id=pid)
 
 
 def archive_project(db: Database, actor: Actor, pid: str, reason: str) -> None:

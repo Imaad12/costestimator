@@ -141,6 +141,25 @@ def extract_text(path: Path) -> tuple[str | None, str | None]:
     return None, f"No text extractor for '.{ext or '(none)'}' files"
 
 
+_UNIT_TOKEN = r"(?:m2|m3|m\u00b2|m\u00b3|sqm|cum|nos?|nr|kg|ton|tonne|lm|m|sum|ls|item|set|each|ea)"
+_NUM = r"\d[\d,]*(?:\.\d+)?"
+
+
+def extraction_warning(text: str) -> str | None:
+    """Detect a text layer that has the descriptions and units of a BOQ-like table but not its numbers (e.g. numbers drawn with unmapped glyphs).
+    Heuristic and deliberately conservative: it needs a Quantity/Qty header word and at least 5 unit tokens; it only ever downgrades the status to 'Extracted - incomplete'."""
+    if not re.search(r"\b(quantity|qty)\b", text, re.I):
+        return None
+    units = re.findall(r"(?<![\w.])" + _UNIT_TOKEN + r"(?![\w.])", text, re.I)
+    if len(units) < 5:
+        return None
+    paired = re.findall(r"(?<![\w.])" + _UNIT_TOKEN + r"[ \t\u00a0]+" + _NUM + r"(?![\w.])|(?<![\w.,])" + _NUM + r"[ \t\u00a0]+" + _UNIT_TOKEN + r"(?![\w.])", text, re.I)
+    if len(paired) * 5 < len(units):
+        return (f"The text layer has a Quantity column header and {len(units)} unit tokens but only {len(paired)} unit/number pairs: the table's quantities are probably NOT in the extracted text "
+                "(numbers drawn as unmapped glyphs or images). Do not search or rely on this extract for quantities; obtain the BOQ as XLSX/CSV or have a person transcribe it from the page images.")
+    return None
+
+
 # ---------------------------------------------------------------------------------------------------- indexing
 def _iter_files(root: Path):
     for p in sorted(root.rglob("*")):
@@ -191,6 +210,10 @@ def index_project(db: Database, actor: Actor | str, project_id: str, *, extract:
             clipped = text[:MAX_EXTRACT_CHARS]
             doc_key = existing["id"] if existing else None
             status, err = "Extracted", None
+            warn = extraction_warning(text)
+            if warn:
+                status, err = "Extracted - incomplete", warn
+                stats["incomplete"] = stats.get("incomplete", 0) + 1
         else:
             doc_key = existing["id"] if existing else None
             if reason and ("Extraction skipped" not in reason) and not reason.startswith("No text extractor") \
@@ -284,7 +307,7 @@ def search(db: Database, project_id: str, query: str, limit: int = 20, context: 
     if not q:
         return out
     for d in list_documents(db, project_id):
-        if d["extraction_status"] != "Extracted" or not d["extract_path"]:
+        if not str(d["extraction_status"]).startswith("Extracted") or not d["extract_path"]:
             continue
         f = root / d["extract_path"]
         if not f.is_file():

@@ -183,3 +183,21 @@ I did **not** change application code in this task; none of these defects was fi
 * What the evidence supports: the controls hold under incomplete, unverified data — nothing was priced, mapped, approved or labelled submission-ready; missing items became blocked documents, draft queries and open actions; originals were preserved with checksums; AI and self-approval paths are refused.
 * What it does not support: the input was a single non-contract web page with no drawings or specifications, so the real-data paths (quotation/rate approval with real evidence, programme from approved norms, a full pack with human approvals) were not exercised on real material, and the BOQ quantities came in via an unverified manual transcription.
 * Before a pilot: fix D-1, D-3, D-4, D-5, D-7 (they can mislead a reader on a real package); supply a complete real package including an XLSX/CSV BOQ; keep the single-site/no-MFA limits in `docs/SECURITY.md` in force.
+
+## 15. Update — the four most misleading defects were fixed (same branch, after the first report)
+
+Fixed: **D-1, D-3, D-4, D-7**. Each has a regression test (`tests/integration/test_practice_test_defect_fixes.py`, 6 tests) and the practice test was re-run against the fixed code (`practice_test/real_document/` now holds the re-run; sections 1–14 above describe the first run and are otherwise unchanged).
+
+| # | Fix | Result on the real document |
+|---|---|---|
+| D-1 | Indexer: a PDF whose text has a Quantity/Qty header and units but almost no unit/number pairs is stored as **"Extracted - incomplete"** with an explanatory message; the completeness report's "Document index" row turns Open and counts it; the extract stays searchable | the PDF now reads `Extracted - incomplete` (was `Extracted`) |
+| D-3 | Draft-query detectors: the wording scan now covers every text column of the imported row (remarks/basis/notes), the marker list gains "assumed / assumption / confirm / not printed / not stated", and a new near-duplicate-size detector (every number within 1 %) raises a `boq_discrepancy` draft | system-detected queries 21 → **25**: item 1.1's "assumed … confirm" note, items 5.2/5.3 (800 vs 802) and 5.16/5.20 (1206 vs 1200) are now found automatically |
+| D-4 | D36 now lists every unpriced/incomplete BOQ line from the frozen estimate (item, description, quantity as imported, mapping, pricing), states "48 of 48 … unpriced", explains why no procurement needs exist (needs are detected from mapped lines only), and the exception table is headed "recorded in the frozen estimate (as at freeze; not necessarily resolved)" | D36 lists all 48 lines |
+| D-7 | Migration `0016`: `projects.basis_defaulted`. Creating a project without an explicit region **and** currency applies KSA-ALL/SAR but flags it; the BOE banner, completeness report and **readiness gate** say "system defaults, not confirmed"; `confirm_basis` / action `confirm_project_basis` (and the workspace form's Region/Currency fields) clear it, audited, and refuse a change once an estimate version is frozen (`BASIS_LOCKED`) | D07 now carries "REGION / CURRENCY (KSA-ALL / SAR) ARE SYSTEM DEFAULTS - NOT CONFIRMED BY A PERSON" |
+
+Notes and limits:
+* D-3 is partial by design: the **backfill formula check (0.27 m³) and the page-2 totals check are still found only by the operator** — a general "printed formula/total vs lines" detector would have to parse free text and was not attempted. The 7.1 hit ("not stated") comes from a word in the section label I typed into the CSV.
+* D-1 is a heuristic (needs a Quantity header and ≥5 unit tokens); it only ever downgrades a status, never blocks indexing.
+* D-7 is a behaviour change: a project created without explicit region **and** currency cannot reach production readiness until a person confirms them. Three existing fixture tests that build a production "human chain" had to pass region/currency explicitly (they represent that confirmation); no gate was weakened. Existing projects are unflagged.
+* Not fixed (unchanged): D-2, D-5, D-6, D-8, D-9, O-1, O-2.
+* Full suite after the fixes: 464 passed (4 min 24 s).

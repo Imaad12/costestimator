@@ -51,7 +51,7 @@ def run(db: Database, actor: Actor, name: str, params: dict) -> Any:
 @action("create_project")
 def _(db, a, p):
     return projects.create_project(db, a, name=req(p, "name")[0], client=opt(p, "client") or "", location=opt(p, "location") or "",
-                                   region=opt(p, "region") or "KSA-ALL", design_stage=opt(p, "design_stage") or "",
+                                   region=opt(p, "region") or None, currency=opt(p, "currency") or None, design_stage=opt(p, "design_stage") or "",
                                    tax_category=opt(p, "tax_category") or "VAT-STD", tender_ref=opt(p, "tender_ref") or "",
                                    project_type=opt(p, "project_type") or "",
                                    trades=[t.strip() for t in (opt(p, "trades") or "").replace(";", ",").split(",") if t.strip()],
@@ -696,6 +696,14 @@ def _(db, a, p):
     if "trades" in p:
         changes["trades"] = [t.strip() for t in (opt(p, "trades") or "").replace(";", ",").split(",") if t.strip()]
     projects.update_project(db, a, pid, **changes)
+    if opt(p, "region") or opt(p, "currency"):                       # submitting both values is the person's confirmation of the project basis
+        cur = projects.get_project(db, pid)
+        projects.confirm_basis(db, a, pid, opt(p, "region") or cur["region"], opt(p, "currency") or cur["currency"])
+
+
+@action("confirm_project_basis")
+def _(db, a, p):
+    projects.confirm_basis(db, a, req(p, "project_id")[0], req(p, "region")[0], req(p, "currency")[0])
 
 
 @action("refresh_workspace")

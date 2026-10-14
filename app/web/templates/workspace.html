@@ -15,7 +15,9 @@ Originals are never modified or overwritten. <b>Next action:</b>
 <div class="grid"><div><label>Project type</label><input name="project_type" value="{{ project.project_type or '' }}" style="width:100%"></div>
 <div><label>Applicable trades (comma-separated)</label><input name="trades" value="{{ trades|join(', ') }}" style="width:100%"></div>
 <div><label>Approved drawing revision(s)</label><input name="drawing_revision" value="{{ project.drawing_revision or '' }}" style="width:100%"></div>
-<div><label>Approved specification revision(s)</label><input name="spec_revision" value="{{ project.spec_revision or '' }}" style="width:100%"></div></div>
+<div><label>Approved specification revision(s)</label><input name="spec_revision" value="{{ project.spec_revision or '' }}" style="width:100%"></div>
+<div><label>Region (code) {% if project.basis_defaulted %}<b>- system default, please confirm</b>{% endif %}</label><input name="region" value="{{ project.region }}" style="width:100%"></div>
+<div><label>Currency {% if project.basis_defaulted %}<b>- system default, please confirm</b>{% endif %}</label><input name="currency" value="{{ project.currency }}" style="width:100%"></div></div>
 <p><button class="sm">Save &amp; regenerate project CLAUDE.md</button></p></form>
 <h2>Document index</h2>
 <p>{{ actform('index_project_documents', '/projects/' ~ project.id ~ '/workspace', [('project_id', project.id, 'hidden')], 'Index documents (read-only scan, versioned extracts)') }}

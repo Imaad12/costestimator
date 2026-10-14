@@ -1,6 +1,46 @@
 [
  {
   "id": "TQ-PRJ-9201-001",
+  "register": "technical",
+  "discipline": "Civil / earthwork",
+  "status": "Draft",
+  "question": "BOQ item 1.1 ('Excavation in pits for footings') uses open wording (assumed, assumption, confirm, not printed) in: Remarks. Please state the exact scope, extent and responsibility priced under this item.",
+  "why": "Open wording leaves scope or quantity undefined; the estimate cannot price it without an assumption.",
+  "generated_by": "system:detector",
+  "related_json": "{\"boq_items\": [\"1.1\"], \"drawing_ref\": \"derived from footing boxes \u2014 footing plan + 0.3 m working space each side, ground z=0.0 to underside of blinding\", \"revision\": null, \"spec_ref\": null}"
+ },
+ {
+  "id": "TQ-PRJ-9201-002",
+  "register": "technical",
+  "discipline": "Architectural / structural (not stated)",
+  "status": "Draft",
+  "question": "BOQ item 7.1 ('Roof and canopy members') uses open wording (not stated) in: Section. Please state the exact scope, extent and responsibility priced under this item.",
+  "why": "Open wording leaves scope or quantity undefined; the estimate cannot price it without an assumption.",
+  "generated_by": "system:detector",
+  "related_json": "{\"boq_items\": [\"7.1\"], \"drawing_ref\": \"plans + elevations \u2014 member length\", \"revision\": null, \"spec_ref\": null}"
+ },
+ {
+  "id": "TQ-PRJ-9201-003",
+  "register": "boq_discrepancy",
+  "discipline": null,
+  "status": "Draft",
+  "question": "BOQ items 5.2 and 5.3 are almost identical ('Door 800 \u00d7 2400 mm' vs 'Door 802 \u00d7 2400 mm'; sizes differ by <= 1%). Are they the same item typed differently, or genuinely different?",
+  "why": "Near-duplicate lines may split one quantity or price two sizes that are the same.",
+  "generated_by": "system:detector",
+  "related_json": "{\"boq_items\": [\"5.2\", \"5.3\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-004",
+  "register": "boq_discrepancy",
+  "discipline": null,
+  "status": "Draft",
+  "question": "BOQ items 5.16 and 5.20 are almost identical ('Window 1206 \u00d7 2000 mm' vs 'Window 1200 \u00d7 2000 mm'; sizes differ by <= 1%). Are they the same item typed differently, or genuinely different?",
+  "why": "Near-duplicate lines may split one quantity or price two sizes that are the same.",
+  "generated_by": "system:detector",
+  "related_json": "{\"boq_items\": [\"5.16\", \"5.20\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-005",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -10,7 +50,7 @@
   "related_json": "{\"documents\": [\"ITT-CONTRACT\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-002",
+  "id": "TQ-PRJ-9201-006",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -20,7 +60,7 @@
   "related_json": "{\"documents\": [\"DWG-ARCH-SET\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-003",
+  "id": "TQ-PRJ-9201-007",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -30,7 +70,7 @@
   "related_json": "{\"documents\": [\"DWG-MEP\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-004",
+  "id": "TQ-PRJ-9201-008",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -40,7 +80,7 @@
   "related_json": "{\"documents\": [\"DWG-STR-COLUMN\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-005",
+  "id": "TQ-PRJ-9201-009",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -50,7 +90,7 @@
   "related_json": "{\"documents\": [\"DWG-STR-FOOTING\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-006",
+  "id": "TQ-PRJ-9201-010",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -60,7 +100,7 @@
   "related_json": "{\"documents\": [\"DWG-STR-SLABBEAM\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-007",
+  "id": "TQ-PRJ-9201-011",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -70,7 +110,7 @@
   "related_json": "{\"documents\": [\"DWG-STR-STAIR\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-008",
+  "id": "TQ-PRJ-9201-012",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -80,7 +120,7 @@
   "related_json": "{\"documents\": [\"BBS-REINF\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-009",
+  "id": "TQ-PRJ-9201-013",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -90,7 +130,7 @@
   "related_json": "{\"documents\": [\"SPEC-ARCH\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-010",
+  "id": "TQ-PRJ-9201-014",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -100,7 +140,7 @@
   "related_json": "{\"documents\": [\"SPEC-STRUCT\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-011",
+  "id": "TQ-PRJ-9201-015",
   "register": "missing_input",
   "discipline": null,
   "status": "Draft",
@@ -110,7 +150,7 @@
   "related_json": "{\"documents\": [\"DWG-SITE-LEVELS\"]}"
  },
  {
-  "id": "TQ-PRJ-9201-012",
+  "id": "TQ-PRJ-9201-016",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -120,7 +160,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-I-001\", \"ASMP-I-006\", \"ASMP-I-010\", \"ASMP-I-015\", \"ASMP-I-016\", \"ASMP-I-017\", \"ASMP-I-024\", \"ASMP-I-026\", \"ASMP-I-030\", \"ASMP-I-031\", \"ASMP-I-032\"], \"category\": \"Commercial terms and payment\"}"
  },
  {
-  "id": "TQ-PRJ-9201-013",
+  "id": "TQ-PRJ-9201-017",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -130,7 +170,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-K-001\", \"ASMP-K-003\", \"ASMP-K-012\", \"ASMP-K-013\", \"ASMP-K-016\", \"ASMP-K-019\"], \"category\": \"Commissioning, testing and handover\"}"
  },
  {
-  "id": "TQ-PRJ-9201-014",
+  "id": "TQ-PRJ-9201-018",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -140,7 +180,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-F-001\", \"ASMP-F-002\"], \"category\": \"Logistics, transport and landed cost\"}"
  },
  {
-  "id": "TQ-PRJ-9201-015",
+  "id": "TQ-PRJ-9201-019",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -150,7 +190,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-C-001\", \"ASMP-C-002\", \"ASMP-C-026\", \"ASMP-C-031\", \"ASMP-E-002\", \"ASMP-E-003\"], \"category\": \"Material, labour, plant and equipment rates\"}"
  },
  {
-  "id": "TQ-PRJ-9201-016",
+  "id": "TQ-PRJ-9201-020",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -160,7 +200,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-H-001\", \"ASMP-H-002\", \"ASMP-H-003\", \"ASMP-H-004\", \"ASMP-H-006\", \"ASMP-H-018\", \"ASMP-H-026\", \"ASMP-H-029\"], \"category\": \"Preliminaries and indirects\"}"
  },
  {
-  "id": "TQ-PRJ-9201-017",
+  "id": "TQ-PRJ-9201-021",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -170,7 +210,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-D-001\", \"ASMP-D-002\", \"ASMP-D-003\", \"ASMP-D-004\", \"ASMP-D-005\", \"ASMP-D-006\", \"ASMP-D-012\", \"ASMP-D-014\", \"ASMP-D-015\"], \"category\": \"Productivity and workforce\"}"
  },
  {
-  "id": "TQ-PRJ-9201-018",
+  "id": "TQ-PRJ-9201-022",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -180,7 +220,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-B-001\", \"ASMP-B-002\", \"ASMP-B-003\", \"ASMP-B-004\", \"ASMP-B-006\", \"ASMP-B-014\", \"ASMP-B-015\", \"ASMP-B-016\", \"ASMP-B-019\"], \"category\": \"Quantities and measurement\"}"
  },
  {
-  "id": "TQ-PRJ-9201-019",
+  "id": "TQ-PRJ-9201-023",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -190,7 +230,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-L-001\", \"ASMP-L-002\", \"ASMP-L-004\", \"ASMP-L-005\", \"ASMP-L-010\", \"ASMP-L-014\", \"ASMP-L-016\", \"ASMP-L-019\"], \"category\": \"Risk and contingency\"}"
  },
  {
-  "id": "TQ-PRJ-9201-020",
+  "id": "TQ-PRJ-9201-024",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -200,7 +240,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-A-001\", \"ASMP-A-002\", \"ASMP-A-003\", \"ASMP-A-004\", \"ASMP-A-005\", \"ASMP-A-006\", \"ASMP-A-008\", \"ASMP-A-009\", \"ASMP-A-011\", \"ASMP-A-012\", \"ASMP-A-014\", \"ASMP-A-017\", \"ASMP-A-021\", \"ASMP-G-001\", \"ASMP-G-002\", \"ASMP-G-004\"], \"category\": \"Scope and design\"}"
  },
  {
-  "id": "TQ-PRJ-9201-021",
+  "id": "TQ-PRJ-9201-025",
   "register": "assumption_confirmation",
   "discipline": null,
   "status": "Draft",
@@ -210,7 +250,7 @@
   "related_json": "{\"assumptions\": [\"ASMP-J-001\", \"ASMP-J-002\", \"ASMP-J-003\", \"ASMP-J-005\", \"ASMP-J-006\", \"ASMP-J-007\", \"ASMP-J-008\", \"ASMP-J-009\", \"ASMP-J-010\", \"ASMP-J-016\"], \"category\": \"Taxes and statutory costs\"}"
  },
  {
-  "id": "TQ-PRJ-9201-022",
+  "id": "TQ-PRJ-9201-026",
   "register": "boq_discrepancy",
   "discipline": "civil",
   "status": "Draft",
@@ -220,7 +260,7 @@
   "related_json": "{\"boq_items\": [\"1.1\", \"1.2\", \"1.3\", \"2.1\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-023",
+  "id": "TQ-PRJ-9201-027",
   "register": "boq_discrepancy",
   "discipline": "structural",
   "status": "Draft",
@@ -230,7 +270,7 @@
   "related_json": "{\"boq_items\": [\"2.1\", \"3.1\", \"4.1\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-024",
+  "id": "TQ-PRJ-9201-028",
   "register": "missing_input",
   "discipline": "civil",
   "status": "Draft",
@@ -240,7 +280,7 @@
   "related_json": "{\"boq_items\": [\"1.1\", \"1.2\", \"1.3\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-025",
+  "id": "TQ-PRJ-9201-029",
   "register": "missing_input",
   "discipline": "architectural",
   "status": "Draft",
@@ -250,7 +290,7 @@
   "related_json": "{\"boq_items\": [\"1.1-7.1\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-026",
+  "id": "TQ-PRJ-9201-030",
   "register": "technical",
   "discipline": "structural",
   "status": "Draft",
@@ -260,7 +300,7 @@
   "related_json": "{\"boq_items\": [\"2.10\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-027",
+  "id": "TQ-PRJ-9201-031",
   "register": "scope_exclusion",
   "discipline": "structural",
   "status": "Draft",
@@ -270,7 +310,7 @@
   "related_json": "{\"boq_items\": [\"2.1-2.10\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-028",
+  "id": "TQ-PRJ-9201-032",
   "register": "scope_exclusion",
   "discipline": "architectural",
   "status": "Draft",
@@ -280,7 +320,7 @@
   "related_json": "{\"boq_items\": [\"4.4\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-029",
+  "id": "TQ-PRJ-9201-033",
   "register": "scope_exclusion",
   "discipline": "mep",
   "status": "Draft",
@@ -290,7 +330,7 @@
   "related_json": "{\"boq_items\": [\"not in BOQ\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-030",
+  "id": "TQ-PRJ-9201-034",
   "register": "technical",
   "discipline": "architectural",
   "status": "Draft",
@@ -300,7 +340,7 @@
   "related_json": "{\"boq_items\": [\"5.4\", \"5.12\", \"5.13\", \"5.15\", \"5.21\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-031",
+  "id": "TQ-PRJ-9201-035",
   "register": "boq_discrepancy",
   "discipline": "architectural",
   "status": "Draft",
@@ -310,7 +350,7 @@
   "related_json": "{\"boq_items\": [\"5.2\", \"5.3\", \"5.6\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-032",
+  "id": "TQ-PRJ-9201-036",
   "register": "missing_input",
   "discipline": "structural",
   "status": "Draft",
@@ -320,7 +360,7 @@
   "related_json": "{\"boq_items\": [\"2.1-2.10\", \"4.1-4.4\", \"5.1-5.25\", \"6.1\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-033",
+  "id": "TQ-PRJ-9201-037",
   "register": "technical",
   "discipline": "commercial",
   "status": "Draft",
@@ -330,7 +370,7 @@
   "related_json": "{\"boq_items\": [\"all\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-034",
+  "id": "TQ-PRJ-9201-038",
   "register": "design_interface",
   "discipline": "structural",
   "status": "Draft",
@@ -340,7 +380,7 @@
   "related_json": "{\"boq_items\": [\"7.1\", \"2.6\", \"2.9\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-035",
+  "id": "TQ-PRJ-9201-039",
   "register": "boq_discrepancy",
   "discipline": "all",
   "status": "Draft",
@@ -350,7 +390,7 @@
   "related_json": "{\"boq_items\": [\"all\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
  },
  {
-  "id": "TQ-PRJ-9201-036",
+  "id": "TQ-PRJ-9201-040",
   "register": "commercial",
   "discipline": "commercial",
   "status": "Draft",

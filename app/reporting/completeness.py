@@ -36,12 +36,15 @@ def project_completeness(db: Database, project_id: str) -> dict:
         rows.append(_row("Workspace", "Tender documents received", OK if tender else OPEN, f"{tender} item(s) in '1. Tender Documents'" if tender else "No tender documents in the workspace yet.", f"{base}/workspace"))
         changed = sum(1 for d in docs if d["review_status"] in ("Source changed - review", "Missing"))
         unextracted = sum(1 for d in docs if d["extraction_status"] in ("Extraction error", "Not text-extracted"))
-        rows.append(_row("Workspace", "Document index", OK if docs and not changed else OPEN if docs else INFO,
-                         f"{len(docs)} indexed; {changed} new/changed/missing awaiting human review; {unextracted} not text-extracted." if docs else "Not indexed yet.", f"{base}/workspace"))
+        incomplete = sum(1 for d in docs if d["extraction_status"] == "Extracted - incomplete")
+        rows.append(_row("Workspace", "Document index", OK if docs and not changed and not incomplete else OPEN if docs else INFO,
+                         (f"{len(docs)} indexed; {changed} new/changed/missing awaiting human review; {unextracted} not text-extracted; {incomplete} extracted but INCOMPLETE (numeric table columns missing from the text layer)." if docs else "Not indexed yet."), f"{base}/workspace"))
     except Exception:
         rows.append(_row("Workspace", "Numbered folders present", OPEN, "No workspace folder yet - open the Workspace tab to create it.", f"{base}/workspace"))
     # --- project context recorded by a human
     trades = jload(p.get("trades"), [])
+    rows.append(_row("Project context", "Region and currency confirmed by a person", OPEN if p.get("basis_defaulted") else OK,
+                     f"{p.get('region')} / {p.get('currency')} are system defaults, not confirmed." if p.get("basis_defaulted") else f"{p.get('region')} / {p.get('currency')}", f"{base}/workspace"))
     rows.append(_row("Project context", "Applicable trades recorded", OK if trades else OPEN, ", ".join(trades) or "Not recorded.", f"{base}/workspace"))
     rows.append(_row("Project context", "Approved drawing / specification revisions recorded", OK if p.get("drawing_revision") and p.get("spec_revision") else OPEN,
                      f"drawings: {p.get('drawing_revision') or 'not recorded'}; specification: {p.get('spec_revision') or 'not recorded'}", f"{base}/workspace"))

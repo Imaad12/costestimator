@@ -22,7 +22,10 @@ QUERY_REGISTERS = ("technical", "commercial", "boq_discrepancy", "scope_exclusio
 OPEN_QUERY = ("Draft", "Approved to Issue", "Issued")
 DOC_TYPES = ("drawing", "specification", "boq", "addendum", "site_information", "geotechnical", "survey", "existing_asset", "client_form", "contract", "standard", "clarification_response", "other")
 # Heuristic markers (detection only - they raise a DRAFT question, never a conclusion): wording that leaves scope, quantity or responsibility open.
-AMBIGUITY_MARKERS = ("as required", "to be confirmed", "tbc", "tbd", "by others", "or similar", "or equal", "approx", "allow for", "as directed", "if required", "as necessary", "provisional")
+AMBIGUITY_MARKERS = ("as required", "to be confirmed", "tbc", "tbd", "by others", "or similar", "or equal", "approx", "allow for", "as directed", "if required", "as necessary", "provisional",
+                     "assumed", "assumption", "confirm", "not printed", "not stated")
+NEAR_DUP_TOLERANCE = 0.01          # sizes that differ by <= 1 % in every dimension are reported as possible duplicates / typing variants
+_NUMBER = re.compile(r"\d+(?:\.\d+)?")
 
 REGISTER_FIELDS = {
     "bid_no_bid": ("criterion", "assessment", "evidence"),
@@ -289,9 +292,20 @@ def generate_draft_queries(db: Database, actor: Actor | str, project_id: str, *,
     for b in items:
         desc = (b["description"] or "")
         low = desc.lower()
-        hit = [m for m in AMBIGUITY_MARKERS if re.search(r"\b" + re.escape(m) + r"\b", low)]
+        # the wording scan covers the description AND every other text column of the imported row (remarks, basis, notes), where a BOQ author usually writes "assumed ... confirm"
+        texts = [("description", low)]
+        try:
+            orig = json.loads(b["original_json"] or "{}")
+        except ValueError:
+            orig = {}
+        for col, val in (orig.items() if isinstance(orig, dict) else []):
+            if isinstance(val, str) and str(col).strip().lower() not in ("description", "item no", "item", "unit", "quantity", "qty") and val.strip() and val.strip() != desc:
+                texts.append((str(col), val.lower()))
+        found = [(col, m) for col, t in texts for m in AMBIGUITY_MARKERS if re.search(r"\b" + re.escape(m) + r"\b", t)]
+        hit = sorted({m for _, m in found})
         if hit:
-            q(f"AMBIG:{b['item_key']}", "technical", f"BOQ item {b['item_key']} ('{desc[:120]}') uses open wording ({', '.join(hit)}). Please state the exact scope, extent and responsibility priced under this item.",
+            where = sorted({col for col, _ in found})
+            q(f"AMBIG:{b['item_key']}", "technical", f"BOQ item {b['item_key']} ('{desc[:120]}') uses open wording ({', '.join(hit)}) in: {', '.join(where)}. Please state the exact scope, extent and responsibility priced under this item.",
               "Open wording leaves scope or quantity undefined; the estimate cannot price it without an assumption.", discipline=b["trade"], responsible_party="Customer / design team",
               related=dict(boq_items=[b["item_key"]], drawing_ref=b["drawing_ref"], spec_ref=b["spec_ref"], revision=b["revision"]),
               impact={"assessed": False, "note": "detected by wording heuristic; impact to be assessed by an estimator"})
@@ -306,6 +320,19 @@ def generate_draft_queries(db: Database, actor: Actor | str, project_id: str, *,
             if iss and b["unit_status"] == "ok":
                 q(f"ISSUE:{b['item_key']}", "boq_discrepancy", f"BOQ item {b['item_key']} was flagged during import: {'; '.join(str(i.get('message', i)) if isinstance(i, dict) else str(i) for i in iss)[:300]} Please confirm the intended item / quantity.",
                   "Import validation found a discrepancy.", discipline=b["trade"], responsible_party="Customer (BOQ owner)", related=dict(boq_items=[b["item_key"]]))
+    # near-duplicate sizes: the same description with every number within NEAR_DUP_TOLERANCE of another line's (e.g. door 800x2400 and 802x2400) splits a count / a priced size
+    shapes: dict[tuple, list] = {}
+    for b in items:
+        nums = [float(n) for n in _NUMBER.findall(b["description"] or "")]
+        if nums and b["item_type"] == "item":
+            shapes.setdefault((_NUMBER.sub("#", (b["description"] or "").lower()), b["unit"]), []).append((b["item_key"], nums))
+    for (_shape, _unit), grp in sorted(shapes.items(), key=lambda kv: kv[0][0]):
+        for i, (k1, n1) in enumerate(grp[:60]):
+            for k2, n2 in grp[i + 1:60]:
+                if len(n1) == len(n2) and n1 != n2 and all(abs(x - y) <= NEAR_DUP_TOLERANCE * max(x, y) for x, y in zip(n1, n2)):
+                    q(f"NEARDUP:{k1}:{k2}", "boq_discrepancy", f"BOQ items {k1} and {k2} are almost identical ('{next(b['description'] for b in items if b['item_key'] == k1)[:80]}' vs '{next(b['description'] for b in items if b['item_key'] == k2)[:80]}'; sizes differ by <= {NEAR_DUP_TOLERANCE:.0%}). Are they the same item typed differently, or genuinely different?",
+                      "Near-duplicate lines may split one quantity or price two sizes that are the same.", discipline=None, responsible_party="Customer (BOQ owner)", related=dict(boq_items=[k1, k2]),
+                      impact={"assessed": False, "note": "detected by a size-similarity heuristic; impact to be assessed by an estimator"})
     drep = documents_report(db, project_id)
     groups: dict[tuple, list] = {}
     for c in drep["revision_conflicts"]:                       # one query per document / revision pair, listing every BOQ item that cites the superseded revision

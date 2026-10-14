@@ -36,7 +36,7 @@ def real_project(db, tmp_path, U, *, demo=False):
                                lines_=[dict(line_type="material", resource_id=rid, factor="1", factor_includes_waste=1)])
     assemblies.submit_assembly(db, est, "FX-ASM")
     assemblies.approve_assembly(db, com, "FX-ASM")
-    pid = projects.create_project(db, est, name="Fixture project", is_demo=demo, tax_category="VAT-STD")
+    pid = projects.create_project(db, est, name="Fixture project", is_demo=demo, tax_category="VAT-STD", region="KSA-ALL", currency="SAR")
     boq_import.import_boq(db, est, pid, write_boq(tmp_path / "b.csv", [("1", "Item", "m3", "10", "", "")]))
     boq.map_to_assembly(db, est, pid, "1", "FX-ASM")
     pol = commercial.create_policy(db, est, code="FX-POL", name="fixture", config={"method": "markup", "markup_pct": "10", "default_tax_category": "VAT-STD",

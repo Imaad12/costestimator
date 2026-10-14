@@ -444,12 +444,23 @@ def d35(c):
 
 
 def d36(c):
-    un = [[l["item"], l["qty"], l["status"]] for l in (c.res.get("schedule") or []) if l["amount"] in (None, "None", "")]
+    boq = {r["item_key"]: r for r in c.db.all("SELECT item_key, description, quantity_original, unit, mapping_status FROM boq_items WHERE project_id=? AND item_type='item'", (c.pid,))}
+    # every BOQ line of the frozen estimate that is not fully priced (an unmapped line never reaches the pricing schedule, so the schedule alone would hide it)
+    un = []
+    for it in (c.res.get("items") or []):
+        if it.get("complete"):
+            continue
+        b = boq.get(it["item_key"])
+        un.append([it["item_key"], (b["description"] if b else "")[:70], f'{b["quantity_original"]} {b["unit"] or ""}'.strip() if b else "", b["mapping_status"] if b else "", it.get("method") or "unpriced"])
     needs = rows_to_dicts(c.db.all("SELECT id, description, reason, estimated_exposure, closed FROM procurement_items WHERE project_id=? ORDER BY id", (c.pid,)))
+    unmapped = sum(1 for r in un if r[3] == "Unmapped")
+    need_note = ([f"No procurement need has been raised, but {len(un)} BOQ line(s) are unpriced ({unmapped} unmapped). Procurement needs are detected from MAPPED lines only: map the lines to assemblies/resources first, then run need detection."]
+                 if un and not needs else [])
     return Doc("D36", "Missing-rate and procurement report", [
-        sec_table("Unpriced schedule lines (never carried as zero)", ["Item", "Quantity", "Status"], un or [["-", "none", ""]]),
-        sec_table("Procurement needs", ["ID", "Description", "Reason", "Exposure", "Closed"], [[n[k] for k in ("id", "description", "reason", "estimated_exposure", "closed")] for n in needs] or [["-", "none", "", "", ""]]),
-        sec_table("Resolved exceptions from the estimate", ["Code", "Severity", "Message"], [[e.get("code"), e.get("severity"), e.get("message")] for e in (c.res.get("exceptions") or [])][:200] or [["-", "-", "none"]])],
+        Section("Summary", [f"{len(un)} of {len(c.res.get('items') or [])} BOQ line(s) are unpriced or incomplete in the frozen estimate (never carried as zero)."]),
+        sec_table("Unpriced or incomplete BOQ lines", ["Item", "Description", "Quantity", "Mapping", "Pricing"], un or [["-", "none", "", "", ""]]),
+        sec_table("Procurement needs", ["ID", "Description", "Reason", "Exposure", "Closed"], [[n[k] for k in ("id", "description", "reason", "estimated_exposure", "closed")] for n in needs] or [["-", "none", "", "", ""]], paras=need_note),
+        sec_table("Exceptions recorded in the frozen estimate (as at freeze; not necessarily resolved)", ["Code", "Severity", "Message"], [[e.get("code"), e.get("severity"), e.get("message")] for e in (c.res.get("exceptions") or [])][:200] or [["-", "-", "none"]])],
                facts=c.facts(), xlsx=True, refs=[f"{c.pid}-D22"], limitations=_lim(c))
 
 
