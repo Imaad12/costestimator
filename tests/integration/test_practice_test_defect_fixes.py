@@ -183,3 +183,66 @@ def test_readiness_lists_an_unchecked_transcription(seeded, tmp_path):
     assert any("no second person has checked" in r for r in readiness.evaluate(seeded, pid, vid, None)["reasons"])
     bi.record_transcription_check(seeded, COMMERCIAL, imp["import_id"], "compared with the source page")
     assert not any("no second person has checked" in r for r in readiness.evaluate(seeded, pid, vid, None)["reasons"])
+
+
+# ---- D-9: discipline x document completeness matrix
+def test_discipline_matrix_from_register_and_boq(seeded, tmp_path):
+    from app.core.errors import ValidationFailed
+    from app.reporting import registry
+    pid = projects.create_project(seeded, ESTIMATOR, name="Matrix (SYNTHETIC)", is_demo=True, region="KSA-ALL", currency="SAR", trades=["civil", "structural"])
+    bi.import_boq(seeded, ESTIMATOR, pid, write_boq(tmp_path / "b.csv", [("1", "Footing", "m3", "5", "Structural"), ("2", "Pit", "m3", "9", "Civil / earthwork"), ("3", "Misc", "nr", "1", "Landscaping")],
+                                                      header=("Item", "Description", "Unit", "Qty", "Trade")))
+    with pytest.raises(ValidationFailed) as e:
+        tender.register_document(seeded, ESTIMATOR, pid, doc_ref="X", doc_type="drawing", title="t", revision="A", discipline="astrology")
+    assert e.value.code == "DOC_DISCIPLINE"
+    tender.register_document(seeded, ESTIMATOR, pid, doc_ref="DWG-S", doc_type="drawing", title="Footing layout", revision="-", status="Missing", discipline="structural")
+    tender.register_document(seeded, ESTIMATOR, pid, doc_ref="DWG-?", doc_type="drawing", title="Unassigned sheet", revision="A")
+    m = registry.run_report(seeded, "discipline_completeness", pid, {})
+    rows = {r["discipline"]: r for r in m["rows"]}
+    assert set(rows) == {"civil", "structural"} and not m["complete"]
+    assert rows["structural"]["drawings"]["state"] == "Missing" and rows["structural"]["specification"]["state"] == "Not registered" and rows["structural"]["boq_lines"] == 1
+    assert rows["civil"]["drawings"]["state"] == "Not registered" and rows["civil"]["boq_lines"] == 1
+    assert m["boq_lines_unclassified"] == 1 and m["documents_without_discipline"] == ["DWG-?"]
+    row = next(r for r in completeness.project_completeness(seeded, pid)["rows"] if r["check"] == "Discipline document coverage")
+    assert row["status"] == "Open" and "structural" in row["detail"]
+    # supply what is missing: structural drawings + spec, civil drawings + spec, and a discipline for the stray sheet
+    for disc, tag in (("structural", "S"), ("civil", "C")):
+        tender.register_document(seeded, ESTIMATOR, pid, doc_ref=f"DWG-{tag}", doc_type="drawing", title="d", revision="B", discipline=disc)
+        tender.register_document(seeded, ESTIMATOR, pid, doc_ref=f"SPEC-{tag}", doc_type="specification", title="s", revision="A", discipline=disc)
+    tender.register_document(seeded, ESTIMATOR, pid, doc_ref="DWG-?", doc_type="drawing", title="Unassigned sheet", revision="B", discipline="civil")
+    assert registry.run_report(seeded, "discipline_completeness", pid, {})["complete"]
+
+
+# ---- O-3: a Complete estimate on synthetic rates does not read as a plain Complete
+def test_state_label_and_caveats_for_synthetic_and_unchecked_data(seeded, tmp_path):
+    from app.estimators.estimate import compute_estimate
+    from app.services import caveats
+    from tests.helpers import build_mini
+    pid = build_mini(seeded, tmp_path)
+    est = compute_estimate(seeded, pid)
+    assert est.flags["synthetic"] and "SYNTHETIC DATA (not for reliance)" in est.state and est.state.startswith(("Complete", "Preliminary"))
+    assert any("synthetic" in c for c in caveats.estimate_caveats(seeded, pid, est))
+    bi.import_boq(seeded, ESTIMATOR, pid, write_boq(tmp_path / "t.csv", [("9.9", "Extra", "m", "1")]), derived_from={"source_file": "x.pdf", "source_sha256": "ef" * 32, "method": "by eye"})
+    cv = caveats.estimate_caveats(seeded, pid, compute_estimate(seeded, pid))
+    assert any("no second person has checked" in c for c in cv)
+    row = next(r for r in completeness.project_completeness(seeded, pid)["rows"] if r["check"] == "Reliance caveats")
+    assert row["status"] == "Open"
+
+
+# ---- O-2: an unapproved assumption in use can never be waived
+def test_unapproved_assumption_in_use_is_critical_and_not_waivable(seeded):
+    from app.reconciliation.rules import load_rules
+    rules = load_rules(seeded)["rules"]
+    assert rules["UNAPPROVED_ASSUMPTION"]["severity"] == "Critical" and rules["UNAPPROVED_ASSUMPTION"]["exception_allowed"] is False
+    assert rules["UNAPPROVED_ADOPTED_ASSUMPTION"]["severity"] == "High" and rules["UNAPPROVED_ADOPTED_ASSUMPTION"]["exception_allowed"] is True
+
+
+def test_commercial_discipline_needs_no_drawings(seeded):
+    from app.reporting import registry
+    pid = projects.create_project(seeded, ESTIMATOR, name="Commercial row (SYNTHETIC)", is_demo=True, region="KSA-ALL", currency="SAR")
+    tender.register_document(seeded, ESTIMATOR, pid, doc_ref="ITT", doc_type="contract", title="Conditions of contract", revision="n/a", status="Missing", discipline="commercial")
+    r = next(x for x in registry.run_report(seeded, "discipline_completeness", pid, {})["rows"] if x["discipline"] == "commercial")
+    assert r["gaps"] == ["documents missing"]
+    tender.register_document(seeded, ESTIMATOR, pid, doc_ref="ITT", doc_type="contract", title="Conditions of contract", revision="A", discipline="commercial")
+    r = next(x for x in registry.run_report(seeded, "discipline_completeness", pid, {})["rows"] if x["discipline"] == "commercial")
+    assert r["gaps"] == [] and r["complete"]

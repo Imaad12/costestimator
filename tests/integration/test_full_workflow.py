@@ -211,7 +211,7 @@ def test_complete_workflow_to_gated_submission_export(demo):
         commercial.approve_tax_category(db, ESTIMATOR, tid, evidence="x")
     commercial.approve_tax_category(db, COMMERCIAL, tid, evidence="SYNTHETIC TEST: pretend verification record against official guidance")
     est = compute_estimate(db, pid)
-    assert est.state == "Complete with Provisional Inputs", (est.state, est.blockers)
+    assert est.state.startswith("Complete with Provisional Inputs"), (est.state, est.blockers)
 
     # ---------------- commercial chain, independent re-derivation ----------------
     c, sch = est.commercial, est.schedule
@@ -256,7 +256,11 @@ def test_complete_workflow_to_gated_submission_export(demo):
     # human resolution of the open items
     for cl in registers.list_clarifications(db, pid):
         registers.resolve_clarification(db, ESTIMATOR, cl["id"], "Confirmed by client: lift 1000 kg / 1.6 m/s; temp power by main contractor (synthetic)", "Addendum 02, ref SYN-ADD-02")
-    for f in by_rule["BOQ_ROWS_REJECTED"] + by_rule["UNAPPROVED_ADOPTED_ASSUMPTION"] + by_rule["PROVISIONAL_INPUTS"]:
+    for f in by_rule["UNAPPROVED_ADOPTED_ASSUMPTION"]:                           # O-2: High now - only a Commercial Approver may accept it, never an Estimator
+        with pytest.raises(PermissionDenied):
+            recon.accept_exception(db, ESTIMATOR, f["id"], "Documented: remaining assumptions are not used by this synthetic estimate")
+        recon.accept_exception(db, COMMERCIAL, f["id"], "Documented: remaining assumptions are not used by this synthetic estimate")
+    for f in by_rule["BOQ_ROWS_REJECTED"] + by_rule["PROVISIONAL_INPUTS"]:
         recon.accept_exception(db, ESTIMATOR, f["id"], "Documented: row 'TBA' is a client placeholder; remaining assumptions are not used by this synthetic estimate; provisional inputs are as per client")
     for f in by_rule.get("INDIRECT_BASE_OVERLAP", []):                           # a High finding: only a Commercial Approver may accept it
         recon.accept_exception(db, COMMERCIAL, f["id"], "Documented: the percentage indirect is intentionally applied to the whole direct cost incl. one preliminaries line (synthetic)")

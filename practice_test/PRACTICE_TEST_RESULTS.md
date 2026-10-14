@@ -219,3 +219,13 @@ Direction given: the application must **not** grow an OCR / PDF-extraction tool;
 * Observation O-3: the engine reports state **Complete** for PRJ-9203 although quantities are an unchecked transcription, the rates are placeholders and no indirect cost exists; only the banners, completeness report and readiness gate carry those caveats.
 
 Still open: D-9, O-1, O-2, O-3. Regression tests for these fixes are in `tests/integration/test_practice_test_defect_fixes.py` (11 tests in total).
+
+## 17. Update — D-9, O-2, O-3 fixed
+
+| # | Resolution | Evidence in the re-run |
+|---|---|---|
+| D-9 | Application report `discipline_completeness` (migration 0017 adds `tender_documents.discipline`): per discipline, drawings / specification / other documents Current vs Missing and BOQ lines; also a section in D33 and a completeness row. Commercial/general disciplines expect no drawings, only that no document is missing. The practice runner now uses this report instead of its own table. | architectural: drawings + spec Missing, 31 BOQ lines; structural: Missing/Missing, 14 lines; civil: not registered, 3 lines; mechanical/plumbing/electrical/fire: drawings Missing; commercial: contract Missing; matrix `complete = false` |
+| O-2 | `UNAPPROVED_ASSUMPTION` (in use) is now **Critical, not waivable** (attempt: `EXCEPTION_NOT_ALLOWED`) and a readiness reason; `UNAPPROVED_ADOPTED_ASSUMPTION` is **High**: needs a Commercial Approver's recorded exception (an Estimator is refused). Five existing tests were updated to accept that exception explicitly. | PRJ-9202 reconciliation: 52 findings, High now 2 |
+| O-3 | State label "... - SYNTHETIC DATA (not for reliance)" when synthetic rates are used; `estimate_caveats` (synthetic, provisional, unchecked transcription, defaulted region/currency, unapproved assumptions in use) in the completeness report ("Reliance caveats": Open), the Basis of Estimate banner and the estimate API | PRJ-9203 state: "Complete - SYNTHETIC DATA (not for reliance)" |
+
+Open now: **O-1** only. Full suite: 473 passed.

@@ -32,7 +32,7 @@
  },
  "A1_workspace_index": {
   "verdict": "PASS",
-  "workspace": "/tmp/claude-0/pt3/workspaces/PRJ-9201-practice-test-sample-residential-buildin",
+  "workspace": "/tmp/claude-0/pt5/workspaces/PRJ-9201-practice-test-sample-residential-buildin",
   "originals_copied": [
    {
     "file": "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
@@ -59,7 +59,7 @@
      "reason": "The text layer has a Quantity column header and 89 unit tokens but only 1 unit/number pairs: the table's quantities are probably NOT in the extracted text (numbers drawn as unmapped glyphs or images). Do not search or rely on this extract for quantities; obtain the BOQ as XLSX/CSV or have a person transcribe it from the page images."
     }
    ],
-   "index_file": "/tmp/claude-0/pt3/workspaces/PRJ-9201-practice-test-sample-residential-buildin/2. AI Context/project_index.json"
+   "index_file": "/tmp/claude-0/pt5/workspaces/PRJ-9201-practice-test-sample-residential-buildin/2. AI Context/project_index.json"
   },
   "indexed": [
    {
@@ -95,8 +95,20 @@
     "Architect's drawing set - 'a 16-sheet drawing set' (p.1): ground-floor"
    ],
    [
-    "DWG-MEP",
-    "Mechanical, plumbing, electrical, fire, ELV drawings (NOT provided; no"
+    "DWG-ELEC",
+    "Electrical drawings (NOT provided; not in scope of the source BOQ)"
+   ],
+   [
+    "DWG-FIRE",
+    "Fire protection drawings (NOT provided; not in scope of the source BOQ"
+   ],
+   [
+    "DWG-MECH",
+    "Mechanical / HVAC drawings (NOT provided; not in scope of the source B"
+   ],
+   [
+    "DWG-PLUMB",
+    "Plumbing and drainage drawings (NOT provided; not in scope of the sour"
    ],
    [
     "DWG-STR-COLUMN",
@@ -260,21 +272,24 @@
    "TQ-PRJ-9201-022",
    "TQ-PRJ-9201-023",
    "TQ-PRJ-9201-024",
-   "TQ-PRJ-9201-025"
+   "TQ-PRJ-9201-025",
+   "TQ-PRJ-9201-026",
+   "TQ-PRJ-9201-027",
+   "TQ-PRJ-9201-028"
   ],
   "manual_drafts": 15,
-  "total": 40,
+  "total": 43,
   "statuses": {
-   "Draft": 40
+   "Draft": 43
   },
   "by_register": {
-   "scope_exclusion": 3,
-   "design_interface": 1,
-   "missing_input": 14,
-   "commercial": 1,
    "assumption_confirmation": 10,
+   "design_interface": 1,
+   "scope_exclusion": 3,
    "technical": 5,
-   "boq_discrepancy": 6
+   "boq_discrepancy": 6,
+   "commercial": 1,
+   "missing_input": 17
   },
   "takeoff_required_tasks": [
    "ACT-PRJ-9201-001",
@@ -367,17 +382,17 @@
    ],
    [
     "TQ-PRJ-9201-016",
-    "assumption_confirmation",
+    "missing_input",
     "system:detector"
    ],
    [
     "TQ-PRJ-9201-017",
-    "assumption_confirmation",
+    "missing_input",
     "system:detector"
    ],
    [
     "TQ-PRJ-9201-018",
-    "assumption_confirmation",
+    "missing_input",
     "system:detector"
    ],
    [
@@ -417,57 +432,57 @@
    ],
    [
     "TQ-PRJ-9201-026",
-    "boq_discrepancy",
-    "user (practice-test operator)"
+    "assumption_confirmation",
+    "system:detector"
    ],
    [
     "TQ-PRJ-9201-027",
-    "boq_discrepancy",
-    "user (practice-test operator)"
+    "assumption_confirmation",
+    "system:detector"
    ],
    [
     "TQ-PRJ-9201-028",
-    "missing_input",
-    "user (practice-test operator)"
+    "assumption_confirmation",
+    "system:detector"
    ],
    [
     "TQ-PRJ-9201-029",
-    "missing_input",
+    "boq_discrepancy",
     "user (practice-test operator)"
    ],
    [
     "TQ-PRJ-9201-030",
-    "technical",
-    "user (practice-test operator)"
-   ],
-   [
-    "TQ-PRJ-9201-031",
-    "scope_exclusion",
-    "user (practice-test operator)"
-   ],
-   [
-    "TQ-PRJ-9201-032",
-    "scope_exclusion",
-    "user (practice-test operator)"
-   ],
-   [
-    "TQ-PRJ-9201-033",
-    "scope_exclusion",
-    "user (practice-test operator)"
-   ],
-   [
-    "TQ-PRJ-9201-034",
-    "technical",
-    "user (practice-test operator)"
-   ],
-   [
-    "TQ-PRJ-9201-035",
     "boq_discrepancy",
     "user (practice-test operator)"
    ],
    [
-    "TQ-PRJ-9201-036",
+    "TQ-PRJ-9201-031",
     "missing_input",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-032",
+    "missing_input",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-033",
+    "technical",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-034",
+    "scope_exclusion",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-035",
+    "scope_exclusion",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-036",
+    "scope_exclusion",
     "user (practice-test operator)"
    ],
    [
@@ -477,16 +492,31 @@
    ],
    [
     "TQ-PRJ-9201-038",
-    "design_interface",
-    "user (practice-test operator)"
-   ],
-   [
-    "TQ-PRJ-9201-039",
     "boq_discrepancy",
     "user (practice-test operator)"
    ],
    [
+    "TQ-PRJ-9201-039",
+    "missing_input",
+    "user (practice-test operator)"
+   ],
+   [
     "TQ-PRJ-9201-040",
+    "technical",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-041",
+    "design_interface",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-042",
+    "boq_discrepancy",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-043",
     "commercial",
     "user (practice-test operator)"
    ]
@@ -633,56 +663,206 @@
  },
  "B2_registers": {
   "verdict": "PASS",
-  "discipline_matrix": [
-   {
-    "discipline": "Architectural",
-    "drawings": "Missing",
-    "specification": "Missing",
-    "boq_coverage": "Partial: masonry, openings, railings (quantities only)"
-   },
-   {
-    "discipline": "Structural",
-    "drawings": "Missing",
-    "specification": "Missing",
-    "boq_coverage": "Partial: RCC volumes + formwork; steel excluded"
-   },
-   {
-    "discipline": "Civil / earthwork / site",
-    "drawings": "Missing",
-    "specification": "Missing",
-    "boq_coverage": "Partial: pits, blinding, backfill; no external works"
-   },
-   {
-    "discipline": "Mechanical / HVAC",
-    "drawings": "Missing",
-    "specification": "Missing",
-    "boq_coverage": "Absent"
-   },
-   {
-    "discipline": "Plumbing / drainage",
-    "drawings": "Missing",
-    "specification": "Missing",
-    "boq_coverage": "Absent"
-   },
-   {
-    "discipline": "Electrical",
-    "drawings": "Missing",
-    "specification": "Missing",
-    "boq_coverage": "Absent"
-   },
-   {
-    "discipline": "Fire protection / ELV",
-    "drawings": "Missing",
-    "specification": "Missing",
-    "boq_coverage": "Absent"
-   },
-   {
-    "discipline": "Contract / commercial / ITT",
-    "drawings": "n/a",
-    "specification": "Missing",
-    "boq_coverage": "Absent (rates blank)"
-   }
-  ],
+  "discipline_matrix": {
+   "project_id": "PRJ-9201",
+   "rows": [
+    {
+     "discipline": "architectural",
+     "drawings": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "specification": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "other": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "boq_lines": 31,
+     "complete": false,
+     "gaps": [
+      "drawings missing",
+      "specification missing"
+     ]
+    },
+    {
+     "discipline": "civil",
+     "drawings": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "specification": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "other": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "boq_lines": 3,
+     "complete": false,
+     "gaps": [
+      "drawings not registered",
+      "specification not registered"
+     ]
+    },
+    {
+     "discipline": "commercial",
+     "drawings": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "specification": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "other": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "boq_lines": 0,
+     "complete": false,
+     "gaps": [
+      "documents missing"
+     ]
+    },
+    {
+     "discipline": "electrical",
+     "drawings": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "specification": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "other": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "boq_lines": 0,
+     "complete": false,
+     "gaps": [
+      "drawings missing",
+      "specification not registered"
+     ]
+    },
+    {
+     "discipline": "fire",
+     "drawings": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "specification": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "other": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "boq_lines": 0,
+     "complete": false,
+     "gaps": [
+      "drawings missing",
+      "specification not registered"
+     ]
+    },
+    {
+     "discipline": "mechanical",
+     "drawings": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "specification": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "other": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "boq_lines": 0,
+     "complete": false,
+     "gaps": [
+      "drawings missing",
+      "specification not registered"
+     ]
+    },
+    {
+     "discipline": "plumbing",
+     "drawings": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "specification": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "other": {
+      "current": 0,
+      "missing": 0,
+      "state": "Not registered"
+     },
+     "boq_lines": 0,
+     "complete": false,
+     "gaps": [
+      "drawings missing",
+      "specification not registered"
+     ]
+    },
+    {
+     "discipline": "structural",
+     "drawings": {
+      "current": 0,
+      "missing": 4,
+      "state": "Missing"
+     },
+     "specification": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "other": {
+      "current": 0,
+      "missing": 1,
+      "state": "Missing"
+     },
+     "boq_lines": 14,
+     "complete": false,
+     "gaps": [
+      "drawings missing",
+      "specification missing"
+     ]
+    }
+   ],
+   "boq_lines_unclassified": 0,
+   "documents_without_discipline": [],
+   "complete": false,
+   "note": "Built from the document register and BOQ trades. Registering a document is not interpreting it; a discipline is only as good as the person who assigned it."
+  },
   "application_completeness_report": {
    "project_id": "PRJ-9201",
    "generated": "2026-10-14",
@@ -731,6 +911,13 @@
     },
     {
      "area": "Project context",
+     "check": "Discipline document coverage",
+     "status": "Open",
+     "detail": "architectural: drawings missing, specification missing; civil: drawings not registered, specification not registered; commercial: documents missing; electrical: drawings missing, specification not registered; fire: drawings missing, specification not registered; mechanical: drawings missing, specification not registered; plumbing: drawings missing, specification not registered; structural: drawings missing, specification missing",
+     "where": "/projects/PRJ-9201/workspace"
+    },
+    {
+     "area": "Project context",
      "check": "Approved drawing / specification revisions recorded",
      "status": "Open",
      "detail": "drawings: not recorded; specification: not recorded",
@@ -770,6 +957,13 @@
      "status": "Blocked",
      "detail": "0/48 items fully priced; 48 item(s) unpriced or incomplete (48 of them unmapped); 0 priced line(s) lack an eligible rate; indicative exposure from unapproved/expired rates SAR 0 for mapped lines only (not computable for 48 unmapped line(s)) (not in totals); 0 line(s) with unknown exposure.",
      "where": "/projects/PRJ-9201/procurement"
+    },
+    {
+     "area": "Estimate",
+     "check": "Reliance caveats",
+     "status": "Open",
+     "detail": "BOQ import #1 is a transcription from '1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf' that no second person has checked - every quantity is unverified; region/currency (KSA-ALL / SAR) are system defaults, not confirmed by a person",
+     "where": "/projects/PRJ-9201/estimate"
     },
     {
      "area": "Estimate",
@@ -850,13 +1044,13 @@
     }
    ],
    "blocked": 5,
-   "open": 10,
+   "open": 12,
    "final_approval_possible": false,
    "note": "Final approval additionally re-runs every server-side gate; this report is a guide, not the gate."
   },
   "drawing_register": "EMPTY: no drawing was supplied; 6 drawing/survey documents referenced by the BOQ are registered as Missing",
   "revision_register": "1 current document; no superseded document; no revision identifier in the source (only two dates)",
-  "note": "The discipline matrix above was written by the practice-test script from the register; the application has no discipline-by-document-type matrix of its own (defect D-3)."
+  "note": "The discipline matrix is the application's own report (discipline_completeness), built from the document register and the BOQ trades."
  },
  "H1_documents_generated": {
   "verdict": "PASS",
@@ -1010,13 +1204,14 @@
     "the project is flagged as a demonstration project",
     "the environment is 'test', not 'production'",
     "project region/currency (KSA-ALL / SAR) are system defaults, not confirmed by a person",
+    "BOQ import #1 is a transcription from '1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf' that no second person has checked",
     "estimate approval: no approval record",
     "letter of offer: none generated",
     "tender-export approval: no approval record",
-    "reconciliation gate blocked by 50 finding(s)",
+    "reconciliation gate blocked by 51 finding(s)",
     "estimate state is 'Preliminary \u2014 Incomplete'",
-    "40 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
-    "required tender document(s) not received: ITT-CONTRACT, DWG-ARCH-SET, DWG-MEP, DWG-STR-COLUMN, DWG-STR-FOOTING, DWG-STR-SLABBEAM, DWG-STR-STAIR, BBS-REINF, SPEC-ARCH, SPEC-STRUCT, DWG-SITE-LEVELS",
+    "43 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
+    "required tender document(s) not received: ITT-CONTRACT, DWG-ARCH-SET, DWG-ELEC, DWG-FIRE, DWG-MECH, DWG-PLUMB, DWG-STR-COLUMN, DWG-STR-FOOTING, DWG-STR-SLABBEAM, DWG-STR-STAIR, BBS-REINF, SPEC-ARCH, SPEC-STRUCT, DWG-SITE-LEVELS",
     "document PRJ-9201-D16 approval: no approval record",
     "document PRJ-9201-D06 approval: no approval record"
    ]
@@ -1030,13 +1225,14 @@
    "reasons": [
     "the project is flagged as a demonstration project",
     "project region/currency (KSA-ALL / SAR) are system defaults, not confirmed by a person",
+    "BOQ import #1 is a transcription from '1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf' that no second person has checked",
     "estimate approval: no approval record",
     "letter of offer: none generated",
     "tender-export approval: no approval record",
-    "reconciliation gate blocked by 50 finding(s)",
+    "reconciliation gate blocked by 51 finding(s)",
     "estimate state is 'Preliminary \u2014 Incomplete'",
-    "40 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
-    "required tender document(s) not received: ITT-CONTRACT, DWG-ARCH-SET, DWG-MEP, DWG-STR-COLUMN, DWG-STR-FOOTING, DWG-STR-SLABBEAM, DWG-STR-STAIR, BBS-REINF, SPEC-ARCH, SPEC-STRUCT, DWG-SITE-LEVELS",
+    "43 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
+    "required tender document(s) not received: ITT-CONTRACT, DWG-ARCH-SET, DWG-ELEC, DWG-FIRE, DWG-MECH, DWG-PLUMB, DWG-STR-COLUMN, DWG-STR-FOOTING, DWG-STR-SLABBEAM, DWG-STR-STAIR, BBS-REINF, SPEC-ARCH, SPEC-STRUCT, DWG-SITE-LEVELS",
     "document PRJ-9201-D16 approval: no approval record",
     "document PRJ-9201-D06 approval: no approval record"
    ]
@@ -1069,8 +1265,8 @@
     "total": 52,
     "by_severity": {
      "Critical": 49,
-     "High": 1,
-     "Medium": 2
+     "High": 2,
+     "Medium": 1
     },
     "top_rules": {
      "INDIRECT_UNAPPROVED": 1,
@@ -1090,7 +1286,7 @@
      "estimate approval: no approval record",
      "letter of offer: none generated",
      "tender-export approval: no approval record",
-     "reconciliation gate blocked by 50 finding(s)",
+     "reconciliation gate blocked by 51 finding(s)",
      "estimate state is 'Preliminary \u2014 Incomplete'",
      "document PRJ-9202-D16 approval: no approval record",
      "document PRJ-9202-D06 approval: no approval record"
@@ -1124,7 +1320,7 @@
    "tax": "220759.31",
    "final_payable": "1692488.05"
   },
-  "state": "Complete",
+  "state": "Complete - SYNTHETIC DATA (not for reliance)",
   "blockers": [],
   "independent": {
    "direct_cost": "1274224.00",
@@ -1167,12 +1363,12 @@
   "verdict": "PASS",
   "result": {
    "ok": true,
-   "checked": 709
+   "checked": 715
   }
  },
  "_meta": {
   "project": "PRJ-9201",
-  "scratch": "/tmp/claude-0/pt3",
+  "scratch": "/tmp/claude-0/pt5",
   "settings_environment": "test",
   "banner": "PRACTICE TEST - NOT A TENDER - NOT FOR SUBMISSION. Third-party sample BOQ; quantities TRANSCRIBED, NOT VERIFIED; no rates, no productivity values."
  }

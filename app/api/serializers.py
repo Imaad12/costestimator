@@ -23,11 +23,17 @@ def ser(o: Any) -> Any:
     return o
 
 
+def _caveats(est) -> list[str]:
+    from ..database import get_db
+    from ..services import caveats
+    return caveats.estimate_caveats(get_db(), est.project["id"], est)
+
+
 def estimate_summary(est: EstimateResult, include_lines: bool = False) -> dict:
     c, s = est.commercial, est.schedule
     out = {
         "project_id": est.project["id"], "as_of": est.as_of.isoformat(), "state": est.state, "blockers": est.blockers, "fingerprint": est.fingerprint,
-        "flags": est.flags, "completeness": est.completeness, "totals": est.totals(),
+        "flags": est.flags, "completeness": est.completeness, "totals": est.totals(), "caveats": _caveats(est),
         "commercial": None if not c else {
             "method": c.method, "method_label": c.method_label, "policy": c.policy_name, "policy_status": c.policy_status, "direct": c.direct,
             "indirect": c.indirect, "pre_contingency_cost": c.pre_contingency_cost, "contingency": c.contingency, "risk": c.risk, "escalation": c.escalation,

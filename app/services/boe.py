@@ -73,6 +73,8 @@ def build_boe(db: Database, project_id: str, est=None) -> dict:
         banner.append("DEMONSTRATION PROJECT - NOT A MARKET QUOTE" + (" - SYNTHETIC DATA" if est.flags.get("synthetic") else ""))
     if est.state != "Complete":
         banner.append(f"ESTIMATE STATE: {est.state.upper()} - NOT FOR SUBMISSION")
+    from . import caveats as _cv
+    banner += [f"CAVEAT: {c}" for c in _cv.estimate_caveats(db, project_id, est) if "region/currency" not in c]
     if p.get("basis_defaulted"):
         banner.append(f"REGION / CURRENCY ({p.get('region')} / {p.get('currency')}) ARE SYSTEM DEFAULTS - NOT CONFIRMED BY A PERSON")
     if est.direct.synthetic_used:

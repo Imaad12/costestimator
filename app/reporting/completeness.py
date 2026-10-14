@@ -46,6 +46,13 @@ def project_completeness(db: Database, project_id: str) -> dict:
     rows.append(_row("Project context", "Region and currency confirmed by a person", OPEN if p.get("basis_defaulted") else OK,
                      f"{p.get('region')} / {p.get('currency')} are system defaults, not confirmed." if p.get("basis_defaulted") else f"{p.get('region')} / {p.get('currency')}", f"{base}/workspace"))
     rows.append(_row("Project context", "Applicable trades recorded", OK if trades else OPEN, ", ".join(trades) or "Not recorded.", f"{base}/workspace"))
+    from ..services import tender as _t
+    dm = _t.discipline_matrix(db, project_id)
+    if dm["rows"] or dm["documents_without_discipline"]:
+        bad = [f"{r['discipline']}: {', '.join(r['gaps'])}" for r in dm["rows"] if r["gaps"]]
+        if dm["documents_without_discipline"]:
+            bad.append(f"{len(dm['documents_without_discipline'])} document(s) without a discipline")
+        rows.append(_row("Project context", "Discipline document coverage", OK if not bad else OPEN, "; ".join(bad) if bad else "every expected discipline has drawings and a specification", f"{base}/workspace"))
     rows.append(_row("Project context", "Approved drawing / specification revisions recorded", OK if p.get("drawing_revision") and p.get("spec_revision") else OPEN,
                      f"drawings: {p.get('drawing_revision') or 'not recorded'}; specification: {p.get('spec_revision') or 'not recorded'}", f"{base}/workspace"))
     # --- BOQ
@@ -79,6 +86,9 @@ def project_completeness(db: Database, project_id: str) -> dict:
             rows.append(_row("Rates", "Provisional (project-scoped) inputs in use", INFO, "Approved provisional rates/allowances are used and disclosed in the estimate state.", f"{base}/estimate"))
         if est.flags["synthetic"]:
             rows.append(_row("Rates", "Synthetic data in use", INFO, "SYNTHETIC / DEMO / NOT A MARKET QUOTE values are present.", f"{base}/estimate"))
+        from ..services import caveats as _cv
+        cav = _cv.estimate_caveats(db, project_id, est)
+        rows.append(_row("Estimate", "Reliance caveats", OPEN if cav else OK, "; ".join(cav) if cav else "none", f"{base}/estimate"))
         for b in est.blockers:
             rows.append(_row("Estimate", "Blocking condition", BLOCKED, b, f"{base}/estimate"))
         rows.append(_row("Estimate", "Estimate state", INFO if est.state.startswith("Complete") else OPEN, est.state, f"{base}/estimate"))

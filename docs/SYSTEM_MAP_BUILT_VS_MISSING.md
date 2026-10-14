@@ -93,6 +93,8 @@ Green = built and exercised. Amber = the software exists, but it produces real o
           ─► approvals row + hash-chained audit row ─► approved record immutable (service + DB trigger)
           ─► readiness: registered HUMAN approvers + production environment + no demo/synthetic
              + region/currency confirmed + transcription checked + no BLOCKED documents
+             + no unapproved assumption in use (Critical, never waivable); adopted-unused ones need
+               a Commercial Approver's recorded exception
           ─►  PRODUCTION      │  DEMONSTRATION (demo/synthetic/test)  │  NOT READY
 ```
 AI can never write a register row, approve, or publish (tested). A missing rate stays `None`. Unknown is shown as `None`, not `0`.
@@ -106,5 +108,5 @@ AI can never write a register row, approve, or publish (tested). A missing rate 
 | Standards | SBC, Saudi procurement law and 4 productivity-reference families **not read** (register marks them "requires human acquisition") | a person obtains and imports them |
 | Content | quality / ITP / HSE / compliance content (only skeletons) | competent persons |
 | Security | MFA/SSO, off-box audit anchor, encryption at rest, separated admin duties, pen-test | engineering backlog (SECURITY.md) |
-| Product | forms for norms/profiles/activities/baselines/queries; discipline completeness matrix (D-9); formula/total-vs-lines detectors; estimate *state* ignores unchecked transcription / placeholder rates (O-3); unapproved assumptions are only a waivable Medium finding (O-2); cash flow not in the frozen snapshot | code backlog (see next-steps doc) |
+| Product | forms for norms/profiles/activities/baselines/queries; formula/total-vs-lines detectors; cash flow not in the frozen snapshot; open defect O-1 (a human can approve a document built on an Incomplete estimate; it stays Draft) | code backlog (see next-steps doc) |
 | By design, never | OCR / PDF-drawing reading, automatic takeoff, AI approvals, invented prices | — |

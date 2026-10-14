@@ -125,7 +125,7 @@ def _(db, a, p):
 def _(db, a, p):
     from ..services import tender
     return tender.register_document(db, a, req(p, "project_id")[0], doc_ref=req(p, "doc_ref")[0], doc_type=req(p, "doc_type")[0], title=req(p, "title")[0], revision=req(p, "revision")[0],
-                                    source=opt(p, "source"), received_date=opt(p, "received_date"), applicability=opt(p, "applicability"), status=opt(p, "status") or "Current", is_synthetic=_b(p, "is_synthetic"))
+                                    source=opt(p, "source"), received_date=opt(p, "received_date"), applicability=opt(p, "applicability"), status=opt(p, "status") or "Current", is_synthetic=_b(p, "is_synthetic"), discipline=opt(p, "discipline"))
 
 
 @action("generate_queries")

@@ -16,7 +16,8 @@ A local-first, Excel-first **estimating, tendering and procurement-support suite
 | **"Close the loop" mission** | Workforce/productivity/calendar engine + crew scenarios; unified assumptions register (17 categories, immutability triggers, four-eyes default); standards register (12 sources); tender registers + draft-only query detectors; 45-document tender pack and 17-document hypothetical handover pack (DOCX/XLSX/PDF, deterministic, manifest, validator); readiness closure gate; 27-stage synthetic scenario with an independent oracle; audit + security review | commits `e8c992a`, `ec75844`; 458 tests; `demo_output/synthetic_closure/` |
 | **Real-document practice test** | One third-party sample BOQ PDF was the only input (no drawings/specs/contract). Quantities read independently, imported, 36 draft queries, 10 takeoff actions, demonstration pack, negative tests, 9 defects + 3 observations recorded | commit `e2f88d4`; `practice_test/PRACTICE_TEST_RESULTS.md` |
 | Defects D-1, D-3, D-4, D-7 fixed | Incomplete-PDF-text flag, BOQ-content detectors, D36 lists unpriced lines, defaulted region/currency flagged (migration 0016) | commit `5b9c4d0`; 464 tests |
-| Defects D-2, D-5, D-6, D-8 fixed + priced run | No OCR by design: independent transcription imported with provenance and a second-person check; completeness no longer says OK with nothing priced; demo ≠ synthetic labelling; unknown totals are `None` not `0`; **priced run PRJ-9203** (real quantities × labelled SYNTHETIC placeholder rates) independently re-computed 48/48 lines | this commit; 469 passed (4 min 39 s) |
+| Defects D-9, O-2, O-3 fixed | Discipline completeness matrix; unapproved assumptions in use can never be waived (adopted-unused need a recorded exception); estimate state and caveats reflect synthetic / unchecked data | this commit; 473 tests passed |
+| Defects D-2, D-5, D-6, D-8 fixed + priced run | No OCR by design: independent transcription imported with provenance and a second-person check; completeness no longer says OK with nothing priced; demo ≠ synthetic labelling; unknown totals are `None` not `0`; **priced run PRJ-9203** (real quantities × labelled SYNTHETIC placeholder rates) independently re-computed 48/48 lines | this commit; 473 passed (4 min 26 s) |
 
 ## 3. Key decisions (so they are not re-litigated)
 * **No invented data.** No rates, productivity, calendars, suppliers or customer answers ship. Synthetic values are labelled and can never become "verified".
@@ -28,7 +29,7 @@ A local-first, Excel-first **estimating, tendering and procurement-support suite
 * **India sample ≠ KSA product.** The practice document is Indian (INR, IS 1200); it was used only to test the pipeline. Placeholder rates in the priced run are labelled and have no source.
 
 ## 4. Results to date (all re-runnable)
-* Automated suite: 469 passed (4 min 39 s) (`python -m pytest -o addopts="" -q`, ≈5 min).
+* Automated suite: 473 passed (4 min 26 s) (`python -m pytest -o addopts="" -q`, ≈5 min).
 * Synthetic scenario `python scripts/run_closure_scenario.py <fresh dir> --out <dir>`: **27/27 stages**, independent oracle agrees; 0 exports marked submission-ready; all actors test principals.
 * Crew scenarios on synthetic norms (head-count / working days): SME 15 → 400, Mid 24 → 212, Large 48 → 170, Enterprise 91 → 170 (the single crane and dependencies bind). Comparisons only, never benchmarks.
 * Practice test (`python scripts/run_real_document_practice_test.py <fresh dir>`): 48 BOQ lines imported (0 rejected); 0/48 verified against drawings (none supplied); 40 draft queries (25 system, 15 operator); 24/45 documents BLOCKED by missing inputs; negative tests held (registered humans in production could not produce a submission-ready export). Priced run: direct cost 1,274,224.00 on placeholder rates, equal to the independent recomputation for all 48 lines.
@@ -45,10 +46,10 @@ A local-first, Excel-first **estimating, tendering and procurement-support suite
 | D-6 | Demo conflated with synthetic | fixed |
 | D-7 | Silent KSA/SAR defaults | fixed (flag + readiness) |
 | D-8 | Zero shown for unknown totals | fixed |
-| D-9 | No discipline × document completeness matrix in the app | **open** |
+| D-9 | No discipline × document completeness matrix in the app | fixed (report `discipline_completeness`, migration 0017, in D33 and the completeness report) |
 | O-1 | Human can approve a document built on an Incomplete estimate (status stays Draft) | open, low |
-| O-2 | Unapproved assumptions are one waivable *Medium* finding | **open — policy decision** |
-| O-3 | Estimate state says Complete despite unchecked transcription / placeholder rates | **open** |
+| O-2 | Unapproved assumptions only a waivable *Medium* finding | fixed: in use → **Critical, cannot be waived**; adopted but unused → **High**, needs a Commercial Approver's recorded exception |
+| O-3 | Estimate state says Complete despite unchecked transcription / placeholder rates | fixed: state reads "... - SYNTHETIC DATA (not for reliance)" and a caveats list (unchecked transcription, defaulted basis, synthetic/provisional, unapproved assumptions) is shown in completeness, BOE banner and the API |
 
 ## 6. What still needs to be done
 
@@ -60,13 +61,12 @@ A local-first, Excel-first **estimating, tendering and procurement-support suite
 5. Competent persons write the real quality / ITP / HSE / compliance content (only skeletons exist).
 
 **B. Code backlog (ordered)**
-1. Decide O-2 (should an unapproved assumption ever reach a submission-ready export?) and O-3 (estimate state should reflect unchecked transcription / placeholder rates).
-2. D-9: discipline × document-type completeness matrix as an application report.
-3. Detector for "printed total / formula vs lines" where a BOQ contains subtotal rows.
-4. Bespoke UI forms for norms, profiles, activities, baselines, queries and document approval (today: API/CLI).
-5. Put cash flow in the frozen snapshot; read-only reviewer view of a frozen estimate.
-6. Security hardening (docs/SECURITY.md): MFA/SSO, off-box audit anchor, encryption at rest, separated admin duties, rate limiting beyond sign-in lockout, an independent penetration test.
-7. KSA specifics to enter only from primary sources (never defaults): statutory labour rules, holiday calendar, VAT treatment per package.
+1. Remaining defect: O-1 (low). Review whether the O-2 policy (adopted-unused assumptions need an exception) is too heavy in practice — every real project will carry ~80 seeded mandatory assumptions until a person approves or excepts them.
+2. Detector for "printed total / formula vs lines" where a BOQ contains subtotal rows.
+3. Bespoke UI forms for norms, profiles, activities, baselines, queries and document approval (today: API/CLI).
+4. Put cash flow in the frozen snapshot; read-only reviewer view of a frozen estimate.
+5. Security hardening (docs/SECURITY.md): MFA/SSO, off-box audit anchor, encryption at rest, separated admin duties, rate limiting beyond sign-in lockout, an independent penetration test.
+6. KSA specifics to enter only from primary sources (never defaults): statutory labour rules, holiday calendar, VAT treatment per package.
 
 **C. Acceptance for the first real-project pilot**: items A1–A2 and A4, B1, plus a dry run of the practice test on the real package with a second person checking every transcribed quantity.
 
@@ -90,4 +90,4 @@ Use scratch locations (`KSA_DB_PATH`, `KSA_WORKSPACES_DIR`) if you do not want t
 * **Rule of thumb**: if a piece cannot be exercised by a test or a scenario run, do not keep it.
 
 ## 9. Where we left off
-Last full-suite result: 469 passed (4 min 39 s). Work is committed on the feature branch; D-9, O-1, O-2, O-3 are the open defects; the next real milestone is a controlled pilot on a complete real tender package with registered human approvers (section 6C).
+Last full-suite result: 473 passed (4 min 26 s). Work is committed on the feature branch; O-1 is the only open defect; the next real milestone is a controlled pilot on a complete real tender package with registered human approvers (section 6C).

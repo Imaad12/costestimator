@@ -13,6 +13,8 @@ from ..core.money import ZERO, D_opt, quantize, to_text
 from ..core.timeutil import parse_date
 from ..database import Database, jload, rows_to_dicts
 from ..models.enums import EstimateState, Status
+
+SYNTHETIC_STATE_SUFFIX = " - SYNTHETIC DATA (not for reliance)"
 from ..services import assumptions as assumption_service
 from . import commercial as com
 from .context import load_inputs
@@ -309,6 +311,8 @@ def compute_estimate_from(inp: EstimateInputs, ex: EstimateExtras, *, policy_ove
         state = EstimateState.PROVISIONAL.value
     else:
         state = EstimateState.COMPLETE.value
+    if direct.synthetic_used and not state.startswith("Preliminary"):
+        state += SYNTHETIC_STATE_SUFFIX                      # a "Complete" estimate that rests on synthetic rates must not read as a plain Complete
     flags = dict(synthetic=direct.synthetic_used, provisional=direct.provisional_used, include_unapproved=include_unapproved,
                  duration_status=dur_status)
     res = EstimateResult(inp.project, inp.as_of, inp, direct, indirect, commercial, schedule, policy, exceptions, state,

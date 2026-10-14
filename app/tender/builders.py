@@ -422,9 +422,14 @@ def d33(c):
     r = tender.documents_report(c.db, c.pid)
     cols = ["doc_ref", "doc_type", "title", "revision", "received_date", "status", "content_status", "source"]
     allrows = r["current"] + r["superseded"] + r["missing"]
+    dm = tender.discipline_matrix(c.db, c.pid)
     return Doc("D33", "Tender document register and revision log", [
         sec_table("Register", ["Ref", "Type", "Title", "Rev", "Received", "Status", "Content status", "Source"], [[d[k] for k in cols] for d in allrows]),
         sec_table("Revision conflicts (BOQ vs register)", ["BOQ item", "Document", "BOQ revision", "Register revision"], [[x["item_key"], x["doc_ref"], x["boq_revision"], x["register_revision"]] for x in r["revision_conflicts"]] or [["-", "none", "", ""]]),
+        sec_table("Discipline completeness (drawings / specification / other: current, missing)", ["Discipline", "Drawings", "Specification", "Other", "BOQ lines", "Gaps"],
+                  [[x["discipline"], f"{x['drawings']['state']} ({x['drawings']['current']}/{x['drawings']['missing']})", f"{x['specification']['state']} ({x['specification']['current']}/{x['specification']['missing']})",
+                    f"{x['other']['state']} ({x['other']['current']}/{x['other']['missing']})", x["boq_lines"], "; ".join(x["gaps"]) or "none"] for x in dm["rows"]] or [["-", "none registered", "", "", "", ""]],
+                  paras=([f"Documents without a discipline (cannot be placed): {', '.join(dm['documents_without_discipline'])}"] if dm["documents_without_discipline"] else [])),
         Section("Not interpreted", [", ".join(r["not_interpreted"]) or "none"])], facts=c.facts(), xlsx=True, limitations=_lim(c))
 
 

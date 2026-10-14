@@ -212,14 +212,16 @@ def run(scratch: Path, inp: Path, out: Path) -> Ev:
     # ---- document register (registered, not interpreted); referenced-but-absent documents are registered as Missing
     tender.register_document(db, A["est"], pid, doc_ref="BOQ-SAMPLE-SITESETU", doc_type="boq", title=T.SOURCE, revision="published 2026-10-01; quantities delivered 2026-09-06", source="uploaded file (practice-test input folder)",
                              received_date="2026-10-14", applicability="BOQ quantities only (structure, walls, openings); rates blank; not a tender document")
-    MISSING = [("DWG-ARCH-SET", "drawing", "Architect's drawing set - 'a 16-sheet drawing set' (p.1): ground-floor plan, first-floor plan, roof plan, sections, elevations (referenced pp.1-3, 5; NOT provided)"),
-               ("DWG-STR-FOOTING", "drawing", "Structural footing layout (basis of item 2.1; NOT provided)"), ("DWG-STR-COLUMN", "drawing", "Structural column keys and column details (items 2.2-2.4; NOT provided)"),
-               ("DWG-STR-SLABBEAM", "drawing", "Structural slab/beam sheets and beam details (items 2.5-2.9; NOT provided)"), ("DWG-STR-STAIR", "drawing", "Structural stair sheet - the source says it was 'quarantined' (item 2.10; NOT provided)"),
-               ("DWG-SITE-LEVELS", "survey", "Site survey / natural ground level (item 1.1 assumption; NOT provided)"), ("SPEC-STRUCT", "specification", "Structural / concrete / masonry specification (grades, cover, mix; NOT provided)"),
-               ("SPEC-ARCH", "specification", "Architectural specification: plaster, door and window schedules, railings (NOT provided)"), ("DWG-MEP", "drawing", "Mechanical, plumbing, electrical, fire, ELV drawings (NOT provided; not in scope of the source BOQ)"),
-               ("BBS-REINF", "other", "Reinforcement bar bending schedule - the source says it is excluded (p.7; NOT provided)"), ("ITT-CONTRACT", "contract", "Invitation to tender, conditions of contract, BOQ preamble / method of measurement (NOT provided)")]
-    for ref, typ, title in MISSING:
-        tender.register_document(db, A["est"], pid, doc_ref=ref, doc_type=typ, title=title, revision="n/a", source="referenced in BOQ-SAMPLE-SITESETU but not supplied", status="Missing")
+    MISSING = [("DWG-ARCH-SET", "drawing", "architectural", "Architect's drawing set - 'a 16-sheet drawing set' (p.1): ground-floor plan, first-floor plan, roof plan, sections, elevations (referenced pp.1-3, 5; NOT provided)"),
+               ("DWG-STR-FOOTING", "drawing", "structural", "Structural footing layout (basis of item 2.1; NOT provided)"), ("DWG-STR-COLUMN", "drawing", "structural", "Structural column keys and column details (items 2.2-2.4; NOT provided)"),
+               ("DWG-STR-SLABBEAM", "drawing", "structural", "Structural slab/beam sheets and beam details (items 2.5-2.9; NOT provided)"), ("DWG-STR-STAIR", "drawing", "structural", "Structural stair sheet - the source says it was 'quarantined' (item 2.10; NOT provided)"),
+               ("DWG-SITE-LEVELS", "survey", "civil", "Site survey / natural ground level (item 1.1 assumption; NOT provided)"), ("SPEC-STRUCT", "specification", "structural", "Structural / concrete / masonry specification (grades, cover, mix; NOT provided)"),
+               ("SPEC-ARCH", "specification", "architectural", "Architectural specification: plaster, door and window schedules, railings (NOT provided)"),
+               ("DWG-MECH", "drawing", "mechanical", "Mechanical / HVAC drawings (NOT provided; not in scope of the source BOQ)"), ("DWG-PLUMB", "drawing", "plumbing", "Plumbing and drainage drawings (NOT provided; not in scope of the source BOQ)"),
+               ("DWG-ELEC", "drawing", "electrical", "Electrical drawings (NOT provided; not in scope of the source BOQ)"), ("DWG-FIRE", "drawing", "fire", "Fire protection drawings (NOT provided; not in scope of the source BOQ)"),
+               ("BBS-REINF", "other", "structural", "Reinforcement bar bending schedule - the source says it is excluded (p.7; NOT provided)"), ("ITT-CONTRACT", "contract", "commercial", "Invitation to tender, conditions of contract, BOQ preamble / method of measurement (NOT provided)")]
+    for ref, typ, disc, title in MISSING:
+        tender.register_document(db, A["est"], pid, doc_ref=ref, doc_type=typ, title=title, revision="n/a", source="referenced in BOQ-SAMPLE-SITESETU but not supplied", status="Missing", discipline=disc)
     rep = tender.documents_report(db, pid)
     ev.stage("B1_document_register", "PASS", current=[(d["doc_ref"], d["revision"], d["content_status"]) for d in rep["current"]], missing=[(d["doc_ref"], d["title"][:70]) for d in rep["missing"]], superseded=[d["doc_ref"] for d in rep["superseded"]],
              revision_conflicts=rep["revision_conflicts"], not_interpreted=rep["not_interpreted"])
@@ -358,13 +360,10 @@ def run(scratch: Path, inp: Path, out: Path) -> Ev:
     # ---- completeness matrix (application report) + discipline matrix from the register
     from app.reporting import completeness
     comp = completeness.project_completeness(db, pid)
-    disc = []
-    for d_, drw, spec, boqq in (("Architectural", "Missing", "Missing", "Partial: masonry, openings, railings (quantities only)"), ("Structural", "Missing", "Missing", "Partial: RCC volumes + formwork; steel excluded"),
-                                ("Civil / earthwork / site", "Missing", "Missing", "Partial: pits, blinding, backfill; no external works"), ("Mechanical / HVAC", "Missing", "Missing", "Absent"), ("Plumbing / drainage", "Missing", "Missing", "Absent"),
-                                ("Electrical", "Missing", "Missing", "Absent"), ("Fire protection / ELV", "Missing", "Missing", "Absent"), ("Contract / commercial / ITT", "n/a", "Missing", "Absent (rates blank)")):
-        disc.append(dict(discipline=d_, drawings=drw, specification=spec, boq_coverage=boqq))
+    from app.api.serializers import ser as _ser
+    disc = _ser(registry.run_report(db, "discipline_completeness", pid, {}))
     ev.stage("B2_registers", "PASS", discipline_matrix=disc, application_completeness_report=comp, drawing_register="EMPTY: no drawing was supplied; 6 drawing/survey documents referenced by the BOQ are registered as Missing",
-             revision_register="1 current document; no superseded document; no revision identifier in the source (only two dates)", note="The discipline matrix above was written by the practice-test script from the register; the application has no discipline-by-document-type matrix of its own (defect D-3).")
+             revision_register="1 current document; no superseded document; no revision identifier in the source (only two dates)", note="The discipline matrix is the application's own report (discipline_completeness), built from the document register and the BOQ trades.")
     # ---- H: generate drafts (freeze first - the pack generator needs a frozen version)
     from app.tender import packs
     vid = estimates.freeze_version(db, A["est"], pid, "practice-v1", "PRACTICE TEST: frozen INCOMPLETE estimate, only so draft documents can be generated")

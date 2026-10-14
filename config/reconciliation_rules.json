@@ -20,14 +20,14 @@
    "title": "Expired rate or quotation"
   },
   "UNAPPROVED_ASSUMPTION": {
-   "severity": "High",
-   "exception_allowed": true,
-   "title": "Unapproved assumption in use"
+   "severity": "Critical",
+   "exception_allowed": false,
+   "title": "Unapproved assumption in use (cannot be waived)"
   },
   "UNAPPROVED_ADOPTED_ASSUMPTION": {
-   "severity": "Medium",
+   "severity": "High",
    "exception_allowed": true,
-   "title": "Adopted assumption not approved"
+   "title": "Adopted assumption not approved (needs a recorded exception)"
   },
   "DOUBLE_COUNT": {
    "severity": "Critical",

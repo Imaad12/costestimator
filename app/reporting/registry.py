@@ -259,6 +259,12 @@ def _tender_documents(db, pid):
     return tender.documents_report(db, pid)
 
 
+@report("discipline_completeness", "Discipline x document completeness", "For each discipline the project expects: drawings, specification and other documents received / missing, and BOQ lines carrying that discipline.", group="Tender")
+def _discipline_completeness(db, pid):
+    from ..services import tender
+    return tender.discipline_matrix(db, pid)
+
+
 @report("applicability", "Tender document applicability matrix", "Each of the 45 tender documents classified Required / Conditional / Not Applicable / Missing Customer Requirement with a reason.", group="Tender")
 def _applicability(db, pid):
     from ..tender import catalogue

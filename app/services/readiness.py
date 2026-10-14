@@ -79,6 +79,7 @@ def _closure_gate(db: Database, project_id: str, est) -> list[str]:
     for aid in used:
         ra = asm.resolve(db, project_id, aid)
         if not ra.approved:
+            out.append(f"assumption {aid} feeds the estimate but is not approved (status '{ra.status}')")
             continue
         if ra.origin == "project_override":
             row = db.one("SELECT * FROM approvals WHERE entity_type=? AND entity_id=? AND action='approve' AND version=? ORDER BY id DESC LIMIT 1",

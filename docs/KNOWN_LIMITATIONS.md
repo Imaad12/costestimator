@@ -84,3 +84,5 @@ DuckDB analytics (architecture-compatible); GASTAT website adapter, Etimad adapt
 * Estimate totals show `None` (not 0) for direct cost when nothing is priced and for indirect cost when no indirect item exists; a partially priced estimate still shows the partial direct-cost sum, labelled by the estimate state (Incomplete).
 * The estimate state does not itself consider an unchecked transcription or placeholder rates; the readiness gate and banners do.
 * A demonstration project on non-synthetic data is labelled DEMONSTRATION / PRACTICE, not SYNTHETIC; synthetic content is detected from the customer flag, synthetic rates in the frozen estimate and synthetic registers.
+* Frozen estimate versions created before this change store the state label without the synthetic suffix; replaying them compares against the new label (affects only demo/synthetic databases).
+* The discipline matrix depends on a person assigning a discipline to each registered document and on BOQ trade text; a document without a discipline is listed, never guessed.

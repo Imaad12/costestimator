@@ -35,3 +35,8 @@ Approving a rate requires evidence text; the rate used is the approved category 
 ## Isolation from the global register, and index data
 A project override lives only in `project_assumptions` (with its reason and approval) and is resolved for that project; other projects and the global default are untouched (tested). Each frozen estimate version stores the resolved assumption values it used (`estimate_snapshots`).
 Escalation: the GASTAT Construction Cost Index observations in `index_observations` are a *reference* a human may cite when deciding an escalation assumption. They are never applied automatically and are not a unit rate.
+
+## Unapproved assumptions and the final gate (policy, 2026-10-14)
+* An assumption **used by the estimate** that is not approved is a **Critical** reconciliation finding (`UNAPPROVED_ASSUMPTION`) and cannot be waived; the readiness gate also lists it. Approve it (a different person than the author) or stop using it.
+* A mandatory assumption **adopted but not used** and still unapproved is **High** (`UNAPPROVED_ADOPTED_ASSUMPTION`, one finding per project): final approval needs a Commercial Approver's recorded exception with a reason - an Estimator cannot accept it.
+* The estimate state carries "- SYNTHETIC DATA (not for reliance)" when synthetic rates are used, and `estimate_caveats` lists unchecked transcriptions, a defaulted region/currency, synthetic/provisional inputs and unapproved assumptions in use (completeness report, Basis of Estimate banner, estimate API).

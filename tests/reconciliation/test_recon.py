@@ -28,11 +28,21 @@ def codes(fs, status="Open"):
     return {f["rule_code"] for f in fs if f["status"] == status}
 
 
+def accept_adopted_assumptions(db, pid, fs):
+    """Unapproved adopted (unused) assumptions are High: a Commercial Approver must accept them as a recorded exception - they never pass silently."""
+    for f in fs:
+        if f["rule_code"] == "UNAPPROVED_ADOPTED_ASSUMPTION" and f["status"] == "Open":
+            recon.accept_exception(db, COMMERCIAL, f["id"], "unused mandatory assumptions: basis to be completed after award (test)")
+
+
 def test_clean_project_has_no_blocking_findings(mini):
     db, pid, _ = mini
     fs = findings(db, pid)
     blocking = [f for f in fs if f["status"] == "Open" and f["severity"] in ("Critical", "High")]
-    assert blocking == [], blocking
+    assert {f["rule_code"] for f in blocking} == {"UNAPPROVED_ADOPTED_ASSUMPTION"}, blocking       # O-2: nothing else, and this one needs a person's recorded exception
+    assert recon.final_gate(db, ESTIMATOR, pid)["blocked"]
+    accept_adopted_assumptions(db, pid, fs)
+    assert not recon.final_gate(db, ESTIMATOR, pid)["blocked"]
     assert {"OFFER_MISSING", "SYNTHETIC_DEMO"} <= codes(fs)
 
 
@@ -58,6 +68,11 @@ def test_unapproved_assumption_in_use_flagged(mini):
     # assumption has no value & is unapproved: the line stays unpriced and the cause is reported
     fs = findings(db, pid)
     assert ("UNAPPROVED_ASSUMPTION", "ASMP-C-010") in {(f["rule_code"], f["entity_id"]) for f in fs}
+    f = next(f for f in fs if f["rule_code"] == "UNAPPROVED_ASSUMPTION" and f["entity_id"] == "ASMP-C-010")
+    assert f["severity"] == "Critical"
+    with pytest.raises(Exception) as e:                                       # O-2: an unapproved assumption in use can never be waived, even by a Commercial Approver
+        recon.accept_exception(db, COMMERCIAL, f["id"], "attempt to waive")
+    assert getattr(e.value, "code", "") == "EXCEPTION_NOT_ALLOWED"
     assumptions.set_override(db, ESTIMATOR, pid, "ASMP-C-010", "5", "synthetic")
     fs = findings(db, pid)
     assert any(f["rule_code"] == "UNAPPROVED_ASSUMPTION" and "Pending Review" in f["detail"] for f in fs)           # value present but not approved
@@ -204,6 +219,7 @@ def test_high_exception_needs_commercial_role_and_configurable_rules(mini):
         recon.accept_exception(db, ESTIMATOR, f["id"], "client will answer after award per addendum")
     assert e.value.code == "EXCEPTION_ROLE"
     recon.accept_exception(db, COMMERCIAL, f["id"], "client will answer after award per addendum")
+    accept_adopted_assumptions(db, pid, findings(db, pid))
     assert not recon.final_gate(db, ESTIMATOR, pid)["blocked"]
     # severities are configurable
     db.insert("settings", dict(key="recon_rules_override", value='{"rules": {"CLARIFICATION_OPEN": {"severity": "Critical", "exception_allowed": false}}}'))

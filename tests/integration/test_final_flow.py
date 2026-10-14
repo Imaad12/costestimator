@@ -62,6 +62,9 @@ def test_final_flow_and_gates(project):
     opens = recon.get_run(db, run["run_id"])["findings"]
     codes = {f["rule_code"] for f in opens}
     assert "OFFER_MISSING" in codes and "SYNTHETIC_DEMO" in codes
+    for f in opens:                                      # O-2: unused adopted assumptions need a recorded exception from a Commercial Approver
+        if f["rule_code"] == "UNAPPROVED_ADOPTED_ASSUMPTION":
+            recon.accept_exception(db, COMMERCIAL, f["id"], "unused mandatory assumptions: basis to be completed (SYNTHETIC test)")
     vid = estimates.freeze_version(db, ESTIMATOR, pid, "v1")
     estimates.submit_version(db, ESTIMATOR, vid)
     # no one but a Commercial Approver / Admin may approve

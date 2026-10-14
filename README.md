@@ -33,7 +33,7 @@ Helper scripts: `scripts/setup.sh` (venv + install + init), `scripts/run.sh`, `s
             45-document tender pack + hypothetical handover pack (DOCX/XLSX/PDF) · readiness gate
  NEEDS PEOPLE'S DATA 🟡   real rates · norms · calendars · workforce profiles · quotes · payment terms · human approvers
  MISSING ⬜  MFA/SSO · off-box audit anchor · forms for the newest records · real quality/HSE content
-            SBC + procurement law not read · open defects D-9, O-1, O-2, O-3
+            SBC + procurement law not read · open defect O-1 (low)
  NEVER (by design)   OCR / drawing reading · automatic takeoff · AI approvals · invented prices
 ```
 * Diagrams of what exists and what is missing: [docs/SYSTEM_MAP_BUILT_VS_MISSING.md](docs/SYSTEM_MAP_BUILT_VS_MISSING.md)

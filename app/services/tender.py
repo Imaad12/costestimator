@@ -21,6 +21,9 @@ TODO = "TO BE COMPLETED BY A COMPETENT PERSON"
 QUERY_REGISTERS = ("technical", "commercial", "boq_discrepancy", "scope_exclusion", "design_interface", "missing_input", "assumption_confirmation", "supplier")
 OPEN_QUERY = ("Draft", "Approved to Issue", "Issued")
 DOC_TYPES = ("drawing", "specification", "boq", "addendum", "site_information", "geotechnical", "survey", "existing_asset", "client_form", "contract", "standard", "clarification_response", "other")
+DISCIPLINES = ("architectural", "structural", "civil", "mechanical", "plumbing", "electrical", "fire", "elv", "specialist", "commercial", "general")
+_DISC_KEYS = (("archit", "architectural"), ("struct", "structural"), ("civil", "civil"), ("earth", "civil"), ("site", "civil"), ("hvac", "mechanical"), ("mech", "mechanical"), ("plumb", "plumbing"),
+              ("drain", "plumbing"), ("electr", "electrical"), ("fire", "fire"), ("elv", "elv"), ("special", "specialist"))
 # Heuristic markers (detection only - they raise a DRAFT question, never a conclusion): wording that leaves scope, quantity or responsibility open.
 AMBIGUITY_MARKERS = ("as required", "to be confirmed", "tbc", "tbd", "by others", "or similar", "or equal", "approx", "allow for", "as directed", "if required", "as necessary", "provisional",
                      "assumed", "assumption", "confirm", "not printed", "not stated")
@@ -87,12 +90,15 @@ def get_enquiry(db: Database, project_id: str) -> dict | None:
 
 # ================================================================================================ received documents
 def register_document(db: Database, actor: Actor, project_id: str, *, doc_ref: str, doc_type: str, title: str, revision: str, source: str | None = None,
-                      received_date: str | None = None, applicability: str | None = None, status: str = "Current", is_synthetic: bool = False) -> int:
+                      received_date: str | None = None, applicability: str | None = None, status: str = "Current", is_synthetic: bool = False, discipline: str | None = None) -> int:
     """Register a received document. A new revision of the same doc_ref supersedes the earlier one (kept, marked Superseded). Registering is NOT interpreting."""
     approvals.require_author(actor)
     projects.require_active(db, project_id)
     if doc_type not in DOC_TYPES:
         raise ValidationFailed(f"doc_type must be one of {list(DOC_TYPES)}", code="DOC_TYPE")
+    discipline = (discipline or "").strip().lower() or None
+    if discipline and discipline not in DISCIPLINES:
+        raise ValidationFailed(f"discipline must be one of {list(DISCIPLINES)}", code="DOC_DISCIPLINE")
     if status not in ("Current", "Missing"):
         raise ValidationFailed("status must be Current or Missing at registration.", code="DOC_STATUS")
     if db.one("SELECT 1 FROM tender_documents WHERE project_id=? AND doc_ref=? AND revision=?", (project_id, doc_ref, revision)):
@@ -100,7 +106,7 @@ def register_document(db: Database, actor: Actor, project_id: str, *, doc_ref: s
     prev = db.one("SELECT pk FROM tender_documents WHERE project_id=? AND doc_ref=? AND status IN ('Current','Missing') ORDER BY pk DESC LIMIT 1", (project_id, doc_ref))
     with db.tx():
         pk = db.insert("tender_documents", dict(project_id=project_id, doc_ref=doc_ref, doc_type=doc_type, title=title, revision=revision, source=source, received_date=received_date,
-                                                applicability=applicability, status=status, supersedes_pk=prev["pk"] if prev else None, is_synthetic=int(is_synthetic),
+                                                applicability=applicability, discipline=discipline, status=status, supersedes_pk=prev["pk"] if prev else None, is_synthetic=int(is_synthetic),
                                                 created_by=actor.username, created_at=now_iso()))
         if prev and status == "Current":
             db.update("tender_documents", {"status": "Superseded"}, "pk=?", (prev["pk"],))
@@ -138,6 +144,48 @@ def documents_report(db: Database, project_id: str) -> dict:
                 missing=[d for d in docs if d["status"] == "Missing"], revision_conflicts=conflicts,
                 not_interpreted=[d["doc_ref"] for d in docs if d["status"] == "Current" and d["content_status"] == "registered_only"],
                 note="A document is registered, not interpreted, unless its content status says parsed/reviewed.")
+
+
+def discipline_of(text: str | None) -> str:
+    low = (text or "").lower()
+    return next((d for k, d in _DISC_KEYS if k in low), "unclassified")
+
+
+def discipline_matrix(db: Database, project_id: str) -> dict:
+    """Discipline x document-type completeness from the register and the BOQ: for each discipline the project expects (its trades, its BOQ trades, any discipline a document was registered under),
+    how many drawings / specifications / other documents are Current vs Missing, and how many BOQ lines carry that discipline. Read-only; a document without a discipline is listed, never guessed."""
+    import json as _j
+    p = projects.get_project(db, project_id)
+    expect: set[str] = {discipline_of(t) for t in _j.loads(p.get("trades") or "[]")} - {"unclassified"}
+    docs = list_documents(db, project_id, include_superseded=False)
+    for d in docs:
+        if d.get("discipline"):
+            expect.add(d["discipline"])
+    boq: dict[str, int] = {}
+    for b in db.all("SELECT trade FROM boq_items WHERE project_id=? AND item_type='item'", (project_id,)):
+        k = discipline_of(b["trade"])
+        boq[k] = boq.get(k, 0) + 1
+        if k != "unclassified":
+            expect.add(k)
+    rows = []
+    for disc in sorted(expect):
+        mine = [d for d in docs if d.get("discipline") == disc]
+
+        def cell(kinds):
+            cur = sum(1 for d in mine if d["doc_type"] in kinds and d["status"] == "Current")
+            mis = sum(1 for d in mine if d["doc_type"] in kinds and d["status"] == "Missing")
+            return dict(current=cur, missing=mis, state=("Missing" if mis and not cur else "Partial" if mis else "Received" if cur else "Not registered"))
+        dr, sp = cell(("drawing",)), cell(("specification",))
+        ot = cell(tuple(t for t in DOC_TYPES if t not in ("drawing", "specification", "boq")))
+        if disc in ("commercial", "general"):          # no drawings/specification expected; only a missing document (e.g. the contract) is a gap
+            gaps = [f"documents {ot['state'].lower()}"] if ot["state"] in ("Missing", "Partial") else []
+        else:
+            gaps = [f"drawings {dr['state'].lower()}" for _ in [0] if dr["state"] != "Received"] + [f"specification {sp['state'].lower()}" for _ in [0] if sp["state"] != "Received"]
+        rows.append(dict(discipline=disc, drawings=dr, specification=sp, other=ot, boq_lines=boq.get(disc, 0), complete=not gaps, gaps=gaps))
+    unassigned = [d["doc_ref"] for d in docs if not d.get("discipline") and d["doc_type"] != "boq"]
+    return dict(project_id=project_id, rows=rows, boq_lines_unclassified=boq.get("unclassified", 0), documents_without_discipline=unassigned,
+                complete=bool(rows) and all(r["complete"] for r in rows) and not unassigned,
+                note="Built from the document register and BOQ trades. Registering a document is not interpreting it; a discipline is only as good as the person who assigned it.")
 
 
 # ================================================================================================ queries
