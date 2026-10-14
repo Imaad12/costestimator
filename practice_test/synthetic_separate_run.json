@@ -1,0 +1,8 @@
+{
+ "note": "Separate SYNTHETIC end-to-end run (scripts/run_closure_scenario.py), different scratch DB and output dir from the real-document practice test. Canonical committed output: demo_output/synthetic_closure/.",
+ "scratch": "/tmp/claude-0/syn_sep (not committed)",
+ "all_pass": true,
+ "stages": 0,
+ "verdicts": {},
+ "acceptance_results_sha256": "a8d86619fe5883c0d9fb161abe501ddf1380cc4397330aabbe12645b636d9601"
+}

@@ -1,0 +1,56 @@
+﻿Item No,Description,Section,Unit,Quantity,Drawing Ref,Remarks
+1,Earthwork,Civil / earthwork,,,,
+1.1,Excavation in pits for footings,Civil / earthwork,m³,314.04,"derived from footing boxes — footing plan + 0.3 m working space each side, ground z=0.0 to underside of blinding",source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED; Assumption printed in source: natural ground level not printed — assumed at project ±0.00; confirm
+1.2,PCC blinding 50 mm under footings,Civil / earthwork,m³,18.33,derived — pit plan x blinding thickness,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+1.3,Backfill around footings,Civil / earthwork,m³,240.58,derived — excavation - footing - blinding,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2,Reinforced concrete,Structural,,,,
+2.1,Isolated footings,Structural,m³,55.40,structural footing layout — sum of 73 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.2,Columns — Foundation,Structural,m³,1.90,column keys + column details — sum of 22 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.3,Columns — Ground floor,Structural,m³,3.30,column keys + column details — sum of 17 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.4,Columns — First floor,Structural,m³,1.56,column keys + column details — sum of 9 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.5,First-floor beams 200x450,Structural,m³,5.21,structural slab/beam sheets and beam details — sum of 11 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.6,Roof beams 200x300,Structural,m³,2.15,structural slab/beam sheets and beam details — sum of 5 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.7,Slab — Ground floor,Structural,m³,22.14,structural slab sheets (net of beam and column footprints) — sum of 7 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.8,Slab — First floor,Structural,m³,22.35,structural slab sheets (net of beam and column footprints) — sum of 24 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.9,Slab — Roof,Structural,m³,11.29,structural slab sheets (net of beam and column footprints) — sum of 14 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+2.10,RC stairs (flights + landings),Structural,m³,4.13,architectural plans and section; structural stair sheet quarantined — sum of 5 mesh volumes,source PDF p.3; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+3,Formwork / shuttering,Structural,,,,
+3.1,Footing sides,Structural,m²,249.59,derived from element boxes — 4 sides x depth,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+3.2,Column faces,Structural,m²,119.38,derived from element boxes — 4 faces x height,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+3.3,Beam sides and soffit,Structural,m²,493.69,derived from element boxes — 2 sides + soffit x length,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+3.4,Slab soffit and edges,Structural,m²,884.02,derived from element boxes — soffit + edges,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+4,Masonry walls,Architectural,,,,
+4.1,Walls — Ground floor,Architectural,m³,58.94,architectural plans — sum of 32 mesh volumes,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+4.2,Walls — First floor,Architectural,m³,43.41,architectural plans — sum of 22 mesh volumes,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+4.3,Walls — Roof,Architectural,m³,9.04,architectural plans — sum of 5 mesh volumes,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+4.4,"Wall plaster area, both faces (gross)",Architectural,m²,1345.20,"derived — 2 x length x height per wall, openings not deducted",source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5,Doors and windows,Architectural,,,,
+5.1,Door 900 × 2400 mm,Architectural,nos,7,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.2,Door 800 × 2400 mm,Architectural,nos,4,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.3,Door 802 × 2400 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.4,Door 6467 × 3140 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.5,Door 2400 × 2400 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.6,Door 736 × 2400 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.7,Door 1300 × 2400 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.8,Window 800 × 400 mm,Architectural,nos,3,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.9,Window 2460 × 600 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.10,Window 3000 × 600 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.11,Window 2600 × 600 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.12,Window 387 × 3140 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.13,Window 368 × 3140 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.4; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.14,Window 1500 × 400 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.15,Window 600 × 2950 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.16,Window 1206 × 2000 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.17,Window 1800 × 2000 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.18,Window 2400 × 2000 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.19,Window 1160 × 2750 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.20,Window 1200 × 2000 mm,Architectural,nos,2,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.21,Window 4274 × 2000 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.22,Window 2500 × 1600 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.23,Window 4000 × 2000 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.24,Window 2400 × 2100 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+5.25,Window 2400 × 1600 mm,Architectural,nos,1,traced on calibrated plans — count,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+6,Railings and balustrades,Architectural,,,,
+6.1,Railings and balustrades,Architectural,m,43.68,architectural plans/elevations — run length,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED
+7,Roof,Architectural / structural (not stated),,,,
+7.1,Roof and canopy members,Architectural / structural (not stated),m,48.85,plans + elevations — member length,source PDF p.5; TRANSCRIBED FROM RENDERED PAGE - NOT VERIFIED

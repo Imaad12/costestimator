@@ -1,0 +1,21 @@
+[
+ {
+  "filename": "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
+  "format": "pdf",
+  "bytes": 3131031,
+  "sha256": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0",
+  "pages": 7,
+  "revision_or_date_visible": "Published 1 October 2026 (p.1); 'Quantities as delivered on 6 September 2026' (p.5); no revision identifier",
+  "discipline": "Multi-trade BOQ extract: earthwork, structural RCC/formwork, masonry, openings, railings, roof (civil/structural/architectural only)",
+  "status": "Marketing web page printed to PDF - NOT a contract document, NOT an issued-for-tender BOQ; quantity column has no text layer",
+  "text_layer": {
+   "decimal_quantities_checked": 22,
+   "found_in_text_layer": 0,
+   "note": "integer counts (doors/windows) cannot be tested this way; item numbers that look like quantities (e.g. 5.21) are excluded"
+  },
+  "text_chars": 8818,
+  "pdf_title": "Sample BOQ for a Residential Building | SiteSetu",
+  "pdf_producer": "Skia/PDF m154",
+  "pdf_created": "D:20261014193353+00'00'"
+ }
+]

@@ -1,0 +1,362 @@
+[
+ {
+  "id": "TQ-PRJ-9201-001",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document ITT-CONTRACT (Invitation to tender, conditions of contract, BOQ preamble / method of measurement (NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"ITT-CONTRACT\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-002",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document DWG-ARCH-SET (Architect's drawing set - 'a 16-sheet drawing set' (p.1): ground-floor plan, first-floor plan, roof plan, sections, elevations (referenced pp.1-3, 5; NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"DWG-ARCH-SET\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-003",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document DWG-MEP (Mechanical, plumbing, electrical, fire, ELV drawings (NOT provided; not in scope of the source BOQ)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"DWG-MEP\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-004",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document DWG-STR-COLUMN (Structural column keys and column details (items 2.2-2.4; NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"DWG-STR-COLUMN\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-005",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document DWG-STR-FOOTING (Structural footing layout (basis of item 2.1; NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"DWG-STR-FOOTING\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-006",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document DWG-STR-SLABBEAM (Structural slab/beam sheets and beam details (items 2.5-2.9; NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"DWG-STR-SLABBEAM\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-007",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document DWG-STR-STAIR (Structural stair sheet - the source says it was 'quarantined' (item 2.10; NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"DWG-STR-STAIR\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-008",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document BBS-REINF (Reinforcement bar bending schedule - the source says it is excluded (p.7; NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"BBS-REINF\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-009",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document SPEC-ARCH (Architectural specification: plaster, door and window schedules, railings (NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"SPEC-ARCH\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-010",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document SPEC-STRUCT (Structural / concrete / masonry specification (grades, cover, mix; NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"SPEC-STRUCT\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-011",
+  "register": "missing_input",
+  "discipline": null,
+  "status": "Draft",
+  "question": "Document DWG-SITE-LEVELS (Site survey / natural ground level (item 1.1 assumption; NOT provided)) is required for the tender but has not been received. Please issue it.",
+  "why": "A required tender document is missing; dependent scope cannot be assessed.",
+  "generated_by": "system:detector",
+  "related_json": "{\"documents\": [\"DWG-SITE-LEVELS\"]}"
+ },
+ {
+  "id": "TQ-PRJ-9201-012",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "11 mandatory assumption(s) in 'Commercial terms and payment' need confirmation of the project basis: ASMP-I-001 Commercial pricing method (Missing data); ASMP-I-006 Contingency base (Missing data); ASMP-I-010 Escalation base (Missing data); ASMP-I-015 Foreign exchange rates and date (Missing data); ASMP-I-016 Estimate currency (Missing data); ASMP-I-017 Monetary rounding (Pending human review); ASMP-I-024 Warranty and defects liability period (Missing data); ASMP-I-026 Payment terms (Missing data); ASMP-I-030 Tender validity period (Missing data); ASMP-I-031 Estimate base date (Missing data); ASMP-I-032 Contract form and risk allocation (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-I-001\", \"ASMP-I-006\", \"ASMP-I-010\", \"ASMP-I-015\", \"ASMP-I-016\", \"ASMP-I-017\", \"ASMP-I-024\", \"ASMP-I-026\", \"ASMP-I-030\", \"ASMP-I-031\", \"ASMP-I-032\"], \"category\": \"Commercial terms and payment\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-013",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "6 mandatory assumption(s) in 'Commissioning, testing and handover' need confirmation of the project basis: ASMP-K-001 Inspection and test plan (Missing data); ASMP-K-003 Authority witnessing and approvals (Missing data); ASMP-K-012 Operation and maintenance manuals (Missing data); ASMP-K-013 As-built drawings and BIM handover (Missing data); ASMP-K-016 Warranty and handover obligations (Missing data); ASMP-K-019 Statutory certificates for occupancy (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-K-001\", \"ASMP-K-003\", \"ASMP-K-012\", \"ASMP-K-013\", \"ASMP-K-016\", \"ASMP-K-019\"], \"category\": \"Commissioning, testing and handover\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-014",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "2 mandatory assumption(s) in 'Logistics, transport and landed cost' need confirmation of the project basis: ASMP-F-001 Delivery distance and haul route (Missing data); ASMP-F-002 Freight cost basis (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-F-001\", \"ASMP-F-002\"], \"category\": \"Logistics, transport and landed cost\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-015",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "6 mandatory assumption(s) in 'Material, labour, plant and equipment rates' need confirmation of the project basis: ASMP-C-001 Material consumption factor basis (Missing data); ASMP-C-002 Wastage inclusion convention (Missing data); ASMP-C-026 Material price validity period (Missing data); ASMP-C-031 Material rate basis - delivered or ex-works (Missing data); ASMP-E-002 Plant hire basis (Missing data); ASMP-E-003 Plant utilisation percentage (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-C-001\", \"ASMP-C-002\", \"ASMP-C-026\", \"ASMP-C-031\", \"ASMP-E-002\", \"ASMP-E-003\"], \"category\": \"Material, labour, plant and equipment rates\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-016",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "8 mandatory assumption(s) in 'Preliminaries and indirects' need confirmation of the project basis: ASMP-H-001 Indirect cost allocation method (Missing data); ASMP-H-002 Project duration for indirects (Missing data); ASMP-H-003 Project management staff (Missing data); ASMP-H-004 Construction management staff (Missing data); ASMP-H-006 Head office overhead allocation (Missing data); ASMP-H-018 HSE management and personnel (Missing data); ASMP-H-026 Project insurance - contractor's all-risk and third-party (Missing data); ASMP-H-029 Permits, licences and authority fees (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-H-001\", \"ASMP-H-002\", \"ASMP-H-003\", \"ASMP-H-004\", \"ASMP-H-006\", \"ASMP-H-018\", \"ASMP-H-026\", \"ASMP-H-029\"], \"category\": \"Preliminaries and indirects\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-017",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "9 mandatory assumption(s) in 'Productivity and workforce' need confirmation of the project basis: ASMP-D-001 Paid hours per shift (Missing data); ASMP-D-002 Productive hours per shift (Missing data); ASMP-D-003 Working days per week (Missing data); ASMP-D-004 Working days per month (Missing data); ASMP-D-005 Working hours per day (Missing data); ASMP-D-006 Working calendar and public holidays (Missing data); ASMP-D-012 Crew composition basis (Missing data); ASMP-D-014 Labour rate basis - direct vs subcontract (Missing data); ASMP-D-015 Labour on-cost components (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-D-001\", \"ASMP-D-002\", \"ASMP-D-003\", \"ASMP-D-004\", \"ASMP-D-005\", \"ASMP-D-006\", \"ASMP-D-012\", \"ASMP-D-014\", \"ASMP-D-015\"], \"category\": \"Productivity and workforce\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-018",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "9 mandatory assumption(s) in 'Quantities and measurement' need confirmation of the project basis: ASMP-B-001 Measurement basis (Missing data); ASMP-B-002 Quantity source (Missing data); ASMP-B-003 Quantity status and completeness (Missing data); ASMP-B-004 Quantity rounding for display and reporting (Pending human review); ASMP-B-006 Unit conversion basis (Missing data); ASMP-B-014 Imported quantity validation rules (Missing data); ASMP-B-015 Imported quantity unit mapping (Missing data); ASMP-B-016 Quantity revision difference handling (Missing data); ASMP-B-019 Gross floor area and area definitions (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-B-001\", \"ASMP-B-002\", \"ASMP-B-003\", \"ASMP-B-004\", \"ASMP-B-006\", \"ASMP-B-014\", \"ASMP-B-015\", \"ASMP-B-016\", \"ASMP-B-019\"], \"category\": \"Quantities and measurement\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-019",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "8 mandatory assumption(s) in 'Risk and contingency' need confirmation of the project basis: ASMP-L-001 Rate source confidence rule (Missing data); ASMP-L-002 Rate age warning threshold (Pending human review); ASMP-L-004 Design maturity assessment (Missing data); ASMP-L-005 Quantity completeness assessment (Missing data); ASMP-L-010 Unresolved mandatory assumptions blocking issue (Missing data); ASMP-L-014 Overall estimate confidence (Missing data); ASMP-L-016 Confidence of defaults and unverified data (Missing data); ASMP-L-019 Estimator review and approval status (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-L-001\", \"ASMP-L-002\", \"ASMP-L-004\", \"ASMP-L-005\", \"ASMP-L-010\", \"ASMP-L-014\", \"ASMP-L-016\", \"ASMP-L-019\"], \"category\": \"Risk and contingency\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-020",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "16 mandatory assumption(s) in 'Scope and design' need confirmation of the project basis: ASMP-A-001 Design stage of estimate basis (Missing data); ASMP-A-002 Drawing register and revision baseline (Missing data); ASMP-A-003 Specification and BOQ revision baseline (Missing data); ASMP-A-004 Date of design information cut-off (Missing data); ASMP-A-005 Scope inclusions statement (Missing data); ASMP-A-006 Scope exclusions statement (Missing data); ASMP-A-008 Scope boundary - enabling and early works (Missing data); ASMP-A-009 Scope boundary - off-site and utility authority works (Missing data); ASMP-A-011 Applicable codes and standards (Missing data); ASMP-A-012 Authority requirements affecting scope (Missing data); ASMP-A-014 Design responsibility allocation (Missing data); ASMP-A-017 Interface with other trades and packages (Missing data); ASMP-A-021 Construction duration basis (Missing data); ASMP-G-001 Project region (Missing data); ASMP-G-002 Regional cost adjustment basis (Missing data); ....",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-A-001\", \"ASMP-A-002\", \"ASMP-A-003\", \"ASMP-A-004\", \"ASMP-A-005\", \"ASMP-A-006\", \"ASMP-A-008\", \"ASMP-A-009\", \"ASMP-A-011\", \"ASMP-A-012\", \"ASMP-A-014\", \"ASMP-A-017\", \"ASMP-A-021\", \"ASMP-G-001\", \"ASMP-G-002\", \"ASMP-G-004\"], \"category\": \"Scope and design\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-021",
+  "register": "assumption_confirmation",
+  "discipline": null,
+  "status": "Draft",
+  "question": "10 mandatory assumption(s) in 'Taxes and statutory costs' need confirmation of the project basis: ASMP-J-001 Default tax category (Pending human review); ASMP-J-002 Tax basis of the estimate (Missing data); ASMP-J-003 Applicable tax categories (Missing data); ASMP-J-005 Tax rate effective date (Missing data); ASMP-J-006 Date-sensitive tax rate verification (Missing data); ASMP-J-007 Input tax recoverability (Missing data); ASMP-J-008 Pre-tax cost definition (Missing data); ASMP-J-009 Output tax treatment (Missing data); ASMP-J-010 Final payable amount (Missing data); ASMP-J-016 Tax treatment of subcontractor invoices (Missing data).",
+  "why": "A mandatory assumption has no approved value.",
+  "generated_by": "system:detector",
+  "related_json": "{\"assumptions\": [\"ASMP-J-001\", \"ASMP-J-002\", \"ASMP-J-003\", \"ASMP-J-005\", \"ASMP-J-006\", \"ASMP-J-007\", \"ASMP-J-008\", \"ASMP-J-009\", \"ASMP-J-010\", \"ASMP-J-016\"], \"category\": \"Taxes and statutory costs\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-022",
+  "register": "boq_discrepancy",
+  "discipline": "civil",
+  "status": "Draft",
+  "question": "Item 1.3 'Backfill around footings' (240.58 m3) is printed as 'excavation - footing - blinding'. 314.04 - 55.40 - 18.33 = 240.31 m3, a difference of 0.27 m3. Which quantity is correct and which volumes (e.g. foundation columns 1.90 m3) were deducted?",
+  "why": "Printed quantity does not follow its own printed formula.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"1.1\", \"1.2\", \"1.3\", \"2.1\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-023",
+  "register": "boq_discrepancy",
+  "discipline": "structural",
+  "status": "Draft",
+  "question": "Page-2 totals differ from the sum of the item lines: RCC 129.42 vs 129.43, formwork 1,746.67 vs 1,746.68, masonry 111.38 vs 111.39. Please confirm the line quantities are the contractual figures (rounding vs error).",
+  "why": "Summary does not reconcile to its lines by 0.01.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"2.1\", \"3.1\", \"4.1\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-024",
+  "register": "missing_input",
+  "discipline": "civil",
+  "status": "Draft",
+  "question": "Natural ground level is 'not printed - assumed at project +/-0.00'. Please supply the site survey / levels. Items 1.1, 1.2, 1.3 change together if it moves.",
+  "why": "Stated assumption in the source that the drawings did not settle.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"1.1\", \"1.2\", \"1.3\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-025",
+  "register": "missing_input",
+  "discipline": "architectural",
+  "status": "Draft",
+  "question": "The BOQ was measured from a '16-sheet drawing set' (and a 3D model of 434 elements). None of the sheets or the model were supplied. Please issue the complete set with revision identifiers so every quantity can be traced.",
+  "why": "0 of 48 lines can be traced to a supplied drawing.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"1.1-7.1\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-026",
+  "register": "technical",
+  "discipline": "structural",
+  "status": "Draft",
+  "question": "Item 2.10 RC stairs (4.13 m3): the structural stair sheet is stated as 'quarantined' and the quantity was taken from architectural plans and section. Please issue the structural stair design (reinforcement, thickness, landing support).",
+  "why": "Quantity based on non-structural drawings.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"2.10\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-027",
+  "register": "scope_exclusion",
+  "discipline": "structural",
+  "status": "Draft",
+  "question": "Reinforcement steel and its bar bending schedule are excluded from the BOQ. Is steel to be priced by the contractor from the drawings, and which weight basis (BBS or % of concrete volume) governs?",
+  "why": "No reinforcement quantity exists for 129.42 m3 of RCC.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"2.1-2.10\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-028",
+  "register": "scope_exclusion",
+  "discipline": "architectural",
+  "status": "Draft",
+  "question": "Plaster (item 4.4) is measured gross, openings not deducted. Which method of measurement applies to the tender (the document cites IS 1200), and are deductions to be made by the contractor?",
+  "why": "Gross quantity overstates plaster area; basis of measurement unclear.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"4.4\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-029",
+  "register": "scope_exclusion",
+  "discipline": "mep",
+  "status": "Draft",
+  "question": "Flooring, finishes, plumbing, electrical and other services are not in the BOQ ('those come with a full BOQ'). Please confirm whether they are in scope of this tender and issue their drawings and quantities.",
+  "why": "Large parts of a G+1 house are unmeasured; MEP interfaces (sleeves, chases) cannot be assessed.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"not in BOQ\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-030",
+  "register": "technical",
+  "discipline": "architectural",
+  "status": "Draft",
+  "question": "Openings with unusual sizes: Door 6467x3140, Window 387x3140, Window 368x3140, Window 600x2950, Window 4274x2000. Please confirm these are real openings (e.g. shopfront, curtain wall, slot) and give their type, material and glazing.",
+  "why": "Sizes look like modelling artefacts or special openings; pricing per size needs a specification.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"5.4\", \"5.12\", \"5.13\", \"5.15\", \"5.21\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-031",
+  "register": "boq_discrepancy",
+  "discipline": "architectural",
+  "status": "Draft",
+  "question": "Door 900x2400 (7 nos), 800x2400 (4), 802x2400 (1), 736x2400 (1): 802 and 736 look like duplicates/variants of 800. Please confirm the schedule sizes.",
+  "why": "Near-duplicate sizes split the count and the priced size.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"5.2\", \"5.3\", \"5.6\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-032",
+  "register": "missing_input",
+  "discipline": "structural",
+  "status": "Draft",
+  "question": "No specification is supplied: concrete grade, cover and mix, masonry unit type and mortar, plaster thickness/mix, door and window materials, railing material. Items carry no grade or material.",
+  "why": "Cannot select an assembly or rate without a specification.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"2.1-2.10\", \"4.1-4.4\", \"5.1-5.25\", \"6.1\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-033",
+  "register": "technical",
+  "discipline": "commercial",
+  "status": "Draft",
+  "question": "The source uses IS 1200 and INR. Which measurement standard, currency, region, tax and contractual basis apply to this enquiry? The suite's defaults are Saudi (VAT, KSA calendar); none is assumed.",
+  "why": "Region/standard mismatch with the estimating basis.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"all\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-034",
+  "register": "design_interface",
+  "discipline": "structural",
+  "status": "Draft",
+  "question": "Item 7.1 'Roof and canopy members' (48.85 m) gives only a running length. Material (steel/RCC/timber), section, finish and relation to roof beams (2.6) and slab (2.9) are not stated.",
+  "why": "Unit and description insufficient to price or sequence.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"7.1\", \"2.6\", \"2.9\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-035",
+  "register": "boq_discrepancy",
+  "discipline": "all",
+  "status": "Draft",
+  "question": "The document says quantities were delivered 6 September 2026 and the page was published 1 October 2026; no revision identifier exists. Which issue is current?",
+  "why": "Revision cannot be established.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"all\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ },
+ {
+  "id": "TQ-PRJ-9201-036",
+  "register": "commercial",
+  "discipline": "commercial",
+  "status": "Draft",
+  "question": "Rates, amounts and the abstract of cost are blank by design. Which rate basis (DSR, SOR, market) and currency is to be used, and what are the payment, retention and bond terms?",
+  "why": "No commercial terms exist in the supplied documents.",
+  "generated_by": "user (practice-test operator)",
+  "related_json": "{\"boq_items\": [\"all\"], \"source\": \"BOQ-SAMPLE-SITESETU\"}"
+ }
+]

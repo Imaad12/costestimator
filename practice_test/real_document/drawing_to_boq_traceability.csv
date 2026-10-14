@@ -1,0 +1,49 @@
+item,pdf_page,measurement_basis_printed,source_drawing_in_input_folder
+1.1,3,"derived from footing boxes — footing plan + 0.3 m working space each side, ground z=0.0 to underside of blinding",False
+1.2,3,derived — pit plan x blinding thickness,False
+1.3,3,derived — excavation - footing - blinding,False
+2.1,3,structural footing layout — sum of 73 mesh volumes,False
+2.2,3,column keys + column details — sum of 22 mesh volumes,False
+2.3,3,column keys + column details — sum of 17 mesh volumes,False
+2.4,3,column keys + column details — sum of 9 mesh volumes,False
+2.5,3,structural slab/beam sheets and beam details — sum of 11 mesh volumes,False
+2.6,3,structural slab/beam sheets and beam details — sum of 5 mesh volumes,False
+2.7,3,structural slab sheets (net of beam and column footprints) — sum of 7 mesh volumes,False
+2.8,3,structural slab sheets (net of beam and column footprints) — sum of 24 mesh volumes,False
+2.9,3,structural slab sheets (net of beam and column footprints) — sum of 14 mesh volumes,False
+2.10,3,architectural plans and section; structural stair sheet quarantined — sum of 5 mesh volumes,False
+3.1,4,derived from element boxes — 4 sides x depth,False
+3.2,4,derived from element boxes — 4 faces x height,False
+3.3,4,derived from element boxes — 2 sides + soffit x length,False
+3.4,4,derived from element boxes — soffit + edges,False
+4.1,4,architectural plans — sum of 32 mesh volumes,False
+4.2,4,architectural plans — sum of 22 mesh volumes,False
+4.3,4,architectural plans — sum of 5 mesh volumes,False
+4.4,4,"derived — 2 x length x height per wall, openings not deducted",False
+5.1,4,traced on calibrated plans — count,False
+5.2,4,traced on calibrated plans — count,False
+5.3,4,traced on calibrated plans — count,False
+5.4,4,traced on calibrated plans — count,False
+5.5,4,traced on calibrated plans — count,False
+5.6,4,traced on calibrated plans — count,False
+5.7,4,traced on calibrated plans — count,False
+5.8,4,traced on calibrated plans — count,False
+5.9,4,traced on calibrated plans — count,False
+5.10,4,traced on calibrated plans — count,False
+5.11,4,traced on calibrated plans — count,False
+5.12,4,traced on calibrated plans — count,False
+5.13,4,traced on calibrated plans — count,False
+5.14,5,traced on calibrated plans — count,False
+5.15,5,traced on calibrated plans — count,False
+5.16,5,traced on calibrated plans — count,False
+5.17,5,traced on calibrated plans — count,False
+5.18,5,traced on calibrated plans — count,False
+5.19,5,traced on calibrated plans — count,False
+5.20,5,traced on calibrated plans — count,False
+5.21,5,traced on calibrated plans — count,False
+5.22,5,traced on calibrated plans — count,False
+5.23,5,traced on calibrated plans — count,False
+5.24,5,traced on calibrated plans — count,False
+5.25,5,traced on calibrated plans — count,False
+6.1,5,architectural plans/elevations — run length,False
+7.1,5,plans + elevations — member length,False

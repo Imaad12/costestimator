@@ -18,3 +18,4 @@ htmlcov/
 projects/*
 !projects/.gitkeep
 !projects/README.md
+practice_test/input/*.pdf

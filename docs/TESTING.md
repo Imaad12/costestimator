@@ -84,3 +84,6 @@ Reproduce the scenario outside pytest: `python scripts/run_closure_scenario.py <
 `python scripts/render_closure_report.py <dir> [--code-commit SHA] [--suite "N passed"]` regenerates `docs/SYNTHETIC_END_TO_END_CLOSURE_REPORT.md` and `docs/TENDER_DOCUMENT_APPLICABILITY_MATRIX.md` from the evidence.
 The scenario always runs with `KSA_ENVIRONMENT=test`, `KSA_ALLOW_SELF_APPROVAL=false`, registered TEST ACTORS and a fresh database; it never touches `var/` or `projects/`.
 Last full-suite result on this branch: **458 passed** (≈320 s); the closure scenario reruns green from a fresh scratch directory (27/27 stages).
+
+## Real-document practice test (2026-10-14)
+`python scripts/run_real_document_practice_test.py <fresh scratch dir>` runs the real services over whatever is in `practice_test/input/` (currently one third-party sample-BOQ PDF, git-ignored) and writes `practice_test/real_document/` (results.json, registers, queries, a DEMONSTRATION tender pack). Findings, negative-test results and application defects are in `practice_test/PRACTICE_TEST_RESULTS.md`. It is a practice exercise, not a tender; the synthetic scenario is run separately (`practice_test/synthetic_separate_run.json`).

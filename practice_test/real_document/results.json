@@ -1,0 +1,1085 @@
+{
+ "A0_inventory": {
+  "verdict": "PASS",
+  "files": [
+   {
+    "filename": "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
+    "format": "pdf",
+    "bytes": 3131031,
+    "sha256": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0",
+    "pages": 7,
+    "revision_or_date_visible": "Published 1 October 2026 (p.1); 'Quantities as delivered on 6 September 2026' (p.5); no revision identifier",
+    "discipline": "Multi-trade BOQ extract: earthwork, structural RCC/formwork, masonry, openings, railings, roof (civil/structural/architectural only)",
+    "status": "Marketing web page printed to PDF - NOT a contract document, NOT an issued-for-tender BOQ; quantity column has no text layer",
+    "text_layer": {
+     "decimal_quantities_checked": 22,
+     "found_in_text_layer": 0,
+     "note": "integer counts (doors/windows) cannot be tested this way; item numbers that look like quantities (e.g. 5.21) are excluded"
+    },
+    "text_chars": 8818,
+    "pdf_title": "Sample BOQ for a Residential Building | SiteSetu",
+    "pdf_producer": "Skia/PDF m154",
+    "pdf_created": "D:20261014193353+00'00'"
+   }
+  ],
+  "folders_expected": [
+   "drawings",
+   "BOQ",
+   "specifications",
+   "tender documents"
+  ],
+  "note": "The input folder contains ONLY the files listed here. No drawing, specification, contract, addendum, spreadsheet or BOQ file exists in it."
+ },
+ "A1_workspace_index": {
+  "verdict": "PASS",
+  "workspace": "/tmp/claude-0/pt1/workspaces/PRJ-9201-practice-test-sample-residential-buildin",
+  "originals_copied": [
+   {
+    "file": "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
+    "sha256_original": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0",
+    "sha256_copy": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0",
+    "identical": true
+   }
+  ],
+  "index_stats": {
+   "new": 1,
+   "changed": 0,
+   "unchanged": 0,
+   "missing": 0,
+   "extracted": 1,
+   "not_extracted": 0,
+   "errors": 0,
+   "documents": 1,
+   "changes": [
+    {
+     "file": "1. Tender Documents/1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
+     "event": "new",
+     "status": "Extracted",
+     "reason": null
+    }
+   ],
+   "index_file": "/tmp/claude-0/pt1/workspaces/PRJ-9201-practice-test-sample-residential-buildin/2. AI Context/project_index.json"
+  },
+  "indexed": [
+   {
+    "rel_path": "1. Tender Documents/1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf",
+    "category": "boq",
+    "extraction_status": "Extracted",
+    "text_chars": 8929,
+    "review_status": "New",
+    "sha256": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0"
+   }
+  ],
+  "decimal_quantities_present_in_application_text_extract": 0,
+  "decimal_quantities_checked": 22,
+  "extract_chars": 9206,
+  "finding": "The indexer extracted the PDF text layer; the quantity column is not in it. The application's own text index therefore cannot see any quantity. They exist only in the rendered page images."
+ },
+ "B1_document_register": {
+  "verdict": "PASS",
+  "current": [
+   [
+    "BOQ-SAMPLE-SITESETU",
+    "published 2026-10-01; quantities delivered 2026-09-06",
+    "registered_only"
+   ]
+  ],
+  "missing": [
+   [
+    "ITT-CONTRACT",
+    "Invitation to tender, conditions of contract, BOQ preamble / method of"
+   ],
+   [
+    "DWG-ARCH-SET",
+    "Architect's drawing set - 'a 16-sheet drawing set' (p.1): ground-floor"
+   ],
+   [
+    "DWG-MEP",
+    "Mechanical, plumbing, electrical, fire, ELV drawings (NOT provided; no"
+   ],
+   [
+    "DWG-STR-COLUMN",
+    "Structural column keys and column details (items 2.2-2.4; NOT provided"
+   ],
+   [
+    "DWG-STR-FOOTING",
+    "Structural footing layout (basis of item 2.1; NOT provided)"
+   ],
+   [
+    "DWG-STR-SLABBEAM",
+    "Structural slab/beam sheets and beam details (items 2.5-2.9; NOT provi"
+   ],
+   [
+    "DWG-STR-STAIR",
+    "Structural stair sheet - the source says it was 'quarantined' (item 2."
+   ],
+   [
+    "BBS-REINF",
+    "Reinforcement bar bending schedule - the source says it is excluded (p"
+   ],
+   [
+    "SPEC-ARCH",
+    "Architectural specification: plaster, door and window schedules, raili"
+   ],
+   [
+    "SPEC-STRUCT",
+    "Structural / concrete / masonry specification (grades, cover, mix; NOT"
+   ],
+   [
+    "DWG-SITE-LEVELS",
+    "Site survey / natural ground level (item 1.1 assumption; NOT provided)"
+   ]
+  ],
+  "superseded": [],
+  "revision_conflicts": [],
+  "not_interpreted": [
+   "BOQ-SAMPLE-SITESETU"
+  ]
+ },
+ "C1_boq_import": {
+  "verdict": "PASS",
+  "import_result": {
+   "rows_read": 55,
+   "blank": 0,
+   "headings": 7,
+   "items": 48,
+   "items_new": 48,
+   "items_unchanged": 0,
+   "rejected": 0,
+   "needs_review": 0,
+   "duplicates": 0,
+   "change_requests": 0,
+   "missing_in_revision": 0,
+   "total_client_amount": "0",
+   "sha256": "83a1dbe4b0c1ec40a25c2a56c25e7ebbfed0c6b6ff31ca92d2ce73b017505990",
+   "import_id": 1
+  },
+  "items": 48,
+  "headings": 7,
+  "rejected_rows": 0,
+  "quantities_identical_to_transcription": 48,
+  "descriptions_identical": 48,
+  "unit_conversions": {
+   "m\u00b3 -> m3 [ok]": 16,
+   "m\u00b2 -> m2 [ok]": 5,
+   "nos -> nr [ok]": 25,
+   "m -> m [ok]": 2
+  },
+  "items_needing_review": [],
+  "source_file_sha256": "83a1dbe4b0c1ec40a25c2a56c25e7ebbfed0c6b6ff31ca92d2ce73b017505990",
+  "limitation": "The importer accepts only CSV/XLSX. The PDF was NOT imported by the application: its quantities were transcribed by hand into the CSV above (labelled unverified)."
+ },
+ "D1_quantity_verification": {
+  "verdict": "PASS (findings raised)",
+  "totals_cross_check": [
+   {
+    "group": "RCC (footings, columns, beams, slabs, stairs) m3",
+    "printed_total": "129.42",
+    "sum_of_lines": "129.43",
+    "difference": "0.01",
+    "agrees": false
+   },
+   {
+    "group": "Formwork m2",
+    "printed_total": "1746.67",
+    "sum_of_lines": "1746.68",
+    "difference": "0.01",
+    "agrees": false
+   },
+   {
+    "group": "Masonry walls m3",
+    "printed_total": "111.38",
+    "sum_of_lines": "111.39",
+    "difference": "0.01",
+    "agrees": false
+   },
+   {
+    "group": "Wall plaster gross m2",
+    "printed_total": "1345.20",
+    "sum_of_lines": "1345.20",
+    "difference": "0.00",
+    "agrees": true
+   },
+   {
+    "group": "Doors nos",
+    "printed_total": "16",
+    "sum_of_lines": "16",
+    "difference": "0",
+    "agrees": true
+   },
+   {
+    "group": "Windows nos",
+    "printed_total": "32",
+    "sum_of_lines": "32",
+    "difference": "0",
+    "agrees": true
+   }
+  ],
+  "backfill_arithmetic": {
+   "excavation": "314.04",
+   "footings": "55.40",
+   "blinding": "18.33",
+   "printed_backfill": "240.58",
+   "calculated_per_printed_basis": "240.31",
+   "difference": "0.27"
+  },
+  "traceability": {
+   "items": 48,
+   "traceable_to_pdf_page_and_printed_basis": 48,
+   "traceable_to_a_drawing_supplied_in_the_input_folder": 0,
+   "verified_against_drawing": 0
+  },
+  "conclusion": "No quantity can be verified: the drawings and the 3D model the quantities came from were not supplied. The cross-checks show the page-2 totals differ by 0.01 in three groups and item 1.3 differs from its own printed formula by 0.27."
+ },
+ "E1_queries": {
+  "verdict": "PASS",
+  "detectors_created": [
+   "TQ-PRJ-9201-001",
+   "TQ-PRJ-9201-002",
+   "TQ-PRJ-9201-003",
+   "TQ-PRJ-9201-004",
+   "TQ-PRJ-9201-005",
+   "TQ-PRJ-9201-006",
+   "TQ-PRJ-9201-007",
+   "TQ-PRJ-9201-008",
+   "TQ-PRJ-9201-009",
+   "TQ-PRJ-9201-010",
+   "TQ-PRJ-9201-011",
+   "TQ-PRJ-9201-012",
+   "TQ-PRJ-9201-013",
+   "TQ-PRJ-9201-014",
+   "TQ-PRJ-9201-015",
+   "TQ-PRJ-9201-016",
+   "TQ-PRJ-9201-017",
+   "TQ-PRJ-9201-018",
+   "TQ-PRJ-9201-019",
+   "TQ-PRJ-9201-020",
+   "TQ-PRJ-9201-021"
+  ],
+  "manual_drafts": 15,
+  "total": 36,
+  "statuses": {
+   "Draft": 36
+  },
+  "by_register": {
+   "scope_exclusion": 3,
+   "boq_discrepancy": 4,
+   "commercial": 1,
+   "technical": 3,
+   "design_interface": 1,
+   "assumption_confirmation": 10,
+   "missing_input": 14
+  },
+  "takeoff_required_tasks": [
+   "ACT-PRJ-9201-001",
+   "ACT-PRJ-9201-002",
+   "ACT-PRJ-9201-003",
+   "ACT-PRJ-9201-004",
+   "ACT-PRJ-9201-005",
+   "ACT-PRJ-9201-006",
+   "ACT-PRJ-9201-007",
+   "ACT-PRJ-9201-008",
+   "ACT-PRJ-9201-009",
+   "ACT-PRJ-9201-010"
+  ],
+  "queries_not_issued": true,
+  "query_ids": [
+   [
+    "TQ-PRJ-9201-001",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-002",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-003",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-004",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-005",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-006",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-007",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-008",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-009",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-010",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-011",
+    "missing_input",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-012",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-013",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-014",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-015",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-016",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-017",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-018",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-019",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-020",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-021",
+    "assumption_confirmation",
+    "system:detector"
+   ],
+   [
+    "TQ-PRJ-9201-022",
+    "boq_discrepancy",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-023",
+    "boq_discrepancy",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-024",
+    "missing_input",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-025",
+    "missing_input",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-026",
+    "technical",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-027",
+    "scope_exclusion",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-028",
+    "scope_exclusion",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-029",
+    "scope_exclusion",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-030",
+    "technical",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-031",
+    "boq_discrepancy",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-032",
+    "missing_input",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-033",
+    "technical",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-034",
+    "design_interface",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-035",
+    "boq_discrepancy",
+    "user (practice-test operator)"
+   ],
+   [
+    "TQ-PRJ-9201-036",
+    "commercial",
+    "user (practice-test operator)"
+   ]
+  ]
+ },
+ "F1_assumptions_register": {
+  "verdict": "PASS",
+  "practice_test_rows": [
+   {
+    "id": "ASMP-PT-001",
+    "origin": "import",
+    "classification": "Imported but unverified",
+    "status": "Draft"
+   },
+   {
+    "id": "ASMP-PT-002",
+    "origin": "import",
+    "classification": "Imported but unverified",
+    "status": "Draft"
+   },
+   {
+    "id": "ASMP-PT-003",
+    "origin": "manual",
+    "classification": "Pending human review",
+    "status": "Draft"
+   },
+   {
+    "id": "ASMP-PT-004",
+    "origin": "calculated",
+    "classification": "Pending human review",
+    "status": "Draft"
+   },
+   {
+    "id": "ASMP-PT-005",
+    "origin": "manual",
+    "classification": "Pending human review",
+    "status": "Draft"
+   }
+  ],
+  "ai_proposals_in_register": 0,
+  "ai_row_attempt": "AI_FORBIDDEN",
+  "ai_actor_attempt": "AI_FORBIDDEN",
+  "synthetic_rows": 0,
+  "project_evidence_by_class": {
+   "Verified source data": 0,
+   "Company-approved internal data": 0,
+   "Project-approved data": 0,
+   "Imported but unverified": 0,
+   "Pending human review": 4,
+   "AI-proposed data": 0,
+   "Explicitly synthetic test data": 0,
+   "Missing data": 81
+  },
+  "mandatory_or_adopted_total": 85,
+  "problems_sample": [
+   "ASMP-A-001: Missing data (mandatory)",
+   "ASMP-A-002: Missing data (mandatory)",
+   "ASMP-A-003: Missing data (mandatory)",
+   "ASMP-A-004: Missing data (mandatory)",
+   "ASMP-A-005: Missing data (mandatory)",
+   "ASMP-A-006: Missing data (mandatory)",
+   "ASMP-A-008: Missing data (mandatory)",
+   "ASMP-A-009: Missing data (mandatory)",
+   "ASMP-A-011: Missing data (mandatory)",
+   "ASMP-A-012: Missing data (mandatory)",
+   "ASMP-A-014: Missing data (mandatory)",
+   "ASMP-A-017: Missing data (mandatory)"
+  ],
+  "fully_verified": false,
+  "source_backed_facts": "none can be classed 'Verified source data': that class needs approval by a person; nothing was approved"
+ },
+ "G1_estimate": {
+  "verdict": "PASS (INCOMPLETE as expected)",
+  "state": "Preliminary \u2014 Incomplete",
+  "totals": {
+   "direct_cost": "0",
+   "indirect_cost": "0",
+   "total_cost": "None",
+   "selling_price_pre_tax": "None",
+   "commercial_net_price": "None",
+   "tax": "None",
+   "final_payable": "None"
+  },
+  "priced_lines": 0,
+  "boq_items": 48,
+  "mapped": 0,
+  "unpriced_lines": 48,
+  "blockers": [
+   "48 BOQ item(s) are unpriced or incomplete.",
+   "No computable commercial policy."
+  ],
+  "completeness": {
+   "items_total": 48,
+   "items_complete": 0,
+   "items_unpriced": 48,
+   "pct_items_complete": "0.0",
+   "missing_rate_lines": 0,
+   "indicative_exposure": "0",
+   "unknown_exposure_lines": 0,
+   "indirects_resolved": true
+  },
+  "note": "No assembly mapping and no approved rate exist. Per rule 4, no mapping was made or approved by the test; per rule 3, no price was invented. The estimate total is therefore not a number."
+ },
+ "G2_programme_to_extent_supported": {
+  "verdict": "PASS (refused/empty as expected)",
+  "build_programme_code": "CALENDAR_REQUIRED",
+  "reports": {
+   "productivity_programme": {
+    "refused": "FIELD_REQUIRED",
+    "message": "profile is required (a workforce profile id)."
+   },
+   "schedule": {
+    "refused": "NO_SCHEDULE",
+    "message": "No schedule tasks."
+   },
+   "long_lead": {
+    "project_id": "PRJ-9201",
+    "as_of": "2026-10-14",
+    "items": "<list 0>",
+    "attention": "<list 0>"
+   },
+   "cashflow": {
+    "refused": "TERMS_NONE",
+    "message": "No approved payment terms: enter the contract/bank/supplier terms as a governed 'payment_terms' parameter."
+   },
+   "plant_hire": {
+    "project_id": "PRJ-9201",
+    "rows": "<list 0>",
+    "mismatches": "<list 0>",
+    "note": "Working days and calendar days are different: a calendar-day contract bills every day on site incl. non-working days. Nothing is changed by this report.",
+    "estimate_state": "Preliminary \u2014 Incomplete"
+   }
+  },
+  "missing_inputs": {
+   "rates": "all 48 lines (no rate exists in the library; 'the library ships empty')",
+   "productivity_norms": 0,
+   "workforce_profiles": 0,
+   "work_activities": 0,
+   "calendar": "none approved",
+   "lead_times": "none recorded",
+   "cost_allocations": "none"
+  },
+  "note": "No programme or duration is produced: no norm, crew, calendar, activity or lead time exists in the documents. A duration here would be invented."
+ },
+ "B2_registers": {
+  "verdict": "PASS",
+  "discipline_matrix": [
+   {
+    "discipline": "Architectural",
+    "drawings": "Missing",
+    "specification": "Missing",
+    "boq_coverage": "Partial: masonry, openings, railings (quantities only)"
+   },
+   {
+    "discipline": "Structural",
+    "drawings": "Missing",
+    "specification": "Missing",
+    "boq_coverage": "Partial: RCC volumes + formwork; steel excluded"
+   },
+   {
+    "discipline": "Civil / earthwork / site",
+    "drawings": "Missing",
+    "specification": "Missing",
+    "boq_coverage": "Partial: pits, blinding, backfill; no external works"
+   },
+   {
+    "discipline": "Mechanical / HVAC",
+    "drawings": "Missing",
+    "specification": "Missing",
+    "boq_coverage": "Absent"
+   },
+   {
+    "discipline": "Plumbing / drainage",
+    "drawings": "Missing",
+    "specification": "Missing",
+    "boq_coverage": "Absent"
+   },
+   {
+    "discipline": "Electrical",
+    "drawings": "Missing",
+    "specification": "Missing",
+    "boq_coverage": "Absent"
+   },
+   {
+    "discipline": "Fire protection / ELV",
+    "drawings": "Missing",
+    "specification": "Missing",
+    "boq_coverage": "Absent"
+   },
+   {
+    "discipline": "Contract / commercial / ITT",
+    "drawings": "n/a",
+    "specification": "Missing",
+    "boq_coverage": "Absent (rates blank)"
+   }
+  ],
+  "application_completeness_report": {
+   "project_id": "PRJ-9201",
+   "generated": "2026-10-14",
+   "rows": [
+    {
+     "area": "Global library",
+     "check": "Approved real (non-synthetic) rates",
+     "status": "Info",
+     "detail": "The global library has 927 catalogue resources but 0 approved real rates (this demonstration project uses SYNTHETIC rates).",
+     "where": "/rates/updates"
+    },
+    {
+     "area": "Workspace",
+     "check": "Numbered folders present",
+     "status": "OK",
+     "detail": "PRJ-9201-practice-test-sample-residential-buildin",
+     "where": "/projects/PRJ-9201/workspace"
+    },
+    {
+     "area": "Workspace",
+     "check": "Tender documents received",
+     "status": "OK",
+     "detail": "1 item(s) in '1. Tender Documents'",
+     "where": "/projects/PRJ-9201/workspace"
+    },
+    {
+     "area": "Workspace",
+     "check": "Document index",
+     "status": "OK",
+     "detail": "1 indexed; 0 new/changed/missing awaiting human review; 0 not text-extracted.",
+     "where": "/projects/PRJ-9201/workspace"
+    },
+    {
+     "area": "Project context",
+     "check": "Applicable trades recorded",
+     "status": "OK",
+     "detail": "civil, structural, architectural",
+     "where": "/projects/PRJ-9201/workspace"
+    },
+    {
+     "area": "Project context",
+     "check": "Approved drawing / specification revisions recorded",
+     "status": "Open",
+     "detail": "drawings: not recorded; specification: not recorded",
+     "where": "/projects/PRJ-9201/workspace"
+    },
+    {
+     "area": "BOQ",
+     "check": "BOQ items",
+     "status": "Info",
+     "detail": "48 item(s) imported (human-measured quantities as supplied).",
+     "where": "/projects/PRJ-9201/boq"
+    },
+    {
+     "area": "BOQ",
+     "check": "Items mapped to an assembly or priced resource",
+     "status": "Blocked",
+     "detail": "48 unmapped item(s).",
+     "where": "/projects/PRJ-9201/mapping"
+    },
+    {
+     "area": "BOQ",
+     "check": "Pending BOQ change requests",
+     "status": "OK",
+     "detail": "0 awaiting human decision.",
+     "where": "/projects/PRJ-9201/boq"
+    },
+    {
+     "area": "Rates",
+     "check": "Lines priced from eligible rates",
+     "status": "OK",
+     "detail": "0/48 items fully priced; 0 unpriced line(s); indicative exposure from unapproved/expired rates SAR 0 (not in totals); 0 line(s) with unknown exposure.",
+     "where": "/projects/PRJ-9201/procurement"
+    },
+    {
+     "area": "Estimate",
+     "check": "Blocking condition",
+     "status": "Blocked",
+     "detail": "48 BOQ item(s) are unpriced or incomplete.",
+     "where": "/projects/PRJ-9201/estimate"
+    },
+    {
+     "area": "Estimate",
+     "check": "Blocking condition",
+     "status": "Blocked",
+     "detail": "No computable commercial policy.",
+     "where": "/projects/PRJ-9201/estimate"
+    },
+    {
+     "area": "Estimate",
+     "check": "Estimate state",
+     "status": "Open",
+     "detail": "Preliminary \u2014 Incomplete",
+     "where": "/projects/PRJ-9201/estimate"
+    },
+    {
+     "area": "Procurement",
+     "check": "Open procurement needs",
+     "status": "OK",
+     "detail": "0 open need(s); 0 RFQ(s); 0 quotation(s) awaiting review; 0 selection(s) awaiting approval.",
+     "where": "/projects/PRJ-9201/procurement"
+    },
+    {
+     "area": "Programme & indirects",
+     "check": "Indirect cost items approved",
+     "status": "Open",
+     "detail": "Approved items present.",
+     "where": "/projects/PRJ-9201/commercial"
+    },
+    {
+     "area": "Programme & indirects",
+     "check": "Project duration",
+     "status": "Open",
+     "detail": "Not recorded.",
+     "where": "/projects/PRJ-9201/commercial"
+    },
+    {
+     "area": "Commercial",
+     "check": "Commercial policy approved",
+     "status": "Blocked",
+     "detail": "No policy assigned.",
+     "where": "/projects/PRJ-9201/commercial"
+    },
+    {
+     "area": "Clarifications",
+     "check": "Outstanding clarifications",
+     "status": "OK",
+     "detail": "0 outstanding.",
+     "where": "/projects/PRJ-9201/registers"
+    },
+    {
+     "area": "Reconciliation",
+     "check": "Reconciliation run",
+     "status": "Open",
+     "detail": "Not run yet.",
+     "where": "/projects/PRJ-9201/reconciliation"
+    },
+    {
+     "area": "Approvals",
+     "check": "Estimate version",
+     "status": "Open",
+     "detail": "No version frozen.",
+     "where": "/projects/PRJ-9201/reconciliation"
+    },
+    {
+     "area": "Approvals",
+     "check": "Tender export released by a Commercial Approver",
+     "status": "Open",
+     "detail": "Not released - only PRELIMINARY outputs exist.",
+     "where": "/projects/PRJ-9201/reports"
+    }
+   ],
+   "blocked": 4,
+   "open": 7,
+   "final_approval_possible": false,
+   "note": "Final approval additionally re-runs every server-side gate; this report is a guide, not the gate."
+  },
+  "drawing_register": "EMPTY: no drawing was supplied; 6 drawing/survey documents referenced by the BOQ are registered as Missing",
+  "revision_register": "1 current document; no superseded document; no revision identifier in the source (only two dates)",
+  "note": "The discipline matrix above was written by the practice-test script from the register; the application has no discipline-by-document-type matrix of its own (defect D-3)."
+ },
+ "H1_documents_generated": {
+  "verdict": "PASS",
+  "out_dir": "/home/user/costestimator/practice_test/real_document/generated/PRJ-9201_tender_pack_r1",
+  "classification": "demonstration",
+  "production_ready": false,
+  "banner": "DEMONSTRATION EXPORT - NOT SUBMISSION READY - NOT APPROVED FOR ANY REAL TENDER | approvals by: none principals in environment 'test'",
+  "counts": {
+   "Required": 25,
+   "Conditional": 6,
+   "Not Applicable": 3,
+   "Missing Customer Requirement": 11
+  },
+  "statuses": {
+   "BLOCKED": [
+    "D01",
+    "D02",
+    "D03",
+    "D04",
+    "D06",
+    "D13",
+    "D14",
+    "D16",
+    "D17",
+    "D18",
+    "D19",
+    "D20",
+    "D22",
+    "D23",
+    "D24",
+    "D26",
+    "D27",
+    "D28",
+    "D29",
+    "D30",
+    "D32",
+    "D37",
+    "D40",
+    "D42"
+   ],
+   "Preliminary (DEMONSTRATION)": [
+    "D05",
+    "D07",
+    "D08",
+    "D09",
+    "D10",
+    "D11",
+    "D12",
+    "D15",
+    "D21",
+    "D25",
+    "D31",
+    "D33",
+    "D34",
+    "D35",
+    "D36",
+    "D41",
+    "D43",
+    "D45"
+   ],
+   "Not Applicable": [
+    "D38",
+    "D39",
+    "D44"
+   ]
+  },
+  "blocked_reasons": {
+   "D01": "submission instructions; tender deadline",
+   "D02": "enquiry brief; programme baseline",
+   "D03": "bid/no-bid assessment not recorded",
+   "D04": "scope summary",
+   "D06": "letter of offer",
+   "D13": "no approved payment terms (contract payment / retention / bond terms) have been supplied",
+   "D14": "calendar; letter of offer validity; programme",
+   "D16": "the tender documents do not state whether a technical proposal is required (customer_requires.technical_proposal not recorded) - confirm with the customer",
+   "D17": "the tender documents do not state whether a technical proposal is required (customer_requires.technical_proposal not recorded) - confirm with the customer",
+   "D18": "the tender documents do not state whether a technical proposal is required (customer_requires.technical_proposal not recorded) - confirm with the customer",
+   "D19": "no work activities are defined, so a programme / workforce plan cannot be produced",
+   "D20": "no work activities are defined, so a programme / workforce plan cannot be produced",
+   "D22": "procurement strategy; supplier qualification status",
+   "D23": "no specification received: compliance requirements are unknown",
+   "D24": "no specification received: compliance requirements are unknown",
+   "D26": "design interfaces",
+   "D27": "the tender documents do not state whether a quality plan / ITP / submittal schedule is required (customer_requires.quality_plan not recorded) - confirm with the customer",
+   "D28": "the tender documents do not state whether a quality plan / ITP / submittal schedule is required (customer_requires.quality_plan not recorded) - confirm with the customer",
+   "D29": "HSE risks; method statements; permit requirements",
+   "D30": "the tender documents do not state whether a quality plan / ITP / submittal schedule is required (customer_requires.quality_plan not recorded) - confirm with the customer",
+   "D32": "handover obligations (from the contract / specification)",
+   "D37": "productivity norms",
+   "D40": "no approved escalation profile; no quantified risks / ranges",
+   "D42": "required-inputs checklist; responsibility assignment"
+  },
+  "files": 110,
+  "requested_outputs": {
+   "Basis of estimate": "D07",
+   "BOQ import and mapping report": "D34",
+   "Document completeness and revision report": "D33",
+   "Technical query / RFI register": "D25",
+   "BOQ discrepancy and scope-gap report": "D34 + D25",
+   "Assumptions and exclusions register": "D08 + D09",
+   "Technical compliance matrix": "D23",
+   "Procurement and missing-rate report": "D36",
+   "Workforce and programme report": "D19/D20/D37",
+   "Preliminary technical proposal": "D16",
+   "Execution methodology": "D18",
+   "Commercial estimate and reconciliation report": "D35",
+   "Document applicability matrix": "applicability_matrix.json",
+   "Open actions and handover checklist": "D42 + D43"
+  },
+  "validator": {
+   "ok": true,
+   "errors": [],
+   "warnings": [
+    "D31: contains 'TO BE COMPLETED' placeholders"
+   ],
+   "blocked_documents": [
+    "D01",
+    "D02",
+    "D03",
+    "D04",
+    "D06",
+    "D13",
+    "D14",
+    "D16",
+    "D17",
+    "D18",
+    "D19",
+    "D20",
+    "D22",
+    "D23",
+    "D24",
+    "D26",
+    "D27",
+    "D28",
+    "D29",
+    "D30",
+    "D32",
+    "D37",
+    "D40",
+    "D42"
+   ],
+   "files_checked": 110
+  }
+ },
+ "I1_gates_and_negative_tests": {
+  "verdict": "PASS",
+  "readiness_test_env": {
+   "classification": "demonstration",
+   "production_ready": false,
+   "reasons": [
+    "the project is flagged as a demonstration project",
+    "the environment is 'test', not 'production'",
+    "estimate approval: no approval record",
+    "letter of offer: none generated",
+    "tender-export approval: no approval record",
+    "reconciliation gate blocked by 50 finding(s)",
+    "estimate state is 'Preliminary \u2014 Incomplete'",
+    "36 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
+    "required tender document(s) not received: ITT-CONTRACT, DWG-ARCH-SET, DWG-MEP, DWG-STR-COLUMN, DWG-STR-FOOTING, DWG-STR-SLABBEAM, DWG-STR-STAIR, BBS-REINF, SPEC-ARCH, SPEC-STRUCT, DWG-SITE-LEVELS",
+    "document PRJ-9201-D16 approval: no approval record",
+    "document PRJ-9201-D06 approval: no approval record"
+   ]
+  },
+  "readiness_if_production_env": {
+   "classification": "demonstration",
+   "production_ready": false,
+   "structural": [
+    "the project is flagged as a demonstration project"
+   ],
+   "reasons": [
+    "the project is flagged as a demonstration project",
+    "estimate approval: no approval record",
+    "letter of offer: none generated",
+    "tender-export approval: no approval record",
+    "reconciliation gate blocked by 50 finding(s)",
+    "estimate state is 'Preliminary \u2014 Incomplete'",
+    "36 unresolved material technical/commercial queries: TQ-PRJ-9201-001, TQ-PRJ-9201-002, TQ-PRJ-9201-003, TQ-PRJ-9201-004, TQ-PRJ-9201-005, TQ-PRJ-9201-006",
+    "required tender document(s) not received: ITT-CONTRACT, DWG-ARCH-SET, DWG-MEP, DWG-STR-COLUMN, DWG-STR-FOOTING, DWG-STR-SLABBEAM, DWG-STR-STAIR, BBS-REINF, SPEC-ARCH, SPEC-STRUCT, DWG-SITE-LEVELS",
+    "document PRJ-9201-D16 approval: no approval record",
+    "document PRJ-9201-D06 approval: no approval record"
+   ]
+  },
+  "negative_service_calls": {
+   "author_approves_own_assumption": "SELF_APPROVAL_BLOCKED",
+   "viewer_creates_assumption": "PERMISSION_DENIED",
+   "freeze_then_export_without_approval": "EXPORT_NOT_APPROVED",
+   "approve_version_incomplete_estimate_by_test_actor": "ESTIMATE_PRELIMINARY",
+   "approve_document_D16_blocked_doc_by_test_actor": "DOC_BLOCKED",
+   "approve_document_D07_by_test_actor_in_demo_project": "NOT REFUSED"
+  },
+  "real_project_with_registered_human_users_in_production_env": {
+   "approve_version_by_human_commercial": "ESTIMATE_PRELIMINARY",
+   "approve_tender_export_by_human_commercial": "ESTIMATE_NOT_APPROVED",
+   "export_submission_by_human_estimator": "EXPORT_NOT_APPROVED",
+   "negative_control_pack": {
+    "classification": "not_ready",
+    "production_ready": false,
+    "blocked": 25
+   },
+   "approve_document_D16_(blocked)_by_human_commercial": "DOC_BLOCKED",
+   "approve_document_D07_by_human_commercial": "NOT REFUSED",
+   "D07_status_after_a_human_approved_it_in_a_not_ready_pack": {
+    "status": "Draft",
+    "pack_classification": "not_ready",
+    "pack_production_ready": false
+   },
+   "reconciliation": {
+    "total": 52,
+    "by_severity": {
+     "Critical": 49,
+     "High": 1,
+     "Medium": 2
+    },
+    "top_rules": {
+     "INDIRECT_UNAPPROVED": 1,
+     "OFFER_MISSING": 1,
+     "POLICY_UNAPPROVED": 1,
+     "UNAPPROVED_ADOPTED_ASSUMPTION": 1,
+     "UNPRICED_ITEM": 48
+    }
+   },
+   "accept_exception_on_a_Critical_finding": "EXCEPTION_NOT_ALLOWED",
+   "final_gate_blocked": true,
+   "readiness": {
+    "classification": "not_ready",
+    "production_ready": false,
+    "reasons": [
+     "estimate approval: no approval record",
+     "letter of offer: none generated",
+     "tender-export approval: no approval record",
+     "reconciliation gate blocked by 50 finding(s)",
+     "estimate state is 'Preliminary \u2014 Incomplete'",
+     "document PRJ-9202-D16 approval: no approval record",
+     "document PRJ-9202-D06 approval: no approval record"
+    ]
+   }
+  },
+  "exports_marked_submission_ready": 0,
+  "pack_validator_blocks_production_label": true
+ },
+ "A2_originals_unchanged": {
+  "verdict": "PASS",
+  "before": {
+   "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0"
+  },
+  "after_input_folder": {
+   "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0"
+  },
+  "after_workspace_copy": {
+   "1ddcacd6-Sample_BOQ_for_a_Residential_Building___SiteSetu.pdf": "9e55f977217142626c38bb16cdb3db6bcda77c430fc691ecc5e0fdf8db066ab0"
+  }
+ },
+ "I2_audit_chain": {
+  "verdict": "PASS",
+  "result": {
+   "ok": true,
+   "checked": 214
+  }
+ },
+ "_meta": {
+  "project": "PRJ-9201",
+  "scratch": "/tmp/claude-0/pt1",
+  "settings_environment": "test",
+  "banner": "PRACTICE TEST - NOT A TENDER - NOT FOR SUBMISSION. Third-party sample BOQ; quantities TRANSCRIBED, NOT VERIFIED; no rates, no productivity values."
+ }
+}
