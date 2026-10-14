@@ -303,8 +303,12 @@ def publish(db: Database, actor: Actor, cid: int) -> int:
     evidence = (f"Candidate {c['candidate_ref']} [{c['source_type']}] {c['source_name'] or ''} {c['source_url']} retrieved {c['retrieved_at'][:10]}; "
                 f"original {c['original_price']} {c['original_currency']}/{c['original_unit']} ({c['price_kind']}; VAT {c['tax_basis']}; {c['delivery_basis']}); "
                 f"published as {price} {currency}/{unit} - {how}. Reviewer {c['reviewer']}: {c['review_comments'] or 'approved for publication'}")
+    synthetic = "SYNTHETIC_DATA" in c["flags"]
+    if synthetic:
+        evidence = f"SYNTHETIC / TEST ONLY / NOT A MARKET QUOTE. {evidence}"
     rid = rates.propose_rate(
-        db, actor, c["resource_id"], unit_price=price, rate_type=RATE_TYPE_FOR_SOURCE.get(c["source_type"], RateType.PUBLISHED_MARKET_PRICE.value),
+        db, actor, c["resource_id"], unit_price=price, is_synthetic=synthetic,
+        rate_type=RateType.SYNTHETIC.value if synthetic else RATE_TYPE_FOR_SOURCE.get(c["source_type"], RateType.PUBLISHED_MARKET_PRICE.value),
         currency=currency, unit=unit, region="KSA-ALL", source_id=c["source_id"], evidence=evidence, price_date=c["effective_date"],
         valid_until=c["valid_until"], tax_basis="Excluded", delivery_basis=c["delivery_basis"], installation_included=c["installation_included"],
         confidence=c["confidence"] if c["confidence"] in ("High", "Medium", "Low", "Unverified") else "Unverified", submit=True)

@@ -75,7 +75,11 @@ def propose(db: Database, actor: Actor, kind: str, code: str, data: dict, *, pro
     return pid
 
 
-def import_csv(db: Database, actor: Actor, path, *, project_id: str | None = None) -> dict:
+class _DryRun(Exception):
+    pass
+
+
+def import_csv(db: Database, actor: Actor, path, *, project_id: str | None = None, dry_run: bool = False) -> dict:
     """Load governed-parameter PROPOSALS from a CSV (columns: kind, code, source, basis_note, project_id, data_json).
 
     Every valid row becomes a Draft; nothing is submitted or approved here, and any status column is ignored. Invalid rows are reported,
@@ -93,12 +97,22 @@ def import_csv(db: Database, actor: Actor, path, *, project_id: str | None = Non
                 data = json.loads(row.get("data_json") or "{}")
                 if not isinstance(data, dict):
                     raise ValueError("data_json must be a JSON object")
-                created.append(propose(db, actor, row.get("kind", ""), row.get("code", ""), data,
-                                       project_id=row.get("project_id") or project_id, source=row.get("source") or None,
-                                       basis_note=row.get("basis_note") or None,
-                                       is_synthetic=row.get("is_synthetic", "").lower() in ("1", "true", "yes")))
+                args = (db, actor, row.get("kind", ""), row.get("code", ""), data)
+                kw = dict(project_id=row.get("project_id") or project_id, source=row.get("source") or None, basis_note=row.get("basis_note") or None,
+                          is_synthetic=row.get("is_synthetic", "").lower() in ("1", "true", "yes"))
+                if dry_run:                                   # validate inside a transaction that is always rolled back: nothing is kept
+                    try:
+                        with db.tx():
+                            propose(*args, **kw)
+                            raise _DryRun()
+                    except _DryRun:
+                        created.append(0)
+                else:
+                    created.append(propose(*args, **kw))
             except (ValidationFailed, ValueError, NotFound, Conflict) as e:
                 errors.append({"row": n, "code": row.get("code", ""), "error": str(e)})
+    if dry_run:
+        return {"would_create": len(created), "errors": errors, "dry_run": True}
     return {"created_ids": created, "errors": errors, "status": "Draft"}
 
 

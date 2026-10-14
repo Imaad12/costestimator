@@ -1,0 +1,32 @@
+SYNTHETIC / TEST ONLY / NOT A MARKET QUOTE - Eastern Province Utility Piping Package (measured quantities supplied in this fixture),,,,,
+Item,Description,Unit,Qty,Rate,Cost Code
+P-001,Carbon steel pipe DN50,m,120,185,E.06
+P-002,Carbon steel pipe DN100,m,240,315,E.06
+P-003,Carbon steel pipe DN150,m,80,480,E.06
+P-004,90-degree elbow DN50,ea,24,95,E.06
+P-005,90-degree elbow DN100,ea,40,165,E.06
+P-006,Tee DN100,ea,12,280,E.06
+P-007,Reducer DN100 x DN50,ea,8,190,E.06
+P-008,Flange DN100,ea,32,140,E.06
+P-009,Gasket DN100,ea,32,28,E.06
+P-010,Bolt and nut set DN100,set,32,45,E.06
+P-011,Gate valve DN50,ea,8,620,E.08
+P-012,Gate valve DN100,ea,6,1450,E.08
+P-013,Check valve DN100,ea,4,1850,E.08
+P-014,Fabricated pipe supports,kg,650,24,E.08
+P-015,Mechanical anchors,ea,80,22,E.08
+P-016,Welding and consumables,dia-in,420,38,E.06
+P-017,Welder labour,hour,320,65,E.06
+P-018,Pipe fitter labour,hour,400,55,E.06
+P-019,Helper labour,hour,500,32,E.06
+P-020,25-ton crane hire,day,6,1800,A.07
+P-021,3-ton forklift hire,day,8,650,A.07
+P-022,Scaffolding access,m2-day,450,9,A.06
+P-023,Radiographic testing,weld,42,260,A.08
+P-024,Positive material identification,test,15,180,A.08
+P-025,Hydrotesting package,LS,1,8500,F.10
+P-026,Flushing package,LS,1,4800,F.10
+P-027,Surface preparation and painting,m2,180,42,D.07
+P-028,Piping insulation,m2,95,125,F.09
+P-029,Mobilisation and demobilisation,LS,1,12000,A.01
+P-030,Site supervision,day,20,850,A.03

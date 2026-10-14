@@ -104,7 +104,7 @@ def cmd_param(a) -> int:
         data = json.loads(Path(a.data[1:]).read_text(encoding="utf-8")) if a.data.startswith("@") else json.loads(a.data)
         print(governed.propose(db, _actor(a), a.kind, a.code, data, project_id=a.project, source=a.source, basis_note=a.basis, submit=a.submit))
     elif a.pcmd3 == "import":
-        _print(governed.import_csv(db, _actor(a), a.file, project_id=a.project))
+        _print(governed.import_csv(db, _actor(a), a.file, project_id=a.project, dry_run=a.dry_run))
     elif a.pcmd3 == "submit":
         governed.submit(db, _actor(a), a.param_id)
     elif a.pcmd3 == "approve":
@@ -323,7 +323,7 @@ def cmd_rates(a) -> int:
         actor = _actor(a)
         rep = importer.import_rates_file(db, actor, Path(a.file), source_id=a.source, source_name=a.source_name, source_url=a.url,
                                          source_type=a.source_type, description=a.description or "", dry_run=dry, retrieved_at=a.retrieved,
-                                         extra_flags=["AWARD_NOT_MARKET_QUOTE"] if a.source_type == "Public tender award" else None)
+                                         extra_flags=(["AWARD_NOT_MARKET_QUOTE"] if a.source_type == "Public tender award" else []) + (["SYNTHETIC_DATA"] if a.synthetic else []) or None)
         _print(rep)
         return 0 if not rep["errors"] or rep["accepted"] else 1
     if a.rcmd == "pending":
@@ -394,7 +394,7 @@ def main(argv: list[str] | None = None) -> int:
     q = ps_.add_parser("list"); q.add_argument("--kind"); q.add_argument("--project"); q.set_defaults(fn=cmd_param)
     q = ps_.add_parser("propose"); q.add_argument("kind"); q.add_argument("code"); q.add_argument("data", help="JSON text or @file.json"); q.add_argument("--project")
     q.add_argument("--source", required=True); q.add_argument("--basis"); q.add_argument("--submit", action="store_true"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
-    q = ps_.add_parser("import", help="load proposals from CSV as Drafts (never approves)"); q.add_argument("file"); q.add_argument("--project"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
+    q = ps_.add_parser("import", help="load proposals from CSV as Drafts (never approves)"); q.add_argument("file"); q.add_argument("--project"); q.add_argument("--dry-run", action="store_true"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
     for n in ("submit", "approve", "reject"):
         q = ps_.add_parser(n); q.add_argument("param_id", type=int); q.add_argument("--comment"); q.add_argument("--user"); q.set_defaults(fn=cmd_param)
     s = sub.add_parser("wbs", help="import WBS nodes or item->WBS assignments from CSV"); s.add_argument("project"); s.add_argument("file"); s.add_argument("--user"); s.set_defaults(fn=cmd_wbs)
@@ -451,7 +451,8 @@ def main(argv: list[str] | None = None) -> int:
     for n in ("import", "validate"):
         q = rs.add_parser(n); q.add_argument("file"); q.add_argument("--source", help="Source Register id, e.g. SRC-006"); q.add_argument("--source-name")
         q.add_argument("--url"); q.add_argument("--source-type", default="Manual dataset"); q.add_argument("--description"); q.add_argument("--retrieved")
-        q.add_argument("--dry-run", action="store_true"); q.add_argument("--user"); q.set_defaults(fn=cmd_rates)
+        q.add_argument("--dry-run", action="store_true"); q.add_argument("--user"); q.add_argument("--synthetic", action="store_true", help="label every candidate SYNTHETIC; published as a Synthetic Demonstration Rate")
+        q.set_defaults(fn=cmd_rates)
     q = rs.add_parser("pending"); q.add_argument("--queue"); q.set_defaults(fn=cmd_rates)
     q = rs.add_parser("review"); q.add_argument("candidate"); q.add_argument("decision", choices=["approve", "reject", "needs_verification"])
     q.add_argument("--comment"); q.add_argument("--user"); q.set_defaults(fn=cmd_rates)

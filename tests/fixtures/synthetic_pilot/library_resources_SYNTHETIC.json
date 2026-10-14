@@ -1,0 +1,62 @@
+[
+ {
+  "id": "LIB-PIPE-DN100",
+  "description": "SYNTHETIC Carbon steel pipe DN100, supply only",
+  "unit": "m",
+  "rate": 190
+ },
+ {
+  "id": "LIB-PIPE-DN50",
+  "description": "SYNTHETIC Carbon steel pipe DN50, supply only",
+  "unit": "m",
+  "rate": 110
+ },
+ {
+  "id": "LIB-LAB-WELDER",
+  "description": "SYNTHETIC Welder labour",
+  "unit": "hr",
+  "rate": 65
+ },
+ {
+  "id": "LIB-LAB-FITTER",
+  "description": "SYNTHETIC Pipe fitter labour",
+  "unit": "hr",
+  "rate": 55
+ },
+ {
+  "id": "LIB-LAB-HELPER",
+  "description": "SYNTHETIC Helper labour",
+  "unit": "hr",
+  "rate": 32
+ },
+ {
+  "id": "LIB-PLT-CRANE",
+  "description": "SYNTHETIC Crane 25-ton",
+  "unit": "day",
+  "rate": 1800
+ },
+ {
+  "id": "LIB-PLT-FORK",
+  "description": "SYNTHETIC Forklift 3-ton",
+  "unit": "day",
+  "rate": 650
+ },
+ {
+  "id": "LIB-MAT-WELDCONS",
+  "description": "SYNTHETIC Welding consumables",
+  "unit": "inch_dia",
+  "rate": 12
+ },
+ {
+  "id": "LIB-MAT-SUPPORT",
+  "description": "SYNTHETIC Fabricated support steel, supply only",
+  "unit": "kg",
+  "rate": 15
+ },
+ {
+  "id": "LIB-MAT-PAINT",
+  "description": "SYNTHETIC Painting material and consumables",
+  "unit": "m2",
+  "rate": 14
+ }
+]

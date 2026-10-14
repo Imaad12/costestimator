@@ -16,6 +16,9 @@
 * Per-line rounding to `money.rounding_dp` means totals can differ by cents from a spreadsheet that rounds only at the end. Tendered unit-rate rounding creates a reported *rounding variance* (bounded and shown).
 * No measurement logic of any kind (by design): no drawing/PDF/BIM takeoff, no deduction rules, no quantity optimisation.
 
+* **Cash flow and time-phased escalation cover only cost that is tied to a programme activity** (by the activity's cost-code prefix or WBS node). Untied cost is listed as unscheduled and is not escalated; the cash-flow valuations still spread the whole price, so the balance is overstated by the price share of that cost (found by the synthetic pilot, docs/SYNTHETIC_PILOT_RUN.md).
+* `percent_of_direct` indirects apply to the whole direct cost; there is no eligibility base, so a percentage indirect cannot exclude lines such as BOQ supervision and mobilisation.
+
 ## Reconciliation / procurement
 * Duplicate detection is rule-based (same description/unit/quantity; same resource+quantity under different trades; keyword overlap between indirects and priced preliminaries) and will have false positives and false negatives; it is a prompt for review, not proof.
 * Offer-vs-estimate checks work on structured scope entries, the schedule hash and totals; the `.docx` text is not parsed back. Offer letters and pricing schedules are drafts for human/legal review.

@@ -75,6 +75,8 @@ def build_boe(db: Database, project_id: str, est=None) -> dict:
         banner.append(f"ESTIMATE STATE: {est.state.upper()} - NOT FOR SUBMISSION")
     if est.direct.synthetic_used:
         banner.append("SYNTHETIC RATES IN USE")
+    if (p.get("notes") or "").strip():                                   # the project's own human-entered label/limitation statement
+        banner.append(f"PROJECT NOTE: {p['notes'].strip()}")
     return dict(
         generated=today_iso(), project=dict(id=p["id"], name=p["name"], client=p.get("client"), location=p.get("location"), region=p.get("region"), currency=p["currency"],
                                             tender_ref=p.get("tender_ref"), design_stage=p.get("design_stage"), drawing_revision=p.get("drawing_revision"),

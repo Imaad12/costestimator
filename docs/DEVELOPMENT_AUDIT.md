@@ -127,3 +127,7 @@ Scope: validation and readiness only, no new feature breadth.
 * **Added, minimal:** `governed.import_csv` + `param import` (Drafts only), `templates/pilot/*.csv`, [PILOT_READINESS.md](PILOT_READINESS.md).
 * **Controls re-verified by the full suite** (replay, approvals, provenance, workspace isolation, tender-export gating): see PILOT_READINESS §9 for the tests that prove each. Result recorded in the commit/final report.
 * **Not claimed:** accuracy on real work, any client compliance, Microsoft Excel behaviour, live Claude API behaviour.
+
+
+## 11. Synthetic end-to-end pilot (2026-10-14)
+A SYNTHETIC 30-line piping package was run through project creation, BOQ import (unit flags), mapping, rate import, governed parameters, assemblies, procurement/levelling, programme, take-off templates, direct/indirect/commercial calculation, risk, escalation, cash flow, Basis of Estimate, reconciliation, freeze/replay, export, CLI/API/UI. Result and evidence: [SYNTHETIC_PILOT_RUN.md](SYNTHETIC_PILOT_RUN.md). Defects fixed (with tests): synthetic candidates were published as market prices (D-1), `param import` lacked a dry run (D-2), the BOE could not carry a project's validation-only statement (D-3). Open observations (not fixed): cash flow/escalation cover only cost tied to programme activities and the cash-flow balance is then overstated; `percent_of_direct` indirects have no eligibility base; day-priced plant needs a documented exception. The pilot proves the software path with synthetic data and test actors only; it does not validate estimating accuracy.

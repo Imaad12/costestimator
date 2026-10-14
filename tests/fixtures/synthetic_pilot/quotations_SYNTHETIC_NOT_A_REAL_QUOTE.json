@@ -1,0 +1,63 @@
+{
+ "suppliers": {
+  "A": {
+   "name": "SYNTHETIC Supplier A",
+   "valid_days": 14,
+   "delivery_included": "Yes"
+  },
+  "B": {
+   "name": "SYNTHETIC Supplier B",
+   "valid_days": 21,
+   "delivery_included": "No"
+  },
+  "C": {
+   "name": "SYNTHETIC Supplier C",
+   "valid_days": 7,
+   "delivery_included": "Yes"
+  }
+ },
+ "lines": [
+  {
+   "resource_id": "LIB-PIPE-DN100",
+   "material": "DN100 pipe",
+   "unit": "m",
+   "A": "192",
+   "B": "188",
+   "C": "205"
+  },
+  {
+   "resource_id": "LIB-PIPE-DN50",
+   "material": "DN50 pipe",
+   "unit": "m",
+   "A": "112",
+   "B": "116",
+   "C": "108"
+  },
+  {
+   "resource_id": "LIB-VALVE-GATE-DN100",
+   "material": "DN100 gate valve",
+   "unit": "nr",
+   "A": "1320",
+   "B": "1280",
+   "C": "1410"
+  },
+  {
+   "resource_id": "LIB-VALVE-CHECK-DN100",
+   "material": "DN100 check valve",
+   "unit": "nr",
+   "A": "1700",
+   "B": "1760",
+   "C": "1650"
+  },
+  {
+   "resource_id": "LIB-MAT-SUPPORT",
+   "material": "Fabricated support steel",
+   "unit": "kg",
+   "A": "16.0",
+   "B": "15.5",
+   "C": "17.0"
+  }
+ ],
+ "delivery_adjustment_B_sar": "2500",
+ "label": "SYNTHETIC / NOT A REAL QUOTE"
+}

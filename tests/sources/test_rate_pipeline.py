@@ -556,3 +556,21 @@ def test_pilot_rate_template_headers_are_recognised_and_placeholders_accepted_as
     r = importer.import_rates_file(res, ESTIMATOR, Path("templates/pilot/rates_template.csv"), source_name="Pilot template", dry_run=True)
     assert r["accepted"] == 0
     assert res.scalar("SELECT COUNT(*) FROM rate_candidates") == 0
+
+
+def test_synthetic_flag_survives_publication_as_a_synthetic_rate_not_a_market_price(res, tmp_path):
+    """Defect found by the synthetic pilot: a synthetic file imported through the controlled path used to be published as 'Published Market Price' with no synthetic marker."""
+    from app.services import rates
+    f = write_csv(tmp_path / "syn.csv", [("T-MAT-001", "SYNTHETIC ready-mix", "m3", "100", "SAR", "2026-09-15", "Excluded", "Delivered", "SYNTHETIC-TEST-FIXTURE:syn.csv")])
+    r = importer.import_rates_file(res, ESTIMATOR, f, source_name="SYNTHETIC TEST DATA", extra_flags=["SYNTHETIC_DATA"])
+    cid = r["candidate_ids"][0]
+    cand.review(res, PROCUREMENT, cid, "approve", comments="TEST ACTOR")
+    rid = cand.publish(res, ESTIMATOR, cid)
+    row = rates.get_rate(res, rid)
+    assert row["rate_type"] == "Synthetic Demonstration Rate" and row["is_synthetic"] == 1 and row["evidence"].startswith("SYNTHETIC / TEST ONLY / NOT A MARKET QUOTE")
+    assert row["status"] == "Pending Review"                                                       # still needs a human rate approval
+    f2 = write_csv(tmp_path / "real.csv", [("T-MAT-002", "Rebar", "kg", "3.1", "SAR", "2026-09-15", "Excluded", "Delivered", "https://example.invalid/p2")])
+    r2 = importer.import_rates_file(res, ESTIMATOR, f2, source_name="Test list")
+    cand.review(res, PROCUREMENT, r2["candidate_ids"][0], "approve", comments="ok")
+    rid2 = rates.get_rate(res, cand.publish(res, ESTIMATOR, r2["candidate_ids"][0]))
+    assert rid2["rate_type"] != "Synthetic Demonstration Rate" and rid2["is_synthetic"] == 0       # unchanged behaviour for ordinary candidates

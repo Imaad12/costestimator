@@ -35,3 +35,15 @@ def test_template_placeholders_are_rejected_not_loaded(seeded):
     from pathlib import Path
     res = governed.import_csv(seeded, ESTIMATOR, Path("templates/pilot/governed_parameters_template.csv"))
     assert res["created_ids"] == [] and res["errors"]
+
+
+def test_governed_csv_dry_run_validates_without_writing_anything(seeded, tmp_path):
+    f = _write(tmp_path / "p.csv", [dict(kind="productivity_factor", code="D1", source="synthetic", basis_note="", project_id="", is_synthetic="yes",
+                                         data_json=json.dumps({"category": "climate_heat", "factor": "1.10"})),
+                                    dict(kind="productivity_factor", code="D2", source="synthetic", basis_note="", project_id="", is_synthetic="yes", data_json=json.dumps({"category": "nope", "factor": "1"}))])
+    before = (seeded.scalar("SELECT COUNT(*) FROM governed_params"), seeded.scalar("SELECT COUNT(*) FROM audit_log"))
+    res = governed.import_csv(seeded, ESTIMATOR, f, dry_run=True)
+    assert res["dry_run"] and res["would_create"] == 1 and len(res["errors"]) == 1
+    assert (seeded.scalar("SELECT COUNT(*) FROM governed_params"), seeded.scalar("SELECT COUNT(*) FROM audit_log")) == before          # rolled back, audit chain untouched
+    from app.services import audit
+    assert audit.verify_chain(seeded)["ok"]

@@ -1,0 +1,242 @@
+[
+ {
+  "item": "P-001",
+  "description": "Carbon steel pipe DN50",
+  "unit": "m",
+  "quantity": 120,
+  "baseline_rate": 185,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-002",
+  "description": "Carbon steel pipe DN100",
+  "unit": "m",
+  "quantity": 240,
+  "baseline_rate": 315,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-003",
+  "description": "Carbon steel pipe DN150",
+  "unit": "m",
+  "quantity": 80,
+  "baseline_rate": 480,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-004",
+  "description": "90-degree elbow DN50",
+  "unit": "ea",
+  "quantity": 24,
+  "baseline_rate": 95,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-005",
+  "description": "90-degree elbow DN100",
+  "unit": "ea",
+  "quantity": 40,
+  "baseline_rate": 165,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-006",
+  "description": "Tee DN100",
+  "unit": "ea",
+  "quantity": 12,
+  "baseline_rate": 280,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-007",
+  "description": "Reducer DN100 x DN50",
+  "unit": "ea",
+  "quantity": 8,
+  "baseline_rate": 190,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-008",
+  "description": "Flange DN100",
+  "unit": "ea",
+  "quantity": 32,
+  "baseline_rate": 140,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-009",
+  "description": "Gasket DN100",
+  "unit": "ea",
+  "quantity": 32,
+  "baseline_rate": 28,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-010",
+  "description": "Bolt and nut set DN100",
+  "unit": "set",
+  "quantity": 32,
+  "baseline_rate": 45,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-011",
+  "description": "Gate valve DN50",
+  "unit": "ea",
+  "quantity": 8,
+  "baseline_rate": 620,
+  "cost_code": "E.08"
+ },
+ {
+  "item": "P-012",
+  "description": "Gate valve DN100",
+  "unit": "ea",
+  "quantity": 6,
+  "baseline_rate": 1450,
+  "cost_code": "E.08"
+ },
+ {
+  "item": "P-013",
+  "description": "Check valve DN100",
+  "unit": "ea",
+  "quantity": 4,
+  "baseline_rate": 1850,
+  "cost_code": "E.08"
+ },
+ {
+  "item": "P-014",
+  "description": "Fabricated pipe supports",
+  "unit": "kg",
+  "quantity": 650,
+  "baseline_rate": 24,
+  "cost_code": "E.08"
+ },
+ {
+  "item": "P-015",
+  "description": "Mechanical anchors",
+  "unit": "ea",
+  "quantity": 80,
+  "baseline_rate": 22,
+  "cost_code": "E.08"
+ },
+ {
+  "item": "P-016",
+  "description": "Welding and consumables",
+  "unit": "dia-in",
+  "quantity": 420,
+  "baseline_rate": 38,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-017",
+  "description": "Welder labour",
+  "unit": "hour",
+  "quantity": 320,
+  "baseline_rate": 65,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-018",
+  "description": "Pipe fitter labour",
+  "unit": "hour",
+  "quantity": 400,
+  "baseline_rate": 55,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-019",
+  "description": "Helper labour",
+  "unit": "hour",
+  "quantity": 500,
+  "baseline_rate": 32,
+  "cost_code": "E.06"
+ },
+ {
+  "item": "P-020",
+  "description": "25-ton crane hire",
+  "unit": "day",
+  "quantity": 6,
+  "baseline_rate": 1800,
+  "cost_code": "A.07"
+ },
+ {
+  "item": "P-021",
+  "description": "3-ton forklift hire",
+  "unit": "day",
+  "quantity": 8,
+  "baseline_rate": 650,
+  "cost_code": "A.07"
+ },
+ {
+  "item": "P-022",
+  "description": "Scaffolding access",
+  "unit": "m2-day",
+  "quantity": 450,
+  "baseline_rate": 9,
+  "cost_code": "A.06"
+ },
+ {
+  "item": "P-023",
+  "description": "Radiographic testing",
+  "unit": "weld",
+  "quantity": 42,
+  "baseline_rate": 260,
+  "cost_code": "A.08"
+ },
+ {
+  "item": "P-024",
+  "description": "Positive material identification",
+  "unit": "test",
+  "quantity": 15,
+  "baseline_rate": 180,
+  "cost_code": "A.08"
+ },
+ {
+  "item": "P-025",
+  "description": "Hydrotesting package",
+  "unit": "LS",
+  "quantity": 1,
+  "baseline_rate": 8500,
+  "cost_code": "F.10"
+ },
+ {
+  "item": "P-026",
+  "description": "Flushing package",
+  "unit": "LS",
+  "quantity": 1,
+  "baseline_rate": 4800,
+  "cost_code": "F.10"
+ },
+ {
+  "item": "P-027",
+  "description": "Surface preparation and painting",
+  "unit": "m2",
+  "quantity": 180,
+  "baseline_rate": 42,
+  "cost_code": "D.07"
+ },
+ {
+  "item": "P-028",
+  "description": "Piping insulation",
+  "unit": "m2",
+  "quantity": 95,
+  "baseline_rate": 125,
+  "cost_code": "F.09"
+ },
+ {
+  "item": "P-029",
+  "description": "Mobilisation and demobilisation",
+  "unit": "LS",
+  "quantity": 1,
+  "baseline_rate": 12000,
+  "cost_code": "A.01"
+ },
+ {
+  "item": "P-030",
+  "description": "Site supervision",
+  "unit": "day",
+  "quantity": 20,
+  "baseline_rate": 850,
+  "cost_code": "A.03"
+ }
+]

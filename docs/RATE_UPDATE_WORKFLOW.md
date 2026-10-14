@@ -89,3 +89,7 @@ The report lists successful/blocked/skipped/failed providers, new candidates, ne
 * GASTAT's own downloadable file format; Etimad structured award parsing; SCA/Muqawil price reports (copyright disclaimer — permission required); any commercial price database.
 * Candidate import has no per-row region/geography column mapping beyond text; regional applicability of a published rate is `KSA-ALL` until a human sets otherwise on the rate.
 * The legacy dataset staging flow (`dataset_imports`/`rate_staging`, UI *Settings → datasets*) still exists beside this pipeline; consolidating them is NEXT_STEPS #12.
+
+
+## Synthetic data
+`rates import FILE --synthetic …` (or `extra_flags=["SYNTHETIC_DATA"]` in code) labels every candidate synthetic; publication then creates a *Synthetic Demonstration Rate* (`is_synthetic=1`, evidence prefixed `SYNTHETIC / TEST ONLY / NOT A MARKET QUOTE`). Without the flag a candidate is published as a market/quotation/historical rate according to its source type. Use `--synthetic` for any test or demonstration file; never for real prices.
