@@ -75,15 +75,19 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def _pin_zip(path: Path) -> None:
-    """Rewrite an OOXML zip with fixed entry timestamps so the bytes are reproducible."""
+def _pin_zip(path: Path, issue_date: str | None = None) -> None:
+    """Rewrite an OOXML zip with fixed entry timestamps (and fixed created/modified properties) so the bytes are reproducible: openpyxl stamps 'modified' with the current time on save."""
     buf = io.BytesIO()
+    stamp = f"{issue_date}T00:00:00Z" if issue_date else None
     with zipfile.ZipFile(path) as zin, zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zout:
         for info in sorted(zin.infolist(), key=lambda i: i.filename):
             zi = zipfile.ZipInfo(info.filename, FIXED_ZIP_TIME)
             zi.compress_type = zipfile.ZIP_DEFLATED
             zi.external_attr = 0o600 << 16
-            zout.writestr(zi, zin.read(info.filename))
+            data = zin.read(info.filename)
+            if stamp and info.filename == "docProps/core.xml":
+                data = re.sub(rb"(<dcterms:(created|modified)[^>]*>)[^<]*(</dcterms:\2>)", lambda m: m.group(1) + stamp.encode() + m.group(3), data)
+            zout.writestr(zi, data)
     path.write_bytes(buf.getvalue())
 
 
@@ -154,7 +158,7 @@ def render_docx(doc: Doc, meta: dict, path: Path) -> None:
         for x in doc.sources:
             d.add_paragraph(x, style="List Bullet")
     d.save(str(path))
-    _pin_zip(path)
+    _pin_zip(path, meta["issue_date"])
 
 
 # ------------------------------------------------------------------------------------------------ XLSX
@@ -192,7 +196,7 @@ def render_xlsx(doc: Doc, meta: dict, path: Path) -> None:
     wb.properties.creator = wb.properties.lastModifiedBy = "KSA Construction Estimating Suite"
     wb.properties.created = wb.properties.modified = datetime.fromisoformat(meta["issue_date"] + "T00:00:00")
     wb.save(str(path))
-    _pin_zip(path)
+    _pin_zip(path, meta["issue_date"])
 
 
 # ------------------------------------------------------------------------------------------------ PDF
@@ -231,7 +235,7 @@ def render_pdf(doc: Doc, meta: dict, path: Path) -> None:
                 story.append(Paragraph(f"<i>{esc(s.table.caption)}</i>", small))
             data = [[Paragraph(f"<b>{esc(h)}</b>", small) for h in s.table.headers]] + [[Paragraph(esc("" if c is None else c), small) for c in r] for r in s.table.rows]
             n = max(1, len(s.table.headers))
-            tb = RTable(data, colWidths=[(262 * mm) / n] * n, repeatRows=1)
+            tb = RTable(data, colWidths=[(262 * mm) / n] * n, repeatRows=1, splitInRow=1)           # a very long cell may continue on the next page
             tb.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.25, colors.grey), ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey), ("VALIGN", (0, 0), (-1, -1), "TOP")]))
             story.append(tb)
     if doc.limitations:

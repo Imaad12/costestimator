@@ -169,3 +169,8 @@ Run with the full suite; see the result in [DEVELOPMENT_AUDIT.md](DEVELOPMENT_AU
 | Workspace isolation | `tests/workspaces/test_workspaces.py::test_project_isolation_files_and_quotes_stay_in_their_own_workspace`, duplicate/foreign folder refusal |
 | Tender-export gating | `tests/integration/test_final_flow.py`, `test_full_workflow.py` (no approval → `EXPORT_NOT_APPROVED`, changed state/blocking findings → `EXPORT_BLOCKED`, client-form export gated) |
 | Audit chain | `test_audit_chain_detects_tampering` |
+
+## 10. After the end-to-end closure (2026-10-14)
+A **controlled real-project pilot** on one authorised package is now feasible *with the registers*: enquiry, document register, queries, norms, workforce profile, calendar, programme baseline, procurement, commercial chain and the document pack all run through the real services.
+What a pilot must still bring (none of it is shipped or defaulted): the project's confirmed calendar, company productivity norms with sources, workforce profiles, the customer's actual requirements (`tender_context.customer_requires`), real rates/quotations, and registered **human** approvers in a production environment.
+Not ready for production: identity assurance (no MFA/SSO), audit anchoring, content of quality/HSE/ITP registers (needs competent authors), unverified standards (see `docs/STANDARDS_AND_EVIDENCE_REGISTER.md`), and any claim that depends on synthetic norms.

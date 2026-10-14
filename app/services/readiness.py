@@ -74,6 +74,19 @@ def _closure_gate(db: Database, project_id: str, est) -> list[str]:
     if syn:
         out.append("synthetic assumption(s) feed the estimate: " + ", ".join(syn[:6]))
     # Unapproved material assumptions are reconciliation findings (High); they can only be accepted as exceptions by a registered human Commercial Approver, never silently.
+    # The APPROVALS behind the assumption values the estimate used must themselves be registered-human production approvals (a test or copied approval does not count).
+    for aid in used:
+        ra = asm.resolve(db, project_id, aid)
+        if not ra.approved:
+            continue
+        if ra.origin == "project_override":
+            row = db.one("SELECT * FROM approvals WHERE entity_type=? AND entity_id=? AND action='approve' AND version=? ORDER BY id DESC LIMIT 1",
+                         (Entity.PROJECT_ASSUMPTION.value, f"{project_id}/{aid}", str(ra.version)))
+            et, eid = Entity.PROJECT_ASSUMPTION.value, f"{project_id}/{aid}"
+        else:
+            row = db.one("SELECT * FROM approvals WHERE entity_type=? AND entity_id=? AND action='approve' AND version=? ORDER BY id DESC LIMIT 1", (Entity.ASSUMPTION.value, aid, str(ra.version)))
+            et, eid = Entity.ASSUMPTION.value, aid
+        out.extend(check_approval(db, row, f"assumption {aid}", entity_type=et, entity_id=eid)[0])
     if workforce.list_activities(db, project_id):
         b = workforce.latest_baseline(db, project_id, approved_only=True)
         if not b:
@@ -83,6 +96,15 @@ def _closure_gate(db: Database, project_id: str, est) -> list[str]:
         pend = [n for n in db.all("SELECT n.id, n.status FROM productivity_norms n JOIN work_activities a ON a.norm_id=n.id WHERE a.project_id=? AND n.version=(SELECT MAX(version) FROM productivity_norms WHERE id=n.id) GROUP BY n.id", (project_id,)) if n["status"] != "Approved"]
         if pend:
             out.append("productivity norms not approved: " + ", ".join(n["id"] for n in pend))
+        # approvals behind the norms, the workforce profile and the baseline must be registered-human production approvals too
+        for n in db.all("SELECT DISTINCT n.id, n.version FROM productivity_norms n JOIN work_activities a ON a.norm_id=n.id WHERE a.project_id=? AND n.status='Approved'", (project_id,)):
+            row = db.one("SELECT * FROM approvals WHERE entity_type=? AND entity_id=? AND action='approve' AND version=? ORDER BY id DESC LIMIT 1", (Entity.PRODUCTIVITY_NORM.value, n["id"], str(n["version"])))
+            out.extend(check_approval(db, row, f"productivity norm {n['id']}", entity_type=Entity.PRODUCTIVITY_NORM.value, entity_id=n["id"])[0])
+        if b:
+            row = db.one("SELECT * FROM approvals WHERE entity_type=? AND entity_id=? AND action='approve' ORDER BY id DESC LIMIT 1", (Entity.PROGRAMME_BASELINE.value, f"{project_id}/v{b['version_no']}"))
+            out.extend(check_approval(db, row, f"programme baseline v{b['version_no']}", entity_type=Entity.PROGRAMME_BASELINE.value, entity_id=f"{project_id}/v{b['version_no']}")[0])
+            row = db.one("SELECT * FROM approvals WHERE entity_type=? AND entity_id=? AND action='approve' AND version=? ORDER BY id DESC LIMIT 1", (Entity.WORKFORCE_PROFILE.value, b["profile_id"], str(b["profile_version"])))
+            out.extend(check_approval(db, row, f"workforce profile {b['profile_id']}", entity_type=Entity.WORKFORCE_PROFILE.value, entity_id=b["profile_id"])[0])
     pk = db.one("SELECT pk FROM tender_packs WHERE project_id=? AND kind='tender' ORDER BY revision DESC LIMIT 1", (project_id,))
     if pk:
         for code in ("D16", "D06"):

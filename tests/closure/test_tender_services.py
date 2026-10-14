@@ -58,7 +58,7 @@ def test_revision_conflict_is_detected_between_boq_and_register(seeded, tmp_path
     c = tender.documents_report(seeded, pid)["revision_conflicts"]
     assert c == [dict(item_key="1", doc_ref="DWG-9", boq_revision="B", register_revision="C")]
     r = tender.generate_draft_queries(seeded, "system:detector", pid, response_due="2027-02-01")
-    assert any(q["detector_key"] == "REV:1:DWG-9" and q["register"] == "technical" for q in tender.list_queries(seeded, pid))
+    assert any(q["detector_key"] == "REV:DWG-9:B>C" and q["register"] == "technical" for q in tender.list_queries(seeded, pid))
 
 
 def test_ambiguity_duplicate_missing_document_and_conflicting_requirement_detectors(seeded, tmp_path):

@@ -1,6 +1,6 @@
 {
  "schema": "ksa-estimator/capability-matrix/1",
- "generated_by": "audit 2026-10-13 (docs/ESTIMATING_CAPABILITY_MATRIX.md is rendered from this file by scripts/gen_capability_matrix.py)",
+ "generated_by": "audit 2026-10-13, extended by the end-to-end closure 2026-10-14 (docs/ESTIMATING_CAPABILITY_MATRIX.md is rendered from this file by scripts/gen_capability_matrix.py)",
  "statuses": [
   "Implemented and tested",
   "Implemented but unverified",
@@ -4515,6 +4515,344 @@
     "IND-01"
    ],
    "acceptance": "A BOQ with preliminaries items and an overlapping indirect (e.g. security) raises POSSIBLE_DUPLICATE_INDIRECT; time-related and fixed preliminaries are reported separately and reconcile to the estimate."
+  },
+  {
+   "id": "TDR-01",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Productivity-based, resource-constrained programme (labour-hours and crew-output bases, factors with double-count guard, fronts, fixed days, dependencies, procurement ready date, finite pool, shifts, overtime, reduced-hour calendar, re-forecast)",
+   "status": "Implemented and tested",
+   "required_from": 3,
+   "kind": "engine",
+   "code": [
+    "app/estimators/productivity.py::run",
+    "app/services/workforce.py::build_programme",
+    "app/services/workforce.py::forecast_vs_baseline"
+   ],
+   "tests": [
+    {
+     "ref": "tests/unit/test_productivity_engine.py::test_labour_hours_formula",
+     "verdict": "yes",
+     "note": "hand-computed 134 working days"
+    },
+    {
+     "ref": "tests/unit/test_productivity_engine.py::test_crew_output_basis_does_not_reapply_labour_hours",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/unit/test_productivity_engine.py::test_resource_conflict_delays_second_activity_by_priority",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/unit/test_productivity_engine.py::test_overtime_shift_and_reduced_hours_capacity",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_closure_scenario.py::test_programme_matches_independent_oracle",
+     "verdict": "yes",
+     "note": "separate fraction/CPM/calendar implementation agrees on hours, crew-days, durations, critical path and dates"
+    }
+   ],
+   "output": "Report `productivity_programme` / document D19: five durations kept apart, calendar shown, gaps with their effect, claim label PROVISIONAL or BASED ON APPROVED NORMS.",
+   "limits": "Norms, crews and calendars are person-entered; the scenario uses synthetic values, so agreement proves arithmetic not real productivity. Priority rule only (no resource levelling); crews are indivisible; no weather model; no P6/MSP import.",
+   "depends": [
+    "DUR-02"
+   ],
+   "acceptance": "Hand-computed activity durations and an independent oracle agree with the engine; a missing or unapproved norm is a reported gap, never a silent zero."
+  },
+  {
+   "id": "TDR-02",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Workforce profiles (SME / mid / large / enterprise planning archetypes) and crew-size scenarios with cost impact",
+   "status": "Implemented and tested",
+   "required_from": 3,
+   "kind": "engine",
+   "code": [
+    "app/services/workforce.py::create_profile",
+    "app/services/workforce.py::crew_scenarios"
+   ],
+   "tests": [
+    {
+     "ref": "tests/integration/test_workforce_service.py::test_profile_band_and_approval",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/integration/test_workforce_service.py::test_scenarios_and_forecast",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_closure_scenario.py::test_crew_scenarios_use_constraints_not_headcount_division",
+     "verdict": "yes",
+     "note": "large and enterprise finish together: crane/dependency bound"
+    }
+   ],
+   "output": "Report `crew_scenarios`, document D20.",
+   "limits": "Archetype bands are initial company planning assumptions, not industry categories; every profile value and role day-cost is person-entered; scenario numbers on synthetic norms are comparisons, not benchmarks.",
+   "depends": [
+    "TDR-01"
+   ],
+   "acceptance": "The same activities scheduled for four profiles give constrained durations; doubling head-count does not halve duration."
+  },
+  {
+   "id": "TDR-03",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Governed productivity norms: seven states, provenance, evidence status, four-eyes, immutable approved versions",
+   "status": "Implemented and tested",
+   "required_from": 3,
+   "kind": "engine",
+   "code": [
+    "app/services/workforce.py::create_norm",
+    "app/services/workforce.py::approve_norm",
+    "app/migrations/0015_end_to_end_closure.sql"
+   ],
+   "tests": [
+    {
+     "ref": "tests/integration/test_workforce_service.py::test_norm_lifecycle_states_and_immutability",
+     "verdict": "yes",
+     "note": "service and database trigger"
+    },
+    {
+     "ref": "tests/integration/test_workforce_service.py::test_norm_needs_source_and_cannot_be_self_approved",
+     "verdict": "yes",
+     "note": ""
+    }
+   ],
+   "output": "Norm records via REST actions / CLI `action`; programme gaps cite the norm id and status.",
+   "limits": "No UI form for norms (REST/CLI only). Evidence is a text reference; the product does not read the cited source.",
+   "depends": [],
+   "acceptance": "A norm cannot be approved without source and effective date or by its author; approved rows cannot be changed or deleted."
+  },
+  {
+   "id": "TDR-04",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Assumptions register governance: 17 categories, origin, data classes, history, database immutability guards, four-eyes default",
+   "status": "Implemented and tested",
+   "required_from": 4,
+   "kind": "engine",
+   "code": [
+    "app/services/assumptions.py::data_class",
+    "app/services/assumptions.py::evidence_report",
+    "app/services/assumptions.py::assumption_history",
+    "app/migrations/0015_end_to_end_closure.sql"
+   ],
+   "tests": [
+    {
+     "ref": "tests/closure/test_assumptions_governance.py::test_approved_versions_are_immutable_in_service_and_database",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_assumptions_governance.py::test_data_class_matrix",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_assumptions_governance.py::test_four_eyes_is_the_default_and_the_administrator_is_not_exempt_for_material_records",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_closure_scenario.py::test_every_stage_passes_and_none_is_missing",
+     "verdict": "yes",
+     "note": "stage 20 bypass attempts via service, SQL, REST and CLI"
+    }
+   ],
+   "output": "Report `assumption_evidence`, document D08, audit `docs/ASSUMPTIONS_GOVERNANCE_AND_SECURITY_AUDIT.md`.",
+   "limits": "The triggers are a guard: anyone with write access to the database file can drop them. No MFA/SSO, no off-box audit anchor.",
+   "depends": [
+    "GOV-01"
+   ],
+   "acceptance": "An approved assumption cannot be edited or deleted; a synthetic or unverified value never reads as verified."
+  },
+  {
+   "id": "TDR-05",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Tender intake: enquiry, received-document register with revisions, query/RFI registers (8 linked registers) with draft-only detectors",
+   "status": "Implemented and tested",
+   "required_from": 4,
+   "kind": "engine",
+   "code": [
+    "app/services/tender.py::generate_draft_queries",
+    "app/services/tender.py::register_document",
+    "app/services/tender.py::approve_to_issue"
+   ],
+   "tests": [
+    {
+     "ref": "tests/closure/test_tender_services.py::test_query_workflow_gates",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_tender_services.py::test_ambiguity_duplicate_missing_document_and_conflicting_requirement_detectors",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_tender_services.py::test_document_register_revisions_supersede_and_status_rules",
+     "verdict": "yes",
+     "note": ""
+    }
+   ],
+   "output": "Reports `tender_queries`, `tender_documents`; documents D10, D25, D33.",
+   "limits": "Detection is heuristic (wording markers, import flags, register comparisons); the system does not read drawings or specifications; nothing is sent; no UI forms.",
+   "depends": [
+    "SCO-01"
+   ],
+   "acceptance": "Detected conditions create Draft queries only; a person must release them; no response is generated."
+  },
+  {
+   "id": "TDR-06",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Tender document pack: 45-document catalogue, applicability matrix, DOCX/XLSX/PDF generation, manifest, pack validator",
+   "status": "Implemented and tested",
+   "required_from": 4,
+   "kind": "engine",
+   "code": [
+    "app/tender/packs.py::generate_pack",
+    "app/tender/packs.py::validate_pack",
+    "app/tender/catalogue.py::matrix"
+   ],
+   "tests": [
+    {
+     "ref": "tests/closure/test_closure_scenario.py::test_every_generated_file_opens_and_carries_its_identity",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_closure_scenario.py::test_applicability_matrix_and_blocked_documents",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_closure_scenario.py::test_validator_detects_tampering_corruption_missing_files_and_inconsistency",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_production_pack_gate.py::test_human_chain_alone_does_not_make_the_pack_submission_ready",
+     "verdict": "yes",
+     "note": ""
+    }
+   ],
+   "output": "`generate_tender_pack` action; files + manifest.json + applicability_matrix.json; D15 states the gate result.",
+   "limits": "Content is assembled from registers; skeleton quality/HSE/ITP rows carry placeholders until a competent person completes them; templates are code (versioned); no Arabic output; PDF layout is functional, not designed.",
+   "depends": [
+    "GOV-07"
+   ],
+   "acceptance": "Every applicable document exists, opens with an independent reader, carries its id and status, and no document claims approval the application gate did not give."
+  },
+  {
+   "id": "TDR-07",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Hypothetical post-award handover pack (17 documents) that refuses without an explicit award scenario",
+   "status": "Implemented and tested",
+   "required_from": 4,
+   "kind": "engine",
+   "code": [
+    "app/tender/handover.py::HANDOVER",
+    "app/tender/packs.py::generate_handover_pack"
+   ],
+   "tests": [
+    {
+     "ref": "tests/closure/test_closure_scenario.py::test_handover_pack_is_labelled_hypothetical_and_complete",
+     "verdict": "yes",
+     "note": ""
+    }
+   ],
+   "output": "Handover documents H01-H17 with a HYPOTHETICAL banner on every page.",
+   "limits": "A simulation only: no award is recorded, no commitment created; owners are those entered in the register.",
+   "depends": [
+    "TDR-06"
+   ],
+   "acceptance": "No award is ever assumed."
+  },
+  {
+   "id": "TDR-08",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Quality plan, ITP, method-statement, HSE-risk, permit, submittal, testing/commissioning and NCR-structure registers",
+   "status": "Partial",
+   "required_from": 4,
+   "kind": "engine",
+   "code": [
+    "app/services/tender.py::upsert_item",
+    "app/services/tender.py::skeleton_registers"
+   ],
+   "tests": [
+    {
+     "ref": "tests/closure/test_tender_services.py::test_generic_registers_validate_and_protect_approved_rows",
+     "verdict": "partly",
+     "note": "structure, placeholders, approval gate; content quality is not testable"
+    }
+   ],
+   "output": "Documents D23, D24, D27-D32 list the register rows.",
+   "limits": "Skeleton rows hold explicit 'TO BE COMPLETED BY A COMPETENT PERSON' placeholders: the system writes no inspection criteria, HSE controls, acceptance limits or compliance statements. Specialist content needs competent human authors and review.",
+   "depends": [
+    "TDR-06"
+   ],
+   "acceptance": "A register row with placeholders cannot be submitted for review; a pack with placeholders is not submission-ready."
+  },
+  {
+   "id": "TDR-09",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Standards and evidence register with verification status and a manual acquisition process",
+   "status": "Partial",
+   "required_from": 4,
+   "kind": "engine",
+   "code": [
+    "app/services/standards.py::import_register",
+    "app/services/standards.py::acquisition_list",
+    "data/standards/standards_register.json"
+   ],
+   "tests": [
+    {
+     "ref": "tests/closure/test_security_backup_migration_standards.py::test_standards_register_rules",
+     "verdict": "yes",
+     "note": ""
+    }
+   ],
+   "output": "`docs/STANDARDS_AND_EVIDENCE_REGISTER.md`; CLI `standards list|acquire|import`.",
+   "limits": "Only 12 sources recorded: 2 read as primary pages, 4 partially verified, 6 need human acquisition (Saudi Building Code and procurement-law pages could not be read; AACE recommended-practice texts are paid). No clause, productivity value or accuracy range is stored.",
+   "depends": [],
+   "acceptance": "A row marked Verified needs the URL/file read; productivity references stay unverified names."
+  },
+  {
+   "id": "TDR-10",
+   "area": "Q. Tender delivery closure: productivity programme, registers, document packs, handover",
+   "capability": "Stage-J submission gate extension: open material queries, missing documents, synthetic assumptions, unapproved baseline/norms/profile, test-principal approvals of programme inputs, document approvals",
+   "status": "Implemented and tested",
+   "required_from": 4,
+   "kind": "engine",
+   "code": [
+    "app/services/readiness.py::_closure_gate",
+    "app/tender/packs.py::approve_document"
+   ],
+   "tests": [
+    {
+     "ref": "tests/closure/test_tender_services.py::test_stage_j_gate_reasons",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_negative_controls.py::test_closure_gate_rejects_test_principal_approvals_of_norms_profile_and_baseline",
+     "verdict": "yes",
+     "note": ""
+    },
+    {
+     "ref": "tests/closure/test_production_pack_gate.py::test_test_actor_cannot_approve_documents_on_a_real_project_in_production",
+     "verdict": "yes",
+     "note": ""
+    }
+   ],
+   "output": "Reasons listed in D15 and in `export_submission` refusals.",
+   "limits": "Applies only where a project uses the registers (legacy projects are unaffected); identity assurance is limited to registered users and roles (no MFA).",
+   "depends": [
+    "GOV-07"
+   ],
+   "acceptance": "A test actor, synthetic data, an unresolved material query or a missing document keeps a pack out of production status."
   }
  ]
 }

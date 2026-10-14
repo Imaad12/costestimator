@@ -304,12 +304,15 @@ def generate_draft_queries(db: Database, actor: Actor | str, project_id: str, *,
             except ValueError:
                 iss = [str(b["issues_json"])]
             if iss and b["unit_status"] == "ok":
-                q(f"ISSUE:{b['item_key']}", "boq_discrepancy", f"BOQ item {b['item_key']} was flagged during import: {'; '.join(map(str, iss))[:300]}. Please confirm the intended item / quantity.",
+                q(f"ISSUE:{b['item_key']}", "boq_discrepancy", f"BOQ item {b['item_key']} was flagged during import: {'; '.join(str(i.get('message', i)) if isinstance(i, dict) else str(i) for i in iss)[:300]} Please confirm the intended item / quantity.",
                   "Import validation found a discrepancy.", discipline=b["trade"], responsible_party="Customer (BOQ owner)", related=dict(boq_items=[b["item_key"]]))
     drep = documents_report(db, project_id)
-    for c in drep["revision_conflicts"]:
-        q(f"REV:{c['item_key']}:{c['doc_ref']}", "technical", f"BOQ item {c['item_key']} cites {c['doc_ref']} at revision {c['boq_revision']} but the document register holds revision {c['register_revision']}. Which revision governs the quantity and scope?",
-          "Conflicting revisions between the BOQ and the received document register.", related=dict(boq_items=[c["item_key"]], documents=[c["doc_ref"]]))
+    groups: dict[tuple, list] = {}
+    for c in drep["revision_conflicts"]:                       # one query per document / revision pair, listing every BOQ item that cites the superseded revision
+        groups.setdefault((c["doc_ref"], c["boq_revision"], c["register_revision"]), []).append(c["item_key"])
+    for (doc_ref, brev, rrev), keys in sorted(groups.items()):
+        q(f"REV:{doc_ref}:{brev}>{rrev}", "technical", f"{len(keys)} BOQ item(s) ({', '.join(keys[:12])}{'...' if len(keys) > 12 else ''}) cite {doc_ref} at revision {brev} but the document register holds revision {rrev}. Which revision governs the quantities and scope?",
+          "Conflicting revisions between the BOQ and the received document register.", related=dict(boq_items=keys, documents=[doc_ref]))
     for d in drep["missing"]:
         q(f"MISSDOC:{d['doc_ref']}", "missing_input", f"Document {d['doc_ref']} ({d['title']}) is required for the tender but has not been received. Please issue it.",
           "A required tender document is missing; dependent scope cannot be assessed.", related=dict(documents=[d["doc_ref"]]), responsible_party="Customer")
@@ -323,10 +326,13 @@ def generate_draft_queries(db: Database, actor: Actor | str, project_id: str, *,
                   e.message, responsible_party="Procurement", related=dict(boq_items=[e.item_key] if e.item_key else [], resource=e.resource_id), blocks_submission=True,
                   impact={"assessed": True, "cost": f"{e.code}: the priced lines depending on {e.resource_id} remain unpriced (never zero)"})
     ev = asm.evidence_report(db, project_id)
+    bycat: dict[str, list] = {}
     for r in ev["rows"]:
         if r["mandatory"] and r["data_class"] in ("Missing data", "Pending human review", "Imported but unverified"):
-            q(f"ASMP:{r['id']}", "assumption_confirmation", f"Assumption {r['id']} '{r['name']}' ({r['category']}) needs confirmation (currently: {r['data_class']}). Please confirm the project basis.",
-              r.get("consequence_if_missing") or "A mandatory assumption has no approved value.", responsible_party="Estimator / Customer", related=dict(assumption=r["id"]))
+            bycat.setdefault(r["category"], []).append(r)
+    for cat, rows in sorted(bycat.items()):                    # grouped by category: one question per area, not one per library row
+        q(f"ASMP-CAT:{cat}", "assumption_confirmation", f"{len(rows)} mandatory assumption(s) in '{cat}' need confirmation of the project basis: " + "; ".join(f"{r['id']} {r['name']} ({r['data_class']})" for r in rows[:15]) + ("; ..." if len(rows) > 15 else "") + ".",
+          "; ".join(sorted({r.get('consequence_if_missing') or "A mandatory assumption has no approved value." for r in rows}))[:400], responsible_party="Estimator / Customer", related=dict(assumptions=[r["id"] for r in rows], category=cat))
     byreq: dict[str, dict] = {}
     for it in list_items(db, project_id, "customer_requirement"):
         byreq.setdefault(str(it["data"].get("requirement", "")).strip().lower(), {})[it["item_key"]] = (str(it["data"].get("stated")), it["data"].get("source"))

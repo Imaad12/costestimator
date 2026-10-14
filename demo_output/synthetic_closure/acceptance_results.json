@@ -1,0 +1,3389 @@
+{
+ "scenario": "Dammam Industrial Utilities - Synthetic Tender Closure",
+ "synthetic": true,
+ "banner": "SYNTHETIC SOFTWARE VALIDATION ONLY - FICTIONAL CUSTOMER - NOT A REAL TENDER - NOT FOR SUBMISSION OR COMMERCIAL RELIANCE.",
+ "verdicts": {
+  "01_enquiry": "PASS",
+  "02_bid_no_bid": "PASS",
+  "03_project_and_documents": "PASS",
+  "04_boq_import": "PASS",
+  "05_validate_and_map": "PASS",
+  "06_assumptions_and_missing_data": "PASS",
+  "07_direct_cost_and_missing_rates": "PASS",
+  "08_productivity_and_crew_scenarios": "PASS",
+  "09_resource_constrained_programme": "PASS",
+  "10_queries_and_clarifications": "PASS",
+  "11_customer_responses": "PASS",
+  "12_recalculate_impacts": "PASS",
+  "13_procurement_and_quote_levelling": "PASS",
+  "14_indirects_tax_risk_escalation_cashflow": "PASS",
+  "15_methodology_and_compliance": "PASS",
+  "16_applicability_matrix": "PASS",
+  "17_generate_document_pack": "PASS",
+  "18_validate_document_pack": "PASS",
+  "19_production_readiness_blocked": "PASS",
+  "20_assumption_bypass_blocked": "PASS",
+  "21_resolve_issues_with_test_approvals": "PASS",
+  "22_final_demonstration_pack": "PASS",
+  "23_hypothetical_handover_pack": "PASS",
+  "24_freeze_estimate_and_manifest": "PASS",
+  "25_global_library_change": "PASS",
+  "26_snapshot_replay": "PASS",
+  "27_ui_api_cli_agreement": "PASS"
+ },
+ "all_pass": true,
+ "stages": {
+  "01_enquiry": {
+   "verdict": "PASS",
+   "enquiry": "ENQ-0001",
+   "customer": "Gulf Process Utilities Co. (FICTIONAL SYNTHETIC CUSTOMER)",
+   "acknowledgement": "SYNTHETIC acknowledgement draft: enquiry received 2027-01-04; clarifications will follow through the query register.",
+   "synthetic_customer": true
+  },
+  "02_bid_no_bid": {
+   "verdict": "PASS",
+   "items": [
+    "capacity",
+    "margin",
+    "risk"
+   ],
+   "statuses": [
+    "Approved",
+    "Approved",
+    "Approved"
+   ]
+  },
+  "03_project_and_documents": {
+   "verdict": "PASS",
+   "project": "PRJ-9101",
+   "workspace": "/tmp/claude-0/final2/workspaces/PRJ-9101-dammam-industrial-utilities-synthetic-te",
+   "current": 11,
+   "superseded": [
+    [
+     "DWG-PR-001",
+     "B"
+    ]
+   ],
+   "missing": [
+    "DWG-EL-010"
+   ],
+   "not_interpreted": 11,
+   "note": "documents are registered, not interpreted"
+  },
+  "04_boq_import": {
+   "verdict": "PASS",
+   "items": 44,
+   "rejected": 0,
+   "change_requests": 0,
+   "duplicates": [
+    "C-071#2"
+   ],
+   "units_not_ok": [],
+   "sum_of_quantities_by_item": null
+  },
+  "05_validate_and_map": {
+   "verdict": "PASS",
+   "mapped": 43,
+   "unmapped": [
+    "C-071#2"
+   ],
+   "resources_without_rate": [
+    "SYN-C-045",
+    "SYN-C-046",
+    "SYN-C-047"
+   ],
+   "note": "every BOQ quantity is the human-measured fixture value; the duplicate code is left unmapped and unpriced until the customer clarifies"
+  },
+  "06_assumptions_and_missing_data": {
+   "verdict": "PASS",
+   "classes_of_new_assumptions": {
+    "ASMP-Z-001": "Explicitly synthetic test data",
+    "ASMP-Z-002": "Explicitly synthetic test data",
+    "ASMP-Z-003": "Explicitly synthetic test data",
+    "ASMP-Z-004": "Explicitly synthetic test data",
+    "ASMP-Z-005": "Explicitly synthetic test data",
+    "ASMP-Z-006": "Explicitly synthetic test data"
+   },
+   "fully_verified": false,
+   "counts": {
+    "Verified source data": 0,
+    "Company-approved internal data": 0,
+    "Project-approved data": 0,
+    "Imported but unverified": 0,
+    "Pending human review": 4,
+    "AI-proposed data": 0,
+    "Explicitly synthetic test data": 6,
+    "Missing data": 81
+   },
+   "problems_sample": [
+    "ASMP-A-001: Missing data (mandatory)",
+    "ASMP-A-002: Missing data (mandatory)",
+    "ASMP-A-003: Missing data (mandatory)",
+    "ASMP-A-004: Missing data (mandatory)",
+    "ASMP-A-005: Missing data (mandatory)",
+    "ASMP-A-006: Missing data (mandatory)",
+    "ASMP-A-008: Missing data (mandatory)",
+    "ASMP-A-009: Missing data (mandatory)"
+   ],
+   "note": "a synthetic assumption can never read as verified, even after approval; a missing value stays 'Missing data'"
+  },
+  "07_direct_cost_and_missing_rates": {
+   "verdict": "PASS",
+   "application_direct_cost": "3087310.00",
+   "independent_direct_cost_priced_lines": "3087310.00",
+   "line_differences": {},
+   "state": "Preliminary \u2014 Incomplete",
+   "unpriced_resources": [
+    "SYN-C-045",
+    "SYN-C-046",
+    "SYN-C-047"
+   ],
+   "note": "the three unpriced items stay unpriced (amount None, never zero); the estimate is not complete"
+  },
+  "08_productivity_and_crew_scenarios": {
+   "verdict": "PASS",
+   "norm_states_after_workflow": {
+    "N-BACK": "Approved",
+    "N-CABLE": "Approved",
+    "N-COAT": "Approved",
+    "N-EXC": "Approved",
+    "...": "17 norms Approved by TEST ACTOR"
+   },
+   "norm_state_examples": {
+    "N-DRAFT": "Draft",
+    "N-IMPORTED": "Imported - Unverified",
+    "N-PROPOSED": "Proposed",
+    "N-REJECT": "Rejected",
+    "N-SYSTEM": "Draft"
+   },
+   "long_lead": "LL-PRJ-9101-001",
+   "scenarios": [
+    {
+     "profile": "WP-SME",
+     "archetype": "sme",
+     "headcount": 15,
+     "subcontract_capacity": 4,
+     "working_days": 400,
+     "calendar_days": 564,
+     "start": "2027-03-07",
+     "finish": "2028-09-20",
+     "peak_workers": 8,
+     "labour_hours": "10094.60",
+     "resource_limited": [
+      "A-EXC",
+      "A-FORM",
+      "A-REBAR",
+      "A-STEEL",
+      "A-SUPP",
+      "A-PUMP",
+      "A-PIPE100",
+      "A-PIPE50",
+      "A-WELD",
+      "A-ROAD",
+      "A-ELV"
+     ],
+     "critical_path": [
+      "A-MOB",
+      "A-EXC",
+      "A-FORM",
+      "A-POUR",
+      "A-SUPP",
+      "A-PIPE100",
+      "A-WELD",
+      "A-HYDRO",
+      "A-COAT",
+      "A-COMM",
+      "A-DEMOB"
+     ],
+     "claim": "PROVISIONAL - NOT FOR RELIANCE: 21 gap(s); provisional (unapproved norm/profile/calendar); synthetic test inputs",
+     "gaps": 21,
+     "cost": {
+      "computed": true,
+      "direct_labour": "313170.00",
+      "indirect_staff": "120000.00",
+      "total": "433170.00",
+      "role_cost_gaps": [],
+      "note": "cost uses person-entered role day-costs; it is a planning comparison, not an estimate of price"
+     }
+    },
+    {
+     "profile": "WP-MID",
+     "archetype": "mid",
+     "headcount": 24,
+     "subcontract_capacity": 6,
+     "working_days": 212,
+     "calendar_days": 302,
+     "start": "2027-03-07",
+     "finish": "2028-01-02",
+     "peak_workers": 18,
+     "labour_hours": "10094.60",
+     "resource_limited": [
+      "A-EXC",
+      "A-EXCH",
+      "A-REBAR",
+      "A-STEEL",
+      "A-PUMP",
+      "A-PIPE50",
+      "A-WELD",
+      "A-ROAD"
+     ],
+     "critical_path": [
+      "A-MOB",
+      "A-EXC",
+      "A-FORM",
+      "A-POUR",
+      "A-SUPP",
+      "A-PIPE100",
+      "A-WELD",
+      "A-HYDRO",
+      "A-COAT",
+      "A-COMM",
+      "A-DEMOB"
+     ],
+     "claim": "PROVISIONAL - NOT FOR RELIANCE: 21 gap(s); provisional (unapproved norm/profile/calendar); synthetic test inputs",
+     "gaps": 21,
+     "cost": {
+      "computed": true,
+      "direct_labour": "320760.00",
+      "indirect_staff": "390080.00",
+      "total": "710840.00",
+      "role_cost_gaps": [],
+      "note": "cost uses person-entered role day-costs; it is a planning comparison, not an estimate of price"
+     }
+    },
+    {
+     "profile": "WP-LARGE",
+     "archetype": "large",
+     "headcount": 48,
+     "subcontract_capacity": 8,
+     "working_days": 170,
+     "calendar_days": 242,
+     "start": "2027-03-07",
+     "finish": "2027-11-03",
+     "peak_workers": 24,
+     "labour_hours": "10094.60",
+     "resource_limited": [
+      "A-SHORE",
+      "A-REBAR",
+      "A-STEEL"
+     ],
+     "critical_path": [
+      "A-MOB",
+      "A-EXC",
+      "A-FORM",
+      "A-POUR",
+      "A-SUPP",
+      "A-PIPE100",
+      "A-WELD",
+      "A-HYDRO",
+      "A-COAT",
+      "A-COMM",
+      "A-DEMOB"
+     ],
+     "claim": "PROVISIONAL - NOT FOR RELIANCE: 21 gap(s); provisional (unapproved norm/profile/calendar); synthetic test inputs",
+     "gaps": 21,
+     "cost": {
+      "computed": true,
+      "direct_labour": "317410.00",
+      "indirect_staff": "683400.00",
+      "total": "1000810.00",
+      "role_cost_gaps": [],
+      "note": "cost uses person-entered role day-costs; it is a planning comparison, not an estimate of price"
+     }
+    },
+    {
+     "profile": "WP-ENT",
+     "archetype": "enterprise",
+     "headcount": 91,
+     "subcontract_capacity": 12,
+     "working_days": 170,
+     "calendar_days": 242,
+     "start": "2027-03-07",
+     "finish": "2027-11-03",
+     "peak_workers": 27,
+     "labour_hours": "10094.60",
+     "resource_limited": [
+      "A-STEEL"
+     ],
+     "critical_path": [
+      "A-MOB",
+      "A-EXC",
+      "A-FORM",
+      "A-POUR",
+      "A-SUPP",
+      "A-PIPE100",
+      "A-WELD",
+      "A-HYDRO",
+      "A-COAT",
+      "A-COMM",
+      "A-DEMOB"
+     ],
+     "claim": "PROVISIONAL - NOT FOR RELIANCE: 21 gap(s); provisional (unapproved norm/profile/calendar); synthetic test inputs",
+     "gaps": 21,
+     "cost": {
+      "computed": true,
+      "direct_labour": "316530.00",
+      "indirect_staff": "1050600.00",
+      "total": "1367130.00",
+      "role_cost_gaps": [],
+      "note": "cost uses person-entered role day-costs; it is a planning comparison, not an estimate of price"
+     }
+    }
+   ],
+   "calendar": {
+    "start": "2027-03-07",
+    "work_weekdays": [
+     0,
+     1,
+     2,
+     3,
+     6
+    ],
+    "holidays": [
+     "2027-03-30"
+    ],
+    "standard_hours": "8",
+    "reduced_hours": [
+     {
+      "frm": "2027-04-04",
+      "to": "2027-04-29",
+      "hours": "6"
+     }
+    ],
+    "shutdowns": [
+     {
+      "frm": "2027-05-16",
+      "to": "2027-05-18"
+     }
+    ],
+    "confirmed": false
+   },
+   "note": "Scenario results compare workforce profiles on the same activities, calendar and norms. They are not an industry benchmark; a doubled workforce does not halve the programme because of dependencies, finite work fronts, shared equipment and rounding of crews."
+  },
+  "09_resource_constrained_programme": {
+   "verdict": "PASS",
+   "baseline_version": 1,
+   "profile": "WP-MID",
+   "working_days": 212,
+   "calendar_days": 302,
+   "start": "2027-03-07",
+   "finish": "2028-01-02",
+   "unconstrained_activity_max_wd": 37,
+   "dependency_constrained_wd": 174,
+   "procurement_constrained_wd": 174,
+   "resource_constrained_wd": 212,
+   "critical_path": [
+    "A-MOB",
+    "A-EXC",
+    "A-FORM",
+    "A-POUR",
+    "A-SUPP",
+    "A-PIPE100",
+    "A-WELD",
+    "A-HYDRO",
+    "A-COAT",
+    "A-COMM",
+    "A-DEMOB"
+   ],
+   "resource_limited": [
+    "A-EXC",
+    "A-EXCH",
+    "A-REBAR",
+    "A-STEEL",
+    "A-PUMP",
+    "A-PIPE50",
+    "A-WELD",
+    "A-ROAD"
+   ],
+   "peak_workers": 18,
+   "labour_hours": "10094.60",
+   "gaps": [
+    [
+     "A-PUMP",
+     "LONG_LEAD_LATE"
+    ],
+    [
+     "A-EXC",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-EXCH",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-SHORE",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-FORM",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-REBAR",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-POUR",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-STEEL",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-SUPP",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-PUMP",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-PIPE100",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-PIPE50",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-WELD",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-NDT",
+     "MISSING_NORM"
+    ],
+    [
+     "A-BACK",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-ROAD",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-COAT",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-TRAY",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-CABLE",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "A-ELV",
+     "NORM_EVIDENCE_SYNTHETIC"
+    ],
+    [
+     "*",
+     "CALENDAR_UNCONFIRMED"
+    ]
+   ],
+   "claim": "PROVISIONAL - NOT FOR RELIANCE: 21 gap(s); provisional (unapproved norm/profile/calendar); synthetic test inputs",
+   "complete": false,
+   "provisional": true,
+   "activity_rows": [
+    {
+     "code": "A-MOB",
+     "status": "OK",
+     "hours": "0.00",
+     "crew_days": "0.00",
+     "unconstrained": 5,
+     "start": 0,
+     "finish": 0,
+     "delay": 0,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-EXC",
+     "status": "OK",
+     "hours": "255.00",
+     "crew_days": "14.17",
+     "unconstrained": 8,
+     "start": 0,
+     "finish": 15,
+     "delay": 0,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-EXCH",
+     "status": "OK",
+     "hours": "180.00",
+     "crew_days": "10.00",
+     "unconstrained": 10,
+     "start": 43,
+     "finish": 53,
+     "delay": 30,
+     "float": 151,
+     "critical": false
+    },
+    {
+     "code": "A-SHORE",
+     "status": "OK",
+     "hours": "240.00",
+     "crew_days": "10.00",
+     "unconstrained": 10,
+     "start": 0,
+     "finish": 10,
+     "delay": 0,
+     "float": 159,
+     "critical": false
+    },
+    {
+     "code": "A-FORM",
+     "status": "OK",
+     "hours": "615.00",
+     "crew_days": "20.50",
+     "unconstrained": 11,
+     "start": 15,
+     "finish": 28,
+     "delay": 2,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-REBAR",
+     "status": "OK",
+     "hours": "460.00",
+     "crew_days": "15.33",
+     "unconstrained": 8,
+     "start": 28,
+     "finish": 39,
+     "delay": 15,
+     "float": 3,
+     "critical": false
+    },
+    {
+     "code": "A-POUR",
+     "status": "OK",
+     "hours": "192.00",
+     "crew_days": "4.00",
+     "unconstrained": 11,
+     "start": 39,
+     "finish": 50,
+     "delay": 15,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-STEEL",
+     "status": "OK",
+     "hours": "403.20",
+     "crew_days": "11.20",
+     "unconstrained": 6,
+     "start": 53,
+     "finish": 65,
+     "delay": 18,
+     "float": 7,
+     "critical": false
+    },
+    {
+     "code": "A-SUPP",
+     "status": "OK",
+     "hours": "230.40",
+     "crew_days": "12.80",
+     "unconstrained": 13,
+     "start": 50,
+     "finish": 63,
+     "delay": 15,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-PUMP",
+     "status": "OK",
+     "hours": "96.00",
+     "crew_days": "4.00",
+     "unconstrained": 4,
+     "start": 119,
+     "finish": 123,
+     "delay": 18,
+     "float": 16,
+     "critical": false
+    },
+    {
+     "code": "A-PIPE100",
+     "status": "OK",
+     "hours": "2600.00",
+     "crew_days": "108.33",
+     "unconstrained": 37,
+     "start": 65,
+     "finish": 102,
+     "delay": 17,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-PIPE50",
+     "status": "OK",
+     "hours": "775.00",
+     "crew_days": "32.29",
+     "unconstrained": 17,
+     "start": 102,
+     "finish": 119,
+     "delay": 54,
+     "float": 20,
+     "critical": false
+    },
+    {
+     "code": "A-WELD",
+     "status": "OK",
+     "hours": "1920.00",
+     "crew_days": "106.67",
+     "unconstrained": 36,
+     "start": 119,
+     "finish": 158,
+     "delay": 34,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-NDT",
+     "status": "MISSING_NORM",
+     "hours": "0.00",
+     "crew_days": "0.00",
+     "unconstrained": 0,
+     "start": 158,
+     "finish": 158,
+     "delay": 37,
+     "float": 0,
+     "critical": false
+    },
+    {
+     "code": "A-HYDRO",
+     "status": "OK",
+     "hours": "0.00",
+     "crew_days": "0.00",
+     "unconstrained": 8,
+     "start": 158,
+     "finish": 166,
+     "delay": 37,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-BACK",
+     "status": "OK",
+     "hours": "144.00",
+     "crew_days": "8.00",
+     "unconstrained": 8,
+     "start": 166,
+     "finish": 174,
+     "delay": 37,
+     "float": 20,
+     "critical": false
+    },
+    {
+     "code": "A-ROAD",
+     "status": "OK",
+     "hours": "120.00",
+     "crew_days": "4.00",
+     "unconstrained": 4,
+     "start": 198,
+     "finish": 202,
+     "delay": 61,
+     "float": 20,
+     "critical": false
+    },
+    {
+     "code": "A-COAT",
+     "status": "OK",
+     "hours": "760.00",
+     "crew_days": "31.67",
+     "unconstrained": 32,
+     "start": 166,
+     "finish": 198,
+     "delay": 37,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-TRAY",
+     "status": "OK",
+     "hours": "480.00",
+     "crew_days": "20.00",
+     "unconstrained": 20,
+     "start": 65,
+     "finish": 85,
+     "delay": 24,
+     "float": 80,
+     "critical": false
+    },
+    {
+     "code": "A-CABLE",
+     "status": "OK",
+     "hours": "480.00",
+     "crew_days": "20.00",
+     "unconstrained": 20,
+     "start": 85,
+     "finish": 105,
+     "delay": 24,
+     "float": 80,
+     "critical": false
+    },
+    {
+     "code": "A-ELV",
+     "status": "OK",
+     "hours": "144.00",
+     "crew_days": "12.00",
+     "unconstrained": 12,
+     "start": 85,
+     "finish": 97,
+     "delay": 24,
+     "float": 88,
+     "critical": false
+    },
+    {
+     "code": "A-COMM",
+     "status": "OK",
+     "hours": "0.00",
+     "crew_days": "0.00",
+     "unconstrained": 10,
+     "start": 202,
+     "finish": 212,
+     "delay": 41,
+     "float": 0,
+     "critical": true
+    },
+    {
+     "code": "A-DEMOB",
+     "status": "OK",
+     "hours": "0.00",
+     "crew_days": "0.00",
+     "unconstrained": 3,
+     "start": 212,
+     "finish": 212,
+     "delay": 38,
+     "float": 0,
+     "critical": true
+    }
+   ]
+  },
+  "10_queries_and_clarifications": {
+   "verdict": "PASS",
+   "created": [
+    "TQ-PRJ-9101-001",
+    "TQ-PRJ-9101-002",
+    "TQ-PRJ-9101-003",
+    "TQ-PRJ-9101-004",
+    "TQ-PRJ-9101-005",
+    "TQ-PRJ-9101-006",
+    "TQ-PRJ-9101-007",
+    "TQ-PRJ-9101-008",
+    "TQ-PRJ-9101-009",
+    "TQ-PRJ-9101-010",
+    "TQ-PRJ-9101-011",
+    "TQ-PRJ-9101-012",
+    "TQ-PRJ-9101-013",
+    "TQ-PRJ-9101-014",
+    "TQ-PRJ-9101-015",
+    "TQ-PRJ-9101-016",
+    "TQ-PRJ-9101-017",
+    "TQ-PRJ-9101-018",
+    "TQ-PRJ-9101-019",
+    "TQ-PRJ-9101-020",
+    "TQ-PRJ-9101-021",
+    "TQ-PRJ-9101-022",
+    "TQ-PRJ-9101-023",
+    "TQ-PRJ-9101-024",
+    "TQ-PRJ-9101-025",
+    "TQ-PRJ-9101-026",
+    "TQ-PRJ-9101-027",
+    "TQ-PRJ-9101-028"
+   ],
+   "by_register": {
+    "technical": 7,
+    "boq_discrepancy": 1,
+    "missing_input": 1,
+    "supplier": 4,
+    "assumption_confirmation": 15,
+    "commercial": 1,
+    "design_interface": 1
+   },
+   "detector_keys": [
+    "AMBIG:C-013",
+    "AMBIG:C-055",
+    "ASMP-CAT:Commercial terms and payment",
+    "ASMP-CAT:Commissioning, testing and handover",
+    "ASMP-CAT:Logistics, transport and landed cost",
+    "ASMP-CAT:Material, labour, plant and equipment rates",
+    "ASMP-CAT:Preliminaries and indirects",
+    "ASMP-CAT:Productivity and workforce",
+    "ASMP-CAT:Quantities and measurement",
+    "ASMP-CAT:Risk and contingency",
+    "ASMP-CAT:Scope and design",
+    "ASMP-CAT:Taxes and statutory costs",
+    "CONFLICT:quality plan required",
+    "ISSUE:C-071#2",
+    "LL:LL-PRJ-9101-001",
+    "MISSDOC:DWG-EL-010",
+    "NORM:A-COMM",
+    "NORM:A-DEMOB",
+    "NORM:A-HYDRO",
+    "NORM:A-MOB",
+    "NORM:A-NDT",
+    "RATE:SYN-C-045",
+    "RATE:SYN-C-046",
+    "RATE:SYN-C-047",
+    "REV:DWG-PR-001:B>C",
+    "REV:SPEC-EL-001:A>0",
+    "REV:SPEC-PIPE-001:B>0",
+    "REV:SPEC-ST-001:B>0"
+   ],
+   "all_draft": true,
+   "refused": {
+    "issue_draft": "NOT_RELEASED",
+    "response_before_issue": "NOT_ISSUED"
+   },
+   "open_material_queries": 25
+  },
+  "11_customer_responses": {
+   "verdict": "PASS",
+   "answered": [
+    [
+     "TQ-PRJ-9101-001",
+     "AMBIG:C-013",
+     "SYNTHETIC CUSTOMER RESPONSE: the 120 m3 of hard-material excavation is"
+    ],
+    [
+     "TQ-PRJ-9101-002",
+     "AMBIG:C-055",
+     "SYNTHETIC CUSTOMER RESPONSE: the customer provides the tie-in flanges;"
+    ],
+    [
+     "TQ-PRJ-9101-003",
+     "ISSUE:C-071#2",
+     "SYNTHETIC CUSTOMER RESPONSE: the second C-071 line is a BOQ error; the"
+    ],
+    [
+     "TQ-PRJ-9101-004",
+     "REV:DWG-PR-001:B>C",
+     "SYNTHETIC CUSTOMER RESPONSE: revision C of DWG-PR-001 governs; it chan"
+    ],
+    [
+     "TQ-PRJ-9101-008",
+     "MISSDOC:DWG-EL-010",
+     "SYNTHETIC CUSTOMER RESPONSE: drawing DWG-EL-010 revision A is issued w"
+    ],
+    [
+     "TQ-PRJ-9101-022",
+     "CONFLICT:quality plan required",
+     "SYNTHETIC CUSTOMER RESPONSE: a project quality plan IS required; the s"
+    ]
+   ],
+   "note": "responses are labelled synthetic test inputs entered by a TEST ACTOR; none was generated by the application"
+  },
+  "12_recalculate_impacts": {
+   "verdict": "PASS",
+   "direct_before": "3087310.00",
+   "direct_after": "3109010.00",
+   "delta_application": "21700.00",
+   "delta_independent": "21700",
+   "missing_documents_after": [],
+   "customer_requires": {
+    "quality_plan": "yes",
+    "technical_proposal": "yes"
+   },
+   "open_material_queries_remaining": [
+    "TQ-PRJ-9101-005",
+    "TQ-PRJ-9101-006",
+    "TQ-PRJ-9101-007",
+    "TQ-PRJ-9101-009",
+    "TQ-PRJ-9101-010",
+    "TQ-PRJ-9101-011",
+    "TQ-PRJ-9101-012",
+    "TQ-PRJ-9101-013",
+    "TQ-PRJ-9101-014",
+    "TQ-PRJ-9101-015",
+    "TQ-PRJ-9101-016",
+    "TQ-PRJ-9101-017",
+    "TQ-PRJ-9101-018",
+    "TQ-PRJ-9101-019",
+    "TQ-PRJ-9101-020",
+    "TQ-PRJ-9101-021",
+    "TQ-PRJ-9101-023",
+    "TQ-PRJ-9101-029",
+    "TQ-PRJ-9101-030"
+   ]
+  },
+  "13_procurement_and_quote_levelling": {
+   "verdict": "PASS",
+   "needs": {
+    "created": 3,
+    "updated": 0,
+    "closed": 0,
+    "open": 3
+   },
+   "package": "PKG-PRJ-9101-E",
+   "headline_totals": {
+    "A": "298400",
+    "B": "284800",
+    "C": "299200"
+   },
+   "expected_headline": {
+    "A": "298400",
+    "B": "284800",
+    "C": "299200"
+   },
+   "evaluated_totals": {
+    "A": "298400",
+    "B": "306300",
+    "C": "299200"
+   },
+   "expected_evaluated": {
+    "A": "298400",
+    "B": "306300",
+    "C": "299200"
+   },
+   "headline_lowest": "B",
+   "evaluated_winner": "A",
+   "validity_as_of_plus_10": [
+    [
+     "QT-0001",
+     "Valid"
+    ],
+    [
+     "QT-0002",
+     "Valid"
+    ],
+    [
+     "QT-0003",
+     "Expired"
+    ]
+   ],
+   "publish_before_approval_blocked_with": "SELECTION_NOT_APPROVED",
+   "rates_status_on_publish": [
+    "Pending Review",
+    "Pending Review",
+    "Pending Review"
+   ],
+   "estimate_state_after": "Preliminary \u2014 Incomplete",
+   "direct_cost_after": "3407410.00"
+  },
+  "14_indirects_tax_risk_escalation_cashflow": {
+   "verdict": "PASS",
+   "totals": {
+    "direct_cost": "3414410.00",
+    "indirect_cost": "332296.90",
+    "total_cost": "3896575.18",
+    "selling_price_pre_tax": "4208358.62",
+    "commercial_net_price": "4208301.19",
+    "tax": "631253.79",
+    "final_payable": "4839612.41"
+   },
+   "independent": {
+    "indirect": "332296.90",
+    "contingency": "149868.28",
+    "total_cost": "3896575.18",
+    "net": "4208301.19",
+    "schedule_total": "4208358.62",
+    "vat": "631253.79",
+    "payable": "4839612.41",
+    "schedule_vs_net_variance": "57.43",
+    "markup_on_cost": "0.080000",
+    "margin_on_price": "0.074074",
+    "max_rounding_variance_allowed": "319.150"
+   },
+   "indirect_application": "332296.90",
+   "findings": [
+    [
+     "Critical",
+     "EXCLUSION_UNAPPROVED"
+    ],
+    [
+     "High",
+     "BOQ_NEEDS_REVIEW"
+    ],
+    [
+     "High",
+     "INDIRECT_BASE_OVERLAP"
+    ],
+    [
+     "High",
+     "LONG_LEAD_AT_RISK"
+    ],
+    [
+     "High",
+     "PLANT_HIRE_DAYS"
+    ],
+    [
+     "High",
+     "SYSTEM_EXCEPTION"
+    ],
+    [
+     "High",
+     "TIMEPHASING_INCOMPLETE"
+    ],
+    [
+     "Low",
+     "SYNTHETIC_DEMO"
+    ],
+    [
+     "Medium",
+     "INDIRECT_ELIGIBILITY_UNSPECIFIED"
+    ],
+    [
+     "Medium",
+     "OFFER_MISSING"
+    ],
+    [
+     "Medium",
+     "POSSIBLE_DUPLICATE_ITEM"
+    ],
+    [
+     "Medium",
+     "UNAPPROVED_ADOPTED_ASSUMPTION"
+    ]
+   ],
+   "schedule_tasks": 23,
+   "escalation_status": "INCOMPLETE - NOT FOR RELIANCE: SAR 568,080.00 of eligible cost has no time allocation and is NOT escalated (see unescalated_lines)",
+   "escalation_complete": false,
+   "unescalated_cost": "568080.00",
+   "indirect_base": {
+    "project_id": "PRJ-9101",
+    "indirects": [
+     {
+      "code": "IND-HO",
+      "category": "Home-office overhead",
+      "status": "Approved",
+      "amount": "102432.30",
+      "specified": false,
+      "base_total": "3414410.00",
+      "eligible_base": "3414410.00",
+      "excluded": "0.00",
+      "unclassified": "0",
+      "spec": null,
+      "by_cost_code": {
+       "A.01": {
+        "total": "85000.00",
+        "eligible": "85000.00"
+       },
+       "A.02": {
+        "total": "210000.00",
+        "eligible": "210000.00"
+       },
+       "A.03": {
+        "total": "36000.00",
+        "eligible": "36000.00"
+       },
+       "A.04": {
+        "total": "18000.00",
+        "eligible": "18000.00"
+       },
+       "A.05": {
+        "total": "92700.00",
+        "eligible": "92700.00"
+       },
+       "B.02": {
+        "total": "52100.00",
+        "eligible": "52100.00"
+       },
+       "B.03": {
+        "total": "33280.00",
+        "eligible": "33280.00"
+       },
+       "B.04": {
+        "total": "18400.00",
+        "eligible": "18400.00"
+       },
+       "B.05": {
+        "total": "37800.00",
+        "eligible": "37800.00"
+       },
+       "C.01": {
+        "total": "162300.00",
+        "eligible": "162300.00"
+       },
+       "C.02": {
+        "total": "48380.00",
+        "eligible": "48380.00"
+       },
+       "C.03": {
+        "total": "73600.00",
+        "eligible": "73600.00"
+       },
+       "C.04": {
+        "total": "414400.00",
+        "eligible": "414400.00"
+       },
+       "C.05": {
+        "total": "31800.00",
+        "eligible": "31800.00"
+       },
+       "E.06": {
+        "total": "1176650.00",
+        "eligible": "1176650.00"
+       },
+       "E.08": {
+        "total": "192000.00",
+        "eligible": "192000.00"
+       },
+       "G.02": {
+        "total": "79100.00",
+        "eligible": "79100.00"
+       },
+       "H.03": {
+        "total": "532900.00",
+        "eligible": "532900.00"
+       },
+       "I.01": {
+        "total": "52800.00",
+        "eligible": "52800.00"
+       },
+       "I.02": {
+        "total": "16800.00",
+        "eligible": "16800.00"
+       },
+       "I.03": {
+        "total": "50400.00",
+        "eligible": "50400.00"
+       }
+      },
+      "by_item": {
+       "C-001": {
+        "total": "85000.00",
+        "eligible": "85000.00"
+       },
+       "C-002": {
+        "total": "210000.00",
+        "eligible": "210000.00"
+       },
+       "C-003": {
+        "total": "36000.00",
+        "eligible": "36000.00"
+       },
+       "C-004": {
+        "total": "18000.00",
+        "eligible": "18000.00"
+       },
+       "C-010": {
+        "total": "32300.00",
+        "eligible": "32300.00"
+       },
+       "C-011": {
+        "total": "33280.00",
+        "eligible": "33280.00"
+       },
+       "C-012": {
+        "total": "18400.00",
+        "eligible": "18400.00"
+       },
+       "C-013": {
+        "total": "19800.00",
+        "eligible": "19800.00"
+       },
+       "C-014": {
+        "total": "37800.00",
+        "eligible": "37800.00"
+       },
+       "C-020": {
+        "total": "139200.00",
+        "eligible": "139200.00"
+       },
+       "C-021": {
+        "total": "48380.00",
+        "eligible": "48380.00"
+       },
+       "C-022": {
+        "total": "73600.00",
+        "eligible": "73600.00"
+       },
+       "C-023": {
+        "total": "414400.00",
+        "eligible": "414400.00"
+       },
+       "C-024": {
+        "total": "31800.00",
+        "eligible": "31800.00"
+       },
+       "C-025": {
+        "total": "23100.00",
+        "eligible": "23100.00"
+       },
+       "C-030": {
+        "total": "171600.00",
+        "eligible": "171600.00"
+       },
+       "C-031": {
+        "total": "58900.00",
+        "eligible": "58900.00"
+       },
+       "C-032": {
+        "total": "197600.00",
+        "eligible": "197600.00"
+       },
+       "C-033": {
+        "total": "55800.00",
+        "eligible": "55800.00"
+       },
+       "C-034": {
+        "total": "20720.00",
+        "eligible": "20720.00"
+       },
+       "C-035": {
+        "total": "15120.00",
+        "eligible": "15120.00"
+       },
+       "C-036": {
+        "total": "39360.00",
+        "eligible": "39360.00"
+       },
+       "C-037": {
+        "total": "137600.00",
+        "eligible": "137600.00"
+       },
+       "C-038": {
+        "total": "22750.00",
+        "eligible": "22750.00"
+       },
+       "C-039": {
+        "total": "55200.00",
+        "eligible": "55200.00"
+       },
+       "C-040": {
+        "total": "166400.00",
+        "eligible": "166400.00"
+       },
+       "C-041": {
+        "total": "129200.00",
+        "eligible": "129200.00"
+       },
+       "C-045": {
+        "total": "192000.00",
+        "eligible": "192000.00"
+       },
+       "C-046": {
+        "total": "43200.00",
+        "eligible": "43200.00"
+       },
+       "C-047": {
+        "total": "63200.00",
+        "eligible": "63200.00"
+       },
+       "C-050": {
+        "total": "35000.00",
+        "eligible": "35000.00"
+       },
+       "C-051": {
+        "total": "13300.00",
+        "eligible": "13300.00"
+       },
+       "C-052": {
+        "total": "44400.00",
+        "eligible": "44400.00"
+       },
+       "C-055": {
+        "total": "43500.00",
+        "eligible": "43500.00"
+       },
+       "C-056": {
+        "total": "35600.00",
+        "eligible": "35600.00"
+       },
+       "C-060": {
+        "total": "94500.00",
+        "eligible": "94500.00"
+       },
+       "C-061": {
+        "total": "187200.00",
+        "eligible": "187200.00"
+       },
+       "C-062": {
+        "total": "86400.00",
+        "eligible": "86400.00"
+       },
+       "C-063": {
+        "total": "64000.00",
+        "eligible": "64000.00"
+       },
+       "C-064": {
+        "total": "100800.00",
+        "eligible": "100800.00"
+       },
+       "C-070": {
+        "total": "52800.00",
+        "eligible": "52800.00"
+       },
+       "C-071": {
+        "total": "50400.00",
+        "eligible": "50400.00"
+       },
+       "C-072": {
+        "total": "16800.00",
+        "eligible": "16800.00"
+       }
+      },
+      "by_kind": {
+       "subcontract": {
+        "total": "2203310.00",
+        "eligible": "2203310.00"
+       },
+       "material": {
+        "total": "1118400.00",
+        "eligible": "1118400.00"
+       },
+       "plant": {
+        "total": "85700.00",
+        "eligible": "85700.00"
+       },
+       "plant_standby": {
+        "total": "1400.00",
+        "eligible": "1400.00"
+       },
+       "plant_mob_days": {
+        "total": "2800.00",
+        "eligible": "2800.00"
+       },
+       "plant_demob_days": {
+        "total": "2800.00",
+        "eligible": "2800.00"
+       }
+      },
+      "preliminaries_in_base": [
+       {
+        "item_key": "C-001",
+        "cost_code": "A.01",
+        "eligible_amount": "85000.00",
+        "exposure": "2550.0000"
+       },
+       {
+        "item_key": "C-002",
+        "cost_code": "A.02",
+        "eligible_amount": "210000.00",
+        "exposure": "6300.0000"
+       },
+       {
+        "item_key": "C-003",
+        "cost_code": "A.03",
+        "eligible_amount": "36000.00",
+        "exposure": "1080.0000"
+       },
+       {
+        "item_key": "C-004",
+        "cost_code": "A.04",
+        "eligible_amount": "18000.00",
+        "exposure": "540.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "28000.00",
+        "exposure": "840.0000"
+       },
+       {
+        "item_key": "C-051",
+        "cost_code": "A.05",
+        "eligible_amount": "13300.00",
+        "exposure": "399.0000"
+       },
+       {
+        "item_key": "C-052",
+        "cost_code": "A.05",
+        "eligible_amount": "44400.00",
+        "exposure": "1332.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "1400.00",
+        "exposure": "42.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "2800.00",
+        "exposure": "84.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "2800.00",
+        "exposure": "84.0000"
+       }
+      ],
+      "overlap_exposure": "13251.0000"
+     },
+     {
+      "code": "IND-SITE",
+      "category": "Site indirects",
+      "status": "Approved",
+      "amount": "204864.60",
+      "specified": false,
+      "base_total": "3414410.00",
+      "eligible_base": "3414410.00",
+      "excluded": "0.00",
+      "unclassified": "0",
+      "spec": null,
+      "by_cost_code": {
+       "A.01": {
+        "total": "85000.00",
+        "eligible": "85000.00"
+       },
+       "A.02": {
+        "total": "210000.00",
+        "eligible": "210000.00"
+       },
+       "A.03": {
+        "total": "36000.00",
+        "eligible": "36000.00"
+       },
+       "A.04": {
+        "total": "18000.00",
+        "eligible": "18000.00"
+       },
+       "A.05": {
+        "total": "92700.00",
+        "eligible": "92700.00"
+       },
+       "B.02": {
+        "total": "52100.00",
+        "eligible": "52100.00"
+       },
+       "B.03": {
+        "total": "33280.00",
+        "eligible": "33280.00"
+       },
+       "B.04": {
+        "total": "18400.00",
+        "eligible": "18400.00"
+       },
+       "B.05": {
+        "total": "37800.00",
+        "eligible": "37800.00"
+       },
+       "C.01": {
+        "total": "162300.00",
+        "eligible": "162300.00"
+       },
+       "C.02": {
+        "total": "48380.00",
+        "eligible": "48380.00"
+       },
+       "C.03": {
+        "total": "73600.00",
+        "eligible": "73600.00"
+       },
+       "C.04": {
+        "total": "414400.00",
+        "eligible": "414400.00"
+       },
+       "C.05": {
+        "total": "31800.00",
+        "eligible": "31800.00"
+       },
+       "E.06": {
+        "total": "1176650.00",
+        "eligible": "1176650.00"
+       },
+       "E.08": {
+        "total": "192000.00",
+        "eligible": "192000.00"
+       },
+       "G.02": {
+        "total": "79100.00",
+        "eligible": "79100.00"
+       },
+       "H.03": {
+        "total": "532900.00",
+        "eligible": "532900.00"
+       },
+       "I.01": {
+        "total": "52800.00",
+        "eligible": "52800.00"
+       },
+       "I.02": {
+        "total": "16800.00",
+        "eligible": "16800.00"
+       },
+       "I.03": {
+        "total": "50400.00",
+        "eligible": "50400.00"
+       }
+      },
+      "by_item": {
+       "C-001": {
+        "total": "85000.00",
+        "eligible": "85000.00"
+       },
+       "C-002": {
+        "total": "210000.00",
+        "eligible": "210000.00"
+       },
+       "C-003": {
+        "total": "36000.00",
+        "eligible": "36000.00"
+       },
+       "C-004": {
+        "total": "18000.00",
+        "eligible": "18000.00"
+       },
+       "C-010": {
+        "total": "32300.00",
+        "eligible": "32300.00"
+       },
+       "C-011": {
+        "total": "33280.00",
+        "eligible": "33280.00"
+       },
+       "C-012": {
+        "total": "18400.00",
+        "eligible": "18400.00"
+       },
+       "C-013": {
+        "total": "19800.00",
+        "eligible": "19800.00"
+       },
+       "C-014": {
+        "total": "37800.00",
+        "eligible": "37800.00"
+       },
+       "C-020": {
+        "total": "139200.00",
+        "eligible": "139200.00"
+       },
+       "C-021": {
+        "total": "48380.00",
+        "eligible": "48380.00"
+       },
+       "C-022": {
+        "total": "73600.00",
+        "eligible": "73600.00"
+       },
+       "C-023": {
+        "total": "414400.00",
+        "eligible": "414400.00"
+       },
+       "C-024": {
+        "total": "31800.00",
+        "eligible": "31800.00"
+       },
+       "C-025": {
+        "total": "23100.00",
+        "eligible": "23100.00"
+       },
+       "C-030": {
+        "total": "171600.00",
+        "eligible": "171600.00"
+       },
+       "C-031": {
+        "total": "58900.00",
+        "eligible": "58900.00"
+       },
+       "C-032": {
+        "total": "197600.00",
+        "eligible": "197600.00"
+       },
+       "C-033": {
+        "total": "55800.00",
+        "eligible": "55800.00"
+       },
+       "C-034": {
+        "total": "20720.00",
+        "eligible": "20720.00"
+       },
+       "C-035": {
+        "total": "15120.00",
+        "eligible": "15120.00"
+       },
+       "C-036": {
+        "total": "39360.00",
+        "eligible": "39360.00"
+       },
+       "C-037": {
+        "total": "137600.00",
+        "eligible": "137600.00"
+       },
+       "C-038": {
+        "total": "22750.00",
+        "eligible": "22750.00"
+       },
+       "C-039": {
+        "total": "55200.00",
+        "eligible": "55200.00"
+       },
+       "C-040": {
+        "total": "166400.00",
+        "eligible": "166400.00"
+       },
+       "C-041": {
+        "total": "129200.00",
+        "eligible": "129200.00"
+       },
+       "C-045": {
+        "total": "192000.00",
+        "eligible": "192000.00"
+       },
+       "C-046": {
+        "total": "43200.00",
+        "eligible": "43200.00"
+       },
+       "C-047": {
+        "total": "63200.00",
+        "eligible": "63200.00"
+       },
+       "C-050": {
+        "total": "35000.00",
+        "eligible": "35000.00"
+       },
+       "C-051": {
+        "total": "13300.00",
+        "eligible": "13300.00"
+       },
+       "C-052": {
+        "total": "44400.00",
+        "eligible": "44400.00"
+       },
+       "C-055": {
+        "total": "43500.00",
+        "eligible": "43500.00"
+       },
+       "C-056": {
+        "total": "35600.00",
+        "eligible": "35600.00"
+       },
+       "C-060": {
+        "total": "94500.00",
+        "eligible": "94500.00"
+       },
+       "C-061": {
+        "total": "187200.00",
+        "eligible": "187200.00"
+       },
+       "C-062": {
+        "total": "86400.00",
+        "eligible": "86400.00"
+       },
+       "C-063": {
+        "total": "64000.00",
+        "eligible": "64000.00"
+       },
+       "C-064": {
+        "total": "100800.00",
+        "eligible": "100800.00"
+       },
+       "C-070": {
+        "total": "52800.00",
+        "eligible": "52800.00"
+       },
+       "C-071": {
+        "total": "50400.00",
+        "eligible": "50400.00"
+       },
+       "C-072": {
+        "total": "16800.00",
+        "eligible": "16800.00"
+       }
+      },
+      "by_kind": {
+       "subcontract": {
+        "total": "2203310.00",
+        "eligible": "2203310.00"
+       },
+       "material": {
+        "total": "1118400.00",
+        "eligible": "1118400.00"
+       },
+       "plant": {
+        "total": "85700.00",
+        "eligible": "85700.00"
+       },
+       "plant_standby": {
+        "total": "1400.00",
+        "eligible": "1400.00"
+       },
+       "plant_mob_days": {
+        "total": "2800.00",
+        "eligible": "2800.00"
+       },
+       "plant_demob_days": {
+        "total": "2800.00",
+        "eligible": "2800.00"
+       }
+      },
+      "preliminaries_in_base": [
+       {
+        "item_key": "C-001",
+        "cost_code": "A.01",
+        "eligible_amount": "85000.00",
+        "exposure": "5100.0000"
+       },
+       {
+        "item_key": "C-002",
+        "cost_code": "A.02",
+        "eligible_amount": "210000.00",
+        "exposure": "12600.0000"
+       },
+       {
+        "item_key": "C-003",
+        "cost_code": "A.03",
+        "eligible_amount": "36000.00",
+        "exposure": "2160.0000"
+       },
+       {
+        "item_key": "C-004",
+        "cost_code": "A.04",
+        "eligible_amount": "18000.00",
+        "exposure": "1080.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "28000.00",
+        "exposure": "1680.0000"
+       },
+       {
+        "item_key": "C-051",
+        "cost_code": "A.05",
+        "eligible_amount": "13300.00",
+        "exposure": "798.0000"
+       },
+       {
+        "item_key": "C-052",
+        "cost_code": "A.05",
+        "eligible_amount": "44400.00",
+        "exposure": "2664.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "1400.00",
+        "exposure": "84.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "2800.00",
+        "exposure": "168.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "2800.00",
+        "exposure": "168.0000"
+       }
+      ],
+      "overlap_exposure": "26502.0000"
+     }
+    ],
+    "overlaps": [
+     {
+      "code": "IND-HO",
+      "category": "Home-office overhead",
+      "status": "Approved",
+      "amount": "102432.30",
+      "specified": false,
+      "base_total": "3414410.00",
+      "eligible_base": "3414410.00",
+      "excluded": "0.00",
+      "unclassified": "0",
+      "spec": null,
+      "by_cost_code": {
+       "A.01": {
+        "total": "85000.00",
+        "eligible": "85000.00"
+       },
+       "A.02": {
+        "total": "210000.00",
+        "eligible": "210000.00"
+       },
+       "A.03": {
+        "total": "36000.00",
+        "eligible": "36000.00"
+       },
+       "A.04": {
+        "total": "18000.00",
+        "eligible": "18000.00"
+       },
+       "A.05": {
+        "total": "92700.00",
+        "eligible": "92700.00"
+       },
+       "B.02": {
+        "total": "52100.00",
+        "eligible": "52100.00"
+       },
+       "B.03": {
+        "total": "33280.00",
+        "eligible": "33280.00"
+       },
+       "B.04": {
+        "total": "18400.00",
+        "eligible": "18400.00"
+       },
+       "B.05": {
+        "total": "37800.00",
+        "eligible": "37800.00"
+       },
+       "C.01": {
+        "total": "162300.00",
+        "eligible": "162300.00"
+       },
+       "C.02": {
+        "total": "48380.00",
+        "eligible": "48380.00"
+       },
+       "C.03": {
+        "total": "73600.00",
+        "eligible": "73600.00"
+       },
+       "C.04": {
+        "total": "414400.00",
+        "eligible": "414400.00"
+       },
+       "C.05": {
+        "total": "31800.00",
+        "eligible": "31800.00"
+       },
+       "E.06": {
+        "total": "1176650.00",
+        "eligible": "1176650.00"
+       },
+       "E.08": {
+        "total": "192000.00",
+        "eligible": "192000.00"
+       },
+       "G.02": {
+        "total": "79100.00",
+        "eligible": "79100.00"
+       },
+       "H.03": {
+        "total": "532900.00",
+        "eligible": "532900.00"
+       },
+       "I.01": {
+        "total": "52800.00",
+        "eligible": "52800.00"
+       },
+       "I.02": {
+        "total": "16800.00",
+        "eligible": "16800.00"
+       },
+       "I.03": {
+        "total": "50400.00",
+        "eligible": "50400.00"
+       }
+      },
+      "by_item": {
+       "C-001": {
+        "total": "85000.00",
+        "eligible": "85000.00"
+       },
+       "C-002": {
+        "total": "210000.00",
+        "eligible": "210000.00"
+       },
+       "C-003": {
+        "total": "36000.00",
+        "eligible": "36000.00"
+       },
+       "C-004": {
+        "total": "18000.00",
+        "eligible": "18000.00"
+       },
+       "C-010": {
+        "total": "32300.00",
+        "eligible": "32300.00"
+       },
+       "C-011": {
+        "total": "33280.00",
+        "eligible": "33280.00"
+       },
+       "C-012": {
+        "total": "18400.00",
+        "eligible": "18400.00"
+       },
+       "C-013": {
+        "total": "19800.00",
+        "eligible": "19800.00"
+       },
+       "C-014": {
+        "total": "37800.00",
+        "eligible": "37800.00"
+       },
+       "C-020": {
+        "total": "139200.00",
+        "eligible": "139200.00"
+       },
+       "C-021": {
+        "total": "48380.00",
+        "eligible": "48380.00"
+       },
+       "C-022": {
+        "total": "73600.00",
+        "eligible": "73600.00"
+       },
+       "C-023": {
+        "total": "414400.00",
+        "eligible": "414400.00"
+       },
+       "C-024": {
+        "total": "31800.00",
+        "eligible": "31800.00"
+       },
+       "C-025": {
+        "total": "23100.00",
+        "eligible": "23100.00"
+       },
+       "C-030": {
+        "total": "171600.00",
+        "eligible": "171600.00"
+       },
+       "C-031": {
+        "total": "58900.00",
+        "eligible": "58900.00"
+       },
+       "C-032": {
+        "total": "197600.00",
+        "eligible": "197600.00"
+       },
+       "C-033": {
+        "total": "55800.00",
+        "eligible": "55800.00"
+       },
+       "C-034": {
+        "total": "20720.00",
+        "eligible": "20720.00"
+       },
+       "C-035": {
+        "total": "15120.00",
+        "eligible": "15120.00"
+       },
+       "C-036": {
+        "total": "39360.00",
+        "eligible": "39360.00"
+       },
+       "C-037": {
+        "total": "137600.00",
+        "eligible": "137600.00"
+       },
+       "C-038": {
+        "total": "22750.00",
+        "eligible": "22750.00"
+       },
+       "C-039": {
+        "total": "55200.00",
+        "eligible": "55200.00"
+       },
+       "C-040": {
+        "total": "166400.00",
+        "eligible": "166400.00"
+       },
+       "C-041": {
+        "total": "129200.00",
+        "eligible": "129200.00"
+       },
+       "C-045": {
+        "total": "192000.00",
+        "eligible": "192000.00"
+       },
+       "C-046": {
+        "total": "43200.00",
+        "eligible": "43200.00"
+       },
+       "C-047": {
+        "total": "63200.00",
+        "eligible": "63200.00"
+       },
+       "C-050": {
+        "total": "35000.00",
+        "eligible": "35000.00"
+       },
+       "C-051": {
+        "total": "13300.00",
+        "eligible": "13300.00"
+       },
+       "C-052": {
+        "total": "44400.00",
+        "eligible": "44400.00"
+       },
+       "C-055": {
+        "total": "43500.00",
+        "eligible": "43500.00"
+       },
+       "C-056": {
+        "total": "35600.00",
+        "eligible": "35600.00"
+       },
+       "C-060": {
+        "total": "94500.00",
+        "eligible": "94500.00"
+       },
+       "C-061": {
+        "total": "187200.00",
+        "eligible": "187200.00"
+       },
+       "C-062": {
+        "total": "86400.00",
+        "eligible": "86400.00"
+       },
+       "C-063": {
+        "total": "64000.00",
+        "eligible": "64000.00"
+       },
+       "C-064": {
+        "total": "100800.00",
+        "eligible": "100800.00"
+       },
+       "C-070": {
+        "total": "52800.00",
+        "eligible": "52800.00"
+       },
+       "C-071": {
+        "total": "50400.00",
+        "eligible": "50400.00"
+       },
+       "C-072": {
+        "total": "16800.00",
+        "eligible": "16800.00"
+       }
+      },
+      "by_kind": {
+       "subcontract": {
+        "total": "2203310.00",
+        "eligible": "2203310.00"
+       },
+       "material": {
+        "total": "1118400.00",
+        "eligible": "1118400.00"
+       },
+       "plant": {
+        "total": "85700.00",
+        "eligible": "85700.00"
+       },
+       "plant_standby": {
+        "total": "1400.00",
+        "eligible": "1400.00"
+       },
+       "plant_mob_days": {
+        "total": "2800.00",
+        "eligible": "2800.00"
+       },
+       "plant_demob_days": {
+        "total": "2800.00",
+        "eligible": "2800.00"
+       }
+      },
+      "preliminaries_in_base": [
+       {
+        "item_key": "C-001",
+        "cost_code": "A.01",
+        "eligible_amount": "85000.00",
+        "exposure": "2550.0000"
+       },
+       {
+        "item_key": "C-002",
+        "cost_code": "A.02",
+        "eligible_amount": "210000.00",
+        "exposure": "6300.0000"
+       },
+       {
+        "item_key": "C-003",
+        "cost_code": "A.03",
+        "eligible_amount": "36000.00",
+        "exposure": "1080.0000"
+       },
+       {
+        "item_key": "C-004",
+        "cost_code": "A.04",
+        "eligible_amount": "18000.00",
+        "exposure": "540.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "28000.00",
+        "exposure": "840.0000"
+       },
+       {
+        "item_key": "C-051",
+        "cost_code": "A.05",
+        "eligible_amount": "13300.00",
+        "exposure": "399.0000"
+       },
+       {
+        "item_key": "C-052",
+        "cost_code": "A.05",
+        "eligible_amount": "44400.00",
+        "exposure": "1332.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "1400.00",
+        "exposure": "42.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "2800.00",
+        "exposure": "84.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "2800.00",
+        "exposure": "84.0000"
+       }
+      ],
+      "overlap_exposure": "13251.0000"
+     },
+     {
+      "code": "IND-SITE",
+      "category": "Site indirects",
+      "status": "Approved",
+      "amount": "204864.60",
+      "specified": false,
+      "base_total": "3414410.00",
+      "eligible_base": "3414410.00",
+      "excluded": "0.00",
+      "unclassified": "0",
+      "spec": null,
+      "by_cost_code": {
+       "A.01": {
+        "total": "85000.00",
+        "eligible": "85000.00"
+       },
+       "A.02": {
+        "total": "210000.00",
+        "eligible": "210000.00"
+       },
+       "A.03": {
+        "total": "36000.00",
+        "eligible": "36000.00"
+       },
+       "A.04": {
+        "total": "18000.00",
+        "eligible": "18000.00"
+       },
+       "A.05": {
+        "total": "92700.00",
+        "eligible": "92700.00"
+       },
+       "B.02": {
+        "total": "52100.00",
+        "eligible": "52100.00"
+       },
+       "B.03": {
+        "total": "33280.00",
+        "eligible": "33280.00"
+       },
+       "B.04": {
+        "total": "18400.00",
+        "eligible": "18400.00"
+       },
+       "B.05": {
+        "total": "37800.00",
+        "eligible": "37800.00"
+       },
+       "C.01": {
+        "total": "162300.00",
+        "eligible": "162300.00"
+       },
+       "C.02": {
+        "total": "48380.00",
+        "eligible": "48380.00"
+       },
+       "C.03": {
+        "total": "73600.00",
+        "eligible": "73600.00"
+       },
+       "C.04": {
+        "total": "414400.00",
+        "eligible": "414400.00"
+       },
+       "C.05": {
+        "total": "31800.00",
+        "eligible": "31800.00"
+       },
+       "E.06": {
+        "total": "1176650.00",
+        "eligible": "1176650.00"
+       },
+       "E.08": {
+        "total": "192000.00",
+        "eligible": "192000.00"
+       },
+       "G.02": {
+        "total": "79100.00",
+        "eligible": "79100.00"
+       },
+       "H.03": {
+        "total": "532900.00",
+        "eligible": "532900.00"
+       },
+       "I.01": {
+        "total": "52800.00",
+        "eligible": "52800.00"
+       },
+       "I.02": {
+        "total": "16800.00",
+        "eligible": "16800.00"
+       },
+       "I.03": {
+        "total": "50400.00",
+        "eligible": "50400.00"
+       }
+      },
+      "by_item": {
+       "C-001": {
+        "total": "85000.00",
+        "eligible": "85000.00"
+       },
+       "C-002": {
+        "total": "210000.00",
+        "eligible": "210000.00"
+       },
+       "C-003": {
+        "total": "36000.00",
+        "eligible": "36000.00"
+       },
+       "C-004": {
+        "total": "18000.00",
+        "eligible": "18000.00"
+       },
+       "C-010": {
+        "total": "32300.00",
+        "eligible": "32300.00"
+       },
+       "C-011": {
+        "total": "33280.00",
+        "eligible": "33280.00"
+       },
+       "C-012": {
+        "total": "18400.00",
+        "eligible": "18400.00"
+       },
+       "C-013": {
+        "total": "19800.00",
+        "eligible": "19800.00"
+       },
+       "C-014": {
+        "total": "37800.00",
+        "eligible": "37800.00"
+       },
+       "C-020": {
+        "total": "139200.00",
+        "eligible": "139200.00"
+       },
+       "C-021": {
+        "total": "48380.00",
+        "eligible": "48380.00"
+       },
+       "C-022": {
+        "total": "73600.00",
+        "eligible": "73600.00"
+       },
+       "C-023": {
+        "total": "414400.00",
+        "eligible": "414400.00"
+       },
+       "C-024": {
+        "total": "31800.00",
+        "eligible": "31800.00"
+       },
+       "C-025": {
+        "total": "23100.00",
+        "eligible": "23100.00"
+       },
+       "C-030": {
+        "total": "171600.00",
+        "eligible": "171600.00"
+       },
+       "C-031": {
+        "total": "58900.00",
+        "eligible": "58900.00"
+       },
+       "C-032": {
+        "total": "197600.00",
+        "eligible": "197600.00"
+       },
+       "C-033": {
+        "total": "55800.00",
+        "eligible": "55800.00"
+       },
+       "C-034": {
+        "total": "20720.00",
+        "eligible": "20720.00"
+       },
+       "C-035": {
+        "total": "15120.00",
+        "eligible": "15120.00"
+       },
+       "C-036": {
+        "total": "39360.00",
+        "eligible": "39360.00"
+       },
+       "C-037": {
+        "total": "137600.00",
+        "eligible": "137600.00"
+       },
+       "C-038": {
+        "total": "22750.00",
+        "eligible": "22750.00"
+       },
+       "C-039": {
+        "total": "55200.00",
+        "eligible": "55200.00"
+       },
+       "C-040": {
+        "total": "166400.00",
+        "eligible": "166400.00"
+       },
+       "C-041": {
+        "total": "129200.00",
+        "eligible": "129200.00"
+       },
+       "C-045": {
+        "total": "192000.00",
+        "eligible": "192000.00"
+       },
+       "C-046": {
+        "total": "43200.00",
+        "eligible": "43200.00"
+       },
+       "C-047": {
+        "total": "63200.00",
+        "eligible": "63200.00"
+       },
+       "C-050": {
+        "total": "35000.00",
+        "eligible": "35000.00"
+       },
+       "C-051": {
+        "total": "13300.00",
+        "eligible": "13300.00"
+       },
+       "C-052": {
+        "total": "44400.00",
+        "eligible": "44400.00"
+       },
+       "C-055": {
+        "total": "43500.00",
+        "eligible": "43500.00"
+       },
+       "C-056": {
+        "total": "35600.00",
+        "eligible": "35600.00"
+       },
+       "C-060": {
+        "total": "94500.00",
+        "eligible": "94500.00"
+       },
+       "C-061": {
+        "total": "187200.00",
+        "eligible": "187200.00"
+       },
+       "C-062": {
+        "total": "86400.00",
+        "eligible": "86400.00"
+       },
+       "C-063": {
+        "total": "64000.00",
+        "eligible": "64000.00"
+       },
+       "C-064": {
+        "total": "100800.00",
+        "eligible": "100800.00"
+       },
+       "C-070": {
+        "total": "52800.00",
+        "eligible": "52800.00"
+       },
+       "C-071": {
+        "total": "50400.00",
+        "eligible": "50400.00"
+       },
+       "C-072": {
+        "total": "16800.00",
+        "eligible": "16800.00"
+       }
+      },
+      "by_kind": {
+       "subcontract": {
+        "total": "2203310.00",
+        "eligible": "2203310.00"
+       },
+       "material": {
+        "total": "1118400.00",
+        "eligible": "1118400.00"
+       },
+       "plant": {
+        "total": "85700.00",
+        "eligible": "85700.00"
+       },
+       "plant_standby": {
+        "total": "1400.00",
+        "eligible": "1400.00"
+       },
+       "plant_mob_days": {
+        "total": "2800.00",
+        "eligible": "2800.00"
+       },
+       "plant_demob_days": {
+        "total": "2800.00",
+        "eligible": "2800.00"
+       }
+      },
+      "preliminaries_in_base": [
+       {
+        "item_key": "C-001",
+        "cost_code": "A.01",
+        "eligible_amount": "85000.00",
+        "exposure": "5100.0000"
+       },
+       {
+        "item_key": "C-002",
+        "cost_code": "A.02",
+        "eligible_amount": "210000.00",
+        "exposure": "12600.0000"
+       },
+       {
+        "item_key": "C-003",
+        "cost_code": "A.03",
+        "eligible_amount": "36000.00",
+        "exposure": "2160.0000"
+       },
+       {
+        "item_key": "C-004",
+        "cost_code": "A.04",
+        "eligible_amount": "18000.00",
+        "exposure": "1080.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "28000.00",
+        "exposure": "1680.0000"
+       },
+       {
+        "item_key": "C-051",
+        "cost_code": "A.05",
+        "eligible_amount": "13300.00",
+        "exposure": "798.0000"
+       },
+       {
+        "item_key": "C-052",
+        "cost_code": "A.05",
+        "eligible_amount": "44400.00",
+        "exposure": "2664.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "1400.00",
+        "exposure": "84.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "2800.00",
+        "exposure": "168.0000"
+       },
+       {
+        "item_key": "C-050",
+        "cost_code": "A.05",
+        "eligible_amount": "2800.00",
+        "exposure": "168.0000"
+       }
+      ],
+      "overlap_exposure": "26502.0000"
+     }
+    ],
+    "unspecified": [
+     "IND-HO",
+     "IND-SITE"
+    ],
+    "note": "A percentage indirect applies to the eligible part of the direct cost. 'specified' False = legacy whole-direct-cost base. Preliminaries (cost-code division A) inside the base may duplicate costs the percentage is meant to cover; exclude them with an eligibility rule or accept the finding with a reason.",
+    "estimate_state": "Complete"
+   },
+   "plant_hire_findings": [
+    {
+     "id": 14,
+     "run_id": 1,
+     "project_id": "PRJ-9101",
+     "rule_code": "PLANT_HIRE_DAYS",
+     "severity": "High",
+     "title": "Plant billable days differ from the programme hire window",
+     "detail": "Plant SYN-C-050 (working_day basis): working_day basis over 2027-05-25..2027-08-30 needs 70 day(s); the estimate bills 10 (difference 60)",
+     "entity_type": "plant",
+     "entity_id": "SYN-C-050",
+     "fingerprint": "2ec3b3062b57ea9e",
+     "financial_impact": "168000",
+     "owner": "Estimator",
+     "status": "Open",
+     "exception_id": null,
+     "exception_reason": null,
+     "exception_by": null
+    },
+    {
+     "id": 15,
+     "run_id": 1,
+     "project_id": "PRJ-9101",
+     "rule_code": "PLANT_HIRE_DAYS",
+     "severity": "High",
+     "title": "Plant billable days differ from the programme hire window",
+     "detail": "Plant SYN-C-051 (working_day basis): working_day basis over 2027-06-10..2027-08-24 needs 54 day(s); the estimate bills 14 (difference 40)",
+     "entity_type": "plant",
+     "entity_id": "SYN-C-051",
+     "fingerprint": "4d0f5ef85439d559",
+     "financial_impact": "38000",
+     "owner": "Estimator",
+     "status": "Open",
+     "exception_id": null,
+     "exception_reason": null,
+     "exception_by": null
+    }
+   ],
+   "cashflow": "TERMS_NONE: No approved payment terms: enter the contract/bank/supplier terms as a governed 'payment_terms' parameter.",
+   "estimate_state": "Complete"
+  },
+  "15_methodology_and_compliance": {
+   "verdict": "PASS",
+   "skeleton": {
+    "itp": 23,
+    "method_statement": 23,
+    "submittal_material": 9,
+    "test_commissioning": 9,
+    "hse_risk": 23,
+    "compliance": 6,
+    "ncr_structure": 6
+   },
+   "register_counts": {
+    "bid_no_bid": 3,
+    "compliance": 6,
+    "customer_requirement": 2,
+    "deviation": 1,
+    "execution_review": 14,
+    "handover_obligation": 1,
+    "hse_risk": 23,
+    "interface": 2,
+    "itp": 23,
+    "method_statement": 23,
+    "ncr_structure": 6,
+    "permit": 2,
+    "procurement_strategy": 1,
+    "quality_plan": 4,
+    "required_input": 4,
+    "responsibility": 3,
+    "submittal_material": 9,
+    "supplier_qualification": 1,
+    "tender_context": 1,
+    "test_commissioning": 9
+   },
+   "rows_with_placeholders": 96,
+   "note": "skeleton rows carry 'TO BE COMPLETED BY A COMPETENT PERSON' placeholders: the system does not write inspection criteria, HSE controls or compliance statements"
+  },
+  "16_applicability_matrix": {
+   "verdict": "PASS",
+   "counts": {
+    "Required": 41,
+    "Conditional": 2,
+    "Not Applicable": 1,
+    "Missing Customer Requirement": 1
+   },
+   "inputs": {
+    "contract_type": "lump sum (FICTIONAL)",
+    "delivery_model": "construct-only (fictional)",
+    "customer_requires": {
+     "quality_plan": "yes",
+     "technical_proposal": "yes"
+    },
+    "documents": 12,
+    "award_scenario": false
+   },
+   "not_required": [
+    [
+     "D44",
+     "tender stage: applicable only after an award (no award scenario selected)"
+    ]
+   ],
+   "missing_customer_requirement": [
+    [
+     "D13",
+     "no approved payment terms (contract payment / retention / bond terms) have been supplied"
+    ]
+   ],
+   "conditional": [
+    "D26",
+    "D32"
+   ]
+  },
+  "17_generate_document_pack": {
+   "verdict": "PASS",
+   "pack_revision": 1,
+   "out_dir": "demo_output/synthetic_closure/PRJ-9101_tender_pack_r1",
+   "classification": "demonstration",
+   "banner": "DEMONSTRATION EXPORT - NOT SUBMISSION READY - NOT APPROVED FOR ANY REAL TENDER | approvals by: test principals in environment 'test'",
+   "counts": {
+    "Required": 41,
+    "Conditional": 2,
+    "Not Applicable": 1,
+    "Missing Customer Requirement": 1
+   },
+   "statuses": {
+    "BLOCKED": 4,
+    "Not Applicable": 1,
+    "Preliminary (DEMONSTRATION)": 40
+   },
+   "blocked": {
+    "D06": "letter of offer",
+    "D13": "no approved payment terms (contract payment / retention / bond terms) have been supplied",
+    "D14": "letter of offer validity",
+    "D30": "shop drawing submittals"
+   },
+   "files": 116
+  },
+  "18_validate_document_pack": {
+   "verdict": "PASS",
+   "ok": true,
+   "errors": [],
+   "warnings": [
+    "D23: contains 'TO BE COMPLETED' placeholders",
+    "D27: contains 'TO BE COMPLETED' placeholders",
+    "D28: contains 'TO BE COMPLETED' placeholders",
+    "D29: contains 'TO BE COMPLETED' placeholders",
+    "D30: contains 'TO BE COMPLETED' placeholders",
+    "D31: contains 'TO BE COMPLETED' placeholders"
+   ],
+   "blocked_documents": [
+    "D06",
+    "D13",
+    "D14",
+    "D30"
+   ],
+   "documents": 45,
+   "files_checked": 116,
+   "facts_checked": [
+    "classification",
+    "direct_cost",
+    "estimate_version",
+    "fingerprint",
+    "indirect_cost",
+    "net_price",
+    "payable",
+    "programme_cd",
+    "programme_finish",
+    "programme_start",
+    "programme_wd",
+    "replay_ok",
+    "schedule_total",
+    "total_cost",
+    "vat"
+   ]
+  },
+  "19_production_readiness_blocked": {
+   "verdict": "PASS",
+   "classification_in_test_environment": "demonstration",
+   "reasons": [
+    "the project is flagged as a demonstration project",
+    "synthetic data is used in the estimate",
+    "the environment is 'test', not 'production'",
+    "estimate approval: no approval record",
+    "letter of offer: none generated",
+    "tender-export approval: no approval record",
+    "rate 928: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 928: recorded in environment 'test', not 'production'",
+    "rate 928: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 929: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 929: recorded in environment 'test', not 'production'",
+    "rate 929: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 930: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 930: recorded in environment 'test', not 'production'"
+   ],
+   "classification_if_production_environment": "demonstration",
+   "structural_reasons": [
+    "the project is flagged as a demonstration project",
+    "synthetic data is used in the estimate"
+   ],
+   "real_project_attempts_in_production_env": {
+    "approve_version": "NON_HUMAN_ACTOR",
+    "approve_tender_export": "NON_HUMAN_ACTOR",
+    "export_submission": "NON_HUMAN_ACTOR",
+    "approve_document": "NON_HUMAN_ACTOR",
+    "export_submission_without_export_approval (demo project)": "EXPORT_NOT_APPROVED"
+   },
+   "resolved_actor_types": {
+    "forged_display_name": "unregistered",
+    "role_mismatch": "role_mismatch",
+    "registered_test_actor": "test",
+    "unregistered": "unregistered"
+   },
+   "exports_marked_submission_ready": 0,
+   "pack_classification": "demonstration"
+  },
+  "20_assumption_bypass_blocked": {
+   "verdict": "PASS",
+   "author_self_approval": "SELF_APPROVAL_BLOCKED",
+   "administrator_self_approval": "SELF_APPROVAL_BLOCKED",
+   "viewer_approval": "PERMISSION_DENIED",
+   "ai_approval": "AI_CANNOT_APPROVE",
+   "ai_creates_register_row": "AI_FORBIDDEN",
+   "manual_entry_is_not_approval": "Pending Review",
+   "approved_by_a_second_person": "test-commercial",
+   "service_revision_creates_new_version": 2,
+   "v1_after_revision": [
+    "45",
+    "Approved"
+   ],
+   "sql_update_of_approved_value": "IntegrityError: IMMUTABLE_RECORD: approved assumption versions cannot be changed; create a new version",
+   "sql_delete_of_approved": "IntegrityError: IMMUTABLE_RECORD: approved assumption versions cannot be deleted",
+   "sql_replace_provenance": "IntegrityError: IMMUTABLE_RECORD: approved assumption versions cannot be changed; create a new version",
+   "sql_make_synthetic_look_real": "IntegrityError: IMMUTABLE_RECORD: approved assumption versions cannot be changed; create a new version",
+   "forged_identity_recorded_as": {
+    "reviewer": "forged-commercial",
+    "actor_type": "unregistered",
+    "environment": "test"
+   },
+   "forged_approval_counts_for_production": false,
+   "api": {
+    "create": 200,
+    "estimator_cannot_approve": [
+     409,
+     "SELF_APPROVAL_BLOCKED"
+    ],
+    "body_field_cannot_forge_identity": [
+     409,
+     "SELF_APPROVAL_BLOCKED"
+    ],
+    "viewer_cannot_approve": [
+     403,
+     "PERMISSION_DENIED"
+    ],
+    "viewer_cannot_create": [
+     403,
+     "PERMISSION_DENIED"
+    ],
+    "commercial_approves": 200,
+    "no_token": 401
+   },
+   "cli": [
+    {
+     "cmd": "python -m app.cli action approve_assumption {\"id\": \"ASMP-Z-090\"}",
+     "exit": 1,
+     "err": "ERROR [PERMISSION_DENIED]: Role 'Viewer' may not 'approve' assumption. Allowed: Administrator, Commercial Approver, Estimator.\n"
+    },
+    {
+     "cmd": "python -m app.cli action approve_assumption {\"id\": \"ASMP-Z-090\"}",
+     "exit": 1,
+     "err": "ERROR [AUTH_REQUIRED]: Invalid username or password.\n"
+    }
+   ]
+  },
+  "21_resolve_issues_with_test_approvals": {
+   "verdict": "PASS",
+   "open_material_queries": [],
+   "time_allocation": {
+    "first_batch": {
+     "cashflow_status": "INCOMPLETE - NOT FOR RELIANCE: SAR 211,380.00 of direct cost is allocated to no period (see unallocated_lines); SAR 260,528.38 of the price is not valued and the closing balance excludes it",
+     "unallocated_lines": [
+      [
+       "C-011",
+       "33280.00"
+      ],
+      [
+       "C-024",
+       "31800.00"
+      ],
+      [
+       "C-055",
+       "43500.00"
+      ],
+      [
+       "C-056",
+       "35600.00"
+      ],
+      [
+       "C-071",
+       "50400.00"
+      ],
+      [
+       "C-072",
+       "16800.00"
+      ]
+     ],
+     "unallocated_direct_cost": "211380.00"
+    },
+    "before": {
+     "cashflow_status": "INCOMPLETE - NOT FOR RELIANCE: SAR 568,080.00 of direct cost is allocated to no period (see unallocated_lines); SAR 700,165.40 of the price is not valued and the closing balance excludes it",
+     "unallocated_direct_cost": "568080.00",
+     "escalation_status": "INCOMPLETE - NOT FOR RELIANCE: SAR 568,080.00 of eligible cost has no time allocation and is NOT escalated (see unescalated_lines)",
+     "unescalated_cost": "568080.00",
+     "financing_refused_with": "TIMEPHASING_INCOMPLETE",
+     "final_gate_blocked_by_it": true,
+     "closing_balance": "374004.85"
+    },
+    "after": {
+     "cashflow_status": "COMPLETE",
+     "complete": true,
+     "reconciliation_checks_ok": true,
+     "escalation_complete": true,
+     "escalation_total": "70523.43",
+     "closing_balance": "450519.65",
+     "peak_funding": "1045873.28"
+    }
+   },
+   "programme": {
+    "version": 2,
+    "working_days": 231,
+    "calendar_days": 327,
+    "finish": "2028-01-27",
+    "gaps": [],
+    "claim": "PROVISIONAL - NOT FOR RELIANCE: synthetic test inputs",
+    "synthetic": true,
+    "complete": true
+   },
+   "critical_open": [],
+   "exceptions_accepted": [
+    [
+     "PLANT_HIRE_DAYS",
+     "SYN-C-050"
+    ]
+   ],
+   "gate_blocked": false,
+   "blockers": [],
+   "estimate_state": "Complete",
+   "totals": {
+    "direct_cost": "3452410.00",
+    "indirect_cost": "292543.90",
+    "total_cost": "3894752.06",
+    "selling_price_pre_tax": "4206320.69",
+    "commercial_net_price": "4206332.22",
+    "tax": "630948.10",
+    "final_payable": "4837268.79"
+   },
+   "plant_hire_after": null
+  },
+  "22_final_demonstration_pack": {
+   "verdict": "PASS",
+   "pack_revision": 2,
+   "out_dir": "demo_output/synthetic_closure/PRJ-9101_tender_pack_r2",
+   "classification": "demonstration",
+   "banner": "DEMONSTRATION EXPORT - NOT SUBMISSION READY - NOT APPROVED FOR ANY REAL TENDER | approvals by: test principals in environment 'test'",
+   "blocked_in_rev1": [
+    "D06",
+    "D13",
+    "D14",
+    "D30"
+   ],
+   "blocked_now": [],
+   "blocked_reasons": {},
+   "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": [
+     "D23: contains 'TO BE COMPLETED' placeholders",
+     "D27: contains 'TO BE COMPLETED' placeholders",
+     "D28: contains 'TO BE COMPLETED' placeholders",
+     "D29: contains 'TO BE COMPLETED' placeholders",
+     "D30: contains 'TO BE COMPLETED' placeholders",
+     "D31: contains 'TO BE COMPLETED' placeholders"
+    ],
+    "files": 116
+   },
+   "statuses": {
+    "Not Applicable": 1,
+    "Preliminary (DEMONSTRATION)": 44
+   },
+   "exports": [
+    {
+     "readiness": "demonstration",
+     "submission_ready": 0,
+     "n": 4
+    }
+   ],
+   "export_files": [
+    "OFR-PRJ-9101-01.docx",
+    "estimate_report_PRJ-9101_DEMONSTRATION.docx",
+    "pricing_schedule_PRJ-9101_DEMONSTRATION.xlsx",
+    "reconciliation_report_PRJ-9101_run11.xlsx"
+   ],
+   "readiness_reasons_still_present": [
+    "the project is flagged as a demonstration project",
+    "synthetic data is used in the estimate",
+    "the environment is 'test', not 'production'",
+    "estimate approval: approved by a 'test' principal (test-commercial); only registered human users count",
+    "estimate approval: recorded in environment 'test', not 'production'",
+    "estimate approval: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "offer approval: approved by a 'test' principal (test-commercial); only registered human users count",
+    "offer approval: recorded in environment 'test', not 'production'",
+    "offer approval: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "tender-export approval: approved by a 'test' principal (test-commercial); only registered human users count",
+    "tender-export approval: recorded in environment 'test', not 'production'",
+    "tender-export approval: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "rate 928: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 928: recorded in environment 'test', not 'production'",
+    "rate 928: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 929: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 929: recorded in environment 'test', not 'production'",
+    "rate 929: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 930: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 930: recorded in environment 'test', not 'production'",
+    "rate 930: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 931: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 931: recorded in environment 'test', not 'production'",
+    "rate 931: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 932: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 932: recorded in environment 'test', not 'production'",
+    "rate 932: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 933: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 933: recorded in environment 'test', not 'production'",
+    "rate 933: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 934: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 934: recorded in environment 'test', not 'production'",
+    "rate 934: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 935: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 935: recorded in environment 'test', not 'production'",
+    "rate 935: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 936: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 936: recorded in environment 'test', not 'production'",
+    "rate 936: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 937: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 937: recorded in environment 'test', not 'production'",
+    "rate 937: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 938: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 938: recorded in environment 'test', not 'production'",
+    "rate 938: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 939: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 939: recorded in environment 'test', not 'production'",
+    "rate 939: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 940: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 940: recorded in environment 'test', not 'production'",
+    "rate 940: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 941: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 941: recorded in environment 'test', not 'production'",
+    "rate 941: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 942: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 942: recorded in environment 'test', not 'production'",
+    "rate 942: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 943: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 943: recorded in environment 'test', not 'production'",
+    "rate 943: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 944: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 944: recorded in environment 'test', not 'production'",
+    "rate 944: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 945: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 945: recorded in environment 'test', not 'production'",
+    "rate 945: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 946: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 946: recorded in environment 'test', not 'production'",
+    "rate 946: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 947: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 947: recorded in environment 'test', not 'production'",
+    "rate 947: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 948: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 948: recorded in environment 'test', not 'production'",
+    "rate 948: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 949: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 949: recorded in environment 'test', not 'production'",
+    "rate 949: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 950: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 950: recorded in environment 'test', not 'production'",
+    "rate 950: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 951: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 951: recorded in environment 'test', not 'production'",
+    "rate 951: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 952: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 952: recorded in environment 'test', not 'production'",
+    "rate 952: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 953: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 953: recorded in environment 'test', not 'production'",
+    "rate 953: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 954: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 954: recorded in environment 'test', not 'production'",
+    "rate 954: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 955: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 955: recorded in environment 'test', not 'production'",
+    "rate 955: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 956: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 956: recorded in environment 'test', not 'production'",
+    "rate 956: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 957: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 957: recorded in environment 'test', not 'production'",
+    "rate 957: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 958: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 958: recorded in environment 'test', not 'production'",
+    "rate 958: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 959: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 959: recorded in environment 'test', not 'production'",
+    "rate 959: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 960: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 960: recorded in environment 'test', not 'production'",
+    "rate 960: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 961: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 961: recorded in environment 'test', not 'production'",
+    "rate 961: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 962: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 962: recorded in environment 'test', not 'production'",
+    "rate 962: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 963: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 963: recorded in environment 'test', not 'production'",
+    "rate 963: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 964: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 964: recorded in environment 'test', not 'production'",
+    "rate 964: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 965: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 965: recorded in environment 'test', not 'production'",
+    "rate 965: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 966: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 966: recorded in environment 'test', not 'production'",
+    "rate 966: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 967: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 967: recorded in environment 'test', not 'production'",
+    "rate 967: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 968: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 968: recorded in environment 'test', not 'production'",
+    "rate 968: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 969: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 969: recorded in environment 'test', not 'production'",
+    "rate 969: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "rate 970: approved by a 'test' principal (test-procurement); only registered human users count",
+    "rate 970: recorded in environment 'test', not 'production'",
+    "rate 970: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+    "commercial policy approval: approved by a 'test' principal (test-commercial); only registered human users count",
+    "commercial policy approval: recorded in environment 'test', not 'production'",
+    "commercial policy approval: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "tax category VAT-STD approval: approved by a 'test' principal (test-commercial); only registered human users count",
+    "tax category VAT-STD approval: recorded in environment 'test', not 'production'",
+    "tax category VAT-STD approval: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "indirect IND-HO: approved by a 'test' principal (test-commercial); only registered human users count",
+    "indirect IND-HO: recorded in environment 'test', not 'production'",
+    "indirect IND-HO: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "indirect IND-INS: approved by a 'test' principal (test-commercial); only registered human users count",
+    "indirect IND-INS: recorded in environment 'test', not 'production'",
+    "indirect IND-INS: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "indirect IND-SITE: approved by a 'test' principal (test-commercial); only registered human users count",
+    "indirect IND-SITE: recorded in environment 'test', not 'production'",
+    "indirect IND-SITE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "reconciliation exception PLANT_HIRE_DAYS (SYN-C-050): accepted by a 'test' principal; recorded in environment 'test'",
+    "programme baseline rests on synthetic or provisional norms / profile / calendar",
+    "productivity norm N-BACK: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-BACK: recorded in environment 'test', not 'production'",
+    "productivity norm N-BACK: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-CABLE: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-CABLE: recorded in environment 'test', not 'production'",
+    "productivity norm N-CABLE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-COAT: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-COAT: recorded in environment 'test', not 'production'",
+    "productivity norm N-COAT: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-FIBRE: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-FIBRE: recorded in environment 'test', not 'production'",
+    "productivity norm N-FIBRE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-EXC: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-EXC: recorded in environment 'test', not 'production'",
+    "productivity norm N-EXC: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-EXCH: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-EXCH: recorded in environment 'test', not 'production'",
+    "productivity norm N-EXCH: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-FORM: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-FORM: recorded in environment 'test', not 'production'",
+    "productivity norm N-FORM: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-NDT: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-NDT: recorded in environment 'test', not 'production'",
+    "productivity norm N-NDT: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-PIPE: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-PIPE: recorded in environment 'test', not 'production'",
+    "productivity norm N-PIPE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-POUR: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-POUR: recorded in environment 'test', not 'production'",
+    "productivity norm N-POUR: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-PUMP: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-PUMP: recorded in environment 'test', not 'production'",
+    "productivity norm N-PUMP: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-REBAR: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-REBAR: recorded in environment 'test', not 'production'",
+    "productivity norm N-REBAR: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-ROAD: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-ROAD: recorded in environment 'test', not 'production'",
+    "productivity norm N-ROAD: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-SHORE: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-SHORE: recorded in environment 'test', not 'production'",
+    "productivity norm N-SHORE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-STEEL: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-STEEL: recorded in environment 'test', not 'production'",
+    "productivity norm N-STEEL: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-SUPP: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-SUPP: recorded in environment 'test', not 'production'",
+    "productivity norm N-SUPP: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-TRAY: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-TRAY: recorded in environment 'test', not 'production'",
+    "productivity norm N-TRAY: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "productivity norm N-WELD: approved by a 'test' principal (test-commercial); only registered human users count",
+    "productivity norm N-WELD: recorded in environment 'test', not 'production'",
+    "productivity norm N-WELD: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "programme baseline v2: approved by a 'test' principal (test-commercial); only registered human users count",
+    "programme baseline v2: recorded in environment 'test', not 'production'",
+    "programme baseline v2: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "workforce profile WP-MID: approved by a 'test' principal (test-commercial); only registered human users count",
+    "workforce profile WP-MID: recorded in environment 'test', not 'production'",
+    "workforce profile WP-MID: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+    "document PRJ-9101-D16 approval: no approval record",
+    "document PRJ-9101-D06 approval: no approval record"
+   ],
+   "documents_approved_by_test_actor": [
+    "D16",
+    "D06"
+   ],
+   "note": "approved by TEST ACTORs on a demonstration project: the pack stays DEMONSTRATION and is never submission-ready"
+  },
+  "23_hypothetical_handover_pack": {
+   "verdict": "PASS",
+   "refused_before_award_scenario": "AWARD_NOT_SELECTED",
+   "pack_revision": 1,
+   "out_dir": "demo_output/synthetic_closure/PRJ-9101_handover_pack_r1",
+   "banner": "HYPOTHETICAL POST-AWARD HANDOVER - SIMULATION ONLY - NO AWARD HAS BEEN MADE | DEMONSTRATION EXPORT - NOT SUBMISSION READY - NOT APPROVED FOR ANY REAL TENDER | approvals by: test principals in environment 'test'",
+   "documents": [
+    [
+     "H01",
+     "Awarded scope and scope boundaries",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H02",
+     "Final tender BOQ and cost baseline",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H03",
+     "Approved assumptions and exclusions",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H04",
+     "Customer clarifications and responses",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H05",
+     "Programme baseline and constraints",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H06",
+     "Procurement and long-lead commitments",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H07",
+     "Subcontract interfaces",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H08",
+     "Technical submittal obligations",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H09",
+     "Quality, inspection and test obligations",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H10",
+     "HSE and access requirements",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H11",
+     "Commissioning and handover obligations",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H12",
+     "Commercial terms, payment milestones and retention",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H13",
+     "Risk register and mitigation owners",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H14",
+     "Outstanding decisions and actions",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H15",
+     "Document register and revisions",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H16",
+     "Estimate snapshot and replay fingerprint",
+     "Preliminary (SIMULATED HANDOVER)"
+    ],
+    [
+     "H17",
+     "Follow-up action owners",
+     "Preliminary (SIMULATED HANDOVER)"
+    ]
+   ],
+   "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": [
+     "H08: contains 'TO BE COMPLETED' placeholders",
+     "H09: contains 'TO BE COMPLETED' placeholders",
+     "H10: contains 'TO BE COMPLETED' placeholders",
+     "H11: contains 'TO BE COMPLETED' placeholders"
+    ],
+    "files": 49
+   },
+   "note": "no award has been made; the scenario is a labelled simulation"
+  },
+  "24_freeze_estimate_and_manifest": {
+   "verdict": "PASS",
+   "snapshot_verified": true,
+   "files_in_manifest": 165,
+   "tender_manifest_sha256": "16d13fa2d7ff910afe46b190924ce23f313e9f595e605a79b3b6036ea478f0e3",
+   "handover_manifest_sha256": "8083e5db19d81225045ebcfec6a5b8f353823624f52ec024ad606cd515ac71d4",
+   "estimate_fingerprint": "48d0f9242dc910b76b953823fdb320a5afd036297875e35276224a0f0929f6c5",
+   "consolidated_manifest": "demo_output/synthetic_closure/MANIFEST.json"
+  },
+  "25_global_library_change": {
+   "verdict": "PASS",
+   "live_estimate_changed": true,
+   "live_total_before": "4837268.79",
+   "live_total_after": "4897593.46",
+   "frozen_total": "4837268.79",
+   "frozen_replay_ok": true,
+   "replay_differences": [],
+   "document_figure_differences_rev_after_vs_before": {},
+   "new_pack_revision": 3,
+   "global_changes": {
+    "rate": "SYN-C-030 +25% (new approved version)",
+    "assumption": "ASMP-Z-002 revised to v2 (approved)"
+   }
+  },
+  "26_snapshot_replay": {
+   "verdict": "PASS",
+   "replay_ok": true,
+   "replay_fingerprint": "48d0f9242dc910b7",
+   "direct_cost_replay_ok": true,
+   "documents_agree_with_frozen_totals": true,
+   "frozen_totals": {
+    "commercial_net_price": "4206332.22",
+    "direct_cost": "3452410",
+    "final_payable": "4837268.79",
+    "indirect_cost": "292543.9",
+    "selling_price_pre_tax": "4206320.69",
+    "tax": "630948.1",
+    "total_cost": "3894752.06"
+   },
+   "replayed_totals": {
+    "direct_cost": "3452410",
+    "indirect_cost": "292543.9",
+    "total_cost": "3894752.06",
+    "selling_price_pre_tax": "4206320.69",
+    "commercial_net_price": "4206332.22",
+    "tax": "630948.1",
+    "final_payable": "4837268.79"
+   },
+   "document_facts": {
+    "net_price": "4206332.22",
+    "vat": "630948.1",
+    "payable": "4837268.79",
+    "schedule_total": "4206320.69"
+   }
+  },
+  "27_ui_api_cli_agreement": {
+   "verdict": "PASS",
+   "agreement": {
+    "crew_working_days": true,
+    "applicability_counts": true,
+    "query_status_counts": true,
+    "assumption_classes": true,
+    "estimate_totals_api_vs_engine": true
+   },
+   "ui": {
+    "/projects/PRJ-9101/": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/estimate": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/boq": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/reconciliation": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/analysis": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/analysis/crew_scenarios": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/analysis/applicability": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/analysis/tender_queries": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/analysis/assumption_evidence": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/analysis/productivity_programme": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    },
+    "/projects/PRJ-9101/workspace": {
+     "status": 200,
+     "traceback": false,
+     "mentions_synthetic": true
+    }
+   },
+   "cli_exit": {
+    "crew": 0,
+    "applic": 0,
+    "queries": 0,
+    "evidence": 0
+   },
+   "crew_working_days": {
+    "WP-SME": 422,
+    "WP-MID": 231,
+    "WP-LARGE": 192,
+    "WP-ENT": 192
+   },
+   "applicability_counts": {
+    "Required": 43,
+    "Conditional": 2,
+    "Not Applicable": 0,
+    "Missing Customer Requirement": 0
+   },
+   "query_status_counts": {
+    "Draft": 0,
+    "Approved to Issue": 0,
+    "Issued": 0,
+    "Answered": 0,
+    "Closed": 8,
+    "Withdrawn": 22
+   }
+  }
+ }
+}

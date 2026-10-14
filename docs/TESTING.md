@@ -76,3 +76,11 @@ Every numeric test uses figures worked out by hand in the test (comments show th
 | `tests/unit/test_plant_hire.py` | missing hire terms, minimum hire, standby, mobilisation/demobilisation lines, working vs calendar days from the programme window, programme delay |
 | `tests/approvals/test_actor_isolation.py`, `tests/integration/test_actor_isolation_api.py` | registered human chain is ready; test principals, forged display names, unregistered/role-mismatched/inactive principals, wrong environment, copied/hand-written approval rows, demo projects, exceptions by test principals; the same refusals through the REST API |
 | `tests/integration/test_synthetic_pilot.py` (additions) | before/after time allocation, eligibility base, plant windows, production isolation of the pilot |
+
+## End-to-end closure (2026-10-14)
+New tests: `tests/unit/test_productivity_engine.py` (15, hand-computed), `tests/integration/test_workforce_service.py` (7), `tests/closure/` - `test_closure_scenario.py` (runs the 27-stage scenario once, ~90 s, and checks the independent oracle, the documents and the validator),
+`test_assumptions_governance.py`, `test_tender_services.py`, `test_negative_controls.py`, `test_production_pack_gate.py`, `test_security_backup_migration_standards.py`.
+Reproduce the scenario outside pytest: `python scripts/run_closure_scenario.py <fresh dir> --out <dir>` (writes the tender pack, the handover pack, `MANIFEST.json` and `acceptance_results.json`), then
+`python scripts/render_closure_report.py <dir> [--code-commit SHA] [--suite "N passed"]` regenerates `docs/SYNTHETIC_END_TO_END_CLOSURE_REPORT.md` and `docs/TENDER_DOCUMENT_APPLICABILITY_MATRIX.md` from the evidence.
+The scenario always runs with `KSA_ENVIRONMENT=test`, `KSA_ALLOW_SELF_APPROVAL=false`, registered TEST ACTORS and a fresh database; it never touches `var/` or `projects/`.
+Last full-suite result on this branch: **458 passed** (≈320 s); the closure scenario reruns green from a fresh scratch directory (27/27 stages).

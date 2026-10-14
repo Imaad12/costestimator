@@ -32,3 +32,14 @@ Limits: a person with administrator rights or database access can register a `hu
 
 ## Operating guidance
 1. Bind to `127.0.0.1` (default) unless TLS is configured. 2. Set `KSA_SECRET_KEY` explicitly in shared use. 3. Replace the demo users (`init --demo-users` is for local demos only). 4. Back up with `python -m app.cli backup` and keep backups on encrypted storage yourself. 5. Treat the `AI` features as optional and off by default (`KSA_AI_ENABLED`); they can only propose.
+
+## End-to-end closure (iteration 6, 2026-10-14)
+Full audit and threat model: `docs/ASSUMPTIONS_GOVERNANCE_AND_SECURITY_AUDIT.md`. In short:
+
+* **Four-eyes is now the default** (`allow_self_approval = false` in code and in `config/settings.toml`). An Administrator is **not** exempt for assumptions, project overrides, productivity norms, workforce profiles, programme baselines,
+  tender queries, tender documents and rates (`policy.SEPARATION_ENTITIES`). The demo seeder relaxes it only inside its own loader and restores it.
+* **Database guards**: triggers refuse any change or delete of an *Approved/Superseded* assumption, project override, productivity norm or workforce profile (`IMMUTABLE_RECORD`). They protect against bugs and casual SQL; anyone with write access to the
+  database file can drop them. The hash-chained audit log is tamper-**evident**, not tamper-proof.
+* **Identity**: REST/UI identity comes from the signed token, never from a request field (tested: body fields `reviewer`/`actor` are ignored); the CLI `action` command authenticates a real user; `create-user` and password resets from the shell are now audited as `cli:<os user>`.
+* **Submission readiness (Stage J)** also requires: no unresolved material query, no missing required document, no synthetic assumption feeding the estimate, an approved non-provisional programme baseline whose norms, workforce profile and baseline approvals are registered-human production approvals, and document approvals for the technical and commercial proposals; a pack with BLOCKED documents or placeholders is never labelled submission-ready even when the approval chain verifies.
+* **Not provided**: MFA/SSO, immutable or off-box audit storage, encryption at rest, separation of administrator duties, API rate limiting beyond sign-in lockout, penetration testing. Hardening backlog: audit document section 6. **Deployment restriction:** local-only or trusted-LAN behind TLS; not for internet exposure and not for wider multi-user production until the backlog items 1-3 are done.

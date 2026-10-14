@@ -1,0 +1,514 @@
+{
+ "banner": "HYPOTHETICAL POST-AWARD HANDOVER - SIMULATION ONLY - NO AWARD HAS BEEN MADE | DEMONSTRATION EXPORT - NOT SUBMISSION READY - NOT APPROVED FOR ANY REAL TENDER | approvals by: test principals in environment 'test'",
+ "classification": "demonstration",
+ "documents": [
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H01",
+   "doc_id": "PRJ-9101-H01",
+   "files": {
+    "docx": {
+     "bytes": 39628,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H01_r1_Awarded-scope-and-scope-boundaries.docx",
+     "sha256": "130bff20957a2ad9310bd90163ff6358575baadd6c27330be874b46fa606dd74"
+    },
+    "pdf": {
+     "bytes": 5138,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H01_r1_Awarded-scope-and-scope-boundaries.pdf",
+     "sha256": "7e5c8740e97aeead4afe9eda42c313960cb0cd5d151af23e7c239893d292cf63"
+    },
+    "xlsx": {
+     "bytes": 6935,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H01_r1_Awarded-scope-and-scope-boundaries.xlsx",
+     "sha256": "953bddcc34b5dffcc29dbe1ff4649e8d14bdff4a25e2b614800d2329ec5ea2d3"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "130bff20957a2ad9310bd90163ff6358575baadd6c27330be874b46fa606dd74",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-SCOPE@1.0.0",
+   "title": "Awarded scope and scope boundaries"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H02",
+   "doc_id": "PRJ-9101-H02",
+   "files": {
+    "docx": {
+     "bytes": 40449,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H02_r1_Final-tender-BOQ-and-cost-baseline.docx",
+     "sha256": "1d1c88ffbaa17fb18a346099aad870a1933171a68201527314a2061508f6180b"
+    },
+    "pdf": {
+     "bytes": 8220,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H02_r1_Final-tender-BOQ-and-cost-baseline.pdf",
+     "sha256": "df5b6e2f6ea0ce81ba20d478604220b2f14be83b5c792d40f2321bcbf6f419e7"
+    },
+    "xlsx": {
+     "bytes": 8328,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H02_r1_Final-tender-BOQ-and-cost-baseline.xlsx",
+     "sha256": "d64c6111d99d224ad39b3035de40eb06e9dd740d0ff9a95ad482c24b673ad8d4"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "1d1c88ffbaa17fb18a346099aad870a1933171a68201527314a2061508f6180b",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-BASELINE@1.0.0",
+   "title": "Final tender BOQ and cost baseline"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H03",
+   "doc_id": "PRJ-9101-H03",
+   "files": {
+    "docx": {
+     "bytes": 42826,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H03_r1_Approved-assumptions-and-exclusions.docx",
+     "sha256": "69c4972df85418367204c3ef0557c73a11c676c096f83e682fce294f1b4cac75"
+    },
+    "pdf": {
+     "bytes": 19871,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H03_r1_Approved-assumptions-and-exclusions.pdf",
+     "sha256": "ecbf1c55a490a14467db4fdb8d1608a61827b9eb131dba56ec33a7485874ced2"
+    },
+    "xlsx": {
+     "bytes": 12766,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H03_r1_Approved-assumptions-and-exclusions.xlsx",
+     "sha256": "64fd6453de9657aed69856c259e9399fe38320102659534faf4e4d1a42b2e0bf"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "69c4972df85418367204c3ef0557c73a11c676c096f83e682fce294f1b4cac75",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-ASSUMPTIONS@1.0.0",
+   "title": "Approved assumptions and exclusions"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H04",
+   "doc_id": "PRJ-9101-H04",
+   "files": {
+    "docx": {
+     "bytes": 43377,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H04_r1_Customer-clarifications-and-responses.docx",
+     "sha256": "92898eaae70e210e55433b2d6e1146935730c38bf13f9b378ef03686151d8eda"
+    },
+    "pdf": {
+     "bytes": 29635,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H04_r1_Customer-clarifications-and-responses.pdf",
+     "sha256": "6fbdf2189ec729c791ff7a919c75adf7f5f06a905ee3e15e5dcbc4101768fbc5"
+    },
+    "xlsx": {
+     "bytes": 11077,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H04_r1_Customer-clarifications-and-responses.xlsx",
+     "sha256": "e9cbce0d79e1153bcf73e14992824243301c0cae4abcbb3d263a88c7fc364021"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "92898eaae70e210e55433b2d6e1146935730c38bf13f9b378ef03686151d8eda",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-CLARIF@1.0.0",
+   "title": "Customer clarifications and responses"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H05",
+   "doc_id": "PRJ-9101-H05",
+   "files": {
+    "docx": {
+     "bytes": 41584,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H05_r1_Programme-baseline-and-constraints.docx",
+     "sha256": "43fb4ef085863fceb89e4c28c2d05c6720bc4319cba8edad3780e5e8a9c76366"
+    },
+    "pdf": {
+     "bytes": 12045,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H05_r1_Programme-baseline-and-constraints.pdf",
+     "sha256": "898bf81e225bc4e73ef97cd4dbfb1825a78dbfb72f1bca03229ff7ef2413a6e6"
+    },
+    "xlsx": {
+     "bytes": 11393,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H05_r1_Programme-baseline-and-constraints.xlsx",
+     "sha256": "4c3743d8b4419aca88391f6137a660b36c727ca761918298ec710e387f803e12"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "43fb4ef085863fceb89e4c28c2d05c6720bc4319cba8edad3780e5e8a9c76366",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-PROGRAMME@1.0.0",
+   "title": "Programme baseline and constraints"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H06",
+   "doc_id": "PRJ-9101-H06",
+   "files": {
+    "docx": {
+     "bytes": 40592,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H06_r1_Procurement-and-long-lead-commitments.docx",
+     "sha256": "4c0cc83ad75e81799adf06c0c26ee03670bae5d86e45e00e47ab670d0e22ecd8"
+    },
+    "pdf": {
+     "bytes": 8518,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H06_r1_Procurement-and-long-lead-commitments.pdf",
+     "sha256": "b09a368391e8fe25a12a885fe8d0f92775d69c8ebb520a59e67ab9e3e78684b4"
+    },
+    "xlsx": {
+     "bytes": 10899,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H06_r1_Procurement-and-long-lead-commitments.xlsx",
+     "sha256": "479d5badd16648753b83e3e085195798d9a9e7aff9ddffe1045e5fec1016c971"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "4c0cc83ad75e81799adf06c0c26ee03670bae5d86e45e00e47ab670d0e22ecd8",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-PROCUREMENT@1.0.0",
+   "title": "Procurement and long-lead commitments"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H07",
+   "doc_id": "PRJ-9101-H07",
+   "files": {
+    "docx": {
+     "bytes": 39614,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H07_r1_Subcontract-interfaces.docx",
+     "sha256": "0f43cd60db7f11a82326897d69a172aafa538cdca483c27c99b7b4601745ce67"
+    },
+    "pdf": {
+     "bytes": 5037,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H07_r1_Subcontract-interfaces.pdf",
+     "sha256": "6b942b76863c477f9ebc14f768fb2035e3b8f085588f80b002c122fc9d31996e"
+    },
+    "xlsx": {
+     "bytes": 7062,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H07_r1_Subcontract-interfaces.xlsx",
+     "sha256": "f07d296677fa9efa44b8e454a70dd675309fdf331f7d1ae08ca9a30f8305a979"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "0f43cd60db7f11a82326897d69a172aafa538cdca483c27c99b7b4601745ce67",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-INTERFACES@1.0.0",
+   "title": "Subcontract interfaces"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H08",
+   "doc_id": "PRJ-9101-H08",
+   "files": {
+    "docx": {
+     "bytes": 39624,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H08_r1_Technical-submittal-obligations.docx",
+     "sha256": "a668310b137643bc20b0e16e7de605543b15930e8d71466479f22276fb8f510d"
+    },
+    "pdf": {
+     "bytes": 5517,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H08_r1_Technical-submittal-obligations.pdf",
+     "sha256": "b861cdc932411546934a422a5fd204888e767d479065f90b54d5973fe4ad6f1c"
+    },
+    "xlsx": {
+     "bytes": 7175,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H08_r1_Technical-submittal-obligations.xlsx",
+     "sha256": "ed4209b2fd89e7b148a578e135880abbe5e762a507060b9c31fd740e6f2f1211"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "a668310b137643bc20b0e16e7de605543b15930e8d71466479f22276fb8f510d",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-SUBMITTALS@1.0.0",
+   "title": "Technical submittal obligations"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H09",
+   "doc_id": "PRJ-9101-H09",
+   "files": {
+    "docx": {
+     "bytes": 40348,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H09_r1_Quality-inspection-and-test-obligations.docx",
+     "sha256": "b003008bf5f83363ccdd9bb2836124d2c3d4dca1644449119e0d5093fa01278d"
+    },
+    "pdf": {
+     "bytes": 8125,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H09_r1_Quality-inspection-and-test-obligations.pdf",
+     "sha256": "8daaa635f5d6fc725a92b575da86c022189a066409e76263e357a6c865090778"
+    },
+    "xlsx": {
+     "bytes": 8729,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H09_r1_Quality-inspection-and-test-obligations.xlsx",
+     "sha256": "d74fe2357f92b309049f567da600894c01ed79201f75bde23f5412561a902509"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "b003008bf5f83363ccdd9bb2836124d2c3d4dca1644449119e0d5093fa01278d",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-QUALITY@1.0.0",
+   "title": "Quality, inspection and test obligations"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H10",
+   "doc_id": "PRJ-9101-H10",
+   "files": {
+    "docx": {
+     "bytes": 40455,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H10_r1_HSE-and-access-requirements.docx",
+     "sha256": "d2d52557b125c98e8e2362c9d59dfd565f4592d787a06364169ba9301c4292f4"
+    },
+    "pdf": {
+     "bytes": 10056,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H10_r1_HSE-and-access-requirements.pdf",
+     "sha256": "b3fb35e56fda4f4592547dc7832a286c644495f163b1832ef6acb998279b7be3"
+    },
+    "xlsx": {
+     "bytes": 9269,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H10_r1_HSE-and-access-requirements.xlsx",
+     "sha256": "cdabfce74cca3d7066abb835e0c853c55c86bfdf6952a27940be0d6be30b87f1"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "d2d52557b125c98e8e2362c9d59dfd565f4592d787a06364169ba9301c4292f4",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-HSE@1.0.0",
+   "title": "HSE and access requirements"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H11",
+   "doc_id": "PRJ-9101-H11",
+   "files": {
+    "docx": {
+     "bytes": 39662,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H11_r1_Commissioning-and-handover-obligations.docx",
+     "sha256": "c4ed0595e539e8db520b8f4934f06bfaa497311a7a4051a8643bea42f66d7b03"
+    },
+    "pdf": {
+     "bytes": 5700,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H11_r1_Commissioning-and-handover-obligations.pdf",
+     "sha256": "d3f82aae9e1050cc209971c767996352b72258f97aee9e057551450f3b6c6579"
+    },
+    "xlsx": {
+     "bytes": 7224,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H11_r1_Commissioning-and-handover-obligations.xlsx",
+     "sha256": "2fdf94947c635bfeae814bf5ce6cd7daae243606d7aa3c2543d990e4c0cdadad"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "c4ed0595e539e8db520b8f4934f06bfaa497311a7a4051a8643bea42f66d7b03",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-COMMISSIONING@1.0.0",
+   "title": "Commissioning and handover obligations"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H12",
+   "doc_id": "PRJ-9101-H12",
+   "files": {
+    "docx": {
+     "bytes": 41841,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H12_r1_Commercial-terms-payment-milestones-and-retentio.docx",
+     "sha256": "7277ac63327aecf468796677f1242dbe7de3ac64efd5e7c77d1905248722b6d8"
+    },
+    "pdf": {
+     "bytes": 11281,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H12_r1_Commercial-terms-payment-milestones-and-retentio.pdf",
+     "sha256": "f488b8036bd1978d4f17bcd3ad9966bf4c977e6261fba86b035508e288c04d0e"
+    },
+    "xlsx": {
+     "bytes": 11297,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H12_r1_Commercial-terms-payment-milestones-and-retentio.xlsx",
+     "sha256": "63ca702337a545525d2213d64c4fc9ec0665bb61fb096862c5909d109386ff74"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "7277ac63327aecf468796677f1242dbe7de3ac64efd5e7c77d1905248722b6d8",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-COMMERCIAL@1.0.0",
+   "title": "Commercial terms, payment milestones and retention"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H13",
+   "doc_id": "PRJ-9101-H13",
+   "files": {
+    "docx": {
+     "bytes": 39524,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H13_r1_Risk-register-and-mitigation-owners.docx",
+     "sha256": "992c5bae98011336cb6744b1bd2000b90058c178500720f981ec47ab67ecfc8c"
+    },
+    "pdf": {
+     "bytes": 4810,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H13_r1_Risk-register-and-mitigation-owners.pdf",
+     "sha256": "25285809bf0ebe61b929eb9753d741fede576e0e330389e1415cad60fe154b7e"
+    },
+    "xlsx": {
+     "bytes": 6428,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H13_r1_Risk-register-and-mitigation-owners.xlsx",
+     "sha256": "da7bfd953a76947aea11d47b0a87fd7c055a1169a53f2466191024f2713b927f"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "992c5bae98011336cb6744b1bd2000b90058c178500720f981ec47ab67ecfc8c",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-RISK@1.0.0",
+   "title": "Risk register and mitigation owners"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H14",
+   "doc_id": "PRJ-9101-H14",
+   "files": {
+    "docx": {
+     "bytes": 41950,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H14_r1_Outstanding-decisions-and-actions.docx",
+     "sha256": "153e2cf6ee0ade77575a4f89140568be95df26fae9e5bb001ede54922b002a6c"
+    },
+    "pdf": {
+     "bytes": 31671,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H14_r1_Outstanding-decisions-and-actions.pdf",
+     "sha256": "8742f5a1a137e9cd9f5fcb5006d48ad5f2cc6c32d34e37e04ef6486036f0008e"
+    },
+    "xlsx": {
+     "bytes": 12836,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H14_r1_Outstanding-decisions-and-actions.xlsx",
+     "sha256": "d1f540a8cd23eb6f775990652a922730612ee5823ad167f860ce46f6e2d64d32"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "153e2cf6ee0ade77575a4f89140568be95df26fae9e5bb001ede54922b002a6c",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-OPEN@1.0.0",
+   "title": "Outstanding decisions and actions"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H15",
+   "doc_id": "PRJ-9101-H15",
+   "files": {
+    "docx": {
+     "bytes": 40312,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H15_r1_Document-register-and-revisions.docx",
+     "sha256": "ad50f44eccfb7c9893643c4393906a37722a8429b978c39fe5fc93c2fbee3be5"
+    },
+    "pdf": {
+     "bytes": 9390,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H15_r1_Document-register-and-revisions.pdf",
+     "sha256": "0cab954bda281b08c3e3c2854341c6a3ce5fa38dab507d16bebc46f271a6b7da"
+    },
+    "xlsx": {
+     "bytes": 8318,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H15_r1_Document-register-and-revisions.xlsx",
+     "sha256": "acffb2a43f4af222bfffdf4fecd849dfab47dbf134a247361e70ce0a316f9857"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "ad50f44eccfb7c9893643c4393906a37722a8429b978c39fe5fc93c2fbee3be5",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-DOCREG@1.0.0",
+   "title": "Document register and revisions"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H16",
+   "doc_id": "PRJ-9101-H16",
+   "files": {
+    "docx": {
+     "bytes": 39273,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H16_r1_Estimate-snapshot-and-replay-fingerprint.docx",
+     "sha256": "0af103767b3af3628f9f9cc2729cf4614c797e281ce9c1448eceff0fc2d7619e"
+    },
+    "pdf": {
+     "bytes": 4300,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H16_r1_Estimate-snapshot-and-replay-fingerprint.pdf",
+     "sha256": "ac728f9a887bca377a7a5f77392bed25a20c2784a2c46756cd036d6f477f3251"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "0af103767b3af3628f9f9cc2729cf4614c797e281ce9c1448eceff0fc2d7619e",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-SNAPSHOT@1.0.0",
+   "title": "Estimate snapshot and replay fingerprint"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "H17",
+   "doc_id": "PRJ-9101-H17",
+   "files": {
+    "docx": {
+     "bytes": 41126,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H17_r1_Follow-up-action-owners.docx",
+     "sha256": "7292ede2feabe0c458726272ff8d316e8ad152287e9d79bd463c186e530225da"
+    },
+    "pdf": {
+     "bytes": 29263,
+     "path": "PRJ-9101_handover_pack_r1/PRJ-9101-H17_r1_Follow-up-action-owners.pdf",
+     "sha256": "884bc28a0d37649dc33fdffdc073483bdd9eeee92c0592a728558d199a160128"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "simulated award scenario",
+   "revision": 1,
+   "sha256": "7292ede2feabe0c458726272ff8d316e8ad152287e9d79bd463c186e530225da",
+   "status": "Preliminary (SIMULATED HANDOVER)",
+   "template": "H-OWNERS@1.0.0",
+   "title": "Follow-up action owners"
+  }
+ ],
+ "estimate_fingerprint": "48d0f9242dc910b76b953823fdb320a5afd036297875e35276224a0f0929f6c5",
+ "estimate_version": 2,
+ "hypothetical": true,
+ "issue_date": "2027-02-15",
+ "kind": "handover",
+ "project_id": "PRJ-9101",
+ "revision": 1,
+ "template_version": "1.0.0"
+}

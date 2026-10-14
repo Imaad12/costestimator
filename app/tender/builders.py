@@ -100,7 +100,7 @@ def queries_section(c: Ctx, registers_: tuple, heading: str) -> list[Section]:
     qs = [q for q in tender.list_queries(c.db, c.pid) if q["register"] in registers_]
     if not qs:
         return [Section(heading, ["No query is registered in this register."])]
-    return [sec_table(heading, ["Query ID", "Register", "Question", "Why", "Due", "Status", "Response", "Cost impact", "Time impact (d)"],
+    return [sec_table(heading, ["Query ID", "Register", "Question", "Why", "Due", "Status", "Response", "Cost impact (SAR)", "Time impact (d)"],
                       [[q["id"], q["register"], q["question"], q["why"], q["response_due"], q["status"],
                         (q["response_text"] + (" [SYNTHETIC RESPONSE]" if q["response_is_synthetic"] else "")) if q["response_text"] else "", q["cost_impact"], q["time_impact_days"]] for q in qs])]
 
@@ -120,7 +120,8 @@ def _lim(c: Ctx, *extra: str) -> list[str]:
 def d01(c):
     return Doc("D01", "Tender cover letter", [
         Section("Addressee", [f"To: {c.customer}", f"Tender reference: {c.project.get('tender_ref') or missing('tender reference')}",
-                              f"Project: {c.project['name']} ({c.pid})"]),
+                              f"Project: {c.project['name']} ({c.pid})", f"Tender deadline: {(c.enq or {}).get('tender_deadline') or missing('tender deadline')}",
+                              f"Submission instructions: {(c.enq or {}).get('submission_instructions') or missing('submission instructions')}"]),
         Section("Letter", [f"We submit herewith our tender pack for {c.project['name']}, comprising the documents listed in the attached document register.",
                            f"Offered price (before VAT): SAR {fmt(c.t.get('commercial_net_price'))}; VAT: SAR {fmt(c.t.get('tax'))}; total payable: SAR {fmt(c.t.get('final_payable'))}.",
                            "This letter is a draft prepared by the estimating system. The authorised signatory, signature and company details are entered by the signatory at signing.",
@@ -319,8 +320,8 @@ def d20(c):
                                                                   ["Peak direct manpower", p["peak_workers"]], ["Total labour-hours", p["labour_hours"]]]),
             sec_table("Daily direct manpower (working-day index: workers)", ["Day", "Workers"], hist)]
     if sc:
-        secs.append(sec_table("Crew-size scenarios (same activities, norms and calendar)", ["Profile", "Archetype", "Head-count", "Working days", "Calendar days", "Finish", "Peak workers", "Labour-hours", "Resource-limited", "Cost (planning only)", "Claim"],
-                              [[s["profile"], s["archetype"], s["headcount"], s["working_days"] if s["schedulable"] else "NOT SCHEDULABLE", s["calendar_days"] if s["schedulable"] else "-", s["finish"] if s["schedulable"] else "-", s["peak_workers"],
+        secs.append(sec_table("Crew-size scenarios (same activities, norms and calendar)", ["Profile", "Archetype", "Head-count (own direct + indirect)", "Subcontract capacity", "Working days", "Calendar days", "Finish", "Peak workers", "Labour-hours", "Resource-limited", "Cost (planning only)", "Claim"],
+                              [[s["profile"], s["archetype"], s["headcount"], s["subcontract_capacity"], s["working_days"] if s["schedulable"] else "NOT SCHEDULABLE", s["calendar_days"] if s["schedulable"] else "-", s["finish"] if s["schedulable"] else "-", s["peak_workers"],
                                 s["labour_hours"], ",".join(s["resource_limited"]), s["cost"].get("total") if s["cost"].get("computed") else "not computed", s["claim"]] for s in sc["scenarios"]]))
         secs.append(Section("Reading the scenarios", [sc["note"]]))
     return Doc("D20", "Workforce and resource-loading plan", secs, facts=c.facts(), xlsx=True, refs=[f"{c.pid}-D19"], limitations=_lim(c, "Workforce bands are configurable company planning assumptions, not industry-standard categories."))
@@ -334,11 +335,27 @@ def d21(c):
 
 
 def d22(c):
+    from ..procurement import leveling
     ll = c.rep("long_lead")
     needs = rows_to_dicts(c.db.all("SELECT id, description, quantity, unit, reason, estimated_exposure, priority, closed FROM procurement_items WHERE project_id=? ORDER BY id", (c.pid,)))
-    return Doc("D22", "Procurement and long-lead schedule", report_sections("Long-lead items", ll, "no long-lead items") + [sec_table("Procurement needs", ["ID", "Description", "Qty", "Unit", "Reason", "Exposure", "Priority", "Closed"],
-                                                                                                                               [[n["id"], n["description"], n["quantity"], n["unit"], n["reason"], n["estimated_exposure"], n["priority"], n["closed"]] for n in needs] or [["-", "none", "", "", "", "", "", ""]])],
-               facts=c.facts(), xlsx=True, refs=[f"{c.pid}-D36"], limitations=_lim(c, "Synthetic quotations are test inputs and never live supplier quotations."))
+    secs = report_sections("Long-lead items", ll, "no long-lead items") + [sec_table("Procurement needs", ["ID", "Description", "Qty", "Unit", "Reason", "Exposure", "Priority", "Closed"],
+                                                                                       [[n["id"], n["description"], n["quantity"], n["unit"], n["reason"], n["estimated_exposure"], n["priority"], n["closed"]] for n in needs] or [["-", "none", "", "", "", "", "", ""]])]
+    rf = rows_to_dicts(c.db.all("SELECT id, package_id, supplier_id, subject, status, response_deadline, issued_at FROM rfqs WHERE project_id=? ORDER BY id", (c.pid,)))
+    secs.append(sec_table("RFQ register (drafts are prepared here; nothing is sent by the application)", ["RFQ", "Package", "Supplier", "Subject", "Status", "Response deadline", "Issued"], [[r[k] for k in ("id", "package_id", "supplier_id", "subject", "status", "response_deadline", "issued_at")] for r in rf] or [["-", "none", "", "", "", "", ""]]))
+    for pkg in rows_to_dicts(c.db.all("SELECT DISTINCT package_id FROM quotations WHERE project_id=? AND package_id IS NOT NULL", (c.pid,))):
+        try:
+            lv = leveling.level_package(c.db, pkg["package_id"])
+        except AppError as e:
+            secs.append(Section(f"Quotation comparison {pkg['package_id']}", [missing(f"quotation levelling: {e}")]))
+            continue
+        secs.append(sec_table(f"Quotation comparison and levelling - package {pkg['package_id']} (SYNTHETIC suppliers in a demonstration; never live quotations)",
+                              ["Quotation", "Headline total", "Approved adjustments", "Evaluated total", "Validity", "Valid until", "Coverage", "Non-compliant items", "Delivery/unloading excluded", "Missing items", "Like-for-like"],
+                              [[q["quotation_id"], q["quoted_total"], q["approved_adjustments"], q["normalised_total"], q["validity"], q["valid_until"], q["coverage"], q["non_compliant_items"],
+                                len(q["delivery_or_unloading_excluded"]), q["missing_items"], q["like_for_like"]] for q in lv["quotations"]],
+                              caption=f"Suggested lowest like-for-like quotation: {lv['suggested_lowest_like_for_like']} (advisory: a person selects and approves)"))
+    secs += items_table(c, "procurement_strategy", ["package", "approach", "rationale"], "Subcontract and package strategy", "procurement strategy")
+    secs += items_table(c, "supplier_qualification", ["supplier", "status", "basis"], "Supplier qualification status", "supplier qualification status")
+    return Doc("D22", "Procurement and long-lead schedule", secs, facts=c.facts(), xlsx=True, refs=[f"{c.pid}-D36"], limitations=_lim(c, "Synthetic quotations are test inputs and never live supplier quotations."))
 
 
 def d23(c):
@@ -480,7 +497,10 @@ def open_actions(c):
 
 
 def d42(c):
-    return Doc("D42", "Open actions and outstanding information register", [sec_table("Outstanding", ["Ref", "Item", "Status", "Owner"], open_actions(c) or [["-", "none", "", ""]])], facts=c.facts(), xlsx=True, refs=[f"{c.pid}-D25", f"{c.pid}-D15"], limitations=_lim(c))
+    secs = [sec_table("Outstanding", ["Ref", "Item", "Status", "Owner"], open_actions(c) or [["-", "none", "", ""]])]
+    secs += items_table(c, "required_input", ["input", "needed_for", "status_note"], "Required-inputs checklist", "required-inputs checklist")
+    secs += items_table(c, "responsibility", ["role", "responsibility", "assigned_to"], "Responsibility assignment", "responsibility assignment")
+    return Doc("D42", "Open actions and outstanding information register", secs, facts=c.facts(), xlsx=True, refs=[f"{c.pid}-D25", f"{c.pid}-D15"], limitations=_lim(c))
 
 
 def d43(c):

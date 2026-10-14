@@ -1,0 +1,1495 @@
+{
+ "applicability_counts": {
+  "Conditional": 2,
+  "Missing Customer Requirement": 1,
+  "Not Applicable": 1,
+  "Required": 41
+ },
+ "banner": "DEMONSTRATION EXPORT - NOT SUBMISSION READY - NOT APPROVED FOR ANY REAL TENDER | approvals by: test principals in environment 'test'",
+ "blocked_documents": [
+  "D06",
+  "D13",
+  "D14",
+  "D30"
+ ],
+ "classification": "demonstration",
+ "documents": [
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D01",
+   "doc_id": "PRJ-9101-D01",
+   "files": {
+    "docx": {
+     "bytes": 39289,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D01_r1_Tender-cover-letter.docx",
+     "sha256": "58ed13616dd79ed4c273a9c6e68c7fe508dcfbb944e69f9e0328f0d3378c7d81"
+    },
+    "pdf": {
+     "bytes": 4395,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D01_r1_Tender-cover-letter.pdf",
+     "sha256": "7656e649a34dfc142cc5297ebc81f619d758b2de36d9b6f9c10e9832d6e6d60f"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "58ed13616dd79ed4c273a9c6e68c7fe508dcfbb944e69f9e0328f0d3378c7d81",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-COVER@1.0.0",
+   "title": "Tender cover letter"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D02",
+   "doc_id": "PRJ-9101-D02",
+   "files": {
+    "docx": {
+     "bytes": 39277,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D02_r1_Executive-summary.docx",
+     "sha256": "2940bc28a91f01a6a4275ddc9681f1fa257045a7d57a359fb56410a738b82775"
+    },
+    "pdf": {
+     "bytes": 4363,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D02_r1_Executive-summary.pdf",
+     "sha256": "1a06f1b5b18880051caa41f3c00c5da7d0c76117a70cc9a9a7faf7ece658813e"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "2940bc28a91f01a6a4275ddc9681f1fa257045a7d57a359fb56410a738b82775",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-EXEC@1.0.0",
+   "title": "Executive summary"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D03",
+   "doc_id": "PRJ-9101-D03",
+   "files": {
+    "docx": {
+     "bytes": 39335,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D03_r1_Bid-no-bid-record.docx",
+     "sha256": "e1e7aaf75452c433dc1904d108cdabd290ded1b493dec09fc26bee21c224bcfe"
+    },
+    "pdf": {
+     "bytes": 4620,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D03_r1_Bid-no-bid-record.pdf",
+     "sha256": "6c5c47b54d2bfc69053f01d67da61343d3b208bdab54275aca98c3a4546502da"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "e1e7aaf75452c433dc1904d108cdabd290ded1b493dec09fc26bee21c224bcfe",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-BIDNOBID@1.0.0",
+   "title": "Bid/no-bid record"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D04",
+   "doc_id": "PRJ-9101-D04",
+   "files": {
+    "docx": {
+     "bytes": 39337,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D04_r1_Scope-of-work-and-scope-boundary.docx",
+     "sha256": "1770f5953e2bd247386db3e4e26c7b8169145c2df0d5bbbd1e13bc2fdd72e09b"
+    },
+    "pdf": {
+     "bytes": 4826,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D04_r1_Scope-of-work-and-scope-boundary.pdf",
+     "sha256": "6b4dce14d01b30419cf1d0d51f66e31bcd7d34ed8a93bfa847fe1c0a0ba860ee"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "1770f5953e2bd247386db3e4e26c7b8169145c2df0d5bbbd1e13bc2fdd72e09b",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-SCOPE@1.0.0",
+   "title": "Scope of work and scope boundary"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D05",
+   "doc_id": "PRJ-9101-D05",
+   "files": {
+    "docx": {
+     "bytes": 40186,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D05_r1_Priced-BOQ-pricing-schedule.docx",
+     "sha256": "2715bdb5cdc174d8aa74b87a6582d6158ae9b40201ba973eeec38c292bd93856"
+    },
+    "pdf": {
+     "bytes": 7835,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D05_r1_Priced-BOQ-pricing-schedule.pdf",
+     "sha256": "f9587c87b165a070aa8bcdcc063093c5c1b3354fb8d810037136f76d92b88614"
+    },
+    "xlsx": {
+     "bytes": 8274,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D05_r1_Priced-BOQ-pricing-schedule.xlsx",
+     "sha256": "0a16d3ca457848df9b95fe416f1d895d155796d68fd00b5767bb842f4f45afbb"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "2715bdb5cdc174d8aa74b87a6582d6158ae9b40201ba973eeec38c292bd93856",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-PRICED-BOQ@1.0.0",
+   "title": "Priced BOQ / pricing schedule"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": "letter of offer",
+   "code": "D06",
+   "doc_id": "PRJ-9101-D06",
+   "files": {
+    "docx": {
+     "bytes": 39391,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D06_r1_Commercial-offer-summary.docx",
+     "sha256": "061863f939ccad242fe6a6f824576fbae5d99ca767641b69cbfbb5d77653fef5"
+    },
+    "pdf": {
+     "bytes": 4797,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D06_r1_Commercial-offer-summary.pdf",
+     "sha256": "e56ff50d873f732b20f3e66bbcbecf2e07a44ac9a471961ae2c54c43241101f6"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "061863f939ccad242fe6a6f824576fbae5d99ca767641b69cbfbb5d77653fef5",
+   "status": "BLOCKED",
+   "template": "T-OFFER@1.0.0",
+   "title": "Commercial offer summary"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D07",
+   "doc_id": "PRJ-9101-D07",
+   "files": {
+    "docx": {
+     "bytes": 42589,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D07_r1_Pricing-basis-and-basis-of-estimate-BOE.docx",
+     "sha256": "5248fab51e14baae250e6c6566c2a66feb7d7fbf85045825d7e0982eb40e0e16"
+    },
+    "pdf": {
+     "bytes": 14910,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D07_r1_Pricing-basis-and-basis-of-estimate-BOE.pdf",
+     "sha256": "a9448fc74088b2d7661c60e903883289c58e909c7eafc43f310b78c75091527a"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "5248fab51e14baae250e6c6566c2a66feb7d7fbf85045825d7e0982eb40e0e16",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-BOE@1.0.0",
+   "title": "Pricing basis and basis of estimate (BOE)"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D08",
+   "doc_id": "PRJ-9101-D08",
+   "files": {
+    "docx": {
+     "bytes": 42207,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D08_r1_Assumptions-register.docx",
+     "sha256": "56bc5c96320f0e1b4b64f664cbbbd65f5e3bda790ce1e7a9aa7e1a0be78bbfa3"
+    },
+    "pdf": {
+     "bytes": 19392,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D08_r1_Assumptions-register.pdf",
+     "sha256": "c938b029e7bcd6f7c4563d402dac52b1863025530cc6e621c97977d4e9306c42"
+    },
+    "xlsx": {
+     "bytes": 11348,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D08_r1_Assumptions-register.xlsx",
+     "sha256": "88d7dd24bd459f6ebf4619f1d7e1ba60fdc716a7e023e0c0fbdc5f4831077f15"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "56bc5c96320f0e1b4b64f664cbbbd65f5e3bda790ce1e7a9aa7e1a0be78bbfa3",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-ASSUMPTIONS@1.0.0",
+   "title": "Assumptions register"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D09",
+   "doc_id": "PRJ-9101-D09",
+   "files": {
+    "docx": {
+     "bytes": 39225,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D09_r1_Exclusions-and-qualifications.docx",
+     "sha256": "d06ce24c11e30a5d470e0f352d3810c6aee19a0efd435344104b83a7ae2cae78"
+    },
+    "pdf": {
+     "bytes": 4438,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D09_r1_Exclusions-and-qualifications.pdf",
+     "sha256": "8029bd89dd4a6a5ad2f3757370ce681a3cad3087e33c32fb79ebfa153f96aa75"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "d06ce24c11e30a5d470e0f352d3810c6aee19a0efd435344104b83a7ae2cae78",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-EXCLUSIONS@1.0.0",
+   "title": "Exclusions and qualifications"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D10",
+   "doc_id": "PRJ-9101-D10",
+   "files": {
+    "docx": {
+     "bytes": 39265,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D10_r1_Commercial-clarifications.docx",
+     "sha256": "f7b89c226c8b42bdd02ac0f2b9b0031e8ba2bcc007160d566d65454864cc91d9"
+    },
+    "pdf": {
+     "bytes": 4569,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D10_r1_Commercial-clarifications.pdf",
+     "sha256": "17bc60bf3c00724e9bace5820635d6dd71ec16ce570d49e3dad69436245deaa2"
+    },
+    "xlsx": {
+     "bytes": 6375,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D10_r1_Commercial-clarifications.xlsx",
+     "sha256": "bf55d3f9f2c81545c54be94c866a83866db721e8ab5e85704e5dd8d812e291cd"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "1 commercial clarification(s) are registered",
+   "revision": 1,
+   "sha256": "f7b89c226c8b42bdd02ac0f2b9b0031e8ba2bcc007160d566d65454864cc91d9",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-COMM-CLARIF@1.0.0",
+   "title": "Commercial clarifications"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D11",
+   "doc_id": "PRJ-9101-D11",
+   "files": {
+    "docx": {
+     "bytes": 39270,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D11_r1_Risk-and-opportunity-register.docx",
+     "sha256": "1322319a74b51813e3885e19ad99d59130ebacf37b3570a93b3cbee4c1a2276b"
+    },
+    "pdf": {
+     "bytes": 4642,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D11_r1_Risk-and-opportunity-register.pdf",
+     "sha256": "f55e7aa906898b6232a3e3f5de74c5effd712cc2dbcd47728005aae6c788033f"
+    },
+    "xlsx": {
+     "bytes": 6378,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D11_r1_Risk-and-opportunity-register.xlsx",
+     "sha256": "b1ceb869b1b83b7b87a1ca65ec66a944576f0a603dde42ca339834233dda6d6f"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "1322319a74b51813e3885e19ad99d59130ebacf37b3570a93b3cbee4c1a2276b",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-RISK@1.0.0",
+   "title": "Risk and opportunity register"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D12",
+   "doc_id": "PRJ-9101-D12",
+   "files": {
+    "docx": {
+     "bytes": 39217,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D12_r1_Tax-and-commercial-terms-summary.docx",
+     "sha256": "9aaea1a7f80f063e2e883d730ad273d798e09021d33ec00b5cbd2a0066a7d04e"
+    },
+    "pdf": {
+     "bytes": 4384,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D12_r1_Tax-and-commercial-terms-summary.pdf",
+     "sha256": "d6a8c3bfdf51e609109f7085a80166f21bff6390472e5d893fc8f3915bbdd336"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "9aaea1a7f80f063e2e883d730ad273d798e09021d33ec00b5cbd2a0066a7d04e",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-TAX@1.0.0",
+   "title": "Tax and commercial terms summary"
+  },
+  {
+   "applicability": "Missing Customer Requirement",
+   "blocked_reason": "no approved payment terms (contract payment / retention / bond terms) have been supplied",
+   "code": "D13",
+   "doc_id": "PRJ-9101-D13",
+   "files": {
+    "docx": {
+     "bytes": 39048,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D13_r1_Payment-milestones-and-cash-flow-basis.docx",
+     "sha256": "39af6ae308e0170c08a3d537b89f5364a3db3aca5edb20efc5fad417db10b155"
+    },
+    "pdf": {
+     "bytes": 3253,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D13_r1_Payment-milestones-and-cash-flow-basis.pdf",
+     "sha256": "0dadfb1d9fca1d8e1675e5659752faa328d05933161cc1b2d8ef7daded7a0dd6"
+    },
+    "xlsx": {
+     "bytes": 5530,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D13_r1_Payment-milestones-and-cash-flow-basis.xlsx",
+     "sha256": "bce450ccc8ad9522186bca04eb8624af57c032cba7f4fea37f7782a9cfc545c5"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "no approved payment terms (contract payment / retention / bond terms) have been supplied",
+   "revision": 1,
+   "sha256": "39af6ae308e0170c08a3d537b89f5364a3db3aca5edb20efc5fad417db10b155",
+   "status": "BLOCKED",
+   "template": "T-CASHFLOW@1.0.0",
+   "title": "Payment milestones and cash-flow basis"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": "letter of offer validity",
+   "code": "D14",
+   "doc_id": "PRJ-9101-D14",
+   "files": {
+    "docx": {
+     "bytes": 39364,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D14_r1_Validity-delivery-and-programme-qualifications.docx",
+     "sha256": "f2a096c5681d71fb3894c0b32cea1d59c8d38456960e8e5ded81c6fe8ee8bcf9"
+    },
+    "pdf": {
+     "bytes": 4601,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D14_r1_Validity-delivery-and-programme-qualifications.pdf",
+     "sha256": "2bd104acec5e38ab7117d59b0761a2d79f350b117d83356b1a65d9c532d7da73"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "f2a096c5681d71fb3894c0b32cea1d59c8d38456960e8e5ded81c6fe8ee8bcf9",
+   "status": "BLOCKED",
+   "template": "T-VALIDITY@1.0.0",
+   "title": "Validity, delivery and programme qualifications"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D15",
+   "doc_id": "PRJ-9101-D15",
+   "files": {
+    "docx": {
+     "bytes": 41463,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D15_r1_Bid-approval-and-submission-readiness-record.docx",
+     "sha256": "60316d8c5611b80a8f894b44bac5edc3d33c9fd9bc06986e8ce1e4a846fb77b1"
+    },
+    "pdf": {
+     "bytes": 19195,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D15_r1_Bid-approval-and-submission-readiness-record.pdf",
+     "sha256": "5cf142ad5515269ae0c8dc003fc5564d796c9f4c34cbacc1237d642a3f5008e9"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "60316d8c5611b80a8f894b44bac5edc3d33c9fd9bc06986e8ce1e4a846fb77b1",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-READINESS@1.0.0",
+   "title": "Bid approval and submission-readiness record"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D16",
+   "doc_id": "PRJ-9101-D16",
+   "files": {
+    "docx": {
+     "bytes": 39350,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D16_r1_Technical-proposal.docx",
+     "sha256": "237d0edaa01726421d2af4830b44484424c100b2cc626937c5a4840a510df3c4"
+    },
+    "pdf": {
+     "bytes": 4472,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D16_r1_Technical-proposal.pdf",
+     "sha256": "aed5c979883bcbf0fe90a7a270960670dbda2e2c809c7cb990e9b23e64d6c796"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "the customer requires a technical proposal (tender_context.customer_requires.technical_proposal = yes)",
+   "revision": 1,
+   "sha256": "237d0edaa01726421d2af4830b44484424c100b2cc626937c5a4840a510df3c4",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-TECH-PROPOSAL@1.0.0",
+   "title": "Technical proposal"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D17",
+   "doc_id": "PRJ-9101-D17",
+   "files": {
+    "docx": {
+     "bytes": 39814,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D17_r1_Understanding-of-the-project-and-scope.docx",
+     "sha256": "6aadd2ad84b9d52f7d5bf6ee5bff2309e8e7408a69f04349eda1bc368417bdad"
+    },
+    "pdf": {
+     "bytes": 6034,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D17_r1_Understanding-of-the-project-and-scope.pdf",
+     "sha256": "0c4addd4e7fa3e6aa66f99f0aed8fa387c33042c770b26e8a2365fe98719a3b5"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "the customer requires a technical proposal (tender_context.customer_requires.technical_proposal = yes)",
+   "revision": 1,
+   "sha256": "6aadd2ad84b9d52f7d5bf6ee5bff2309e8e7408a69f04349eda1bc368417bdad",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-UNDERSTANDING@1.0.0",
+   "title": "Understanding of the project and scope"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D18",
+   "doc_id": "PRJ-9101-D18",
+   "files": {
+    "docx": {
+     "bytes": 40888,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D18_r1_Execution-methodology.docx",
+     "sha256": "3ae99f8e36189ad39c4d1d60cc323f5598029e350ad8f62793f7d7c53d881650"
+    },
+    "pdf": {
+     "bytes": 9319,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D18_r1_Execution-methodology.pdf",
+     "sha256": "cf10d109955c2ea814679341c229a1f4ee8f747ede136c97008a00a10c92cc1c"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "the customer requires a technical proposal (tender_context.customer_requires.technical_proposal = yes)",
+   "revision": 1,
+   "sha256": "3ae99f8e36189ad39c4d1d60cc323f5598029e350ad8f62793f7d7c53d881650",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-METHODOLOGY@1.0.0",
+   "title": "Execution methodology"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D19",
+   "doc_id": "PRJ-9101-D19",
+   "files": {
+    "docx": {
+     "bytes": 41300,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D19_r1_Construction-programme-and-milestones.docx",
+     "sha256": "baf401759aa86fdcf8c5c5ae713e801140a342a30da9490b6c7bc4bac0c1e59b"
+    },
+    "pdf": {
+     "bytes": 11613,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D19_r1_Construction-programme-and-milestones.pdf",
+     "sha256": "cd989195c5d33d94284d2304a765d5ae3b89a6485bae3836757491f5fd4c23ab"
+    },
+    "xlsx": {
+     "bytes": 10826,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D19_r1_Construction-programme-and-milestones.xlsx",
+     "sha256": "63950b438e4ec9ed9ab50cf7053506297449542a200808011bddfa5e017617e2"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "work activities with norms are defined for the programme",
+   "revision": 1,
+   "sha256": "baf401759aa86fdcf8c5c5ae713e801140a342a30da9490b6c7bc4bac0c1e59b",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-PROGRAMME@1.0.0",
+   "title": "Construction programme and milestones"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D20",
+   "doc_id": "PRJ-9101-D20",
+   "files": {
+    "docx": {
+     "bytes": 41298,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D20_r1_Workforce-and-resource-loading-plan.docx",
+     "sha256": "ccb84dd569ff5c1153e5fa7856aed88553b77180e787eb416f045b61239e5233"
+    },
+    "pdf": {
+     "bytes": 17525,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D20_r1_Workforce-and-resource-loading-plan.pdf",
+     "sha256": "9f38065da294298d4a0bf9939617ff1ffee1da2837448bcb25e508efebb6bc5b"
+    },
+    "xlsx": {
+     "bytes": 10532,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D20_r1_Workforce-and-resource-loading-plan.xlsx",
+     "sha256": "ed5d75a779435cf5aae6b4e392254a37755b35c5c4dd99f38da67e5bdec9570f"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "work activities with norms are defined for the programme",
+   "revision": 1,
+   "sha256": "ccb84dd569ff5c1153e5fa7856aed88553b77180e787eb416f045b61239e5233",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-WORKFORCE@1.0.0",
+   "title": "Workforce and resource-loading plan"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D21",
+   "doc_id": "PRJ-9101-D21",
+   "files": {
+    "docx": {
+     "bytes": 39439,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D21_r1_Plant-and-equipment-plan.docx",
+     "sha256": "40f40288e59bcf2befa50fcef5f6babc28676ee0d91ac91ce412f3152661aa75"
+    },
+    "pdf": {
+     "bytes": 5469,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D21_r1_Plant-and-equipment-plan.pdf",
+     "sha256": "73b230fd9382733a894088087342f79555e6fcc43edd92f1628240df69a06040"
+    },
+    "xlsx": {
+     "bytes": 7868,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D21_r1_Plant-and-equipment-plan.xlsx",
+     "sha256": "9b06caf21dccdbdc19d4bd7a5430b0e9a41721e2fcb336e3b1ff3d1a7ecc57ea"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "plant hire terms / plant resources are in the estimate",
+   "revision": 1,
+   "sha256": "40f40288e59bcf2befa50fcef5f6babc28676ee0d91ac91ce412f3152661aa75",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-PLANT@1.0.0",
+   "title": "Plant and equipment plan"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D22",
+   "doc_id": "PRJ-9101-D22",
+   "files": {
+    "docx": {
+     "bytes": 40412,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D22_r1_Procurement-and-long-lead-schedule.docx",
+     "sha256": "ebef4a76255650bf0cbb1536759e7bd841e444ee10628db54a297904e69d6c7c"
+    },
+    "pdf": {
+     "bytes": 8739,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D22_r1_Procurement-and-long-lead-schedule.pdf",
+     "sha256": "da6fc18fab0c8fa2eb7e61887f9e111d0a7976f2eccd5518483cf7c20e03a05c"
+    },
+    "xlsx": {
+     "bytes": 11625,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D22_r1_Procurement-and-long-lead-schedule.xlsx",
+     "sha256": "941c8e172f8fb6417b4d2d32f49af63bcac020837176688006a5a67b0f796084"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "long-lead items are registered",
+   "revision": 1,
+   "sha256": "ebef4a76255650bf0cbb1536759e7bd841e444ee10628db54a297904e69d6c7c",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-PROCUREMENT@1.0.0",
+   "title": "Procurement and long-lead schedule"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D23",
+   "doc_id": "PRJ-9101-D23",
+   "files": {
+    "docx": {
+     "bytes": 39471,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D23_r1_Technical-compliance-matrix.docx",
+     "sha256": "0d405ce0844baf80187fb065f877b95190d51d6089bbb72bef9e0ed13ef8cc8e"
+    },
+    "pdf": {
+     "bytes": 5410,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D23_r1_Technical-compliance-matrix.pdf",
+     "sha256": "c9079ed1e9faa30873725bc8a4ab37ad93de16e31b8b2fc33e80dcc0008871cc"
+    },
+    "xlsx": {
+     "bytes": 6584,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D23_r1_Technical-compliance-matrix.xlsx",
+     "sha256": "5763cfe30b455a776852c6b0f656b3a9ca72cfb3e1ac34620207a40a087c6217"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "a specification / standard has been received that requires a compliance response",
+   "revision": 1,
+   "sha256": "0d405ce0844baf80187fb065f877b95190d51d6089bbb72bef9e0ed13ef8cc8e",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-COMPLIANCE@1.0.0",
+   "title": "Technical compliance matrix"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D24",
+   "doc_id": "PRJ-9101-D24",
+   "files": {
+    "docx": {
+     "bytes": 39194,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D24_r1_Technical-deviations-and-exceptions.docx",
+     "sha256": "5bec0866ae0f51c2ac75736ea114dc16e8a0e5f0dae131d7b7a0b3f5518cf20f"
+    },
+    "pdf": {
+     "bytes": 3577,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D24_r1_Technical-deviations-and-exceptions.pdf",
+     "sha256": "3d8466f9420530fc6aa7d17fdda8974b53c4b0d6bfbfecf8633b6b704ebc3d07"
+    },
+    "xlsx": {
+     "bytes": 6276,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D24_r1_Technical-deviations-and-exceptions.xlsx",
+     "sha256": "1e4d8420882431bc17139978c96add0b6459c8ba9e8e222c0b472f6395947293"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "a specification / standard has been received that requires a compliance response",
+   "revision": 1,
+   "sha256": "5bec0866ae0f51c2ac75736ea114dc16e8a0e5f0dae131d7b7a0b3f5518cf20f",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-DEVIATIONS@1.0.0",
+   "title": "Technical deviations and exceptions"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D25",
+   "doc_id": "PRJ-9101-D25",
+   "files": {
+    "docx": {
+     "bytes": 43036,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D25_r1_Technical-query-RFI-register.docx",
+     "sha256": "43c30f319ed2373a8958227bef1c8a871822676f9e4c757be899cf2d5965d01a"
+    },
+    "pdf": {
+     "bytes": 29723,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D25_r1_Technical-query-RFI-register.pdf",
+     "sha256": "6ef3d37776cca8e83f74352c49f33a75ca796e7b6c01380144a70a41150ec531"
+    },
+    "xlsx": {
+     "bytes": 10916,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D25_r1_Technical-query-RFI-register.xlsx",
+     "sha256": "dad524fb1113edde6587e490cf779ee79cb118134a87f718fea8b6782381f8b4"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "43c30f319ed2373a8958227bef1c8a871822676f9e4c757be899cf2d5965d01a",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-RFI@1.0.0",
+   "title": "Technical query / RFI register"
+  },
+  {
+   "applicability": "Conditional",
+   "blocked_reason": null,
+   "code": "D26",
+   "doc_id": "PRJ-9101-D26",
+   "files": {
+    "docx": {
+     "bytes": 39376,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D26_r1_Design-and-interface-matrix.docx",
+     "sha256": "f0ea0f13deb5f11e706d569ff8a525767cf564111238b67e8c799b134cedfd7d"
+    },
+    "pdf": {
+     "bytes": 4686,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D26_r1_Design-and-interface-matrix.pdf",
+     "sha256": "4cc6f33ecd3771d3e9f1daa6010d25346b846439363690c068c437e50bfdc5ba"
+    },
+    "xlsx": {
+     "bytes": 7016,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D26_r1_Design-and-interface-matrix.xlsx",
+     "sha256": "b51d1ccd7227d9a10d2011fe11d5416784acf4fa540637ae61f8a55fd9550cd7"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "construct-only delivery; interfaces still need recording where the BOQ names other parties",
+   "revision": 1,
+   "sha256": "f0ea0f13deb5f11e706d569ff8a525767cf564111238b67e8c799b134cedfd7d",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-INTERFACE@1.0.0",
+   "title": "Design and interface matrix"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D27",
+   "doc_id": "PRJ-9101-D27",
+   "files": {
+    "docx": {
+     "bytes": 39473,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D27_r1_Quality-plan-summary.docx",
+     "sha256": "587698ab9037c4a7332c8f797a93dbfdc0baf6fc72ba30ec4b5b6085bbb6afef"
+    },
+    "pdf": {
+     "bytes": 5140,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D27_r1_Quality-plan-summary.pdf",
+     "sha256": "e78e4ef17d86072933b6c5775bdfa4ec5eceb6b22bca325e02be5a314e29a4ee"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "the customer requires a quality plan / ITP / submittal schedule (tender_context.customer_requires.quality_plan = yes)",
+   "revision": 1,
+   "sha256": "587698ab9037c4a7332c8f797a93dbfdc0baf6fc72ba30ec4b5b6085bbb6afef",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-QUALITY@1.0.0",
+   "title": "Quality plan summary"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D28",
+   "doc_id": "PRJ-9101-D28",
+   "files": {
+    "docx": {
+     "bytes": 39697,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D28_r1_ITP-and-inspection-register.docx",
+     "sha256": "786a932a166d8929251a9feda78e652bcfb9802c741b515929638c688bcbdee3"
+    },
+    "pdf": {
+     "bytes": 6935,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D28_r1_ITP-and-inspection-register.pdf",
+     "sha256": "a2455a423bff428cb61d5e9a67c8a77d3ba42dd42fddf14be85df669f388de88"
+    },
+    "xlsx": {
+     "bytes": 7059,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D28_r1_ITP-and-inspection-register.xlsx",
+     "sha256": "6ee495773e39e4fa293736b98d3b46c1cf3a8c6be2b0ef6ad6e782672f95ad37"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "the customer requires a quality plan / ITP / submittal schedule (tender_context.customer_requires.quality_plan = yes)",
+   "revision": 1,
+   "sha256": "786a932a166d8929251a9feda78e652bcfb9802c741b515929638c688bcbdee3",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-ITP@1.0.0",
+   "title": "ITP and inspection register"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D29",
+   "doc_id": "PRJ-9101-D29",
+   "files": {
+    "docx": {
+     "bytes": 40297,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D29_r1_HSE-execution-summary-and-risk-register.docx",
+     "sha256": "ae939a55a71cd10099fdb1c2cbeb59f579bde2ef902b525f9c303174a064717d"
+    },
+    "pdf": {
+     "bytes": 9974,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D29_r1_HSE-execution-summary-and-risk-register.pdf",
+     "sha256": "4f72279cd6e6bbf62f543588c6f25f71c30d689ecd7094bb129fe59e4bffe4d8"
+    },
+    "xlsx": {
+     "bytes": 9228,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D29_r1_HSE-execution-summary-and-risk-register.xlsx",
+     "sha256": "3b1594e59680909eaaa9776ee26615e63b3efacc934734247e8f813d2d996274"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "ae939a55a71cd10099fdb1c2cbeb59f579bde2ef902b525f9c303174a064717d",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-HSE@1.0.0",
+   "title": "HSE execution summary and risk register"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": "shop drawing submittals",
+   "code": "D30",
+   "doc_id": "PRJ-9101-D30",
+   "files": {
+    "docx": {
+     "bytes": 39320,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D30_r1_Material-and-technical-submittal-schedule.docx",
+     "sha256": "e688a0f7e5c49df530815fed7378d1789e533eab66be98336f5c23461a563d90"
+    },
+    "pdf": {
+     "bytes": 5127,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D30_r1_Material-and-technical-submittal-schedule.pdf",
+     "sha256": "c5b25d32a40321ed62a673a89aac7e35a23ecca6884fc4a8ff847c2fec9ee612"
+    },
+    "xlsx": {
+     "bytes": 6458,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D30_r1_Material-and-technical-submittal-schedule.xlsx",
+     "sha256": "7003d76a5a5f32dd0077a0e700d5313f2a1ec92b88140ff3f7b890674e515da8"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "the customer requires a quality plan / ITP / submittal schedule (tender_context.customer_requires.quality_plan = yes)",
+   "revision": 1,
+   "sha256": "e688a0f7e5c49df530815fed7378d1789e533eab66be98336f5c23461a563d90",
+   "status": "BLOCKED",
+   "template": "T-SUBMITTALS@1.0.0",
+   "title": "Material and technical submittal schedule"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D31",
+   "doc_id": "PRJ-9101-D31",
+   "files": {
+    "docx": {
+     "bytes": 39267,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D31_r1_Testing-and-commissioning-plan.docx",
+     "sha256": "76a3d4d1b2e8354ac5a3c047147b963308139fad44767b877a0bb35657ef9fa3"
+    },
+    "pdf": {
+     "bytes": 5114,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D31_r1_Testing-and-commissioning-plan.pdf",
+     "sha256": "0002f4e486759b66f0b7b448a23c7e30575455411b219fba55bf60883128a7b8"
+    },
+    "xlsx": {
+     "bytes": 6477,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D31_r1_Testing-and-commissioning-plan.xlsx",
+     "sha256": "3503f421614c320dc3d79bfd8a3f8109429b8d7f06370ca41c6648a19aafdd74"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "the scope includes systems that need testing and commissioning",
+   "revision": 1,
+   "sha256": "76a3d4d1b2e8354ac5a3c047147b963308139fad44767b877a0bb35657ef9fa3",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-TESTING@1.0.0",
+   "title": "Testing and commissioning plan"
+  },
+  {
+   "applicability": "Conditional",
+   "blocked_reason": null,
+   "code": "D32",
+   "doc_id": "PRJ-9101-D32",
+   "files": {
+    "docx": {
+     "bytes": 39125,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D32_r1_Handover-and-closeout-plan.docx",
+     "sha256": "76527537850d337d1301fe2ab7400518fb7b82803b9da9b7f7c82e06ba88c68e"
+    },
+    "pdf": {
+     "bytes": 3488,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D32_r1_Handover-and-closeout-plan.pdf",
+     "sha256": "a4bb813182da1cf596c34e29e425434b0055e2775a90b7b38784894d89aff7a9"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "required by most contracts; confirm customer handover requirements",
+   "revision": 1,
+   "sha256": "76527537850d337d1301fe2ab7400518fb7b82803b9da9b7f7c82e06ba88c68e",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-CLOSEOUT@1.0.0",
+   "title": "Handover and closeout plan"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D33",
+   "doc_id": "PRJ-9101-D33",
+   "files": {
+    "docx": {
+     "bytes": 40029,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D33_r1_Tender-document-register-and-revision-log.docx",
+     "sha256": "603468593be64fe2bcb851021c4c7d71c75b2b350d64afe806994952228e9b91"
+    },
+    "pdf": {
+     "bytes": 8466,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D33_r1_Tender-document-register-and-revision-log.pdf",
+     "sha256": "3a6ffe28b68a961b6094cc3eb82fcaf3bd4a81519d65ff9b737b2bfa578bbf0c"
+    },
+    "xlsx": {
+     "bytes": 8275,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D33_r1_Tender-document-register-and-revision-log.xlsx",
+     "sha256": "7835d5771f22563a16992f8e81c333cac7821d3e6eb993ba4a497f719538f784"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "603468593be64fe2bcb851021c4c7d71c75b2b350d64afe806994952228e9b91",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-DOCREG@1.0.0",
+   "title": "Tender document register and revision log"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D34",
+   "doc_id": "PRJ-9101-D34",
+   "files": {
+    "docx": {
+     "bytes": 40773,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D34_r1_BOQ-mapping-and-quantity-validation-report.docx",
+     "sha256": "8ce74980ee58cd1021a307da3c626933227fbcba66e0c44060e7fedb4f27f0a5"
+    },
+    "pdf": {
+     "bytes": 11539,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D34_r1_BOQ-mapping-and-quantity-validation-report.pdf",
+     "sha256": "b51c0fd1777b16b30e5168474584668dd2e98936e19ecc911da41b1775910b42"
+    },
+    "xlsx": {
+     "bytes": 9329,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D34_r1_BOQ-mapping-and-quantity-validation-report.xlsx",
+     "sha256": "7b8b9e08f18db67faea28e0bcc6a6a7bdf8336bca3657fd80368df53f76f43dd"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "8ce74980ee58cd1021a307da3c626933227fbcba66e0c44060e7fedb4f27f0a5",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-BOQ-VALIDATION@1.0.0",
+   "title": "BOQ mapping and quantity validation report"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D35",
+   "doc_id": "PRJ-9101-D35",
+   "files": {
+    "docx": {
+     "bytes": 39934,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D35_r1_Estimate-audit-and-reconciliation-report.docx",
+     "sha256": "88714d371574e5bb0f8680c2751a252ff49b9a9bee7735dc03e7b63f027067fd"
+    },
+    "pdf": {
+     "bytes": 6425,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D35_r1_Estimate-audit-and-reconciliation-report.pdf",
+     "sha256": "393336536242b14721d3090db6accab111153ab077968d103bffff8a01c4cde4"
+    },
+    "xlsx": {
+     "bytes": 8295,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D35_r1_Estimate-audit-and-reconciliation-report.xlsx",
+     "sha256": "9db18748c482d1d7f3588d5a17dd8a46e9f4685bf78fb6e0b3a64c369533a5c0"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "88714d371574e5bb0f8680c2751a252ff49b9a9bee7735dc03e7b63f027067fd",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-RECON@1.0.0",
+   "title": "Estimate audit and reconciliation report"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D36",
+   "doc_id": "PRJ-9101-D36",
+   "files": {
+    "docx": {
+     "bytes": 39515,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D36_r1_Missing-rate-and-procurement-report.docx",
+     "sha256": "7a14aecd6aed051eb707eaa3814b9d3535f4e1479271002a3a6f4d96881a4490"
+    },
+    "pdf": {
+     "bytes": 5093,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D36_r1_Missing-rate-and-procurement-report.pdf",
+     "sha256": "9c4d8ca4c81b6d6f3d2df2584a56d53552a41b5977f7dbac334c0ecebea5efdc"
+    },
+    "xlsx": {
+     "bytes": 7642,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D36_r1_Missing-rate-and-procurement-report.xlsx",
+     "sha256": "5fed2457f6ed94d20cbf971d559798e17588524b32c8b95418bc46af5843aff3"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "7a14aecd6aed051eb707eaa3814b9d3535f4e1479271002a3a6f4d96881a4490",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-MISSING-RATES@1.0.0",
+   "title": "Missing-rate and procurement report"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D37",
+   "doc_id": "PRJ-9101-D37",
+   "files": {
+    "docx": {
+     "bytes": 40614,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D37_r1_Productivity-and-programme-assumptions-report.docx",
+     "sha256": "a22e9d48eaca44fbefdf5189050fb8164253e1480d2a62b86fc30f90d87f82c0"
+    },
+    "pdf": {
+     "bytes": 12410,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D37_r1_Productivity-and-programme-assumptions-report.pdf",
+     "sha256": "9d627fdfe773478eeac8c9d28c59e8c5ae7da939cfb3a39220fbce7bab1a67c0"
+    },
+    "xlsx": {
+     "bytes": 8771,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D37_r1_Productivity-and-programme-assumptions-report.xlsx",
+     "sha256": "e8224d8f6b64269ca015511e21d09d08fa6d6ba782141befb79a9afa898b4c59"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "productivity norms drive the programme",
+   "revision": 1,
+   "sha256": "a22e9d48eaca44fbefdf5189050fb8164253e1480d2a62b86fc30f90d87f82c0",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-PRODUCTIVITY@1.0.0",
+   "title": "Productivity and programme assumptions report"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D38",
+   "doc_id": "PRJ-9101-D38",
+   "files": {
+    "docx": {
+     "bytes": 39517,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D38_r1_Indirect-cost-eligibility-report.docx",
+     "sha256": "8740eb535fb0fbb254eceed3be7ec06bc461bb644df1d1849436f721889831cb"
+    },
+    "pdf": {
+     "bytes": 5567,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D38_r1_Indirect-cost-eligibility-report.pdf",
+     "sha256": "eb3d26eb2b1d5d3ce47d235694bbacb9f7a14123948670ce80cebe361c917e74"
+    },
+    "xlsx": {
+     "bytes": 7935,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D38_r1_Indirect-cost-eligibility-report.xlsx",
+     "sha256": "08fda419066af32fdce6fa3e8ae476e403ba5623d52e724fc6aff151cbf04578"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "indirect items exist",
+   "revision": 1,
+   "sha256": "8740eb535fb0fbb254eceed3be7ec06bc461bb644df1d1849436f721889831cb",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-INDIRECT-ELIG@1.0.0",
+   "title": "Indirect-cost eligibility report"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D39",
+   "doc_id": "PRJ-9101-D39",
+   "files": {
+    "docx": {
+     "bytes": 39489,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D39_r1_Plant-hire-and-equipment-exposure-report.docx",
+     "sha256": "118e6eac969dcbdd902c8404e0eca71f489813a6c19da096c19cc53b290db93a"
+    },
+    "pdf": {
+     "bytes": 5514,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D39_r1_Plant-hire-and-equipment-exposure-report.pdf",
+     "sha256": "9826eb4672e1d3711313b5e71cb2fe4f2d67908fcd01066f84511aecc7b6d720"
+    },
+    "xlsx": {
+     "bytes": 7890,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D39_r1_Plant-hire-and-equipment-exposure-report.xlsx",
+     "sha256": "94371d29e2547b53d42a47a5cd509795a1e5a0701dc77a3bbfebf1bfacd733a7"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "day-priced plant exists",
+   "revision": 1,
+   "sha256": "118e6eac969dcbdd902c8404e0eca71f489813a6c19da096c19cc53b290db93a",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-PLANT-EXPOSURE@1.0.0",
+   "title": "Plant-hire and equipment exposure report"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D40",
+   "doc_id": "PRJ-9101-D40",
+   "files": {
+    "docx": {
+     "bytes": 40908,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D40_r1_Estimate-risk-sensitivity-report.docx",
+     "sha256": "bd87d09a1af39de4f31b9372b38c90202fa9cde27333f8224555dd6a735cbaf4"
+    },
+    "pdf": {
+     "bytes": 10080,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D40_r1_Estimate-risk-sensitivity-report.pdf",
+     "sha256": "0dc9d1e3eae67e766a5984b272a6e0d0967f7efa9badb7248df3efb8740ad925"
+    },
+    "xlsx": {
+     "bytes": 10076,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D40_r1_Estimate-risk-sensitivity-report.xlsx",
+     "sha256": "b08d95f5e13becba5d33978bc76e32a32394e8e1b73ad99355ad7a0edb072f9e"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "bd87d09a1af39de4f31b9372b38c90202fa9cde27333f8224555dd6a735cbaf4",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-SENSITIVITY@1.0.0",
+   "title": "Estimate risk / sensitivity report"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D41",
+   "doc_id": "PRJ-9101-D41",
+   "files": {
+    "docx": {
+     "bytes": 41446,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D41_r1_Approval-and-decision-log.docx",
+     "sha256": "70d667fdfda8e0869029143f488e9ad6007025890892ce24038b1e28b493a8f5"
+    },
+    "pdf": {
+     "bytes": 24792,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D41_r1_Approval-and-decision-log.pdf",
+     "sha256": "116a525b249f3f75e2837209e21eeb2dc3059a5cb482e049fda505fc7750b2b9"
+    },
+    "xlsx": {
+     "bytes": 12548,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D41_r1_Approval-and-decision-log.xlsx",
+     "sha256": "ee17ffa971c2e856b69c88eb9c4d3ce6db6725a48909c372046cdbc34e79bb2c"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "70d667fdfda8e0869029143f488e9ad6007025890892ce24038b1e28b493a8f5",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-APPROVALS@1.0.0",
+   "title": "Approval and decision log"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D42",
+   "doc_id": "PRJ-9101-D42",
+   "files": {
+    "docx": {
+     "bytes": 42427,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D42_r1_Open-actions-and-outstanding-information-registe.docx",
+     "sha256": "6b59094411cb97afb03a55a4c29fa648b1c4106cfa350af4d2edf0ec3bf3852d"
+    },
+    "pdf": {
+     "bytes": 31754,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D42_r1_Open-actions-and-outstanding-information-registe.pdf",
+     "sha256": "17cbc6f5fa422f67952c6f5b4d256965ddf723d0fabea2e92b30db18e3c51689"
+    },
+    "xlsx": {
+     "bytes": 13500,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D42_r1_Open-actions-and-outstanding-information-registe.xlsx",
+     "sha256": "9ec49f527153c38af1cdb670ae2b9648e5bb42be33f967e701351743fcfa112a"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "6b59094411cb97afb03a55a4c29fa648b1c4106cfa350af4d2edf0ec3bf3852d",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-OPEN-ACTIONS@1.0.0",
+   "title": "Open actions and outstanding information register"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D43",
+   "doc_id": "PRJ-9101-D43",
+   "files": {
+    "docx": {
+     "bytes": 39040,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D43_r1_Tender-handover-checklist.docx",
+     "sha256": "03c918080f8edb3dede70a16a69540bd925b0af2c965ca293de61633fdbf5a2f"
+    },
+    "pdf": {
+     "bytes": 3362,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D43_r1_Tender-handover-checklist.pdf",
+     "sha256": "ecac479338cd863c7034e637c6219d5f3e7e2b1efcf5d37342e67aede198906c"
+    }
+   },
+   "formats": "docx,pdf",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "03c918080f8edb3dede70a16a69540bd925b0af2c965ca293de61633fdbf5a2f",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-HANDOVER-CHECK@1.0.0",
+   "title": "Tender handover checklist"
+  },
+  {
+   "applicability": "Not Applicable",
+   "blocked_reason": null,
+   "code": "D44",
+   "doc_id": "PRJ-9101-D44",
+   "files": {},
+   "formats": "",
+   "reason": "tender stage: applicable only after an award (no award scenario selected)",
+   "revision": 1,
+   "sha256": "",
+   "status": "Not Applicable",
+   "template": "T-POSTAWARD@1.0.0",
+   "title": "Post-award project setup checklist"
+  },
+  {
+   "applicability": "Required",
+   "blocked_reason": null,
+   "code": "D45",
+   "doc_id": "PRJ-9101-D45",
+   "files": {
+    "docx": {
+     "bytes": 42910,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D45_r1_Final-document-manifest.docx",
+     "sha256": "d17f476de5a54898bc9e5551f1d1e22aa8fb74d46a1f46330c670711bad0f1ac"
+    },
+    "pdf": {
+     "bytes": 16577,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D45_r1_Final-document-manifest.pdf",
+     "sha256": "a8a7a968d2102c1ea5bb406714c7a40f5d85538a8ad1b00243a1f39a86fe3fb1"
+    },
+    "xlsx": {
+     "bytes": 11096,
+     "path": "PRJ-9101_tender_pack_r1/PRJ-9101-D45_r1_Final-document-manifest.xlsx",
+     "sha256": "f7be695b09c7815f71e0d36b9e4847a13f5102c334eac3cbc436460f92ba42f2"
+    }
+   },
+   "formats": "docx,pdf,xlsx",
+   "reason": "core tender record produced for every tender",
+   "revision": 1,
+   "sha256": "d17f476de5a54898bc9e5551f1d1e22aa8fb74d46a1f46330c670711bad0f1ac",
+   "status": "Preliminary (DEMONSTRATION)",
+   "template": "T-MANIFEST@1.0.0",
+   "title": "Final document manifest"
+  }
+ ],
+ "documents_with_placeholders": [
+  "D23",
+  "D27",
+  "D28",
+  "D29",
+  "D30",
+  "D31"
+ ],
+ "estimate_fingerprint": "460941d66a7192880b0c78441673c201429753bed9637f49b780496d5e4cfe34",
+ "estimate_version": 1,
+ "issue_date": "2027-02-15",
+ "kind": "tender",
+ "production_ready": false,
+ "project_id": "PRJ-9101",
+ "reasons_not_ready": [
+  "the project is flagged as a demonstration project",
+  "synthetic data is used in the estimate",
+  "the environment is 'test', not 'production'",
+  "estimate approval: no approval record",
+  "letter of offer: none generated",
+  "tender-export approval: no approval record",
+  "rate 928: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 928: recorded in environment 'test', not 'production'",
+  "rate 928: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 929: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 929: recorded in environment 'test', not 'production'",
+  "rate 929: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 930: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 930: recorded in environment 'test', not 'production'",
+  "rate 930: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 931: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 931: recorded in environment 'test', not 'production'",
+  "rate 931: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 932: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 932: recorded in environment 'test', not 'production'",
+  "rate 932: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 933: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 933: recorded in environment 'test', not 'production'",
+  "rate 933: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 934: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 934: recorded in environment 'test', not 'production'",
+  "rate 934: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 935: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 935: recorded in environment 'test', not 'production'",
+  "rate 935: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 936: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 936: recorded in environment 'test', not 'production'",
+  "rate 936: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 937: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 937: recorded in environment 'test', not 'production'",
+  "rate 937: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 938: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 938: recorded in environment 'test', not 'production'",
+  "rate 938: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 939: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 939: recorded in environment 'test', not 'production'",
+  "rate 939: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 940: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 940: recorded in environment 'test', not 'production'",
+  "rate 940: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 941: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 941: recorded in environment 'test', not 'production'",
+  "rate 941: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 942: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 942: recorded in environment 'test', not 'production'",
+  "rate 942: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 943: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 943: recorded in environment 'test', not 'production'",
+  "rate 943: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 944: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 944: recorded in environment 'test', not 'production'",
+  "rate 944: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 945: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 945: recorded in environment 'test', not 'production'",
+  "rate 945: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 946: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 946: recorded in environment 'test', not 'production'",
+  "rate 946: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 947: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 947: recorded in environment 'test', not 'production'",
+  "rate 947: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 948: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 948: recorded in environment 'test', not 'production'",
+  "rate 948: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 949: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 949: recorded in environment 'test', not 'production'",
+  "rate 949: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 950: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 950: recorded in environment 'test', not 'production'",
+  "rate 950: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 951: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 951: recorded in environment 'test', not 'production'",
+  "rate 951: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 952: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 952: recorded in environment 'test', not 'production'",
+  "rate 952: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 953: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 953: recorded in environment 'test', not 'production'",
+  "rate 953: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 954: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 954: recorded in environment 'test', not 'production'",
+  "rate 954: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 955: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 955: recorded in environment 'test', not 'production'",
+  "rate 955: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 956: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 956: recorded in environment 'test', not 'production'",
+  "rate 956: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 957: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 957: recorded in environment 'test', not 'production'",
+  "rate 957: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 958: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 958: recorded in environment 'test', not 'production'",
+  "rate 958: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 959: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 959: recorded in environment 'test', not 'production'",
+  "rate 959: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 960: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 960: recorded in environment 'test', not 'production'",
+  "rate 960: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 961: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 961: recorded in environment 'test', not 'production'",
+  "rate 961: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 962: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 962: recorded in environment 'test', not 'production'",
+  "rate 962: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 963: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 963: recorded in environment 'test', not 'production'",
+  "rate 963: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 964: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 964: recorded in environment 'test', not 'production'",
+  "rate 964: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 965: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 965: recorded in environment 'test', not 'production'",
+  "rate 965: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 966: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 966: recorded in environment 'test', not 'production'",
+  "rate 966: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 967: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 967: recorded in environment 'test', not 'production'",
+  "rate 967: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 968: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 968: recorded in environment 'test', not 'production'",
+  "rate 968: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 969: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 969: recorded in environment 'test', not 'production'",
+  "rate 969: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "rate 970: approved by a 'test' principal (test-procurement); only registered human users count",
+  "rate 970: recorded in environment 'test', not 'production'",
+  "rate 970: test-procurement is not (or is no longer) an active registered human user holding role 'Procurement Reviewer'",
+  "commercial policy approval: approved by a 'test' principal (test-commercial); only registered human users count",
+  "commercial policy approval: recorded in environment 'test', not 'production'",
+  "commercial policy approval: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "tax category VAT-STD approval: approved by a 'test' principal (test-commercial); only registered human users count",
+  "tax category VAT-STD approval: recorded in environment 'test', not 'production'",
+  "tax category VAT-STD approval: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "indirect IND-HO: approved by a 'test' principal (test-commercial); only registered human users count",
+  "indirect IND-HO: recorded in environment 'test', not 'production'",
+  "indirect IND-HO: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "indirect IND-INS: approved by a 'test' principal (test-commercial); only registered human users count",
+  "indirect IND-INS: recorded in environment 'test', not 'production'",
+  "indirect IND-INS: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "indirect IND-SITE: approved by a 'test' principal (test-commercial); only registered human users count",
+  "indirect IND-SITE: recorded in environment 'test', not 'production'",
+  "indirect IND-SITE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "reconciliation gate blocked by 9 finding(s)",
+  "19 unresolved material technical/commercial queries: TQ-PRJ-9101-005, TQ-PRJ-9101-006, TQ-PRJ-9101-007, TQ-PRJ-9101-009, TQ-PRJ-9101-010, TQ-PRJ-9101-011",
+  "programme baseline: none approved",
+  "productivity norm N-BACK: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-BACK: recorded in environment 'test', not 'production'",
+  "productivity norm N-BACK: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-CABLE: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-CABLE: recorded in environment 'test', not 'production'",
+  "productivity norm N-CABLE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-COAT: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-COAT: recorded in environment 'test', not 'production'",
+  "productivity norm N-COAT: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-FIBRE: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-FIBRE: recorded in environment 'test', not 'production'",
+  "productivity norm N-FIBRE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-EXC: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-EXC: recorded in environment 'test', not 'production'",
+  "productivity norm N-EXC: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-EXCH: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-EXCH: recorded in environment 'test', not 'production'",
+  "productivity norm N-EXCH: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-FORM: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-FORM: recorded in environment 'test', not 'production'",
+  "productivity norm N-FORM: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-PIPE: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-PIPE: recorded in environment 'test', not 'production'",
+  "productivity norm N-PIPE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-POUR: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-POUR: recorded in environment 'test', not 'production'",
+  "productivity norm N-POUR: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-PUMP: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-PUMP: recorded in environment 'test', not 'production'",
+  "productivity norm N-PUMP: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-REBAR: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-REBAR: recorded in environment 'test', not 'production'",
+  "productivity norm N-REBAR: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-ROAD: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-ROAD: recorded in environment 'test', not 'production'",
+  "productivity norm N-ROAD: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-SHORE: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-SHORE: recorded in environment 'test', not 'production'",
+  "productivity norm N-SHORE: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-STEEL: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-STEEL: recorded in environment 'test', not 'production'",
+  "productivity norm N-STEEL: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-SUPP: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-SUPP: recorded in environment 'test', not 'production'",
+  "productivity norm N-SUPP: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-TRAY: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-TRAY: recorded in environment 'test', not 'production'",
+  "productivity norm N-TRAY: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'",
+  "productivity norm N-WELD: approved by a 'test' principal (test-commercial); only registered human users count",
+  "productivity norm N-WELD: recorded in environment 'test', not 'production'",
+  "productivity norm N-WELD: test-commercial is not (or is no longer) an active registered human user holding role 'Commercial Approver'"
+ ],
+ "revision": 1,
+ "synthetic": true,
+ "template_version": "1.0.0"
+}

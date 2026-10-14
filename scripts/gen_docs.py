@@ -94,8 +94,31 @@ def excel_dictionary() -> None:
     (ROOT / "docs/EXCEL_DATA_DICTIONARY.md").write_text("\n".join(out), encoding="utf-8")
 
 
+def standards_doc() -> None:
+    import json
+    d = json.loads((ROOT / "data/standards/standards_register.json").read_text(encoding="utf-8"))
+    f = lambda x, n=700: (str(x) if x is not None else "-").replace("|", "/").replace("\n", " ")[:n]  # noqa: E731
+    out = ["# Standards and evidence register", "",
+           "Generated from `data/standards/standards_register.json` by `scripts/gen_docs.py` (loaded into the table `standards_register`; CLI `python -m app.cli standards list|acquire|import`).",
+           "It records **where a rule or a basis comes from and what was actually read** - concise references and paraphrases only. It never reproduces copyrighted standards, never stores a price or a productivity value,",
+           "and **no row is a statement that a project complies** with anything. " + d.get("review_required", ""), "",
+           f"Source of these rows: {d.get('generated_by', '')}. Access date {d.get('access_date', '')}.", "",
+           "| ID | Topic | Title | Publisher | Edition / date | Clause / page | Status | Link or file |", "|---|---|---|---|---|---|---|---|"]
+    for s_ in d["sources"]:
+        out.append(f"| {s_['id']} | {f(s_.get('topic'), 80)} | {f(s_['title'], 160)} | {f(s_.get('publisher'), 80)} | {f(s_.get('edition_or_publication_date'), 120)} | {f(s_.get('clause_or_page'), 120)} | **{s_['verification_status']}** | {f(s_.get('url'), 120)} |")
+    out += ["", "## What each row says and where it stops", ""]
+    for s_ in d["sources"]:
+        out += [f"### {s_['id']} - {f(s_['title'], 120)}", "", f"* **Scope:** {f(s_.get('scope'))}", f"* **Paraphrase (not a quotation):** {f(s_.get('paraphrase'))}",
+                f"* **Limitations:** {f(s_.get('limitations'), 900)}", f"* **Notes:** {f(s_.get('notes'), 900)}", ""]
+    out += ["## Sources a person must still acquire", "", "Every row whose status is not *Verified - primary source read* needs a person to obtain the document, record the edition and clause, and re-import the row. "
+            "Until then the product treats it as **unverified** and states so in every document that cites it. Productivity references (RSMeans, Spon's, CIOB publications, manufacturer instructions, company actuals) "
+            "are listed by **name only**; no number from them is stored anywhere in the product.", ""]
+    (ROOT / "docs/STANDARDS_AND_EVIDENCE_REGISTER.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+
+
 if __name__ == "__main__":
     (ROOT / "docs").mkdir(exist_ok=True)
+    standards_doc()
     taxonomy()
     excel_dictionary()
     governed_parameters()

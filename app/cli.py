@@ -45,11 +45,13 @@ def cmd_init(a) -> int:
 def cmd_create_user(a) -> int:
     db = get_db()
     pw = a.password or getpass.getpass("Password: ")
+    who = f"cli:{getpass.getuser()}"                    # the CLI is a shell-access tool, not an authenticated session: record which operating-system user ran it
     if a.reset and db.one("SELECT 1 FROM users WHERE username=?", (a.username,)):
         db.update("users", {"password_hash": auth.hash_password(pw)}, "username=?", (a.username,))
+        audit.log(db, who, "user", a.username, "password_reset")
         print("Password reset.")
     else:
-        auth.create_user(db, a.username, a.display_name or a.username, a.role, pw, actor_type=a.actor_type)
+        auth.create_user(db, a.username, a.display_name or a.username, a.role, pw, creator=who, actor_type=a.actor_type)
         print("User created.")
     return 0
 
@@ -99,6 +101,18 @@ def cmd_action(a) -> int:
     from .api.serializers import ser
     params = json.loads(Path(a.params[1:]).read_text(encoding="utf-8")) if a.params.startswith("@") else json.loads(a.params)
     _print(ser(actions.run(get_db(), _actor(a), a.name, params)))
+    return 0
+
+
+def cmd_standards(a) -> int:
+    from .services import standards
+    db = get_db()
+    if a.stcmd == "list":
+        _print(standards.list_standards(db, a.status))
+    elif a.stcmd == "acquire":
+        _print(standards.acquisition_list(db))
+    elif a.stcmd == "import":
+        _print(standards.import_register(db, Path(a.file), created_by=_actor(a).username, dry_run=a.dry_run))
     return 0
 
 
@@ -400,6 +414,11 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(fn=cmd_report)
     s = sub.add_parser("action", help="run a registered action as a real user: action NAME 'JSON' | @file.json  (see /api/actions)")
     s.add_argument("name"); s.add_argument("params"); s.add_argument("--user"); s.set_defaults(fn=cmd_action)
+    s = sub.add_parser("standards", help="standards / source register: list | acquire (what a person must still obtain) | import FILE")
+    st_ = s.add_subparsers(dest="stcmd", required=True)
+    q = st_.add_parser("list"); q.add_argument("--status"); q.set_defaults(fn=cmd_standards)
+    st_.add_parser("acquire").set_defaults(fn=cmd_standards)
+    q = st_.add_parser("import"); q.add_argument("file"); q.add_argument("--dry-run", action="store_true"); q.add_argument("--user"); q.set_defaults(fn=cmd_standards)
     s = sub.add_parser("param", help="governed parameters: kinds / list / propose / submit / approve / reject")
     ps_ = s.add_subparsers(dest="pcmd3", required=True)
     ps_.add_parser("kinds").set_defaults(fn=cmd_param)

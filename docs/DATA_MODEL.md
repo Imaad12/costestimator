@@ -1,6 +1,6 @@
 # Data model and source-of-truth rules
 
-SQLite (`var/ksa_estimator.db`), schema = numbered SQL files in `app/migrations/` (0001 core … 0007 workspaces & sources). Decimals are stored as exact TEXT.
+SQLite (`var/ksa_estimator.db`), schema = numbered SQL files in `app/migrations/` (0001 core … 0015 end-to-end closure). Decimals are stored as exact TEXT.
 Everything below is **implemented** unless marked otherwise.
 
 ## The eleven data classes and where each lives
@@ -62,3 +62,9 @@ Numbers that a company decides (productivity factors, hire terms, calendar, esca
 
 ## Migration rules
 Forward-only numbered SQL (`app/migrations`), applied once, recorded in `schema_migrations`. Restructuring of *files* goes through `migrate-workspaces` (dry-run, backup, report, copy-only).
+
+## End-to-end closure tables (migration 0015)
+* Assumption governance: new columns on `assumptions` (`category`, `origin`, `reason`, `business_impact`, `uncertainty`, `consequence_if_missing`, `affects`, `reviewed_by/at`, `supersedes_version`) and **triggers** that refuse changes/deletes of Approved/Superseded rows of `assumptions`, `project_assumptions`, `productivity_norms`, `workforce_profiles` (a guard, not tamper-proofing).
+* Programme: `productivity_norms` (versioned, 7 states, origin, evidence status), `workforce_profiles` (archetype, roles, shifts, attendance, fronts, role costs), `work_activities` (project activities; quantity read from `boq_items`), `programme_baselines` (saved results + fingerprint + approval).
+* Tender: `tender_enquiries`, `tender_documents` (received documents, revisions, content status), `tender_queries` (8 registers, draft-only workflow), `tender_register_items` (compliance, ITP, method statement, HSE, permit, submittal, testing, NCR structure, bid/no-bid, context ...), `open_actions`.
+* Output: `tender_packs` (kind tender/handover, revision, classification, manifest hash), `generated_documents` (doc id, template id/version, status, applicability + reason, checksum, facts printed, references). `standards_register` holds source references.

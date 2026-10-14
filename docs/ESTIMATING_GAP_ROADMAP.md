@@ -15,7 +15,7 @@ A level is *Supported* when every engine capability required at that level is *I
 | 1 | Level 2 + WP-19, 20, 21 | owner's controlled documents (never assumed) |
 
 ## 0a. Status after iteration 4 (2026-10-13)
-Capability records now: <!-- MATRIX_COUNTS_BEGIN -->131 records = 85 IT + 3 IU + 40 PA + 3 MI + 0 NA (IT implemented and tested, IU implemented but unverified, PA partial, MI missing, NA not applicable) - generated from `docs/capability_matrix.json`<!-- MATRIX_COUNTS_END -->.
+Capability records now: <!-- MATRIX_COUNTS_BEGIN -->141 records = 93 IT + 3 IU + 42 PA + 3 MI + 0 NA (IT implemented and tested, IU implemented but unverified, PA partial, MI missing, NA not applicable) - generated from `docs/capability_matrix.json`<!-- MATRIX_COUNTS_END -->.
 Each row says what was **built and tested** and what is **still open**. "Open" is almost always data, a document the user must supply, a real network, or Microsoft Excel - not missing code.
 | WP | Status | Built and tested (matrix records) | Still open |
 |---|---|---|---|
@@ -73,6 +73,7 @@ Priority: **P0** blocks real use or blocks many other packages · **P1** high va
 | WP-20 | P3 | CTL-05, CTL-06, CTL-03 | **Change control and forecasting; benchmark library**: variation register priced against the awarded baseline; EAC/ETC; approved benchmark ranges and findings | WP-02, WP-10 | cumulative variation reporting reconciles | tests | Yes | actuals |
 | WP-21 | P3 | SAU-06, SAU-07, SAU-04, OUT-05 | **Client compliance profile framework** (versioned profiles referencing controlled documents; CBS/WBS maps, forms, mandatory checks, templates), then a *specific owner's* profile **only from documents the user is authorised to supply**; local-content scoring where the owner's method is supplied | WP-07, WP-02 | export blocked when mandatory profile items are unmet; profile records document and revision | profile validation tests | Yes | owner's controlled documents |
 | WP-22 | P1 (before shared deployment) | SCO-09, GOV-12 | **Scale and hardening**: cached estimate per request, paginated tables, incremental workbook export, security review items (TLS, CSRF, lockout, MFA/SSO), concurrency | none | 50k items: estimate < 10 s, pages < 3 s | published performance budget tests | Yes | review |
+| WP-23 | P1 (before a real-data pilot) | TDR-08, TDR-09 | **Closure follow-ups**: competent-person content for quality plan / ITP / method-statement / HSE registers (templates fed from the owner's specification and the company's QMS, never generated); acquire and record the Saudi Building Code edition in force, the current Labor Law and Executive Regulations text, the in-force Government Tenders and Procurement Law and the AACE recommended practices (human acquisition, then `standards import`); bespoke UI forms for norms, queries and registers | WP-07 | each acquired source re-imported with `Verified` and a URL/file; one real quality plan loaded and approved through the register | `tests/closure/test_security_backup_migration_standards.py`; reviewer sample | Yes | licensed standards, owner specification, company QMS |
 
 ## 2. Dependency graph (critical path)
 `WP-00a` ∥ `WP-01` → `WP-02` → `WP-03` → (`WP-04`, `WP-05`, `WP-09`, `WP-10`) → `WP-06`/`WP-13`/`WP-14` → `WP-19`.

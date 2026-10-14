@@ -17,7 +17,10 @@ from ..database import Database, rows_to_dicts
 from . import audit
 
 APP_VERSION = "0.1.0"
-KEY_TABLES = ["projects", "resources", "resource_rates", "assumptions", "assemblies", "boq_items", "quotations", "approvals", "audit_log"]
+KEY_TABLES = ["projects", "resources", "resource_rates", "assumptions", "assemblies", "boq_items", "quotations", "approvals", "audit_log",
+              # end-to-end closure records (migration 0015)
+              "productivity_norms", "workforce_profiles", "work_activities", "programme_baselines", "tender_enquiries", "tender_documents", "tender_queries", "tender_register_items",
+              "tender_packs", "generated_documents", "open_actions", "standards_register"]
 
 
 def _sha(b: bytes) -> str:
@@ -203,6 +206,12 @@ def export_project_package(db: Database, project_id: str, dest: Path | None = No
         "long_lead_items": "SELECT * FROM long_lead_items WHERE project_id=?", "package_scope": "SELECT * FROM package_scope WHERE project_id=?",
         "variations": "SELECT * FROM variations WHERE project_id=?", "task_progress": "SELECT * FROM task_progress WHERE project_id=?",
         "variation_lines": "SELECT l.* FROM variation_lines l JOIN variations v ON v.id=l.variation_id WHERE v.project_id=?",
+        # end-to-end closure records
+        "work_activities": "SELECT * FROM work_activities WHERE project_id=?", "programme_baselines": "SELECT * FROM programme_baselines WHERE project_id=?",
+        "tender_enquiries": "SELECT * FROM tender_enquiries WHERE project_id=?", "tender_documents": "SELECT * FROM tender_documents WHERE project_id=?",
+        "tender_queries": "SELECT * FROM tender_queries WHERE project_id=?", "tender_register_items": "SELECT * FROM tender_register_items WHERE project_id=?",
+        "tender_packs": "SELECT * FROM tender_packs WHERE project_id=?", "open_actions": "SELECT * FROM open_actions WHERE project_id=?",
+        "generated_documents": "SELECT g.* FROM generated_documents g JOIN tender_packs p ON p.pk=g.pack_pk WHERE p.project_id=?",
     }
     data = {k: rows_to_dicts(db.all(q, (project_id,))) for k, q in tables.items()}
     with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as z:

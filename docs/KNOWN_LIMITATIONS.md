@@ -67,3 +67,14 @@
 
 ## Not implemented (documented integration points)
 DuckDB analytics (architecture-compatible); GASTAT website adapter, Etimad adapter (manual import only); automated tests of the browser UI beyond HTTP-level rendering and form posts.
+
+## End-to-end closure (iteration 6): read before relying on any output
+* **Productivity and programme**: every norm, crew, profile, calendar, shift/overtime efficiency and role day-cost is person-entered; the closure scenario uses *synthetic* values, so its agreement with the oracle proves arithmetic and controls, not real productivity or duration.
+  Scheduling is a daily priority simulation (no levelling beyond the priority rule, indivisible crews, no weather model, no multi-calendar resources, no P6/MSP import). Archetype bands (4-15, 15-25, 26-50, 51+) are initial company planning assumptions, not industry categories.
+* **No default Saudi calendar or labour rule is shipped.** The standards register records what was read: 2 sources verified on the primary page, 4 partially verified, 6 requiring human acquisition (Saudi Building Code pages and the procurement law could not be read; AACE recommended-practice texts are paid).
+  The product states no compliance with any standard, owner requirement or AACE class.
+* **Registers and documents**: detectors are heuristic (wording markers, import flags, register comparisons) and raise **draft** queries only; documents are *registered*, not interpreted; the quality, ITP, method-statement, HSE and commissioning registers hold structure and explicit
+  placeholders - no inspection criteria, HSE controls or compliance statements are generated. Generated documents are assembled from registers and the frozen estimate; template content is code (versioned), English only, PDF layout is functional.
+* **Cash flow and escalation are not part of the frozen snapshot** (they read the current approved payment terms and programme); the estimate totals and every printed estimate figure are frozen. Tax is charged on the tendered pricing schedule, which differs from the commercial net price by the reported rounding variance (O-9).
+* **Interfaces**: the closure registers are reachable through reports (UI/REST/CLI), REST actions and the CLI `action` command; there are no bespoke UI forms for norms, profiles, queries or registers.
+* **Identity**: in-process service calls trust the `Actor` they receive (the approval is *recorded* as `unregistered`/`role_mismatch`/`test` and never counts for readiness); there is no MFA/SSO; an Administrator can register a user typed `human`. A hypothetical handover pack is a simulation: no award is recorded and none is assumed.

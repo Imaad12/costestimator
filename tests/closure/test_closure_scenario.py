@@ -232,8 +232,11 @@ def test_pack_regeneration_is_deterministic_and_figures_survive_library_changes(
     d = model.Doc("D99", "Determinism probe", [model.Section("S", ["p"], model.Table(["a"], [[1]]))], facts={"x": 1}, xlsx=True)
     meta = dict(project_id="P", project_name="n", customer="c", doc_id="P-D99", title=d.title, revision=1, issue_date="2027-01-01", status="Draft", author="a", reviewer="r", estimate_version="v1",
                 fingerprint="ab", template="t", confidentiality="c", banner="B", synthetic_mark="S")
+    import time
     hashes = set()
     for i in range(2):
+        if i:
+            time.sleep(2.1)                                          # a different wall-clock second must not change a single byte
         for fmt, fn in (("docx", model.render_docx), ("xlsx", model.render_xlsx), ("pdf", model.render_pdf)):
             p = run["work"] / f"det{i}.{fmt}"
             fn(d, meta, p)

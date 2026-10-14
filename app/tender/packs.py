@@ -94,6 +94,8 @@ def generate_pack(db: Database, actor: Actor, project_id: str, *, out_root: Path
             doc = model.Doc(m["code"], m["title"], [model.Section("Not produced", [model.missing(f"{e.code}: {e}")])])
         if m["applicability"] == MCR:
             doc = model.Doc(m["code"], m["title"], [model.Section("Blocked: missing customer requirement", [model.missing(m["reason"])])], facts=doc.facts, limitations=builders._lim(c))
+        if not doc.sources:
+            doc.sources = [f"Frozen estimate version v{v['version_no']} (fingerprint {v['inputs_hash'][:16]}), totals and pricing schedule", "Registers in the application database (see document D33 for received documents, D08 for assumptions, D25 for queries)"]
         built[m["n"]] = doc
     cust_missing = model.MISSING in c.customer             # the customer name appears in every document's header block: without it every document carries a placeholder
     blocked_codes = sorted(f"D{n:02d}" for n, d in built.items() if d.missing_inputs() or cust_missing)

@@ -135,6 +135,12 @@ def load_assumption_register(db: Database) -> int:
     return n
 
 
+def load_standards_register(db: Database) -> int:
+    from . import standards
+    p = _data("standards", "standards_register.json")
+    return standards.import_register(db, p)["new"] if p.exists() else 0
+
+
 def load_standard_assemblies(db: Database) -> int:
     """Structure-only assemblies (no factors). Loaded as Draft: they cannot be mapped or approved until an estimator supplies the factors."""
     from . import assemblies as asm_service
@@ -169,6 +175,7 @@ def seed_reference(db: Database) -> dict:
             "cost_codes": load_taxonomy(db),
             "sources": load_sources(db),
             "assumptions": load_assumption_register(db),
+            "standards_register": load_standards_register(db),
             "resources": load_resource_catalogues(db),
         }
         out["tax_categories"] = seed_tax_categories(db)

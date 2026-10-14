@@ -91,3 +91,9 @@ single-user/small-team tool. Not designed for multi-node or internet exposure (b
 | Optional Claude AI features | **Partially implemented**: schemas, review gating, mock-tested; live API never exercised | |
 | Real Saudi rate coverage | **Not achieved**: 0 approved real rates | NEXT_STEPS #9 |
 | Full replay of frozen estimates (indirect/commercial), OCR/CAD extraction, multi-user server hardening, per-workspace ACLs | **Planned** | NEXT_STEPS |
+
+## End-to-end closure layer (iteration 6)
+`app/estimators/productivity.py` (pure engine) -> `app/services/workforce.py` (norms, profiles, activities, baselines, scenarios) ; `app/services/tender.py` (enquiry, document register, query registers, generic registers) ;
+`app/services/standards.py` ; `app/tender/` = `model.py` (content model + deterministic DOCX/XLSX/PDF renderers), `catalogue.py` (45 documents + applicability), `builders.py` (content from the frozen estimate and registers),
+`packs.py` (generation, manifest, document approval, validator), `handover.py` (H01-H17). `app/services/readiness.py::_closure_gate` extends the Stage-J gate. Actions: `app/api/actions_closure.py`; reports in `app/reporting/registry.py`.
+Rule: documents never contain a typed value - every figure comes from the frozen estimate version or a register; missing inputs are `[[MISSING: ...]]` markers that make the document BLOCKED.

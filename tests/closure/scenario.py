@@ -92,6 +92,12 @@ def stage_enquiry_project_docs(db, ev, A, workdir):
         tender.upsert_item(db, A["est"], pid, "bid_no_bid", k, dict(criterion=crit, assessment=assess, evidence=evid), source_ref="SYNTHETIC bid review", is_synthetic=True)
         tender.submit_item(db, A["est"], pid, "bid_no_bid", k)
         tender.approve_item(db, A["com"], pid, "bid_no_bid", k, comments="TEST ACTOR: SYNTHETIC")
+    for k, (inp, need, note) in {"drawings": ("Complete drawing set with all revisions", "quantities and methodology", "DWG-EL-010 missing at enquiry"), "payment": ("Payment, retention and bond terms", "cash-flow basis and financing", "not stated in the ITT"),
+                                  "quality": ("Customer quality-plan requirement", "documents D27, D28, D30", "conflicting statements"), "site": ("Site access and working-hour rules", "calendar and programme", "to be confirmed")}.items():
+        tender.upsert_item(db, A["est"], pid, "required_input", k, dict(input=inp, needed_for=need, status_note=note), source_ref="enquiry review (SYNTHETIC)", is_synthetic=True)
+    for k, (role, resp, who) in {"estimating": ("Estimating lead", "BOQ mapping, pricing, queries", "SIMULATED OWNER - Lead Estimator (test)"), "commercial": ("Commercial approver", "commercial policy, offer, final gate", "SIMULATED OWNER - Commercial Manager (test)"),
+                                  "procurement": ("Procurement lead", "RFQs, quote levelling, long-lead items", "SIMULATED OWNER - Procurement Manager (test)")}.items():
+        tender.upsert_item(db, A["est"], pid, "responsibility", k, dict(role=role, responsibility=resp, assigned_to=who), source_ref="project setup (SYNTHETIC)", is_synthetic=True)
     ev.stage("02_bid_no_bid", "PASS", items=[i["item_key"] for i in tender.list_items(db, pid, "bid_no_bid")], statuses=[i["status"] for i in tender.list_items(db, pid, "bid_no_bid")])
     # context + customer requirements (one deliberately conflicting, one deliberately unstated)
     tender.upsert_item(db, A["est"], pid, "tender_context", "context", dict(contract_type="lump sum (FICTIONAL)", delivery_model="construct-only (FICTIONAL)", award_scenario="",
@@ -254,8 +260,11 @@ def stage_productivity(db, ev, A, pid):
     wf.create_norm(db, A["est"], id="N-PROPOSED", trade="Piping", activity="Proposed example", output_unit="m", basis="crew_output_per_crew_day", value="10", crew={"skilled": 1}, source=Dt.SYN, is_synthetic=True)
     wf.propose_norm(db, A["est"], "N-PROPOSED")
     wf.create_norm(db, A["est"], id="N-IMPORTED", trade="Piping", activity="Imported example", output_unit="m", basis="crew_output_per_crew_day", value="10", crew={"skilled": 1}, source=Dt.SYN, origin="import")
+    wf.create_norm(db, A["est"], id="N-REJECT", trade="Piping", activity="Rejected example", output_unit="m", basis="crew_output_per_crew_day", value="99", crew={"skilled": 1}, source=Dt.SYN, effective_from="2027-01-01", is_synthetic=True)
+    wf.submit_norm(db, A["est"], "N-REJECT")
+    wf.reject_norm(db, A["com"], "N-REJECT", "TEST ACTOR: SYNTHETIC rejection - value not supported by the cited source")
     wf.create_norm(db, A["est"], id="N-SYSTEM", trade="Piping", activity="System-proposed example", output_unit="m", basis="crew_output_per_crew_day", value="10", crew={"skilled": 1}, source=Dt.SYN, is_synthetic=True)
-    state_demo = {n["id"]: n["status"] for n in wf.list_norms(db) if n["id"] in ("N-DRAFT", "N-PROPOSED", "N-IMPORTED", "N-SYSTEM")}
+    state_demo = {n["id"]: n["status"] for n in wf.list_norms(db) if n["id"] in ("N-DRAFT", "N-PROPOSED", "N-IMPORTED", "N-SYSTEM", "N-REJECT")}
     for prof in Dt.PROFILES:
         pid_, arch, name, roles, indirect, shifts, nt, att, av, ph, fronts, sub = prof
         wf.create_profile(db, A["est"], id=pid_, archetype=arch, name=name, roles=roles, indirect=indirect, shifts=shifts, night_shift_efficiency_pct=nt, attendance_pct=att, availability_pct=av,
@@ -277,7 +286,7 @@ def stage_productivity(db, ev, A, pid):
           and D(wds["WP-SME"]) / wds["WP-ENT"] < D(base["WP-ENT"]["headcount"]) / base["WP-SME"]["headcount"] / 2 and wds["WP-LARGE"] == wds["WP-ENT"] and all(v["schedulable"] for v in base.values()))
     ev.stage("08_productivity_and_crew_scenarios", "PASS" if ok else "FAIL", norm_states_after_workflow=dict(sorted(norm_status.items())[:4]) | {"...": f"{len(norm_status)} norms Approved by TEST ACTOR"},
              norm_state_examples=state_demo, long_lead=ll,
-             scenarios=[{k: s[k] for k in ("profile", "archetype", "headcount", "working_days", "calendar_days", "start", "finish", "peak_workers", "labour_hours", "resource_limited", "critical_path", "claim", "gaps")} |
+             scenarios=[{k: s[k] for k in ("profile", "archetype", "headcount", "subcontract_capacity", "working_days", "calendar_days", "start", "finish", "peak_workers", "labour_hours", "resource_limited", "critical_path", "claim", "gaps")} |
                         {"cost": s["cost"]} for s in sc["scenarios"]], calendar=sc["calendar"], note=sc["note"])
     return sc
 
@@ -490,7 +499,9 @@ def stage_commercial(db, ev, A, pid):
     lines_ok = all(abs(l.amount - l.quantity * l.unit_rate) <= D("0.01") * max(D(1), l.quantity) for l in est.schedule.lines if l.amount is not None and l.unit_rate is not None)
     vat = r2(sched_total * D("0.15"))
     variance = sched_total - net
-    chain_ok = (r2(t["total_cost"]) == r2(total_cost) and r2(t["commercial_net_price"]) == net and r2(t["selling_price_pre_tax"]) == r2(sched_total) and r2(t["tax"]) == vat
+    markup_on_cost = (net - total_cost) / total_cost
+    margin_on_price = (net - total_cost) / net                                          # markup and margin are different numbers: 8 % on cost is 7.41 % on price
+    chain_ok = (abs(markup_on_cost - D("0.08")) < D("0.0000001") and abs(margin_on_price - D("0.08") / D("1.08")) < D("0.0000001") and r2(t["total_cost"]) == r2(total_cost) and r2(t["commercial_net_price"]) == net and r2(t["selling_price_pre_tax"]) == r2(sched_total) and r2(t["tax"]) == vat
                 and r2(t["final_payable"]) == r2(sched_total) + vat and abs(variance) <= est.schedule.max_rounding_variance + D("0.01"))
     # independent percent-indirect: 9% of the whole direct cost (nothing excluded: base unspecified) + 25,000 fixed
     ind_expected = r2(Dd * D("0.09")) + D(25000)
@@ -498,7 +509,7 @@ def stage_commercial(db, ev, A, pid):
     have = {c for _, c in codes}
     ev.stage("14_indirects_tax_risk_escalation_cashflow", "PASS" if need <= have and chain_ok and lines_ok and abs(ind - ind_expected) <= D("0.05") else "FAIL",
              totals={k: str(v) for k, v in t.items()}, independent=dict(indirect=str(ind_expected), contingency=str(cont), total_cost=str(total_cost), net=str(net), schedule_total=str(r2(sched_total)), vat=str(vat), payable=str(r2(sched_total) + vat),
-                              schedule_vs_net_variance=str(r2(variance)), max_rounding_variance_allowed=str(est.schedule.max_rounding_variance)),
+                              schedule_vs_net_variance=str(r2(variance)), markup_on_cost=str(markup_on_cost.quantize(D('0.000001'))), margin_on_price=str(margin_on_price.quantize(D('0.000001'))), max_rounding_variance_allowed=str(est.schedule.max_rounding_variance)),
              indirect_application=str(ind), findings=codes, schedule_tasks=n_tasks, escalation_status=es.get("status"), escalation_complete=es.get("complete"),
              unescalated_cost=es.get("unescalated_eligible_cost"), indirect_base=dict(ib) if isinstance(ib, dict) else None, plant_hire_findings=[x for x in f if x["rule_code"] == "PLANT_HIRE_DAYS"][:3],
              cashflow=cf_state, estimate_state=est.state)
@@ -519,7 +530,12 @@ def stage_methodology(db, ev, A, pid):
         "procurement": "Pump skids are a long-lead item; procurement-constrained dates are shown in the programme.",
         "inspection": "Hold points follow the ITP register; NDT sample size is subject to the compliance deviation D-1.",
         "interfaces": "The fire-water tie-in is an interface with the existing ring main owned by the customer.",
-        "risks": "Programme risks: hard-material excavation, pump skid delay, tie-in isolation windows (see the risk register)."}
+        "risks": "Programme risks: hard-material excavation, pump skid delay, tie-in isolation windows (see the risk register).",
+        "temporary_works": "Temporary works: trench shoring (BOQ C-012) and scaffolding access hire (BOQ C-052); design of temporary works is by a competent engineer (not generated here).",
+        "access": "Access and working windows follow the project calendar (shutdown and reduced-hour windows are shown in D19); the customer's site access rules are a recorded required input.",
+        "testing_commissioning": "Hydrotest and flushing are a fixed 8-day activity, commissioning a fixed 10-day activity after coating, cable and fibre completion.",
+        "hse_interfaces": "HSE interfaces: hot-work and excavation permits (permit register), tie-in isolation with the existing ring main (interface register).",
+        "constraints": "Constraints and exclusions: see D09; unverified norms and the synthetic basis are listed in D37."}
     for k, v in topics.items():
         tender.upsert_item(db, A["est"], pid, "execution_review", k, dict(topic=k.replace("_", " ").title(), content=v), source_ref="programme baseline / registers", is_synthetic=True)
     for k, t in {"scope": "Scope and objectives", "org": "Organisation and responsibilities", "ncr": "Nonconformance handling", "records": "Records and documentation control"}.items():
@@ -814,6 +830,8 @@ def stage_resolve(db, ev, A, pid, out_root):
     tender.upsert_item(db, A["est"], pid, "submittal_shop", "SH-1", dict(item="Pipe-rack steel shop drawings", drawing_ref="DWG-ST-002", required_by="Before fabrication"), is_synthetic=True)
     o = offers.generate_offer(db, A["est"], pid, payment_terms="SYNTHETIC terms per the synthetic customer response")
     offers.approve_offer(db, A["com"], pid, o["version_no"])
+    from app.procurement import needs as _needs
+    _needs.detect_needs(db, A["est"], pid)   # re-detect so needs satisfied by the approved quotations close
     # --- reconciliation: remaining High findings are accepted as recorded exceptions by the Commercial Approver (test actor); Critical ones must be resolved
     run = recon.run_reconciliation(db, A["est"], pid)
     fnd = recon.get_run(db, run["run_id"])["findings"]

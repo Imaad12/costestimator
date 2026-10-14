@@ -457,7 +457,9 @@ def crew_scenarios(db: Database, project_id: str, profile_ids: list[str], *, all
     rows = []
     for pid in profile_ids:
         r = build_programme(db, project_id, pid, allow_provisional=allow_provisional, allow_unconfirmed_calendar=allow_unconfirmed_calendar)
-        rows.append(dict(profile=pid, archetype=r["profile"]["archetype"], headcount=sum(int(v) for v in r["profile"]["pool"].values()) + r["indirect_headcount"],
+        pool = r["profile"]["pool"]
+        own = sum(int(v) for k, v in pool.items() if not k.startswith(("eq:", "sub:")))             # own direct labour; equipment and subcontract capacity are not head-count
+        rows.append(dict(profile=pid, archetype=r["profile"]["archetype"], headcount=own + r["indirect_headcount"], subcontract_capacity=sum(int(v) for k, v in pool.items() if k.startswith("sub:")),
                          productive_hours=r["profile"]["productive_hours"], shifts=r["profile"]["shifts"], labour_hours=r["labour_hours"],
                          unconstrained_wd=r["unconstrained_project_wd"], dependency_wd=r["dependency_constrained_wd"], procurement_wd=r["procurement_constrained_wd"],
                          working_days=r["working_days"], calendar_days=r["calendar_days"], start=r["start_date"], finish=r["finish_date"], peak_workers=r["peak_workers"],
