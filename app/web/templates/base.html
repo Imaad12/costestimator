@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ title or "KSA Construction Estimating Suite" }}</title><link rel="stylesheet" href="/static/app.css"><script src="/static/app.js" defer></script></head><body>
+<title>{{ title or "KSA Construction Estimating Suite" }}</title><link rel="stylesheet" href="/static/app.css?v={{ asset_v }}"><script src="/static/app.js?v={{ asset_v }}" defer></script></head><body>
 <header><span class="brand">KSA Construction Estimating Suite</span><a href="/help">Help</a>
 {% if actor %}<span class="who">{{ actor.display_name or actor.username }} · {{ actor.role }} · <a href="/logout">sign out</a></span>{% endif %}</header>
 <div class="layout">

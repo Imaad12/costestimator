@@ -34,6 +34,8 @@ from ..services import (assemblies, assumptions, audit, auth, backup, boq, comme
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
+# cache-busting: a changed stylesheet / script gets a new URL, so browsers never show a stale UI
+templates.env.globals["asset_v"] = "".join(str(int((Path(__file__).parent / "static" / f).stat().st_mtime)) for f in ("app.css", "app.js"))[-12:]
 
 
 def page(request: Request, name: str, actor: Actor | None, **ctx):

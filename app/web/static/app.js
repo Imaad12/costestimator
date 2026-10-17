@@ -101,3 +101,11 @@ document.addEventListener("submit", function (e) {
   }
   sel.addEventListener("change", render); form.addEventListener("submit", serialise); render();
 })();
+/* wide tables scroll inside their own box instead of stretching the page */
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("main table").forEach(function (t) {
+    if (t.parentElement && t.parentElement.classList.contains("tw")) return;
+    var w = document.createElement("div"); w.className = "tw";
+    t.parentNode.insertBefore(w, t); w.appendChild(t);
+  });
+});
