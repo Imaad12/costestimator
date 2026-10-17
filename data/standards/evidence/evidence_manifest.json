@@ -64,6 +64,30 @@
    "bytes": 1141447,
    "supplied_by": "project owner (upload), 2026-10-17",
    "register_row": "STD-014"
+  },
+  {
+   "file": "SBC_Saudi_Building_Code_System_overview_leaflet.pdf",
+   "original_name": "Saudi_Building_Code_System.pdf",
+   "sha256": "ce80da9b7f378afb7e7fbfb72e7c0b0a422de5a0bbebdc30c2532cad83d8fe44",
+   "bytes": 3289187,
+   "supplied_by": "project owner (upload), 2026-10-17",
+   "register_row": "STD-004"
+  },
+  {
+   "file": "SBC_201-CR-18_General_Building_Code_Summary_of_Content.pdf",
+   "original_name": "SBC201CR_Summary.pdf",
+   "sha256": "3a1e16d83d05e1f9082a9b8a98e397804117f5c8eedc78f6affe5223e08dc685",
+   "bytes": 3660329,
+   "supplied_by": "project owner (upload), 2026-10-17",
+   "register_row": "STD-015"
+  },
+  {
+   "file": "SBC_302-CR-18_Construction_Code_Summary_of_Content.pdf",
+   "original_name": "SBC302CR_Summary.pdf",
+   "sha256": "700c6bb95f2aa738d0dfd8381f70406d04b61c08ad629d5ec5c4a030ea3ac606",
+   "bytes": 2575779,
+   "supplied_by": "project owner (upload), 2026-10-17",
+   "register_row": "STD-016"
   }
  ]
 }

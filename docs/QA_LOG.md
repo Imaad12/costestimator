@@ -20,5 +20,8 @@ How the application was exercised as different people, what broke and what was f
 | 7 | Phone test | Header, menu and tables overflowed sideways at 390 px | Compact header, scrolling menu, single-column grids |
 | 8 | Rates upload run | Candidates without a VAT treatment could not be approved and the inbox did not say why | Blockers shown with an inline fix form; VAT can be stated for a whole file |
 
+## Final sweep
+After the fixes: 1,309 form submissions in a real browser across the five roles (estimator 218, procurement 247, commercial 275, administrator 307, viewer 262), no server error, no unexpected error, no browser exception; all pages load for every role; no page scrolls sideways at phone width.
+
 ## Not covered
 Microsoft Excel itself, live public sources, real rates and real users: see `KNOWN_LIMITATIONS.md`.

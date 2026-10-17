@@ -70,16 +70,16 @@ def test_migration_0015_is_additive_and_forward_only_on_populated_data(tmp_path,
 
 def test_standards_register_rules(seeded, tmp_path):
     rows = standards.list_standards(seeded)
-    assert len(rows) == 14
+    assert len(rows) == 16
     for r in rows:
         if r["verification_status"].startswith("Verified"):
             assert r["url"] and r["access_date"] and r["limitations"], r["id"]
         assert len(r["paraphrase"] or "") < 700                                                  # concise paraphrase, never reproduced text
     prod = [r for r in rows if r["topic"] and "productivity" in r["topic"].lower()]
     assert all(r["verification_status"].startswith("Not verified") for r in prod) or not prod
-    assert all(r["verification_status"].startswith("Not verified") for r in rows if r["id"] in ("STD-009", "STD-010", "STD-011", "STD-012", "STD-004"))
+    assert all(r["verification_status"].startswith("Not verified") for r in rows if r["id"] in ("STD-009", "STD-010", "STD-011", "STD-012"))
     todo = standards.acquisition_list(seeded)
-    assert {"STD-004", "STD-009"} <= {x["id"] for x in todo}
+    assert {"STD-009"} <= {x["id"] for x in todo}
     f = tmp_path / "s.json"
     base = {"access_date": "2026-10-14", "title": "t", "topic": "x"}
     f.write_text(json.dumps({"sources": [dict(base, id="STD-X1", verification_status="Verified - primary source read", url=None)]}))
@@ -89,7 +89,7 @@ def test_standards_register_rules(seeded, tmp_path):
     with pytest.raises(ValidationFailed):
         standards.import_register(seeded, f)
     f.write_text(json.dumps({"sources": [dict(base, id="STD-X3", verification_status="Not verified - requires human acquisition")]}))
-    assert standards.import_register(seeded, f, dry_run=True)["new"] == 1 and len(standards.list_standards(seeded)) == 14
+    assert standards.import_register(seeded, f, dry_run=True)["new"] == 1 and len(standards.list_standards(seeded)) == 16
     assert standards.import_register(seeded, f)["new"] == 1 and standards.import_register(seeded, f)["new"] == 0       # insert-only
 
 
