@@ -74,7 +74,7 @@ def _form_args(f) -> dict:
     g = lambda k, d="": (f.get(k) or d) if hasattr(f, "get") else d          # noqa: E731
     mapping = {fld: int(f[f"map_{fld}"]) for fld, _ in rate_importer.MAP_FIELDS if f.get(f"map_{fld}", "") != ""}
     return dict(stored=Path(g("stored")).name, sheet=g("sheet") or None, header_row=int(g("header_row")) if g("header_row") else None, mapping=mapping or None,
-                default_currency=g("default_currency").strip() or None, default_date=g("default_date").strip() or None,
+                default_currency=g("default_currency").strip() or None, default_date=g("default_date").strip() or None, default_tax_basis=g("default_tax_basis").strip() or None,
                 src=dict(source_name=g("source_name"), source_url=g("source_url"), source_id=g("source_id"), source_type=g("source_type", "Manual dataset"), description=g("description")))
 
 
@@ -82,9 +82,9 @@ def _rates_page(request: Request, actor: Actor, a: dict, *, filename: str, dry: 
     db = get_db()
     recent = rows_to_dicts(db.all("SELECT id, source_name, description, imported_at, imported_by, status, accepted_rows, rejected_rows, sha256 FROM import_manifests WHERE kind='rates' ORDER BY id DESC LIMIT 15"))
     return page(request, "rates_workbook.html", actor, source_types=rate_candidates.SOURCE_TYPES, register=rows_to_dicts(db.all("SELECT source_id, name FROM sources ORDER BY source_id")),
-                recent=recent, counts=rate_candidates.queue_counts(db), title="Rates workbook", map_fields=rate_importer.MAP_FIELDS, err=warn or None,
+                recent=recent, counts=rate_candidates.queue_counts(db), title="Rates workbook", map_fields=rate_importer.MAP_FIELDS, hint=warn or None,
                 preview=dict(result=dry, info=info, stored=a["stored"], file=filename, mapping=a["mapping"] or (info or {}).get("auto") or {}, default_currency=a["default_currency"] or "",
-                             default_date=a["default_date"] or "", **a["src"]))
+                             default_date=a["default_date"] or "", default_tax_basis=a["default_tax_basis"] or "", **a["src"]))
 
 
 def _run(db, actor, a: dict, dry_run: bool) -> dict:
@@ -92,27 +92,32 @@ def _run(db, actor, a: dict, dry_run: bool) -> dict:
     if not path.exists():
         raise AppError("The uploaded file is no longer available; please upload it again.", code="FILE_GONE")
     return rate_importer.import_rates_file(db, actor, path, dry_run=dry_run, sheet=a["sheet"], mapping=a["mapping"], header_row=a["header_row"],
-                                           default_currency=a["default_currency"], default_date=a["default_date"], **_rate_args(**a["src"]))
+                                           default_currency=a["default_currency"], default_date=a["default_date"], default_tax_basis=a["default_tax_basis"], **_rate_args(**a["src"]))
 
 
 @router.post("/rates/workbook/preview", response_class=HTMLResponse)
 async def rates_preview(request: Request, file: UploadFile = File(...), source_name: str = Form(""), source_url: str = Form(""), source_id: str = Form(""),
-                        source_type: str = Form("Manual dataset"), description: str = Form(""), default_currency: str = Form(""), actor: Actor = Depends(current_actor)):
+                        source_type: str = Form("Manual dataset"), description: str = Form(""), default_currency: str = Form(""), default_tax_basis: str = Form(""), actor: Actor = Depends(current_actor)):
     db = get_db()
     if not source_name.strip() and not source_id:
         return back("/rates/workbook", err="Say where these prices come from: enter a source name (for example 'Supplier X price list, Sep 2026') or pick a Source Register entry.")
     path = save_upload("", file)
-    a = _form_args(dict(stored=path.name, source_name=source_name, source_url=source_url, source_id=source_id, source_type=source_type, description=description, default_currency=default_currency))
+    a = _form_args(dict(stored=path.name, source_name=source_name, source_url=source_url, source_id=source_id, source_type=source_type, description=description, default_currency=default_currency, default_tax_basis=default_tax_basis))
     try:
         info = None if path.suffix.lower() == ".json" else rate_importer.inspect_file(path)
         dry, warn = None, None
-        if info is None or info["detected"] or default_currency:
+        if info is not None and not info["detected"]:
+            auto = info["auto"]
+            if "original_price" in auto and ({"resource_id", "description"} & set(auto)):          # use the keyword suggestion for the first check; the person confirms or corrects it
+                a.update(mapping=dict(auto), header_row=info["header_row"], sheet=info["sheet"])
+                warn = "The columns were not recognised exactly. The system has suggested what each column is: check it and correct anything wrong, then press Re-check."
+            else:
+                warn = "The columns were not recognised. Tell the system which column holds what, below."
+        if info is None or info["detected"] or a["mapping"]:
             try:
                 dry = _run(db, actor, a, True)
             except AppError as e:
                 warn = f"{e.code}: {e.message}"
-        else:
-            warn = "The columns were not recognised automatically. Tell the system which column holds what, below."
     except AppError as e:
         return back("/rates/workbook", err=f"{e.code}: {e.message}")
     return _rates_page(request, actor, a, filename=file.filename, dry=dry, info=info, warn=warn)
@@ -136,6 +141,39 @@ async def rates_remap(request: Request, actor: Actor = Depends(current_actor)):
         return back("/rates/workbook", err=f"{e.code}: {e.message}")
     info["auto"] = a["mapping"] or info["auto"]
     return _rates_page(request, actor, a, filename=a["stored"], dry=dry, info=info, warn=warn)
+
+
+@router.post("/rates/workbook/arranged")
+async def rates_arranged(request: Request, actor: Actor = Depends(current_actor)):
+    """Download the person's own file re-arranged into the standard template (using the mapping they chose), so it can be tidied and re-uploaded without mapping next time."""
+    a = _form_args(await request.form())
+    path = get_settings().projects_dir / "_uploads" / a["stored"]
+    try:
+        rows = rate_importer.read_rows(path, a["sheet"], a["mapping"] or rate_importer.inspect_file(path, a["sheet"], a["header_row"])["auto"] or None, a["header_row"])
+    except AppError as e:
+        return back("/rates/workbook", err=f"{e.code}: {e.message}")
+    from openpyxl import load_workbook
+    cols = {"resource_id": "Resource ID", "description": "Description (for new resources)", "unit": "Unit", "original_price": "Unit price", "currency": "Currency", "effective_date": "Price date",
+            "valid_until": "Valid until", "tax_basis": "Tax basis", "delivery_basis": "Delivery basis", "evidence_snippet": "Evidence / reference"}
+    with tempfile.TemporaryDirectory() as d:
+        p = xl_templates.rate_workbook(Path(d) / "arranged.xlsx", get_db())
+        wb = load_workbook(p)
+        ws = wb["Rate Dataset"]
+        hdr = {str(c.value): c.column for c in ws[5] if c.value}
+        for i, (_, r) in enumerate(rows):
+            for f, h in cols.items():
+                v = r.get(f)
+                if f == "currency" and not v:
+                    v = a["default_currency"]
+                if f == "tax_basis" and not v:
+                    v = a["default_tax_basis"]
+                if f == "effective_date" and not v:
+                    v = a["default_date"]
+                if v not in (None, "") and h in hdr:
+                    ws.cell(row=6 + i, column=hdr[h], value=v)
+        wb.save(p)
+        data = p.read_bytes()
+    return Response(data, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": 'attachment; filename="rates_arranged_into_template.xlsx"'})
 
 
 @router.post("/rates/workbook/import")

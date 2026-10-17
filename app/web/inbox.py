@@ -40,7 +40,7 @@ def _rates(db: Database):
         if r["project_id"]:
             a = op("approve_rate", {"rate_id": r["id"]})
         yield _item(title, detail, project_id=r["project_id"], raised_by=r["created_by"], entity="rate", approve=a, reject=op("reject_rate", {"rate_id": r["id"]}, [REASON], "Reject"),
-                    approve_policy=policy, link=f"/libraries/resource/{r['resource_id']}", synthetic=bool(r["is_synthetic"]),
+                    approve_policy=policy, link=f"/libraries/{r['resource_id']}", synthetic=bool(r["is_synthetic"]),
                     extra=dict(provisional=op("approve_rate_provisional", {"rate_id": r["id"], "project_id": r["project_id"]}, [("comments", "Basis for provisional use (required)", True)],
                                               "Approve as provisional") if r["project_id"] else None))
 
@@ -150,10 +150,23 @@ def _versions(db: Database):
 
 
 def _candidates(db: Database):
+    from ..rate_updates import candidates as rc
     for r in rows_to_dicts(db.all("SELECT * FROM rate_candidates WHERE status IN ('Pending Review','Needs Verification','Approved for Publication') ORDER BY id LIMIT 200")):
         title = f"{r['candidate_ref']} - {_s(r['description'])[:60]}"
         detail = f"{_s(r['original_price'])} {_s(r['original_currency'])}/{_s(r['original_unit'])} - {_s(r['source_name'])} - {r['status']}"
         link = f"/rates/updates/{r['candidate_ref']}"
+        blockers = []
+        if r["status"] != "Approved for Publication":
+            try:
+                blockers = rc.publishable_price(db, rc.get(db, r["id"]))[2]
+            except Exception:
+                blockers = []
+        if blockers:
+            tax_only = len(blockers) <= 2 and all(("VAT" in b or "normalisation" in b) for b in blockers)
+            yield _item(title, detail, raised_by=r["created_by"], entity="rate_candidate", link=link,
+                        approve=None, reject=op("review_rate_candidate", {"candidate": r["candidate_ref"], "decision": "reject"}, [("comment", "Reason (required)", True)], "Reject"),
+                        extra=dict(blockers=blockers, fix=op("edit_rate_candidate", {"candidate": r["candidate_ref"]}, [("tax_basis", "Does the price include VAT?", True, ("Excluded", "Included"))], "Save VAT treatment") if tax_only else None))
+            continue
         if r["status"] == "Approved for Publication":
             yield _item(title, detail + " - ready to publish as a Pending Review rate", raised_by=r["created_by"], entity="rate_candidate", approve=op("publish_rate_candidate", {"candidate": r["candidate_ref"]}, [], "Publish as rate"),
                         link=link)
@@ -236,6 +249,7 @@ def build(db: Database, actor: Actor, only: str = "") -> list[dict]:
             continue
         items = []
         for it in fn(db):
+            it["can_fix"] = bool(it["extra"].get("fix")) and _can(actor, it["entity"], "request_changes")
             it["can_approve"] = bool(it["approve"]) and (_can(actor, it["entity"], it["approve_policy"]) or bool(it["extra"].get("provisional") and _can(actor, it["entity"], "approve_provisional")))
             it["can_reject"] = bool(it["reject"]) and _can(actor, it["entity"], "reject")
             it["own"] = bool(it["raised_by"]) and it["raised_by"] == actor.username and not get_settings().allow_self_approval

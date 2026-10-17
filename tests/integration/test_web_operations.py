@@ -35,6 +35,8 @@ def test_inbox_shows_buttons_only_to_roles_that_may_decide_and_never_on_own_work
     page = client.get("/approvals").text
     assert 'action="/ui/do/approve_rate"' in page and f'name="rate_id" value="{r}"' in page and 'action="/ui/do/reject_rate"' in page
     assert client.get("/approvals?group=rates").status_code == 200
+    for href in set(re.findall(r'href="(/(?:libraries|assemblies|assumptions|projects|rates)[^"]*)"', page)):          # every link the inbox offers must resolve
+        assert client.get(href).status_code == 200, href
     ok = client.post("/ui/do/approve_rate", data={"rate_id": r, "comments": "checked", "_next": "/approvals"}, follow_redirects=False)
     assert "ok=" in ok.headers["location"], ok.headers["location"]
     assert db.scalar("SELECT status FROM resource_rates WHERE id=?", (r,)) == "Approved"
@@ -149,7 +151,7 @@ def test_rates_workbook_column_mapping_for_a_file_that_does_not_follow_the_templ
     files = {"file": ("theirs.xlsx", buf.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
     src = {"source_name": "SYNTHETIC supplier", "source_type": "Quotation"}
     pv = client.post("/rates/workbook/preview", files=files, data=src)
-    assert pv.status_code == 200 and "Map the columns of your file" in pv.text and "not recognised automatically" in pv.text and "Mat Code" in pv.text
+    assert pv.status_code == 200 and "Check the suggested column mapping" in pv.text and "not recognised exactly" in pv.text and "Mat Code" in pv.text
     assert "Import " not in re.sub(r"<[^>]+>", " ", pv.text).split("Start again")[0].split("Re-check with this mapping")[-1]     # nothing to import yet
     stored = re.search(r'name="stored" value="([^"]+)"', pv.text).group(1)
     form = {**src, "stored": stored, "sheet": "Our prices", "header_row": "3", "map_resource_id": "0", "map_description": "1", "map_unit": "2", "map_original_price": "3", "map_source_url": "4"}
@@ -193,3 +195,62 @@ def test_superuser_is_a_generated_password_test_principal_and_self_approval_stay
     monkeypatch.setattr(get_settings(), "allow_self_approval", True)                              # only the person running the server can switch it on
     page = client.get("/approvals?group=rates").text
     assert "Self-approval is switched on" in page and f'name="rate_id" value="{mine}"' in page and "You raised this" not in page
+
+
+def _messy_file(rid, tax=None):
+    import io
+    wb = openpyxl.Workbook(); ws = wb.active; ws.title = "Prices"
+    ws.append(["Mat Code", "Item name", "Measure", "Cost per unit", "Quote ref"] + (["VAT"] if tax else []))
+    ws.append([rid, "Sand", "m3", 31.5, "Q-1"] + ([tax] if tax else []))
+    buf = io.BytesIO(); wb.save(buf)
+    return {"file": ("messy.xlsx", buf.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+
+
+def test_rate_candidate_needs_vat_confirmed_inbox_explains_it_and_the_whole_flow_reaches_an_approved_rate(client):
+    db = get_db()
+    rid = rates.create_resource(db, PROC, resource_type="material", description="VAT flow sand (SYNTHETIC)", unit="m3", cost_code="C.07")
+    _login(client, "proc")
+    src = {"source_name": "SYNTHETIC supplier", "source_type": "Quotation", "default_currency": "SAR"}
+    pv = client.post("/rates/workbook/preview", files=_messy_file(rid), data=src)
+    assert "Check the suggested column mapping" in pv.text and 'value="original_price" selected' in pv.text and 'value="unit" selected' in pv.text
+    stored = re.search(r'name="stored" value="([^"]+)"', pv.text).group(1)
+    form = {k: v for k, v in src.items()} | {"stored": stored, "sheet": "Prices", "header_row": "1", "map_resource_id": "0", "map_description": "1", "map_unit": "2", "map_original_price": "3", "map_source_url": "4"}
+    chk = client.post("/rates/workbook/remap", data=form)
+    assert "do not say whether the price includes VAT" in chk.text                                  # warned before importing
+    arr = client.post("/rates/workbook/arranged", data=form)
+    assert arr.status_code == 200 and "rates_arranged" in arr.headers["content-disposition"]
+    import io
+    ws = openpyxl.load_workbook(io.BytesIO(arr.content))["Rate Dataset"]
+    assert [c.value for c in ws[6]][:5] == [rid, "Sand", "m3", 31.5, "SAR"]                          # the person's data, in the standard layout
+    imp = client.post("/rates/workbook/import", data=form, follow_redirects=False)
+    assert "ok=" in imp.headers["location"]
+    ref = db.scalar("SELECT candidate_ref FROM rate_candidates ORDER BY id DESC LIMIT 1")
+    _login(client, "com")
+    page = client.get("/approvals?group=candidates").text
+    assert "VAT treatment must be confirmed" in page and 'name="tax_basis"' in page and 'value="approve"' not in page.split(ref)[1].split("qitem")[0]
+    blocked = client.post("/ui/do/review_rate_candidate", data={"candidate": ref, "decision": "approve", "_next": "/approvals"}, follow_redirects=False)
+    assert "NOT_PUBLISHABLE" in blocked.headers["location"]                                          # the server refuses regardless of the form
+    fixed = client.post("/ui/do/edit_rate_candidate", data={"candidate": ref, "tax_basis": "Excluded", "_next": "/approvals"}, follow_redirects=False)
+    assert "ok=" in fixed.headers["location"], fixed.headers["location"]
+    assert 'name="decision" value="approve"' in client.get("/approvals?group=candidates").text
+    for act, extra in (("review_rate_candidate", {"decision": "approve"}), ("publish_rate_candidate", {})):
+        r = client.post(f"/ui/do/{act}", data={"candidate": ref, **extra, "_next": "/approvals"}, follow_redirects=False)
+        assert "ok=" in r.headers["location"], (act, r.headers["location"])
+    rate = db.one("SELECT id, status, unit_price FROM resource_rates WHERE resource_id=? ORDER BY id DESC LIMIT 1", (rid,))
+    assert rate["status"] == "Pending Review"                                                       # published, still needs its own approval
+    _login(client, "admin")
+    assert "ok=" in client.post("/ui/do/approve_rate", data={"rate_id": rate["id"], "_next": "/approvals"}, follow_redirects=False).headers["location"]
+    assert db.scalar("SELECT status FROM resource_rates WHERE id=?", (rate["id"],)) == "Approved"
+
+
+def test_vat_stated_for_the_whole_file_removes_the_per_row_blocker(client):
+    db = get_db()
+    rid = rates.create_resource(db, PROC, resource_type="material", description="VAT default sand (SYNTHETIC)", unit="m3", cost_code="C.07")
+    _login(client, "proc")
+    src = {"source_name": "SYNTHETIC supplier", "source_type": "Quotation", "default_currency": "SAR", "default_tax_basis": "Excluded"}
+    pv = client.post("/rates/workbook/preview", files=_messy_file(rid), data=src)
+    stored = re.search(r'name="stored" value="([^"]+)"', pv.text).group(1)
+    form = src | {"stored": stored, "sheet": "Prices", "header_row": "1", "map_resource_id": "0", "map_unit": "2", "map_original_price": "3", "map_source_url": "4", "map_description": "1"}
+    assert "do not say whether" not in client.post("/rates/workbook/remap", data=form).text
+    client.post("/rates/workbook/import", data=form, follow_redirects=False)
+    assert db.scalar("SELECT tax_basis FROM rate_candidates ORDER BY id DESC LIMIT 1") == "Excluded"

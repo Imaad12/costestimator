@@ -108,6 +108,36 @@ MAP_FIELDS = [("resource_id", "Resource ID"), ("description", "Description"), ("
               ("tax_basis", "Tax (VAT) basis"), ("delivery_basis", "Delivery basis"), ("installation_included", "Installation included"), ("price_kind", "Price kind"), ("evidence_snippet", "Evidence / notes")]
 
 
+# Keyword suggestions for headings that are not an exact synonym (never used to import by themselves: the person confirms the mapping).
+_KEYWORDS = [("original_price", ("price", "rate", "cost per", "cost/unit", "amount")), ("currency", ("currency", "ccy")), ("resource_id", ("resource id", "item no", "item code", "item #", "code", "mat id", "sku")),
+             ("description", ("description", "product", "item name", "name", "material")), ("unit", ("uom", "unit of", "measure", "unit")), ("valid_until", ("valid", "expiry", "expires")),
+             ("effective_date", ("date",)), ("tax_basis", ("vat", "tax")), ("delivery_basis", ("delivery", "incoterm")), ("evidence_snippet", ("note", "remark", "evidence", "comment")),
+             ("source_url", ("quote ref", "reference", "ref", "url", "link"))]
+
+
+def _suggest(header_cells: list) -> dict:
+    out: dict[str, int] = {}
+    taken: set[int] = set()
+    for f, words in _KEYWORDS:
+        for w in words:
+            hit = next((i for i, c in enumerate(header_cells) if i not in taken and w in str(c or "").strip().lower() and str(c or "").strip()), None)
+            if hit is not None:
+                out[f] = hit
+                taken.add(hit)
+                break
+    return out
+
+
+def _guess_header(rs) -> int:
+    """Index of the most heading-like row among the first 40: the row with the most non-empty text cells (title rows have one)."""
+    best, best_n = 0, -1
+    for i, (_, cells) in enumerate(rs.rows[:40]):
+        n = sum(1 for c in cells if isinstance(c, str) and c.strip())
+        if n > best_n:
+            best, best_n = i, n
+    return best
+
+
 def inspect_file(path: Path, sheet: str | None = None, header_row: int | None = None, max_sample: int = 5) -> dict:
     """What a person needs to map the columns of any rate file: sheets, the (detected or chosen) header row, each column with sample values and the automatically
     matched field. Never changes the file."""
@@ -128,8 +158,11 @@ def inspect_file(path: Path, sheet: str | None = None, header_row: int | None = 
                 if f not in syn_hit and str(c or "").strip().lower() in syns:
                     syn_hit[f] = ci
         auto = syn_hit
-    if hidx is None:                                                  # nothing recognisable: offer the first non-empty row as the header guess
-        hidx = next((i for i, (_, cells) in enumerate(rs.rows) if any(c not in (None, "") for c in cells)), 0)
+    suggested = False
+    if hidx is None:                                                  # nothing recognised exactly: guess the heading row and suggest columns by keyword
+        hidx = _guess_header(rs) if rs.rows else 0
+        auto = _suggest(rs.rows[hidx][1]) if rs.rows else {}
+        suggested = bool(auto)
     hrow = rs.rows[hidx] if rs.rows else (0, [])
     width = max((len(c) for _, c in rs.rows[:60]), default=0)
     body = [c for _, c in rs.rows[hidx + 1:] if any(x not in (None, "") for x in c)]
@@ -138,7 +171,8 @@ def inspect_file(path: Path, sheet: str | None = None, header_row: int | None = 
         head = hrow[1][i] if i < len(hrow[1]) else None
         cols.append(dict(index=i, header=("" if head is None else str(head)), sample=[_cell(r[i]) for r in body[:max_sample] if i < len(r) and r[i] not in (None, "")][:max_sample],
                          field=next((f for f, ci in auto.items() if ci == i), "")))
-    return dict(sheets=sheets, sheet=rs.name, header_row=hrow[0], columns=cols, auto=auto, rows=len(body), detected=bool("original_price" in auto and ({"resource_id", "description"} & set(auto))),
+    return dict(sheets=sheets, sheet=rs.name, header_row=hrow[0], columns=cols, auto=auto, rows=len(body), suggested=suggested,
+                detected=bool(not suggested and "original_price" in auto and ({"resource_id", "description"} & set(auto))),
                 warnings=list(rs.warnings))
 
 
@@ -146,7 +180,7 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
                       source_type: str = "Manual dataset", description: str = "", dry_run: bool = False, retrieved_at: str | None = None,
                       sheet: str | None = None, adapter: str = "manual-file", extra_flags: list[str] | None = None,
                       confidence: str = "Unverified", mapping: dict | None = None, header_row: int | None = None,
-                      default_currency: str | None = None, default_date: str | None = None) -> dict:
+                      default_currency: str | None = None, default_date: str | None = None, default_tax_basis: str | None = None) -> dict:
     if hasattr(actor, "is_ai"):
         approvals.require_author(actor)
     path = Path(path)
@@ -186,6 +220,8 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
             d["price_kind"] = "Quoted" if source_type == "Quotation" else "List price"
         if default_currency and not d.get("currency"):
             d["currency"] = default_currency.strip().upper()              # stated explicitly by the person for the whole file (recorded in the manifest), never assumed
+        if default_tax_basis in ("Included", "Excluded") and not d.get("tax_basis"):
+            d["tax_basis"] = default_tax_basis                            # stated by the person for the whole file (recorded in the manifest)
         if default_date and not d.get("effective_date"):
             d["effective_date"] = default_date
         if not d.get("currency"):
@@ -210,11 +246,12 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
                 except (ValidationFailed, Conflict) as e:
                     errors.append({"row": rn, "errors": [e.message]})
     parsing = {"file": path.name, "format": path.suffix.lstrip("."), "rows_read": len(rows), "source_type": source_type, "columns": sorted({k for _, r in rows for k in r}),
-               "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date}
+               "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date, "default_tax_basis": default_tax_basis}
     mid = mf.write_manifest(db, actor, kind="rates", adapter=adapter, source_id=source_id, source_name=source_name, source_url=source_url,
                             original_path=str(path), stored_path=stored, sha=sha, description=description, dry_run=dry_run, parsing=parsing,
                             accepted=len(ids) if not dry_run else len(ok_rows), rejected=len(errors), errors=errors, candidate_ids=ids)
     if ids:
         db.execute(f"UPDATE rate_candidates SET manifest_id=? WHERE id IN ({','.join('?' * len(ids))})", [mid, *ids])
     return {"manifest_id": mid, "dry_run": dry_run, "rows_read": len(rows), "accepted": len(ids) if not dry_run else len(ok_rows),
-            "rejected": len(errors), "errors": errors, "candidate_ids": ids, "sha256": sha}
+            "rejected": len(errors), "errors": errors, "candidate_ids": ids, "sha256": sha,
+            "needs_vat": sum(1 for _, d in ok_rows if d.get("tax_basis") not in ("Included", "Excluded"))}

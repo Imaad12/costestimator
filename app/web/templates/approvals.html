@@ -9,7 +9,7 @@
 <div class="qmain"><div class="qtitle">{% if it.link %}<a href="{{ it.link }}">{{ it.title }}</a>{% else %}{{ it.title }}{% endif %}{% if it.synthetic %} <span class="tag">SYNTHETIC</span>{% endif %}</div>
 <div class="muted">{{ it.detail }}</div>
 <div class="muted small">{% if it.project_id %}Project <a href="/projects/{{ it.project_id }}">{{ it.project_id }}</a> · {% endif %}Raised by {{ it.raised_by or 'the system' }}{% if it.own %} (you){% endif %}</div></div>
-<div class="qact">{% if it.own %}<span class="note">You raised this - a different approver must decide.</span>
+<div class="qact">{% if it.extra.blockers %}<div class="note">Before this can be approved: {{ it.extra.blockers|join('; ') }}</div>{% if it.can_fix and it.extra.fix %}{{ opform(it.extra.fix, '/approvals' ~ ('?group=' ~ group if group else ''), 'alt') }}{% elif it.extra.blockers %}<a href="{{ it.link }}">Open the candidate to fix this</a>{% endif %}{% if it.reject and it.can_reject %}<details class="rej"><summary>Reject</summary>{{ opform(it.reject, '/approvals' ~ ('?group=' ~ group if group else ''), 'danger') }}</details>{% endif %}{% elif it.own %}<span class="note">You raised this - a different approver must decide.</span>
 {% elif it.can_approve or it.can_reject %}
 {% if it.approve and it.can_approve %}{{ opform(it.approve, '/approvals' ~ ('?group=' ~ group if group else '')) }}{% elif it.extra.provisional %}{{ opform(it.extra.provisional, '/approvals' ~ ('?group=' ~ group if group else ''), 'alt') }}{% endif %}
 {% if it.reject and it.can_reject %}<details class="rej"><summary>Reject</summary>{{ opform(it.reject, '/approvals' ~ ('?group=' ~ group if group else ''), 'danger') }}</details>{% endif %}

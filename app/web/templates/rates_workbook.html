@@ -2,28 +2,31 @@
 <h1>Rates workbook</h1>
 <p class="muted">Bring prices in from Excel in four steps. Nothing becomes a rate until a different person approves it: uploaded rows are <b>candidates</b> that wait in the <a href="/approvals?group=candidates">Approvals inbox</a>. Original files are stored untouched with their SHA-256 hash.</p>
 <div class="steps">
-<div class="step"><span class="n">1</span><b>Download the template</b><div class="muted">Yellow cells are inputs. A second sheet lists every resource id (no prices).</div><p><a class="btn" href="/rates/workbook/template.xlsx">Download template (.xlsx)</a></p></div>
+<div class="step"><span class="n">1</span><b>Download the template</b><div class="muted">Yellow cells are inputs. A second sheet lists every resource id (no prices).</div><p><a class="btn" href="/rates/workbook/template.xlsx">Download template (.xlsx)</a></p><div class="muted small">Already have a price list in your own layout? Skip this: upload it below and tell the system which column is which.</div></div>
 <div class="step"><span class="n">2</span><b>Fill it in</b><div class="muted">One price per row: resource id, unit, unit price, currency (required, never assumed), price date, validity, tax basis, delivery basis and an evidence reference.</div></div>
 <div class="step"><span class="n">3</span><b>Upload and check</b><div class="muted">You see accepted and rejected rows with the reason for each before anything is stored.</div></div>
 <div class="step"><span class="n">4</span><b>Import, then approve</b><div class="muted">Candidates are reviewed, published as Pending Review rates, and approved by a different person.</div></div></div>
 {% if preview %}{% set r = preview.result %}{% set info = preview.info %}
 <form method="post" action="/rates/workbook/remap" class="card stack" id="mapform">
 <h2>Check result for {{ preview.file }}</h2>
+{% if hint %}<div class="banner warn">{{ hint }}</div>{% endif %}
 {% for k in ['stored','source_name','source_url','source_id','source_type','description'] %}<input type="hidden" name="{{ k }}" value="{{ preview[k] }}">{% endfor %}
 {% if r %}<div class="grid"><div class="kpi"><b>{{ r.rows_read }}</b><span>Rows read</span></div><div class="kpi"><b>{{ r.accepted }}</b><span>Rows that can be imported</span></div><div class="kpi"><b>{{ r.rejected }}</b><span>Rows rejected</span></div><div class="kpi"><b>{{ r.sha256[:12] }}...</b><span>File SHA-256</span></div></div>
+{% if r.needs_vat %}<div class="banner warn">{{ r.needs_vat }} row(s) do not say whether the price includes VAT. You can import them, but each needs its VAT treatment confirmed (Approvals, Public-source rate candidates) before it can be approved for publication. Or state it for the whole file under the mapping below.</div>{% endif %}
 {% if r.errors %}<h3>Rejected rows</h3><table><thead><tr><th>Row</th><th>Reason</th></tr></thead><tbody>{% for e in r.errors %}<tr><td>{{ e.row }}</td><td>{{ e.errors|join('; ') }}</td></tr>{% endfor %}</tbody></table><p class="muted">Fix these in the file and upload it again, change the mapping below, or import the accepted rows now and add the rest later.</p>{% endif %}{% endif %}
-{% if info %}<details {{ 'open' if (not r) or info.detected is false else '' }}><summary>{{ 'Columns were matched automatically - change the mapping' if info.detected else 'Map the columns of your file' }}</summary>
+{% if info %}<details {{ 'open' if (not r) or info.detected is false else '' }}><summary>{{ 'Columns were matched automatically - change the mapping' if info.detected else ('Check the suggested column mapping' if info.suggested else 'Map the columns of your file') }}</summary>
 <p class="hint">Tell the system which column holds what. Unit price and either Resource ID or Description are needed. Currency is never assumed: map a currency column, or state one currency for the whole file below.</p>
 <div class="grid"><div><label>Sheet</label><select name="sheet">{% for sh in info.sheets %}<option {{ 'selected' if sh == info.sheet else '' }}>{{ sh }}</option>{% endfor %}</select></div>
 <div><label>Header row number</label><input name="header_row" type="number" min="1" value="{{ info.header_row }}"></div>
 <div><label>Currency for every row (only if the file has no currency column)</label><input name="default_currency" maxlength="3" value="{{ preview.default_currency }}" placeholder="E.g. SAR"></div>
+<div><label>VAT treatment for every row (only if the file has none)</label><select name="default_tax_basis"><option value="">Not stated - confirm per row at review</option><option value="Excluded" {{ 'selected' if preview.default_tax_basis == 'Excluded' else '' }}>Prices exclude VAT</option><option value="Included" {{ 'selected' if preview.default_tax_basis == 'Included' else '' }}>Prices include VAT</option></select></div>
 <div><label>Price date for every row (optional)</label><input name="default_date" type="date" value="{{ preview.default_date }}"></div></div>
 <table class="mapt"><thead><tr><th>Column</th><th>Heading in your file</th><th>Example values</th><th>This column is</th></tr></thead><tbody>
 {% for c in info.columns %}{% set cur = namespace(f='') %}{% for fld, idx in preview.mapping.items() %}{% if idx == c.index %}{% set cur.f = fld %}{% endif %}{% endfor %}
 <tr><td class="nowrap">{{ loop.index }}</td><td>{{ c.header or '(blank)' }}</td><td class="muted">{{ c.sample|join(' | ') }}</td>
 <td><select data-col="{{ c.index }}" class="mapsel"><option value="">Ignore this column</option>{% for fld, label in map_fields %}<option value="{{ fld }}" {{ 'selected' if cur.f == fld else '' }}>{{ label }}</option>{% endfor %}</select></td></tr>{% endfor %}</tbody></table>
 <div id="mapvals"></div>
-<p><button>Re-check with this mapping</button></p></details>{% endif %}
+<p><button>Re-check with this mapping</button> <button type="submit" formaction="/rates/workbook/arranged" class="alt">Download my data re-arranged into the standard template</button></p></details>{% endif %}
 {% if r and r.accepted %}<p><button type="submit" formaction="/rates/workbook/import" class="go">Import {{ r.accepted }} row(s) for review</button> <a class="btn alt" href="/rates/workbook">Cancel</a></p>{% elif r %}<p><b>Nothing can be imported from this file yet.</b> <a class="btn alt" href="/rates/workbook">Start again</a></p>{% endif %}
 </form>{% endif %}
 <div class="card"><h2>Upload a filled workbook</h2>
@@ -34,6 +37,7 @@
 <div><label>Source URL or document reference (optional)</label><input name="source_url" placeholder="Web address or the file's reference"></div>
 <div><label>Source Register entry (optional)</label><select name="source_id"><option value="">None</option>{% for s in register %}<option value="{{ s.source_id }}">{{ s.source_id }} - {{ s.name[:60] }}</option>{% endfor %}</select></div>
 <div><label>Currency for every row (only if your file has no currency column)</label><input name="default_currency" maxlength="3" placeholder="E.g. SAR"></div>
+<div><label>VAT treatment for every row (only if your file has none)</label><select name="default_tax_basis"><option value="">Not stated - confirm per row at review</option><option value="Excluded">Prices exclude VAT</option><option value="Included">Prices include VAT</option></select></div>
 <div><label>Note (optional)</label><input name="description" placeholder="E.g. Q3 2026 quotation round"></div></div>
 <p><button>Check workbook</button> <span class="muted">Nothing is stored until you confirm.</span></p></form></div>
 <div class="grid"><div class="kpi"><b>{{ counts.by_status.get('Pending Review', 0) }}</b><span>Candidates pending review</span></div><div class="kpi"><b>{{ counts.by_status.get('Approved for Publication', 0) }}</b><span>Ready to publish</span></div><div class="kpi"><b>{{ counts.rates_pending_approval }}</b><span>Published rates awaiting approval</span></div></div>
