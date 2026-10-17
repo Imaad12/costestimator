@@ -66,7 +66,7 @@ def project_tower(db: Database, pid: str) -> dict:
     else:
         st, head = PART, f"{len(acts)} activities · {'draft baseline v' + str(base['version_no']) if base else 'no baseline'}"
     stages.append(_stage("F", "Method & programme", st, head, [f"{_n(db, 'SELECT COUNT(*) FROM productivity_norms WHERE status=?', 'Approved')} approved norm(s)", f"{len(workforce.list_profiles(db))} workforce profile(s)"], "programme",
-                         "Every norm, calendar and profile is a person-entered, approved record."))
+                         "Every norm, calendar and profile is a person-entered, approved record (the calendar is set on the Inputs tab)."))
     # G registers
     reg = db.all("SELECT register, status, COUNT(*) n FROM tender_register_items WHERE project_id=? GROUP BY register, status", (pid,))
     total_reg = sum(r["n"] for r in reg)

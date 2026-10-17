@@ -107,6 +107,8 @@ def pack_page(pid: str, request: Request, pack: int | None = None, validate: int
         docs = rows_to_dicts(db.all("SELECT * FROM generated_documents WHERE pack_pk=? ORDER BY doc_code", (cur["pk"],)))
         for d in docs:
             d["formats"] = [f for f in (d.get("format") or "").split(",") if f]
+            ap = db.one("SELECT reviewer, reviewer_role, actor_type, environment, ts FROM approvals WHERE entity_type='tender_document' AND entity_id=? AND action='approve' ORDER BY id DESC LIMIT 1", (f"{pid}/{d['doc_id']}",))
+            d["approval"] = dict(ap) if ap else None
         if validate:                                       # read-only: re-reads the files and checks checksums, formats, placeholders, arithmetic and cross-document facts
             from ..tender import packs as _packs
             val = _packs.validate_pack(db, cur["pk"])

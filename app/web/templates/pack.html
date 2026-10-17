@@ -14,9 +14,14 @@
 {% if val %}<div class="banner {{ 'ok' if val.ok else 'bad' }}">Validator: {{ 'no errors' if val.ok else val.errors|length ~ ' error(s)' }} · {{ val.files_checked }} files checked · {{ val.warnings|length }} warning(s) · {{ val.blocked_documents|length }} BLOCKED document(s)</div>
 {% if val.errors or val.warnings %}<div class="card"><ul>{% for e in val.errors %}<li><b>error:</b> {{ e }}</li>{% endfor %}{% for w in val.warnings %}<li>warning: {{ w }}</li>{% endfor %}</ul></div>{% endif %}
 <p class="muted">"No errors" means the files are well-formed, checksummed and consistent with each other — it does not mean the pack is complete; completeness is the BLOCKED list above and the Readiness tab.</p>{% endif %}
-<table><thead><tr><th>Code</th><th>Document</th><th>Applicability</th><th>Status</th><th>Why blocked / reason</th><th>Files</th></tr></thead><tbody>
+<table><thead><tr><th>Code</th><th>Document</th><th>Applicability</th><th>Status</th><th>Why blocked / reason</th><th>Files</th><th>Approval</th></tr></thead><tbody>
 {% for d in docs %}<tr><td>{{ d.doc_code }}</td><td>{{ d.title }}</td><td class="muted">{{ d.applicability }}</td><td>{{ tag(d.status) }}</td><td class="muted">{{ d.blocked_reason or d.applicability_reason or '' }}</td>
-<td class="nowrap">{% for f in d.formats %}<a href="/projects/{{ project.id }}/pack/{{ cur.pk }}/file/{{ d.doc_id }}/{{ f }}">{{ f }}</a> {% endfor %}</td></tr>{% endfor %}</tbody></table>
+<td class="nowrap">{% for f in d.formats %}<a href="/projects/{{ project.id }}/pack/{{ cur.pk }}/file/{{ d.doc_id }}/{{ f }}">{{ f }}</a> {% endfor %}</td>
+<td>{% if d.approval %}<span class="tag {{ 'OK' if d.approval.actor_type == 'human' else 'Pending' }}">approved by {{ d.approval.reviewer }}</span><div class="muted">{{ d.approval.reviewer_role }} · {{ d.approval.actor_type }} · {{ d.approval.environment }}{% if d.approval.actor_type != 'human' %} — does not count for submission readiness{% endif %}</div>
+{% elif d.status == 'BLOCKED' %}<span class="muted">cannot be approved while blocked</span>{% elif d.status == 'Not Applicable' %}<span class="muted">—</span>
+{% else %}<form class="inline" method="post" action="/ui/do/approve_document" data-confirm="Record your approval of {{ d.doc_id }}? This is an audited decision."><input type="hidden" name="_next" value="/projects/{{ project.id }}/pack?pack={{ cur.pk }}"><input type="hidden" name="project_id" value="{{ project.id }}"><input type="hidden" name="doc_id" value="{{ d.doc_id }}">
+<input name="comments" placeholder="comment" size="14"><button class="sm">Approve</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table>
+<p class="muted">Approval is a person's recorded decision on one document; the service decides who may approve (Commercial Approver / Administrator, not the author where four-eyes applies). On a real project it needs a registered human user in a production environment. An approved document in a pack that is not ready never reads "Approved for Submission".</p>
 {% else %}<p class="muted">No pack generated yet.</p>{% endif %}
 {% if mx %}<h2>Applicability matrix (live)</h2><p class="muted">{{ mx.counts }}</p>
 <details><summary>Show all 45 classifications</summary><table><thead><tr><th>No.</th><th>Code</th><th>Title</th><th>Applicability</th><th>Reason</th></tr></thead><tbody>

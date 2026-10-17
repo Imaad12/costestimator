@@ -4,14 +4,16 @@
 The software ships <b>none</b>. Each is validated, needs a stated source, goes Draft → Pending Review → Approved by a permitted human, and an approved value is never edited — a change is a new version.
 Only <i>Approved</i> values affect the strict estimate.</p>
 <h2>Propose a parameter</h2>
-<form method="post" action="/ui/do/propose_param" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/inputs">
-<div class="grid"><div><label>Kind</label><select name="kind" id="kind">{% for k in kinds %}<option value="{{ k.kind }}">{{ k.label }} ({{ k.kind }})</option>{% endfor %}</select></div>
+<p class="muted">Quick starts: <a href="?kind=calendar">work calendar</a> · <a href="?kind=payment_terms">payment terms</a> · <a href="?kind=plant_hire_terms">plant-hire terms</a> · <a href="?kind=escalation_profile">escalation</a> · <a href="?kind=productivity_factor">productivity factor</a> · <a href="?kind=time_allocation">time allocation</a>. Every field is blank: fill each from your own records and name the source.</p>
+<form method="post" action="/ui/do/propose_param" class="stack" id="paramform" data-kinds='{{ kinds|tojson }}' data-pre="{{ pre_kind }}"><input type="hidden" name="_next" value="/projects/{{ project.id }}/inputs"><input type="hidden" name="data">
+<div class="grid"><div><label>Kind</label><select name="kind" id="kind">{% for k in kinds %}<option value="{{ k.kind }}" {{ 'selected' if k.kind == pre_kind else '' }}>{{ k.label }} ({{ k.kind }})</option>{% endfor %}</select></div>
 <div><label>Code (unique per kind; MTO factors use template/slot)</label><input name="code" required style="width:100%"></div>
 <div><label>Scope</label><select name="project_id"><option value="{{ project.id }}">this project</option><option value="">company-wide</option></select></div>
 <div><label>Source / basis (document, record, contract clause) — required</label><input name="source" style="width:100%"></div></div>
-<label>Data (JSON — field names shown per kind below; fill in every value from your records)</label>
-<textarea name="data" rows="7" style="width:100%;font-family:monospace" placeholder='{"field": "value"}'></textarea>
-<p><label><input type="checkbox" name="submit" value="1"> submit for review now</label> <button class="sm">Save</button></p></form>
+<div id="kindinfo" class="hint"></div><div id="kindfields" class="card"></div>
+<p><label><input type="checkbox" name="is_synthetic" value="1"> SYNTHETIC test value</label> <label><input type="checkbox" name="submit" value="1"> submit for review now</label> <button class="sm">Save</button> <span class="muted">Saved as a Draft; a different permitted person approves it.</span></p>
+<details><summary>Advanced: edit the raw JSON instead</summary><label>Data (JSON) — if filled, it replaces the fields above</label><textarea name="data_raw" rows="6" style="width:100%;font-family:monospace" placeholder='{"field": "value"}'></textarea></details></form>
+<noscript><p class="banner warn">This form needs JavaScript; without it use the raw JSON box (set the Data field by API/CLI).</p></noscript>
 <details><summary>Fields per kind (no values — names only)</summary>
 {% for k in kinds %}<p><b>{{ k.kind }}</b> — approvers: {{ k.approvers|join(', ') }}<br><span class="muted">{{ k.description }}</span><br><code>{{ k.fields_json }}</code></p>{% endfor %}</details>
 <h2>Parameters in this project and company-wide</h2>

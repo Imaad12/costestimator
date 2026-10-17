@@ -67,14 +67,14 @@ def analysis_saved(pid: str, rid: int, request: Request, actor: Actor = Depends(
 
 
 @router.get("/projects/{pid}/inputs", response_class=HTMLResponse)
-def inputs_page(pid: str, request: Request, actor: Actor = Depends(current_actor)):
+def inputs_page(pid: str, request: Request, kind: str = "", actor: Actor = Depends(current_actor)):
     kinds = governed.kinds()
     for k in kinds:
         k["fields_json"] = json.dumps(k["fields"], ensure_ascii=False)
     params = governed.list_params(get_db(), None, pid)
     for p in params:
         p["data_text"] = json.dumps(p["data"], ensure_ascii=False)
-    return page(request, "inputs.html", actor, project=_proj(pid), kinds=kinds, params=params, title="Inputs", tab="inputs")
+    return page(request, "inputs.html", actor, project=_proj(pid), kinds=kinds, params=params, pre_kind=kind, title="Inputs", tab="inputs")
 
 
 @router.get("/projects/{pid}/structure", response_class=HTMLResponse)

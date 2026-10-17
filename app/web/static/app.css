@@ -51,3 +51,6 @@ details.form>summary{font-weight:600}details.form{background:#fff;border:1px sol
 table.rows td{padding:2px 3px}table.rows input,table.rows select{width:100%;min-width:54px}table.rows input[type=checkbox]{width:auto;min-width:0}
 .hint{color:var(--muted);font-size:12px;margin:2px 0 6px}
 tbody.rowlist tr.row{display:table-row;margin:0}tbody.rowlist .row input,tbody.rowlist .row select{width:100%;min-width:48px}tbody.rowlist .row input[type=checkbox]{width:auto;min-width:0}
+.pfield label{display:block;text-transform:capitalize;font-size:12px;color:var(--muted);margin:2px 0}.pfield input[type=text],.pfield input[type=date],.pfield select{width:100%}
+.pfield .rowlist .row input,.pfield .rowlist .row select{flex:1;min-width:70px;width:auto}
+#paramform select{width:100%}

@@ -38,7 +38,7 @@ Helper scripts: `scripts/setup.sh` (venv + install + init), `scripts/run.sh`, `s
 ```
 * Diagrams of what exists and what is missing: [docs/SYSTEM_MAP_BUILT_VS_MISSING.md](docs/SYSTEM_MAP_BUILT_VS_MISSING.md)
 * History, evidence, defect ledger, to-do list and how to keep the project lean: [docs/PROJECT_HISTORY_AND_NEXT_STEPS.md](docs/PROJECT_HISTORY_AND_NEXT_STEPS.md)
-* **See it run:** `scripts/demo_web.sh` (builds the synthetic end-to-end tender on first run, ≈1 min, then serves http://127.0.0.1:8000 — sign in `test-commercial` / `synthetic-only-pw`, open Projects → PRJ-9101 → Control tower). Menu: Overview · Libraries · Governance · System · Help; per project a **Tender** row (Control tower, Tender desk, Queries & RFIs, Registers, Workforce & programme, Tender pack, Readiness) and an **Estimate** row.
+* **See it run:** (if the page shows a different application, another program owns that port: `scripts/demo_web.sh` now picks a free port and checks the page title before printing the URL — use the URL it prints) `scripts/demo_web.sh` (builds the synthetic end-to-end tender on first run, ≈1 min, then serves http://127.0.0.1:8000 — sign in `test-commercial` / `synthetic-only-pw`, open Projects → PRJ-9101 → Control tower). Menu: Overview · Libraries · Governance · System · Help; per project a **Tender** row (Control tower, Tender desk, Queries & RFIs, Registers, Workforce & programme, Tender pack, Readiness) and an **Estimate** row.
 
 ## What is in the box
 

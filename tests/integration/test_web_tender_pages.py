@@ -127,3 +127,46 @@ def test_workforce_forms_post_what_the_row_editors_serialise_and_prefill(client)
     assert "err=" in own.headers["location"]
     # crew comparison uses plain checkboxes (no inline script)
     assert client.get(nxt + "?profiles=WP-W1").status_code == 200
+
+
+def test_pack_page_offers_approve_only_on_unblocked_documents_and_records_who(client, tmp_path):
+    _login(client, "est")
+    pid = _project(client)
+    db = get_db()
+    out = tmp_path / "p"
+    out.mkdir()
+    pk = db.insert("tender_packs", dict(project_id=pid, kind="tender", revision=1, classification="demonstration", status_label="t", out_dir=str(out), created_by="t", created_at="2026-01-01"))
+    for code, st in (("D07", "Preliminary (DEMONSTRATION)"), ("D16", "BLOCKED"), ("D38", "Not Applicable")):
+        db.insert("generated_documents", dict(pack_pk=pk, doc_code=code, doc_id=f"{pid}-{code}", title=code, template_id="T", template_version="1", revision=1, status=st, applicability="Required", path=str(out / f"{code}.docx"), format="docx", created_at="2026-01-01"))
+    page = client.get(f"/projects/{pid}/pack").text
+    assert page.count('action="/ui/do/approve_document"') == 1 and f'value="{pid}-D07"' in page and "cannot be approved while blocked" in page
+    r = client.post("/ui/do/approve_document", data={"project_id": pid, "doc_id": f"{pid}-D07", "_next": f"/projects/{pid}/pack"}, follow_redirects=False)       # an Estimator may not approve documents
+    assert "PERMISSION_DENIED" in r.headers["location"]
+    _login(client, "com")
+    r = client.post("/ui/do/approve_document", data={"project_id": pid, "doc_id": f"{pid}-D16", "_next": f"/projects/{pid}/pack"}, follow_redirects=False)       # a BLOCKED document is refused by the service even if posted by hand
+    assert "err=" in r.headers["location"] and "DOC_BLOCKED" in r.headers["location"]
+    r = client.post("/ui/do/approve_document", data={"project_id": pid, "doc_id": f"{pid}-D07", "comments": "reviewed", "_next": f"/projects/{pid}/pack"}, follow_redirects=False)
+    assert "ok=" in r.headers["location"], r.headers["location"]
+    after = client.get(f"/projects/{pid}/pack").text
+    assert "approved by com" in after and after.count('action="/ui/do/approve_document"') == 0
+    _login(client, "view")
+    r = client.post("/ui/do/approve_document", data={"project_id": pid, "doc_id": f"{pid}-D07", "_next": f"/projects/{pid}/pack"}, follow_redirects=False)
+    assert "err=" in r.headers["location"]
+
+
+def test_governed_parameter_form_is_schema_driven_and_posts_what_the_browser_builds(client):
+    import json
+    _login(client, "est")
+    pid = _project(client)
+    page = client.get(f"/projects/{pid}/inputs?kind=calendar").text
+    assert 'id="paramform"' in page and "data-kinds=" in page and 'value="calendar" selected' in page and "&#34;work_weekdays&#34;" in page
+    cal = {"start_date": "2027-03-01", "work_weekdays": [0, 1, 2, 3, 4], "holidays": ["2027-03-10"], "hours_per_day": "8", "calendar_source": "test", "requires_confirmation": True,
+           "reduced_hours": [{"from": "2027-03-15", "to": "2027-04-14", "hours": "6", "reason": "test window"}]}
+    r = client.post("/ui/do/propose_param", data={"kind": "calendar", "code": "CAL-W", "project_id": pid, "source": "test entry", "data": json.dumps(cal), "is_synthetic": "1", "_next": f"/projects/{pid}/inputs"}, follow_redirects=False)
+    assert "ok=" in r.headers["location"], r.headers["location"]
+    assert "CAL-W" in client.get(f"/projects/{pid}/inputs").text
+    bad = client.post("/ui/do/propose_param", data={"kind": "payment_terms", "code": "PAY-W", "project_id": pid, "source": "x", "data": json.dumps({"name": "n", "advance_pct": "10"}), "_next": f"/projects/{pid}/inputs"}, follow_redirects=False)
+    assert "PARAM_FIELD" in bad.headers["location"]                                  # the service, not the form, decides what is complete
+    _login(client, "view")
+    v = client.post("/ui/do/propose_param", data={"kind": "calendar", "code": "CAL-V", "project_id": pid, "data": json.dumps(cal), "_next": f"/projects/{pid}/inputs"}, follow_redirects=False)
+    assert "err=" in v.headers["location"]

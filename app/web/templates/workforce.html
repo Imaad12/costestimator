@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs, actform %}{% from "_render.html" import val %}{% block body %}
 <h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'workforce') }}
-<div class="banner warn">No productivity value, crew, calendar or workforce size ships with the application. Every figure below was entered by a person, is versioned and needs a different person's approval. A programme built on unapproved or synthetic inputs is labelled PROVISIONAL / NOT FOR RELIANCE and cannot be baselined.</div>
+<div class="banner warn">No productivity value, crew, calendar or workforce size ships with the application. Every figure below was entered by a person, is versioned and needs a different person's approval. A programme built on unapproved or synthetic inputs is labelled PROVISIONAL / NOT FOR RELIANCE and cannot be baselined. A programme also needs an approved <a href="/projects/{{ project.id }}/inputs?kind=calendar">work calendar</a>.</div>
 <h2>Productivity norms</h2>
 <table><thead><tr><th>Id</th><th>Ver</th><th>Trade</th><th>Activity</th><th>Basis</th><th class="num">Value</th><th>Unit</th><th>Status</th><th>Evidence</th><th>Source</th><th></th></tr></thead><tbody>
 {% for n in norms %}<tr><td>{{ n.id }}{% if n.is_synthetic %} <span class="tag">SYN</span>{% endif %}</td><td>{{ n.version }}</td><td>{{ n.trade }}</td><td>{{ n.activity }}</td><td>{{ n.basis }}</td><td class="num">{{ n.value }}</td><td>{{ n.output_unit }}</td>

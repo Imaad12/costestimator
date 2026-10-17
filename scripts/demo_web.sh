@@ -30,5 +30,34 @@ case "$MODE" in
     ;;
   *) echo "unknown mode '$MODE'"; exit 2 ;;
 esac
-echo "Serving on http://$HOST:$PORT  (Ctrl-C to stop)"
-exec python -m app.cli run --host "$HOST" --port "$PORT"
+# Pick a free port (another program may already own 8000) and prove that THIS application answers on it.
+PORT=$(python - "$HOST" "$PORT" <<'PY'
+import socket, sys
+host, start = sys.argv[1], int(sys.argv[2])
+for port in range(start, start + 50):
+    with socket.socket() as s:
+        s.settimeout(0.3)
+        if s.connect_ex((host, port)) != 0:          # nothing is listening: free
+            print(port); break
+PY
+)
+python -m app.cli run --host "$HOST" --port "$PORT" &
+SRV=$!
+trap 'kill $SRV 2>/dev/null || true' EXIT INT TERM
+python - "$HOST" "$PORT" <<'PY'
+import re, sys, time, urllib.request
+url = f"http://{sys.argv[1]}:{sys.argv[2]}/login"
+for _ in range(60):
+    try:
+        html = urllib.request.urlopen(url, timeout=2).read().decode("utf-8", "replace"); break
+    except Exception:
+        time.sleep(0.5)
+else:
+    sys.exit("The web app did not start - see the messages above.")
+title = (re.search(r"<title>([^<]*)", html) or [None, ""])[1]
+if "KSA Construction Estimating Suite" not in title:
+    sys.exit(f"ANOTHER application answered at {url} (title: '{title}'). Stop it or set PORT=<free port> and run again.")
+print(f"Verified: '{title}' is answering.")
+PY
+echo "Open  http://$HOST:$PORT   (Ctrl-C to stop)"
+wait $SRV

@@ -16,8 +16,8 @@ A local-first, Excel-first **estimating, tendering and procurement-support suite
 | **"Close the loop" mission** | Workforce/productivity/calendar engine + crew scenarios; unified assumptions register (17 categories, immutability triggers, four-eyes default); standards register (12 sources); tender registers + draft-only query detectors; 45-document tender pack and 17-document hypothetical handover pack (DOCX/XLSX/PDF, deterministic, manifest, validator); readiness closure gate; 27-stage synthetic scenario with an independent oracle; audit + security review | commits `e8c992a`, `ec75844`; 458 tests; `demo_output/synthetic_closure/` |
 | **Real-document practice test** | One third-party sample BOQ PDF was the only input (no drawings/specs/contract). Quantities read independently, imported, 36 draft queries, 10 takeoff actions, demonstration pack, negative tests, 9 defects + 3 observations recorded | commit `e2f88d4`; `practice_test/PRACTICE_TEST_RESULTS.md` |
 | Defects D-1, D-3, D-4, D-7 fixed | Incomplete-PDF-text flag, BOQ-content detectors, D36 lists unpriced lines, defaulted region/currency flagged (migration 0016) | commit `5b9c4d0`; 464 tests |
-| Defects D-9, O-2, O-3 fixed | Discipline completeness matrix; unapproved assumptions in use can never be waived (adopted-unused need a recorded exception); estimate state and caveats reflect synthetic / unchecked data | this commit; 479 tests passed |
-| Defects D-2, D-5, D-6, D-8 fixed + priced run | No OCR by design: independent transcription imported with provenance and a second-person check; completeness no longer says OK with nothing priced; demo ≠ synthetic labelling; unknown totals are `None` not `0`; **priced run PRJ-9203** (real quantities × labelled SYNTHETIC placeholder rates) independently re-computed 48/48 lines | this commit; 479 passed (3 min 33 s) |
+| Defects D-9, O-2, O-3 fixed | Discipline completeness matrix; unapproved assumptions in use can never be waived (adopted-unused need a recorded exception); estimate state and caveats reflect synthetic / unchecked data | this commit; 481 tests passed |
+| Defects D-2, D-5, D-6, D-8 fixed + priced run | No OCR by design: independent transcription imported with provenance and a second-person check; completeness no longer says OK with nothing priced; demo ≠ synthetic labelling; unknown totals are `None` not `0`; **priced run PRJ-9203** (real quantities × labelled SYNTHETIC placeholder rates) independently re-computed 48/48 lines | this commit; 481 passed (3 min 35 s) |
 
 ## 3. Key decisions (so they are not re-litigated)
 * **No invented data.** No rates, productivity, calendars, suppliers or customer answers ship. Synthetic values are labelled and can never become "verified".
@@ -29,7 +29,7 @@ A local-first, Excel-first **estimating, tendering and procurement-support suite
 * **India sample ≠ KSA product.** The practice document is Indian (INR, IS 1200); it was used only to test the pipeline. Placeholder rates in the priced run are labelled and have no source.
 
 ## 4. Results to date (all re-runnable)
-* Automated suite: 479 passed (3 min 33 s) (`python -m pytest -o addopts="" -q`, ≈5 min).
+* Automated suite: 481 passed (3 min 35 s) (`python -m pytest -o addopts="" -q`, ≈5 min).
 * Synthetic scenario `python scripts/run_closure_scenario.py <fresh dir> --out <dir>`: **27/27 stages**, independent oracle agrees; 0 exports marked submission-ready; all actors test principals.
 * Crew scenarios on synthetic norms (head-count / working days): SME 15 → 400, Mid 24 → 212, Large 48 → 170, Enterprise 91 → 170 (the single crane and dependencies bind). Comparisons only, never benchmarks.
 * Practice test (`python scripts/run_real_document_practice_test.py <fresh dir>`): 48 BOQ lines imported (0 rejected); 0/48 verified against drawings (none supplied); 40 draft queries (25 system, 15 operator); 24/45 documents BLOCKED by missing inputs; negative tests held (registered humans in production could not produce a submission-ready export). Priced run: direct cost 1,274,224.00 on placeholder rates, equal to the independent recomputation for all 48 lines.
@@ -63,7 +63,7 @@ A local-first, Excel-first **estimating, tendering and procurement-support suite
 **B. Code backlog (ordered)**
 1. Remaining defect: O-1 (low). Review whether the O-2 policy (adopted-unused assumptions need an exception) is too heavy in practice — every real project will carry ~80 seeded mandatory assumptions until a person approves or excepts them.
 2. Detector for "printed total / formula vs lines" where a BOQ contains subtotal rows.
-3. A document-approval button on the pack page and UI forms for governed parameters (calendar, payment terms) — norms, profiles and activities can now be created, submitted and approved in the web UI.
+3. Norms, profiles, activities, governed parameters (calendar, payment terms and the other 20 kinds) and document approval are all available in the web UI; remaining UI gaps are bulk import screens for rates/quotations beyond the existing pages.
 4. Put cash flow in the frozen snapshot; read-only reviewer view of a frozen estimate.
 5. Security hardening (docs/SECURITY.md): MFA/SSO, off-box audit anchor, encryption at rest, separated admin duties, rate limiting beyond sign-in lockout, an independent penetration test.
 6. KSA specifics to enter only from primary sources (never defaults): statutory labour rules, holiday calendar, VAT treatment per package.
@@ -93,4 +93,4 @@ Use scratch locations (`KSA_DB_PATH`, `KSA_WORKSPACES_DIR`) if you do not want t
 * **Rule of thumb**: if a piece cannot be exercised by a test or a scenario run, do not keep it.
 
 ## 9. Where we left off
-Last full-suite result: 479 passed (3 min 33 s). Work is committed on the feature branch; O-1 is the only open defect; the next real milestone is a controlled pilot on a complete real tender package with registered human approvers (section 6C).
+Last full-suite result: 481 passed (3 min 35 s). Work is committed on the feature branch; O-1 is the only open defect; the next real milestone is a controlled pilot on a complete real tender package with registered human approvers (section 6C).
