@@ -163,7 +163,7 @@ def readiness_page(pid: str, request: Request, version: int | None = None, actor
 @router.get("/favicon.ico")
 def favicon():
     from fastapi.responses import Response
-    return Response(status_code=204)
+    return Response((ROOT / "app" / "web" / "static" / "favicon.svg").read_bytes(), media_type="image/svg+xml", headers={"Cache-Control": "public, max-age=86400"})
 
 
 @router.get("/standards", response_class=HTMLResponse)

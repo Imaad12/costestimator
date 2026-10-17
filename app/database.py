@@ -67,6 +67,8 @@ class Database:
         return cur.lastrowid
 
     def update(self, table: str, values: dict, where: str, params: Iterable[Any] = ()) -> int:
+        if not values:                                  # nothing to set: no statement (an empty SET is a syntax error)
+            return 0
         sets = ",".join(f"{c}=?" for c in values)
         sql = f"UPDATE {table} SET {sets} WHERE {where}"
         cur = self.conn.execute(sql, [_adapt(v) for v in values.values()] + list(params))

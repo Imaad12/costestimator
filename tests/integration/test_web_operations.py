@@ -254,3 +254,29 @@ def test_vat_stated_for_the_whole_file_removes_the_per_row_blocker(client):
     assert "do not say whether" not in client.post("/rates/workbook/remap", data=form).text
     client.post("/rates/workbook/import", data=form, follow_redirects=False)
     assert db.scalar("SELECT tax_basis FROM rate_candidates ORDER BY id DESC LIMIT 1") == "Excluded"
+
+
+def test_errors_are_styled_escaped_and_never_a_bare_500(client, monkeypatch):
+    import app.web.routes as web
+    _login(client, "est")
+    r = client.get("/no-such-page")
+    assert r.status_code == 404 and "Page not found" in r.text and "text/html" in r.headers["content-type"]
+    assert client.get("/api/no-such-endpoint").headers["content-type"].startswith("application/json")          # API clients still get JSON
+    pid = client.post("/ui/do/create_project", data={"name": "Err test (SYNTHETIC)", "_next": "/projects/{result}"}, follow_redirects=False).headers["location"].split("?")[0].split("/")[2]
+    r = client.post("/ui/do/update_project", data={"project_id": pid, "_next": "/"}, follow_redirects=False)
+    assert "NO_CHANGES" in r.headers["location"]                                                                # was a database syntax error (HTTP 500)
+
+    def boom(*a, **k):
+        raise RuntimeError("secret internal detail <script>")
+    monkeypatch.setattr(web, "run", boom)
+    r = client.post("/ui/do/update_project", data={"project_id": pid, "client": "x", "_next": "/"}, follow_redirects=False)
+    assert r.status_code == 303 and "UNEXPECTED_ERROR" in r.headers["location"] and "secret" not in r.headers["location"]       # logged, not leaked
+    client.get("/")                                                                                              # still alive
+
+
+def test_logo_favicon_and_fonts_are_served_without_external_assets(client):
+    assert client.get("/favicon.ico").headers["content-type"].startswith("image/svg+xml")
+    assert client.get("/static/logo.svg").status_code == 200
+    login = client.get("/login").text
+    assert "/static/logo.svg" in login and 'rel="icon"' in login
+    assert "fonts.googleapis" not in login and "https://" not in re.sub(r"<a [^>]*>", "", login)               # CSP: nothing external is loaded

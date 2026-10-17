@@ -134,3 +134,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   f.querySelectorAll("select.mapsel").forEach(function (s) { s.addEventListener("change", sync); }); f.addEventListener("submit", sync); sync();
 });
+/* "Go back" links (no javascript: URLs - the CSP forbids them) */
+document.addEventListener("click", function (e) { var a = e.target.closest && e.target.closest("a[data-back]"); if (a) { e.preventDefault(); history.back(); } });
+/* a Viewer is read-only: switch off every form that would change data (the server refuses them anyway) */
+document.addEventListener("DOMContentLoaded", function () {
+  if (document.body.getAttribute("data-role") !== "Viewer") return;
+  document.querySelectorAll("main form[method=post], main form[method=POST]").forEach(function (f) {
+    f.querySelectorAll("button,input,select,textarea").forEach(function (e) { e.disabled = true; });
+    f.title = "Read-only: a Viewer cannot change data";
+  });
+});

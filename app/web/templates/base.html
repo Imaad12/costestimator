@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ title or "KSA Construction Estimating Suite" }}</title><link rel="stylesheet" href="/static/app.css?v={{ asset_v }}"><script src="/static/app.js?v={{ asset_v }}" defer></script></head><body>
-<header><a class="brand" href="/">KSA Construction Estimating Suite</a>
+<title>{{ title or "KSA Construction Estimating Suite" }}</title><link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><meta name="theme-color" content="#3b5bdb"><link rel="stylesheet" href="/static/app.css?v={{ asset_v }}"><script src="/static/app.js?v={{ asset_v }}" defer></script></head><body{% if actor %} data-role="{{ actor.role }}"{% endif %}>
+<header><a class="brand" href="/"><img src="/static/logo.svg" alt="" width="28" height="28"><span>KSA Construction Estimating Suite</span></a>
 {% if actor %}<a class="hlink" href="/approvals">Approvals{% if pending_total %} <span class="badge">{{ pending_total }}</span>{% endif %}</a><a class="hlink" href="/settings?tab=documents">Help</a>
 <details class="user"><summary aria-label="Account menu"><span class="av">{{ ((actor.display_name or actor.username).split()|map('first')|join('')|upper)[:2] }}</span><span class="un">{{ actor.display_name or actor.username }}<small>{{ actor.role }}</small></span></summary>
 <div class="menu"><div class="who2"><b>{{ actor.display_name or actor.username }}</b><span>{{ actor.username }} &middot; {{ actor.role }}</span></div><a href="/settings?tab=users">Users &amp; roles</a><a href="/settings?tab=documents">Rules &amp; documents</a><a href="/logout">Sign out</a></div></details>{% endif %}</header>
@@ -15,6 +15,7 @@
 {% if project is defined and project %}<h6>This project</h6><a href="/projects/{{ project.id }}/tower" class="proj">{{ project.id }}<small>{{ project.name[:34] }}</small></a>{% endif %}
 </nav>{% endif %}
 <main>
+{% if actor and actor.role == 'Viewer' %}<div class="banner warn"><b>Read-only.</b> You are signed in as a Viewer, so you can look at everything but cannot change or approve anything.</div>{% endif %}
 {% if dev_mode %}<div class="banner warn"><b>Self-approval is switched on for this server</b> (KSA_ALLOW_SELF_APPROVAL), so one person can approve their own work. Use it only while tuning; exports stay labelled DEMONSTRATION when the environment is test.</div>{% endif %}
 {% if ok %}<div class="banner ok">{{ ok }}</div>{% endif %}{% if err %}<div class="banner bad">{{ err }}</div>{% endif %}
 {% if actor and lib and lib.rates_approved_real == 0 %}<div class="banner warn"><b>No approved real rates yet.</b> The global library lists {{ lib.resources }} catalogue resources but contains no approved real Saudi rate: every real price must come from a quotation, dataset or source you import and a human approves (<a href="/rates/updates">Rate updates</a>). Synthetic demo rates, where present, are labelled SYNTHETIC / DEMO / NOT A MARKET QUOTE.</div>{% endif %}

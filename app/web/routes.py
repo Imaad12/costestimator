@@ -100,6 +100,12 @@ async def do(name: str, request: Request, actor: Actor = Depends(current_actor))
         return back(nxt, err=f"{e.code}: {e.message}")
     except ValueError as e:
         return back(nxt, err=str(e))
+    except Exception:                                                  # never show a bare server error for a form: log it, say nothing was confirmed
+        import logging
+        import uuid
+        ref = uuid.uuid4().hex[:8]
+        logging.getLogger("app.web").exception("action %s failed (ref %s)", name, ref)
+        return back(nxt, err=f"UNEXPECTED_ERROR: that could not be completed (reference {ref}). Please check the values you entered; if it keeps happening, give this reference to an administrator.")
     if isinstance(result, str) and "{result}" in nxt:
         nxt = nxt.replace("{result}", quote(result))
     msg = f"Done: {name.replace('_', ' ')}" + (f" → {result}" if isinstance(result, (str, int)) else "")

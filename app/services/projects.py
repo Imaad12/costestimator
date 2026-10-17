@@ -97,6 +97,8 @@ def update_project(db: Database, actor: Actor, pid: str, **changes) -> None:
     bad = set(changes) - allowed
     if bad:
         raise ValidationFailed(f"Not editable: {sorted(bad)}")
+    if not changes:
+        raise ValidationFailed("No changes were submitted.", code="NO_CHANGES")
     before = get_project(db, pid)
     if "trades" in changes and not isinstance(changes["trades"], str):
         changes["trades"] = json.dumps(list(changes["trades"] or []))
