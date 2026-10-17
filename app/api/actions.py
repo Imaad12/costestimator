@@ -2,6 +2,8 @@
 Every action calls a service that enforces permissions and approval rules on the server."""
 from __future__ import annotations
 
+import sqlite3
+
 from pathlib import Path
 from typing import Any, Callable
 
@@ -44,7 +46,10 @@ def opt(p: dict, k: str):
 def run(db: Database, actor: Actor, name: str, params: dict) -> Any:
     if name not in ACTIONS:
         raise ValidationFailed(f"Unknown action '{name}'.", code="UNKNOWN_ACTION")
-    return ACTIONS[name](db, actor, params)
+    try:
+        return ACTIONS[name](db, actor, params)
+    except sqlite3.IntegrityError as e:                      # a database rule (allowed values, uniqueness, immutability) refused the data: say so plainly, never a bare server error
+        raise ValidationFailed(f"The data was refused by a database rule: {e}", code="DATA_RULE")
 
 
 # ---------------------------------------------------------------- projects

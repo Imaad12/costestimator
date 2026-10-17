@@ -280,3 +280,11 @@ def test_logo_favicon_and_fonts_are_served_without_external_assets(client):
     login = client.get("/login").text
     assert "/static/logo.svg" in login and 'rel="icon"' in login
     assert "fonts.googleapis" not in login and "https://" not in re.sub(r"<a [^>]*>", "", login)               # CSP: nothing external is loaded
+
+
+def test_a_database_rule_violation_is_a_friendly_message_not_a_server_error(client):
+    _login(client, "est")
+    pid = client.post("/ui/do/create_project", data={"name": "Rule test (SYNTHETIC)", "_next": "/projects/{result}"}, follow_redirects=False).headers["location"].split("?")[0].split("/")[2]
+    r = client.post("/ui/do/create_norm", data={"id": "N-QA", "trade": "Civil", "activity": "A", "output_unit": "m3", "basis": "crew_output_per_crew_day", "value": "5", "crew": "{}",
+                                                  "evidence_status": "QA test", "_next": f"/projects/{pid}/workforce"}, follow_redirects=False)
+    assert r.status_code == 303 and "NORM_EVIDENCE" in r.headers["location"]

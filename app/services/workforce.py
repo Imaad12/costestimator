@@ -74,6 +74,10 @@ def create_norm(db: Database, actor: Actor, *, id: str, trade: str, activity: st
     approvals.require_author(actor)
     if basis not in ("labour_hours_per_unit", "crew_output_per_crew_day"):
         raise ValidationFailed("basis must be labour_hours_per_unit or crew_output_per_crew_day.", code="NORM_FIELD")
+    if evidence_status not in ("unverified", "verified", "synthetic"):
+        raise ValidationFailed("evidence_status must be unverified, verified or synthetic.", code="NORM_EVIDENCE")
+    if origin not in ("user", "system", "import", "synthetic"):
+        raise ValidationFailed("origin must be user, system, import or synthetic.", code="NORM_ORIGIN")
     if origin == "system" and not actor.username.startswith("system:"):
         raise ValidationFailed("origin 'system' is reserved for system principals.", code="NORM_ORIGIN")
     if evidence_status == "verified" or origin == "synthetic":

@@ -115,6 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll("input[placeholder],textarea[placeholder]").forEach(function (e) { e.setAttribute("placeholder", cap(e.getAttribute("placeholder"))); });
   document.querySelectorAll("option").forEach(function (o) {
     var t = o.textContent; if (!t || !/^[a-z]/.test(t.trim())) return;
+    if (!o.hasAttribute("value")) o.setAttribute("value", o.value);          // an option without a value submits its text: pin the real value BEFORE changing what is displayed
     o.textContent = cap(t.trim()).replace(/_/g, " ");
   });
   document.querySelectorAll("button,summary,label,th").forEach(function (e) {
