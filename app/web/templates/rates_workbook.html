@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, table %}{% block body %}
+<h1>Rates workbook</h1>
+<p class="muted">Bring prices in from Excel in four steps. Nothing becomes a rate until a different person approves it: uploaded rows are <b>candidates</b> that wait in the <a href="/approvals?group=candidates">Approvals inbox</a>. Original files are stored untouched with their SHA-256 hash.</p>
+<div class="steps">
+<div class="step"><span class="n">1</span><b>Download the template</b><div class="muted">Yellow cells are inputs. A second sheet lists every resource id (no prices).</div><p><a class="btn" href="/rates/workbook/template.xlsx">Download template (.xlsx)</a></p></div>
+<div class="step"><span class="n">2</span><b>Fill it in</b><div class="muted">One price per row: resource id, unit, unit price, currency (required, never assumed), price date, validity, tax basis, delivery basis and an evidence reference.</div></div>
+<div class="step"><span class="n">3</span><b>Upload and check</b><div class="muted">You see accepted and rejected rows with the reason for each before anything is stored.</div></div>
+<div class="step"><span class="n">4</span><b>Import, then approve</b><div class="muted">Candidates are reviewed, published as Pending Review rates, and approved by a different person.</div></div></div>
+{% if preview %}{% set r = preview.result %}
+<div class="card"><h2>Check result for {{ preview.file }}</h2>
+<div class="grid"><div class="kpi"><b>{{ r.rows_read }}</b><span>Rows read</span></div><div class="kpi"><b>{{ r.accepted }}</b><span>Rows that can be imported</span></div><div class="kpi"><b>{{ r.rejected }}</b><span>Rows rejected</span></div><div class="kpi"><b>{{ r.sha256[:12] }}...</b><span>File SHA-256</span></div></div>
+{% if r.errors %}<h3>Rejected rows</h3><table><thead><tr><th>Row</th><th>Reason</th></tr></thead><tbody>{% for e in r.errors %}<tr><td>{{ e.row }}</td><td>{{ e.errors|join('; ') }}</td></tr>{% endfor %}</tbody></table><p class="muted">Fix these in the workbook and upload it again, or import the accepted rows now and add the rest later.</p>{% endif %}
+{% if r.accepted %}<form method="post" action="/rates/workbook/import" class="inline" data-confirm="Import {{ r.accepted }} row(s) as candidates for review?">
+<input type="hidden" name="stored" value="{{ preview.stored }}"><input type="hidden" name="source_name" value="{{ preview.source_name }}"><input type="hidden" name="source_url" value="{{ preview.source_url }}"><input type="hidden" name="source_id" value="{{ preview.source_id }}"><input type="hidden" name="source_type" value="{{ preview.source_type }}"><input type="hidden" name="description" value="{{ preview.description }}">
+<button>Import {{ r.accepted }} row(s) for review</button> <a class="btn alt" href="/rates/workbook">Cancel</a></form>{% else %}<p><b>Nothing can be imported from this file.</b></p>{% endif %}</div>{% endif %}
+<div class="card"><h2>Upload a filled workbook</h2>
+<form method="post" action="/rates/workbook/preview" enctype="multipart/form-data" class="stack"><div class="grid">
+<div><label>Workbook (.xlsx, .csv or .json)</label><input type="file" name="file" required accept=".xlsx,.csv,.json"></div>
+<div><label>Source name (required unless you pick a register entry)</label><input name="source_name" placeholder="E.g. Supplier X price list, Sep 2026"></div>
+<div><label>Source type</label><select name="source_type">{% for t in source_types if t != 'Official statistics' %}<option>{{ t }}</option>{% endfor %}</select></div>
+<div><label>Source URL or document reference (optional)</label><input name="source_url" placeholder="Web address or the file's reference"></div>
+<div><label>Source Register entry (optional)</label><select name="source_id"><option value="">None</option>{% for s in register %}<option value="{{ s.source_id }}">{{ s.source_id }} - {{ s.name[:60] }}</option>{% endfor %}</select></div>
+<div><label>Note (optional)</label><input name="description" placeholder="E.g. Q3 2026 quotation round"></div></div>
+<p><button>Check workbook</button> <span class="muted">Nothing is stored until you confirm.</span></p></form></div>
+<div class="grid"><div class="kpi"><b>{{ counts.by_status.get('Pending Review', 0) }}</b><span>Candidates pending review</span></div><div class="kpi"><b>{{ counts.by_status.get('Approved for Publication', 0) }}</b><span>Ready to publish</span></div><div class="kpi"><b>{{ counts.rates_pending_approval }}</b><span>Published rates awaiting approval</span></div></div>
+<h2>Recent rate imports</h2>
+<table><thead><tr><th>#</th><th>Source</th><th>When</th><th>By</th><th>Status</th><th>Accepted</th><th>Rejected</th><th>SHA-256</th></tr></thead><tbody>{% for m in recent %}<tr><td>{{ m.id }}</td><td>{{ m.source_name or '' }}</td><td class="nowrap">{{ m.imported_at }}</td><td>{{ m.imported_by }}</td><td>{{ m.status }}</td><td class="num">{{ m.accepted_rows }}</td><td class="num">{{ m.rejected_rows }}</td><td><code>{{ (m.sha256 or '')[:16] }}</code></td></tr>{% endfor %}</tbody></table>
+<p class="muted">Prefer public data? See <a href="/rates/updates">Rate updates</a> for public sources and index data (an index is never a price).</p>
+{% endblock %}

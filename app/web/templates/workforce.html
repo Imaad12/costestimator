@@ -11,12 +11,12 @@
 <form method="post" action="/ui/do/create_norm" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/workforce"><input type="hidden" name="crew">
 <p class="hint">A norm is a person-entered, sourced value — nothing is defaulted. It is created as a <b>Draft</b>; a different person approves it. Use the BOQ's unit (e.g. m3, m2, nr, m) as the output unit: a mismatch excludes the activity.</p>
 <div class="grid"><div><label>Norm id *</label><input name="id" required placeholder="N-EXC"></div><div><label>Trade *</label><input name="trade" required></div><div><label>Activity *</label><input name="activity" required></div>
-<div><label>Output unit *</label><input name="output_unit" required placeholder="m3"></div>
+<div><label>Output unit *</label><input name="output_unit" required placeholder="M3"></div>
 <div><label>Basis *</label><select name="basis"><option value="crew_output_per_crew_day">crew output per crew-day (units/day)</option><option value="labour_hours_per_unit">labour-hours per unit</option></select></div>
 <div><label>Value *</label><input name="value" required inputmode="decimal"></div></div>
 <label>Crew * (role → head-count; the norm's crew)</label>
-<div id="crewrows" data-json-map="crew" data-int="1"><div class="rowlist"><div class="row"><input class="k" placeholder="role, e.g. skilled"><input class="v" type="number" min="1" placeholder="head-count"><button class="sm alt" data-del-row>×</button></div></div>
-<template><div class="row"><input class="k" placeholder="role"><input class="v" type="number" min="1" placeholder="head-count"><button class="sm alt" data-del-row>×</button></div></template><button class="sm alt" data-add-row="crewrows">+ role</button></div>
+<div id="crewrows" data-json-map="crew" data-int="1"><div class="rowlist"><div class="row"><input class="k" placeholder="Role, e.g. skilled"><input class="v" type="number" min="1" placeholder="Head-count"><button class="sm alt" data-del-row>×</button></div></div>
+<template><div class="row"><input class="k" placeholder="Role"><input class="v" type="number" min="1" placeholder="Head-count"><button class="sm alt" data-del-row>×</button></div></template><button class="sm alt" data-add-row="crewrows">+ role</button></div>
 <div class="grid"><div><label>Source (who/what the value comes from) *</label><input name="source"></div><div><label>Evidence</label><input name="evidence"></div>
 <div><label>Evidence status</label><select name="evidence_status"><option>unverified</option><option>verified</option></select></div><div><label>Confidence</label><select name="confidence"><option>Low</option><option>Medium</option><option>High</option></select></div>
 <div><label>Effective from</label><input name="effective_from" type="date"></div><div><label>Review by</label><input name="review_by" type="date"></div></div>

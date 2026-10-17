@@ -18,12 +18,12 @@
 <table><thead><tr><th>ID</th><th>Item</th><th>Field</th><th>Current</th><th>Proposed</th><th>Reason</th><th>Decision</th></tr></thead><tbody>
 {% for c in changes %}<tr><td>{{ c.id }}</td><td>{{ c.entity_id }}</td><td>{{ c.field }}</td><td>{{ c.old_value }}</td><td>{{ c.new_value }}</td><td>{{ c.reason }}</td><td>
 <form class="inline" method="post" action="/ui/do/decide_change"><input type="hidden" name="_next" value="/projects/{{ project.id }}/boq"><input type="hidden" name="change_id" value="{{ c.id }}">
-{% if c.field == 'unit' %}<input name="unit_code" placeholder="canonical unit e.g. t" size="8" value="{{ c.new_value or '' }}">{% endif %}<input name="comment" placeholder="comment" size="14">
+{% if c.field == 'unit' %}<input name="unit_code" placeholder="Canonical unit e.g. t" size="8" value="{{ c.new_value or '' }}">{% endif %}<input name="comment" placeholder="Comment" size="14">
 <button class="sm" name="decision" value="approve">Approve</button><button class="sm danger" name="decision" value="reject">Reject</button></form></td></tr>{% endfor %}</tbody></table>{% endif %}
 <h2>Imports</h2>{{ table(imports, [('id','#'),('source_file','File'),('sheet','Sheet'),('revision','Rev'),('imported_by','By'),('imported_at','At'),('sha256','SHA-256')]) }}
 {% if rejected %}<h2>Rejected rows ({{ rejected|length }})</h2>{{ table(rejected, [('source_file','File'),('source_row','Row'),('reason_code','Code'),('reason','Reason')]) }}{% endif %}
 <h2>Items ({{ items|length }})</h2>
-<form class="filter" method="get"><input name="q" value="{{ q }}" placeholder="search description / code"><button class="alt sm">Search</button></form>
+<form class="filter" method="get"><input name="q" value="{{ q }}" placeholder="Search description / code"><button class="alt sm">Search</button></form>
 <table><thead><tr><th>Key</th><th>Description</th><th>Unit</th><th class="num">Qty (as imported)</th><th>Src row</th><th>Validation</th><th>Issues</th><th></th></tr></thead><tbody>
 {% for i in items %}<tr {% if i.item_type=='heading' %}style="background:#eef1f8;font-weight:600"{% endif %}><td>{{ i.item_key }}</td><td>{{ i.description }}</td>
 <td>{{ i.unit or '' }}{% if not i.unit and i.item_type=='item' %} <span class="tag Open">{{ i.unit_status }}: '{{ i.unit_original }}'</span>{% endif %}</td>

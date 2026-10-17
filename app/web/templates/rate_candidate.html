@@ -25,7 +25,7 @@
 <div><label>Effective date</label><input name="effective_date" placeholder="{{ c.effective_date }}"></div></div><p><button class="sm">Save</button></p></form>
 <h2>Decision (human only)</h2>
 <form method="post" action="/ui/do/review_rate_candidate" class="stack"><input type="hidden" name="_next" value="/rates/updates/{{ c.candidate_ref }}"><input type="hidden" name="candidate" value="{{ c.candidate_ref }}">
-<input name="comment" placeholder="comment (required for reject / verify)" size="50"> <button class="sm" name="decision" value="approve">Approve for publication</button>
+<input name="comment" placeholder="Comment (required for reject / verify)" size="50"> <button class="sm" name="decision" value="approve">Approve for publication</button>
 <button class="sm alt" name="decision" value="needs_verification">Needs verification</button><button class="sm danger" name="decision" value="reject">Reject</button></form>
 {% if c.status == 'Approved for Publication' %}{{ actform('publish_rate_candidate', '/rates/updates/' ~ c.candidate_ref, [('candidate', c.candidate_ref, 'hidden')], 'Publish as a new Pending Review rate version') }}
 <p class="muted">The published version still needs its own rate approval (Approvals page) before any final estimate can use it.</p>{% endif %}

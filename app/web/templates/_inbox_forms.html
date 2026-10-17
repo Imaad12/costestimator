@@ -1,0 +1,3 @@
+{% macro opform(o, nxt, cls='') %}<form class="inline opform" method="post" action="/ui/do/{{ o.action }}"{% if o.label.startswith('Approve') or o.label in ('Accept','Publish as rate') %} data-confirm="{{ o.label }}? This is recorded in the audit trail under your name."{% endif %}>
+<input type="hidden" name="_next" value="{{ nxt }}">{% for k, v in o.fields.items() %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+{% for name, label, req in o.inputs %}<input name="{{ name }}" placeholder="{{ label }}" {{ 'required' if req else '' }} size="26">{% endfor %}<button class="{{ cls }}">{{ o.label }}</button></form>{% endmacro %}

@@ -1,17 +1,17 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ title or "KSA Construction Estimating Suite" }}</title><link rel="stylesheet" href="/static/app.css?v={{ asset_v }}"><script src="/static/app.js?v={{ asset_v }}" defer></script></head><body>
-<header><span class="brand">KSA Construction Estimating Suite</span><a href="/help">Help</a>
-{% if actor %}<span class="who">{{ actor.display_name or actor.username }} · {{ actor.role }} · <a href="/logout">sign out</a></span>{% endif %}</header>
+<header><a class="brand" href="/">KSA Construction Estimating Suite</a>
+{% if actor %}<a class="hlink" href="/approvals">Approvals{% if pending_total %} <span class="badge">{{ pending_total }}</span>{% endif %}</a><a class="hlink" href="/settings?tab=documents">Help</a>
+<details class="user"><summary aria-label="Account menu"><span class="av">{{ ((actor.display_name or actor.username).split()|map('first')|join('')|upper)[:2] }}</span><span class="un">{{ actor.display_name or actor.username }}<small>{{ actor.role }}</small></span></summary>
+<div class="menu"><div class="who2"><b>{{ actor.display_name or actor.username }}</b><span>{{ actor.username }} &middot; {{ actor.role }}</span></div><a href="/settings?tab=users">Users &amp; roles</a><a href="/settings?tab=documents">Rules &amp; documents</a><a href="/logout">Sign out</a></div></details>{% endif %}</header>
 <div class="layout">
 {% if actor %}{% set path = request.url.path %}
 <nav class="side" aria-label="Main menu">
 {% macro item(href, label, match=None) %}<a href="{{ href }}" class="{{ 'on' if (path == href or (match and path.startswith(match))) else '' }}">{{ label }}</a>{% endmacro %}
 <h6>Overview</h6>{{ item('/', 'Dashboard') }}{{ item('/projects', 'Projects', '/projects') }}
-<h6>Libraries</h6>{{ item('/libraries', 'Resources & rates', '/libraries') }}{{ item('/assumptions', 'Assumptions', '/assumptions') }}{{ item('/assemblies', 'Assemblies', '/assemblies') }}
-{{ item('/rates/updates', 'Rate updates', '/rates') }}{{ item('/standards', 'Standards & evidence') }}
-<h6>Governance</h6>{{ item('/approvals', 'Approvals') }}{{ item('/audit', 'Audit trail') }}
-<h6>System</h6>{{ item('/settings', 'Settings & sources') }}
-<h6>Help</h6>{{ item('/help/SYSTEM_MAP_BUILT_VS_MISSING', "What's built / missing") }}{{ item('/help/PROJECT_HISTORY_AND_NEXT_STEPS', 'History & next steps') }}{{ item('/help/USER_GUIDE', 'User guide') }}{{ item('/help', 'All documents') }}
+<h6>Work</h6><a href="/approvals" class="{{ 'on' if path.startswith('/approvals') else '' }}">Approvals{% if pending_total %}<span class="badge">{{ pending_total }}</span>{% endif %}</a>{{ item('/rates/workbook', 'Rates workbook') }}
+<h6>Libraries</h6>{{ item('/libraries', 'Resources & rates', '/libraries') }}{{ item('/assumptions', 'Assumptions', '/assumptions') }}{{ item('/assemblies', 'Assemblies', '/assemblies') }}{{ item('/rates/updates', 'Rate updates', '/rates/updates') }}
+<h6>System</h6>{{ item('/settings', 'Settings', '/settings') }}
 {% if project is defined and project %}<h6>This project</h6><a href="/projects/{{ project.id }}/tower" class="proj">{{ project.id }}<small>{{ project.name[:34] }}</small></a>{% endif %}
 </nav>{% endif %}
 <main>

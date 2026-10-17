@@ -21,7 +21,7 @@ def test_menu_and_every_new_page_render(client):
     _login(client, "est")
     pid = _project(client)
     home = client.get("/").text
-    for label in ("Dashboard", "Projects", "Standards &amp; evidence", "Audit trail", "What&#39;s built / missing", "All documents"):
+    for label in ("Dashboard", "Projects", "Approvals", "Rates workbook", "Settings"):
         assert label in home or label.replace("&#39;", "'") in home, label
     for path in (f"/projects/{pid}/tower", f"/projects/{pid}/tender", f"/projects/{pid}/queries", f"/projects/{pid}/tender-registers", f"/projects/{pid}/workforce",
                  f"/projects/{pid}/pack", f"/projects/{pid}/readiness", "/standards", "/audit", "/audit?verify=1", "/help", "/help/SYSTEM_MAP_BUILT_VS_MISSING", "/favicon.ico"):

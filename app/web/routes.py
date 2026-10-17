@@ -46,6 +46,11 @@ def page(request: Request, name: str, actor: Actor | None, **ctx):
             ctx.setdefault("lib", workspaces.library_versions(get_db()))
         except Exception:
             ctx.setdefault("lib", None)
+        try:
+            from . import inbox
+            ctx.setdefault("pending_total", sum(inbox.counts(get_db()).values()))
+        except Exception:
+            ctx.setdefault("pending_total", 0)
     return templates.TemplateResponse(request, name, {"actor": actor, "request": request, **ctx})
 
 
@@ -395,23 +400,6 @@ def assembly_list(request: Request, q: str = "", code: str | None = None, actor:
 
 
 # ------------------------------------------------------------------ approvals & settings
-@router.get("/approvals", response_class=HTMLResponse)
-def approvals_page(request: Request, entity: str = "", actor: Actor = Depends(current_actor)):
-    db = get_db()
-    log = rows_to_dicts(db.all("SELECT * FROM approvals " + ("WHERE entity_type=? " if entity else "") + "ORDER BY id DESC LIMIT 300", (entity,) if entity else ()))
-    return page(request, "approvals.html", actor, queue=dashboard.pending_queue(db), log=log, entity=entity, title="Approvals")
-
-
-@router.get("/settings", response_class=HTMLResponse)
-def settings_page(request: Request, actor: Actor = Depends(current_actor)):
-    db = get_db()
-    s = get_settings()
-    return page(request, "settings.html", actor, sources=rows_to_dicts(db.all("SELECT * FROM sources ORDER BY source_id")), tax=commercial.list_tax_categories(db),
-                fx=rows_to_dicts(db.all("SELECT * FROM fx_rates ORDER BY id DESC")), company=s.company, users=rows_to_dicts(db.all("SELECT username, display_name, role, is_active FROM users")),
-                backups=sorted(p.name for p in s.backups_dir.glob("*.zip")) if s.backups_dir.exists() else [], datasets=rows_to_dicts(db.all("SELECT * FROM dataset_imports ORDER BY id DESC LIMIT 20")),
-                cost_codes=rows_to_dicts(db.all("SELECT * FROM cost_codes ORDER BY code")), audit=audit.verify_chain(db), ai_enabled=s.ai_enabled, title="Settings & data sources")
-
-
 @router.post("/datasets/stage")
 async def dataset_stage(file: UploadFile = File(...), source_id: str = Form(""), actor: Actor = Depends(current_actor)):
     try:

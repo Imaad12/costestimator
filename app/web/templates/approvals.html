@@ -1,7 +1,23 @@
-{% extends "base.html" %}{% from "_macros.html" import tag, table %}{% block body %}
-<h1>Approvals</h1><p class="muted">Pending items by type. Decisions are made on the relevant page (rates → resource page; assumptions → register; quotations/selections → project Quotations; versions → Reconciliation …). AI cannot approve anything.</p>
-{% for name, rows in queue.items() %}{% if rows %}<h2>{{ name }} ({{ rows|length }})</h2><table><thead><tr>{% for k in rows[0].keys() %}<th>{{ k }}</th>{% endfor %}</tr></thead><tbody>{% for r in rows %}<tr>{% for v in r.values() %}<td>{{ v if v is not none else '' }}</td>{% endfor %}</tr>{% endfor %}</tbody></table>{% endif %}{% endfor %}
-<h2>Approval log {% if entity %}({{ entity }}){% endif %}</h2>
-<form class="filter" method="get"><input name="entity" value="{{ entity }}" placeholder="entity type e.g. rate"><button class="alt sm">Filter</button></form>
-{{ table(log, [('ts','When (UTC)'),('entity_type','Entity'),('entity_id','ID'),('version','v'),('reviewer','Reviewer'),('reviewer_role','Role'),('action','Action'),('approved_value','Approved value'),('comments','Comments'),('override_reason','Override reason')]) }}
-{% endblock %}
+{% extends "base.html" %}{% from "_macros.html" import tag %}{% from "_inbox_forms.html" import opform %}{% block body %}
+<h1>Approvals</h1>
+<p class="muted">Everything waiting for a human decision. You can only act on what your role allows, and never on something you raised yourself (the four-eyes rule is enforced by the server). Approved records become immutable; a change is a new version.</p>
+<div class="sub"><a href="/approvals" class="{{ 'on' if not group and not show_log else '' }}">All pending ({{ total }})</a>{% for k, n, c in tabs %}<a href="/approvals?group={{ k }}" class="{{ 'on' if group == k else '' }}">{{ n }} ({{ c }})</a>{% endfor %}<a href="/approvals?log=1" class="{{ 'on' if show_log else '' }}">Decision log</a></div>
+{% if not show_log %}
+{% if not groups or total == 0 %}<div class="card empty"><b>Nothing is waiting for approval.</b><div class="muted">New rates, assumptions, quotations and other proposals appear here the moment someone submits them.</div></div>{% endif %}
+{% for g in groups %}{% if g['items'] %}<h2>{{ g['name'] }} <span class="tag">{{ g['items']|length }}</span></h2>
+<div class="queue">{% for it in (g['items'] if group else g['items'][:6]) %}<div class="qitem">
+<div class="qmain"><div class="qtitle">{% if it.link %}<a href="{{ it.link }}">{{ it.title }}</a>{% else %}{{ it.title }}{% endif %}{% if it.synthetic %} <span class="tag">SYNTHETIC</span>{% endif %}</div>
+<div class="muted">{{ it.detail }}</div>
+<div class="muted small">{% if it.project_id %}Project <a href="/projects/{{ it.project_id }}">{{ it.project_id }}</a> · {% endif %}Raised by {{ it.raised_by or 'the system' }}{% if it.own %} (you){% endif %}</div></div>
+<div class="qact">{% if it.own %}<span class="note">You raised this - a different approver must decide.</span>
+{% elif it.can_approve or it.can_reject %}
+{% if it.approve and it.can_approve %}{{ opform(it.approve, '/approvals' ~ ('?group=' ~ group if group else '')) }}{% elif it.extra.provisional %}{{ opform(it.extra.provisional, '/approvals' ~ ('?group=' ~ group if group else ''), 'alt') }}{% endif %}
+{% if it.reject and it.can_reject %}<details class="rej"><summary>Reject</summary>{{ opform(it.reject, '/approvals' ~ ('?group=' ~ group if group else ''), 'danger') }}</details>{% endif %}
+{% if it.extra.more %}<details class="rej"><summary>Needs verification</summary>{{ opform(it.extra.more, '/approvals' ~ ('?group=' ~ group if group else ''), 'alt') }}</details>{% endif %}
+{% else %}<span class="note">Needs a {{ it.roles|join(' / ') }}. Your role ({{ actor.role }}) cannot decide this.</span>{% endif %}</div></div>{% endfor %}{% if not group and g['items']|length > 6 %}<a class="more" href="/approvals?group={{ g['key'] }}">Show all {{ g['items']|length }} {{ g['name']|lower }}</a>{% endif %}</div>{% endif %}{% endfor %}
+{% else %}
+<h2>Decision log {% if entity %}({{ entity }}){% endif %}</h2>
+<form class="filter" method="get"><input type="hidden" name="log" value="1"><input name="entity" value="{{ entity }}" placeholder="Entity type, e.g. rate"><button class="alt sm">Filter</button></form>
+<table><thead><tr><th>When (UTC)</th><th>Entity</th><th>ID</th><th>v</th><th>Reviewer</th><th>Role</th><th>Action</th><th>Approved value</th><th>Comments</th><th>Override reason</th></tr></thead><tbody>
+{% for r in log %}<tr><td class="nowrap">{{ r.ts }}</td><td>{{ r.entity_type }}</td><td>{{ r.entity_id }}</td><td>{{ r.version or '' }}</td><td>{{ r.reviewer }}</td><td>{{ r.reviewer_role }}</td><td>{{ r.action }}</td><td>{{ r.approved_value or '' }}</td><td>{{ r.comments or '' }}</td><td>{{ r.override_reason or '' }}</td></tr>{% endfor %}</tbody></table>
+{% endif %}{% endblock %}

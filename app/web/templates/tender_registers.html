@@ -14,7 +14,7 @@
 <h2>Open actions &amp; outstanding information</h2>
 <table><thead><tr><th>ID</th><th>Description</th><th>Owner</th><th>Due</th><th>Reference</th><th>Status</th><th></th></tr></thead><tbody>
 {% for a in actions %}<tr><td>{{ a.id }}</td><td>{{ a.description }}</td><td>{{ a.owner or '' }}</td><td>{{ a.due or '' }}</td><td class="muted">{{ a.source_ref or '' }}</td><td>{{ tag(a.status) }}</td>
-<td>{% if a.status == 'Open' %}<form class="inline" method="post" action="/ui/do/close_action"><input type="hidden" name="_next" value="/projects/{{ project.id }}/tender-registers"><input type="hidden" name="action_id" value="{{ a.id }}"><input name="note" placeholder="closing note" size="16" required><button class="sm alt">Close</button></form>{% endif %}</td></tr>
+<td>{% if a.status == 'Open' %}<form class="inline" method="post" action="/ui/do/close_action"><input type="hidden" name="_next" value="/projects/{{ project.id }}/tender-registers"><input type="hidden" name="action_id" value="{{ a.id }}"><input name="note" placeholder="Closing note" size="16" required><button class="sm alt">Close</button></form>{% endif %}</td></tr>
 {% else %}<tr><td colspan="7" class="muted">No open actions.</td></tr>{% endfor %}</tbody></table>
 {{ actform('add_action', '/projects/' ~ project.id ~ '/tender-registers', [('project_id', project.id, 'hidden'), ('description', 'new action or takeoff task', none, 40), ('owner','owner'), ('source_ref', 'drawing / location', none, 22)], 'Add action') }}
 {% endblock %}

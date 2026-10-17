@@ -98,3 +98,7 @@ Secrets are never committed (`.env`, `var/` are git-ignored).
 ## Licence
 
 MIT (see `LICENSE`). Commercial and contractual outputs (offer letters, schedules) are drafts for human review and are not legal advice.
+
+
+## Using the web application
+Start it with `scripts/demo_web.sh` and sign in. Day-to-day work happens in **Approvals** (one inbox with approve/reject buttons), **Rates workbook** (Excel template, upload, preview, import) and **Settings** (users, audit trail, integrity hashes, standards, rules and documents). See `docs/USER_GUIDE.md` section 11 and `docs/DOS_AND_DONTS.md`.

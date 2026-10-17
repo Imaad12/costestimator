@@ -265,3 +265,35 @@ def _(db, a, p):
     from ..services import estimates
     return estimates.export_client_form(db, a, req(p, "project_id")[0], req(p, "template_path")[0], jdict(p, "mapping"),
                                         version_id=int(p["version_id"]) if opt(p, "version_id") else None, approval_id=int(p["approval_id"]) if opt(p, "approval_id") else None)
+
+
+# ---------------------------------------------------------------- user administration (Administrator only; enforced in services.auth)
+@action("reset_user_password")
+def _(db, a, p):
+    from ..services import auth
+    u, pw = req(p, "username", "password")
+    auth.reset_password(db, a, u, pw)
+    return u
+
+
+@action("set_user_role")
+def _(db, a, p):
+    from ..services import auth
+    u, r = req(p, "username", "role")
+    auth.set_role(db, a, u, r)
+    return u
+
+
+@action("set_user_active")
+def _(db, a, p):
+    from ..services import auth
+    u = req(p, "username")[0]
+    auth.set_active(db, a, u, str(p.get("active")).lower() in ("1", "true", "yes", "on"))
+    return u
+
+
+@action("unlock_user")
+def _(db, a, p):
+    from ..services import auth
+    u = req(p, "username")[0]
+    return auth.unlock_user(db, a, u)

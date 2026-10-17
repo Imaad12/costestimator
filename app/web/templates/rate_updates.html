@@ -18,7 +18,7 @@
 <h2>Import a price list / public dataset (CSV, XLSX, JSON)</h2>
 <form method="post" action="/rates/updates/import" enctype="multipart/form-data" class="stack"><div class="grid">
 <div><label>File</label><input type="file" name="file" required></div>
-<div><label>Source name</label><input name="source_name" placeholder="e.g. Supplier X price list, Sep 2026" style="width:100%"></div>
+<div><label>Source name</label><input name="source_name" placeholder="E.g. Supplier X price list, Sep 2026" style="width:100%"></div>
 <div><label>Source URL (optional; file reference is stored otherwise)</label><input name="source_url" style="width:100%"></div>
 <div><label>Source Register id</label><select name="source_id"><option value="">(none)</option>{% for s in register %}<option value="{{ s.source_id }}">{{ s.source_id }} — {{ s.name[:60] }}</option>{% endfor %}</select></div>
 <div><label>Source type</label><select name="source_type"><option>Manual dataset</option><option>Supplier website</option><option>Manufacturer website</option><option>Public tender award</option><option>Quotation</option><option>Historical project</option></select></div>

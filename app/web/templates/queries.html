@@ -19,8 +19,8 @@
 {% if q.status == 'Draft' %}{{ actform('release_query', '/projects/' ~ project.id ~ '/queries', [('query_id', q.id, 'hidden')], 'Approve to issue') }}
 {% elif q.status == 'Approved to Issue' %}{{ actform('mark_query_issued', '/projects/' ~ project.id ~ '/queries', [('query_id', q.id, 'hidden')], 'I issued it manually') }}
 {% elif q.status == 'Issued' %}<form class="inline" method="post" action="/ui/do/record_query_response"><input type="hidden" name="_next" value="/projects/{{ project.id }}/queries"><input type="hidden" name="query_id" value="{{ q.id }}">
-<input name="response_text" placeholder="customer's response (as received)" size="34" required><input name="response_by" placeholder="from" size="12" required><input name="response_date" type="date" required><button class="sm">Record response</button></form>{% endif %}
-{% if q.status in ('Draft','Approved to Issue','Issued','Responded') %}<form class="inline" method="post" action="/ui/do/close_query"><input type="hidden" name="_next" value="/projects/{{ project.id }}/queries"><input type="hidden" name="query_id" value="{{ q.id }}"><input name="note" placeholder="closing note (required)" size="22" required>
+<input name="response_text" placeholder="Customer's response (as received)" size="34" required><input name="response_by" placeholder="From" size="12" required><input name="response_date" type="date" required><button class="sm">Record response</button></form>{% endif %}
+{% if q.status in ('Draft','Approved to Issue','Issued','Responded') %}<form class="inline" method="post" action="/ui/do/close_query"><input type="hidden" name="_next" value="/projects/{{ project.id }}/queries"><input type="hidden" name="query_id" value="{{ q.id }}"><input name="note" placeholder="Closing note (required)" size="22" required>
 <label class="muted"><input type="checkbox" name="withdraw" value="true"> withdraw</label><button class="sm alt">Close</button></form>{% endif %}</div></div>
 {% else %}<p class="muted">No queries match. Use <i>Run detectors</i> to draft queries from the project's records.</p>{% endfor %}
 {% endblock %}

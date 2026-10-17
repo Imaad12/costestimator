@@ -20,7 +20,7 @@
 <td>{% if d.approval %}<span class="tag {{ 'OK' if d.approval.actor_type == 'human' else 'Pending' }}">approved by {{ d.approval.reviewer }}</span><div class="muted">{{ d.approval.reviewer_role }} · {{ d.approval.actor_type }} · {{ d.approval.environment }}{% if d.approval.actor_type != 'human' %} — does not count for submission readiness{% endif %}</div>
 {% elif d.status == 'BLOCKED' %}<span class="muted">cannot be approved while blocked</span>{% elif d.status == 'Not Applicable' %}<span class="muted">—</span>
 {% else %}<form class="inline" method="post" action="/ui/do/approve_document" data-confirm="Record your approval of {{ d.doc_id }}? This is an audited decision."><input type="hidden" name="_next" value="/projects/{{ project.id }}/pack?pack={{ cur.pk }}"><input type="hidden" name="project_id" value="{{ project.id }}"><input type="hidden" name="doc_id" value="{{ d.doc_id }}">
-<input name="comments" placeholder="comment" size="14"><button class="sm">Approve</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table>
+<input name="comments" placeholder="Comment" size="14"><button class="sm">Approve</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table>
 <p class="muted">Approval is a person's recorded decision on one document; the service decides who may approve (Commercial Approver / Administrator, not the author where four-eyes applies). On a real project it needs a registered human user in a production environment. An approved document in a pack that is not ready never reads "Approved for Submission".</p>
 {% else %}<p class="muted">No pack generated yet.</p>{% endif %}
 {% if mx %}<h2>Applicability matrix (live)</h2><p class="muted">{{ mx.counts }}</p>

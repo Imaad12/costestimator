@@ -89,6 +89,59 @@ def unlock_user(db: Database, actor: Actor, username: str) -> int:
     return n
 
 
+def list_users(db: Database) -> list[dict]:
+    rows = db.all("SELECT username, display_name, role, is_active, is_ai, actor_type, created_at FROM users ORDER BY is_active DESC, role, username")
+    return [dict(r) for r in rows]
+
+
+def _admin_count(db: Database) -> int:
+    return int(db.scalar("SELECT COUNT(*) FROM users WHERE role=? AND is_active=1 AND is_ai=0", (Role.ADMIN.value,)) or 0)
+
+
+def _human_user(db: Database, username: str):
+    r = db.one("SELECT * FROM users WHERE username=?", (username,))
+    if not r:
+        raise ValidationFailed(f"Unknown user '{username}'.", code="USER_UNKNOWN")
+    if r["is_ai"]:
+        raise ValidationFailed("AI principals have no password and cannot be edited here.", code="USER_AI")
+    return r
+
+
+def reset_password(db: Database, actor: Actor, username: str, new_password: str) -> None:
+    from ..approvals import engine as approvals
+    approvals.require_admin(actor, "resetting a password")
+    _human_user(db, username)
+    if len(new_password or "") < 8:
+        raise ValidationFailed("Password must be at least 8 characters.", code="PASSWORD_WEAK")
+    db.update("users", {"password_hash": hash_password(new_password)}, "username=?", (username,))
+    unlock_user(db, actor, username)
+    audit.log(db, actor, "user", username, "password_reset")
+
+
+def set_role(db: Database, actor: Actor, username: str, role: str) -> None:
+    from ..approvals import engine as approvals
+    approvals.require_admin(actor, "changing a role")
+    r = _human_user(db, username)
+    if role not in ROLE_VALUES or role == Role.AI.value:
+        raise ValidationFailed(f"Unknown role '{role}'. Valid: {[x for x in ROLE_VALUES if x != Role.AI.value]}", code="ROLE_UNKNOWN")
+    if r["role"] == Role.ADMIN.value and role != Role.ADMIN.value and r["is_active"] and _admin_count(db) <= 1:
+        raise ValidationFailed("Cannot remove the last active Administrator.", code="LAST_ADMIN")
+    db.update("users", {"role": role}, "username=?", (username,))
+    audit.log(db, actor, "user", username, "set_role", before={"role": r["role"]}, after={"role": role})
+
+
+def set_active(db: Database, actor: Actor, username: str, active: bool) -> None:
+    from ..approvals import engine as approvals
+    approvals.require_admin(actor, "activating or deactivating a user")
+    r = _human_user(db, username)
+    if not active and username == actor.username:
+        raise ValidationFailed("You cannot deactivate your own account.", code="SELF_DEACTIVATE")
+    if not active and r["role"] == Role.ADMIN.value and r["is_active"] and _admin_count(db) <= 1:
+        raise ValidationFailed("Cannot deactivate the last active Administrator.", code="LAST_ADMIN")
+    db.update("users", {"is_active": int(active)}, "username=?", (username,))
+    audit.log(db, actor, "user", username, "activate" if active else "deactivate")
+
+
 def get_actor(db: Database, username: str) -> Actor:
     r = db.one("SELECT * FROM users WHERE username=? AND is_active=1", (username,))
     if not r:

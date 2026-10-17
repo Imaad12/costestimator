@@ -109,3 +109,15 @@ document.addEventListener("DOMContentLoaded", function () {
     t.parentNode.insertBefore(w, t); w.appendChild(t);
   });
 });
+/* sentence-case what people read: placeholders, dropdown options, buttons, labels, headers (display only - submitted values are untouched) */
+document.addEventListener("DOMContentLoaded", function () {
+  function cap(s) { return /^[a-z]/.test(s) ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+  document.querySelectorAll("input[placeholder],textarea[placeholder]").forEach(function (e) { e.setAttribute("placeholder", cap(e.getAttribute("placeholder"))); });
+  document.querySelectorAll("option").forEach(function (o) {
+    var t = o.textContent; if (!t || !/^[a-z]/.test(t.trim())) return;
+    o.textContent = cap(t.trim()).replace(/_/g, " ");
+  });
+  document.querySelectorAll("button,summary,label,th").forEach(function (e) {
+    var n = e.firstChild; if (n && n.nodeType === 3 && /^\s*[a-z]/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/^(\s*)([a-z])/, function (_, a, b) { return a + b.toUpperCase(); });
+  });
+});

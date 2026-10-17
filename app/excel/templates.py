@@ -84,3 +84,21 @@ def generate_all(out_dir: Path, db: Database | None = None) -> list[Path]:
                        "Quantities x unit rates with an engine check column."))
     out += generate_docx_templates(out_dir)
     return out
+
+
+def rate_workbook(path: Path, db: Database | None = None) -> Path:
+    """The rates-entry workbook: the shipped 'Rate Dataset' layout plus a read-only 'Resource List' (ids, descriptions, units - no prices) to copy resource ids from."""
+    _single(path, db, [RATE_DATASET], "Rates workbook",
+            "Fill the yellow 'Rate Dataset' rows: one price per row with currency, price date and an evidence reference. Use 'Resource List' to find resource ids. "
+            "After upload every row is a candidate for review - nothing becomes a rate until a different person approves it.")
+    if db:
+        from openpyxl import load_workbook
+        wb = load_workbook(path)
+        ws = wb.create_sheet("Resource List")
+        ws.append(["Resource ID", "Description", "Unit", "Type"])
+        for r in db.all("SELECT id, description, unit, resource_type FROM resources WHERE is_active=1 ORDER BY id"):
+            ws.append([r["id"], r["description"], r["unit"], r["resource_type"]])
+        ws.freeze_panes = "A2"
+        ws.column_dimensions["A"].width, ws.column_dimensions["B"].width = 18, 70
+        wb.save(path)
+    return path

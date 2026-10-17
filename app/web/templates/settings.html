@@ -1,21 +1,76 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, table, actform %}{% block body %}
-<h1>Settings &amp; data sources</h1>
-<div class="card"><b>Audit trail:</b> {{ 'hash chain intact' if audit.ok else 'CHAIN BROKEN at id ' ~ audit.first_bad_id }} ({{ audit.checked }} entries; tamper-evident only, not tamper-proof) · <b>AI:</b> {{ 'enabled' if ai_enabled else 'disabled (deterministic features unaffected)' }}</div>
-<h2>Company details (used on offers and RFQs)</h2><form class="inline" method="post" action="/ui/do/save_company_settings"><input type="hidden" name="_next" value="/settings">
-{% for k in ['name','address','cr_number','vat_number','contact_name','contact_email','contact_phone'] %}<input name="{{ k }}" placeholder="{{ k }}" value="{{ company.get(k,'') }}" size="16">{% endfor %}<button class="sm">Save (Administrator)</button></form>
+<h1>Settings</h1>
+<div class="sub">{% for k, n in tabs %}<a href="/settings?tab={{ k }}" class="{{ 'on' if tab == k else '' }}">{{ n }}</a>{% endfor %}</div>
+{% if not is_admin and tab in ('users','general','sources','reference') %}<div class="banner warn">You can read this page. Changes here are limited to Administrators.</div>{% endif %}
+
+{% if tab == 'general' %}
+<div class="grid"><div class="kpi"><b>{{ environment|capitalize }}</b><span>Environment (approvals record it)</span></div><div class="kpi"><b>{{ 'On' if ai_enabled else 'Off' }}</b><span>AI suggestions (never approves)</span></div><div class="kpi"><b>{{ migrations|length }}</b><span>Database migrations applied</span></div><div class="kpi"><b>{{ backups|length }}</b><span>Backups on disk</span></div></div>
+<h2>Company details</h2><p class="muted">Used on offers, RFQs and tender documents.</p>
+<form class="stack" method="post" action="/ui/do/save_company_settings"><input type="hidden" name="_next" value="/settings?tab=general"><div class="grid">
+{% for k, label in [('name','Company name'),('address','Address'),('cr_number','Commercial registration no.'),('vat_number','VAT number'),('contact_name','Contact name'),('contact_email','Contact email'),('contact_phone','Contact phone')] %}<div><label>{{ label }}</label><input name="{{ k }}" value="{{ company.get(k,'') }}"></div>{% endfor %}</div><p><button>Save company details</button></p></form>
+<h2>Backups</h2>{{ actform('create_backup', '/settings?tab=general', [], 'Create backup now') }}
+<ul>{% for b in backups %}<li><code>{{ b }}</code></li>{% else %}<li class="muted">No backups yet.</li>{% endfor %}</ul><p class="muted">Restore from the command line with a safety backup: <code>python -m app.cli restore FILE --yes</code>. See <a href="/settings?tab=documents&doc=BACKUP_RESTORE">Backup and restore</a>.</p>
+<h2>Database</h2><p class="muted">File: <code>{{ db_path }}</code></p>
+<details><summary>Applied migrations</summary>{{ table(migrations, [('version','Migration'),('applied_at','Applied')]) }}</details>
+
+{% elif tab == 'users' %}
+<p class="muted">Each approver needs their own login so the audit trail names a real person. Passwords are stored hashed. After 5 failed sign-ins an account locks for 15 minutes.</p>
+<table><thead><tr><th>User</th><th>Name</th><th>Role</th><th>Type</th><th>Status</th><th>Manage</th></tr></thead><tbody>
+{% for u in users %}<tr><td><b>{{ u.username }}</b></td><td>{{ u.display_name }}</td><td>{{ u.role }}</td><td>{{ u.actor_type }}</td><td>{{ tag('Active' if u.is_active else 'Inactive') }}</td>
+<td>{% if is_admin and not u.is_ai %}<details><summary>Manage</summary>
+<form class="inline" method="post" action="/ui/do/set_user_role"><input type="hidden" name="_next" value="/settings?tab=users"><input type="hidden" name="username" value="{{ u.username }}"><select name="role">{% for r in roles %}<option {{ 'selected' if r == u.role else '' }}>{{ r }}</option>{% endfor %}</select><button class="sm alt">Change role</button></form>
+<form class="inline" method="post" action="/ui/do/reset_user_password" data-confirm="Reset the password for {{ u.username }}?"><input type="hidden" name="_next" value="/settings?tab=users"><input type="hidden" name="username" value="{{ u.username }}"><input type="password" name="password" placeholder="New password (8+ characters)" required minlength="8"><button class="sm alt">Reset password</button></form>
+<form class="inline" method="post" action="/ui/do/set_user_active"><input type="hidden" name="_next" value="/settings?tab=users"><input type="hidden" name="username" value="{{ u.username }}"><input type="hidden" name="active" value="{{ 0 if u.is_active else 1 }}"><button class="sm {{ 'danger' if u.is_active else 'alt' }}">{{ 'Deactivate' if u.is_active else 'Reactivate' }}</button></form>
+<form class="inline" method="post" action="/ui/do/unlock_user"><input type="hidden" name="_next" value="/settings?tab=users"><input type="hidden" name="username" value="{{ u.username }}"><button class="sm alt">Unlock sign-in</button></form></details>{% elif u.is_ai %}<span class="muted">No sign-in; can never approve</span>{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% if is_admin %}<div class="card"><h2>Add a user</h2><form class="stack" method="post" action="/ui/do/create_user"><input type="hidden" name="_next" value="/settings?tab=users"><div class="grid">
+<div><label>Username</label><input name="username" required placeholder="E.g. a.alharbi"></div><div><label>Display name</label><input name="display_name" placeholder="E.g. Ahmed Al-Harbi"></div>
+<div><label>Role</label><select name="role">{% for r in roles %}<option>{{ r }}</option>{% endfor %}</select></div><div><label>Initial password (8+ characters)</label><input type="password" name="password" required minlength="8"></div></div>
+<p><button>Add user</button></p></form></div>{% endif %}
+<h2>What each role can do</h2><table><thead><tr><th>Role</th><th>Authors</th><th>Approves</th></tr></thead><tbody>
+<tr><td>Estimator</td><td>BOQ mapping, assemblies, assumptions, norms, queries</td><td>Mappings, assemblies, assumptions, indirects, durations, programme, queries, provisional project rates</td></tr>
+<tr><td>Procurement Reviewer</td><td>Rates, quotations, suppliers</td><td>Rates, quotations, selections, FX, rate candidates</td></tr>
+<tr><td>Commercial Approver</td><td>Commercial policy</td><td>Policy, tax, estimate versions, offers, tender export, documents</td></tr>
+<tr><td>Administrator</td><td>Everything, plus users and settings</td><td>As above (not exempt from four-eyes on assumptions, norms, profiles, baselines, queries, documents, rates)</td></tr>
+<tr><td>Viewer</td><td>Nothing</td><td>Nothing (read-only)</td></tr></tbody></table>
+
+{% elif tab == 'audit' %}
+<p class="muted">Every approval and material change writes a hash-chained row. The chain is tamper-<i>evident</i> (editing or deleting a row breaks it from that row on), not tamper-proof.</p>
+<form class="filter" method="get"><input type="hidden" name="tab" value="audit"><input name="project" placeholder="Project id" value="{{ f_project }}" size="10"><select name="entity"><option value="">All entity types</option>{% for e in etypes %}<option {{ 'selected' if e == f_entity else '' }}>{{ e }}</option>{% endfor %}</select><button class="sm">Filter</button> <a class="btn sm alt" href="/settings?tab=audit&verify=1">Verify hash chain</a></form>
+{% if chain %}<div class="banner {{ 'ok' if chain.ok else 'bad' }}">{% if chain.ok %}Chain verified: {{ chain.checked }} rows intact.{% else %}CHAIN BROKEN at row {{ chain.first_bad_id }} ({{ chain.checked }} rows verified before it).{% endif %}</div>{% endif %}
+{{ table(rows, [('id','#'),('ts','Time'),('actor','Actor'),('actor_role','Role'),('project_id','Project'),('entity_type','Entity'),('entity_id','Id'),('action','Action'),('comment','Comment')]) }}<p class="muted">Latest 300 rows.</p>
+
+{% elif tab == 'integrity' %}
+<div class="banner {{ 'ok' if chain.ok else 'bad' }}">Audit hash chain: {% if chain.ok %}intact ({{ chain.checked }} rows).{% else %}BROKEN at row {{ chain.first_bad_id }}.{% endif %}</div>
+<p class="muted">Hashes prove a stored file is the file that was imported. <a class="btn sm" href="/settings?tab=integrity&verify=1">Recompute and compare now</a>{% if verified %} <span class="tag Approved">Checked just now</span>{% endif %}</p>
+<h2>Standards evidence files</h2>{% if evidence %}<table><thead><tr><th>File</th><th>Register</th><th>SHA-256 (recorded)</th><th>Result</th></tr></thead><tbody>{% for e in evidence %}<tr><td>{{ e.file }}</td><td>{{ e.register_row }}</td><td><code>{{ e.sha256 }}</code></td><td>{{ tag(e.state) }}</td></tr>{% endfor %}</tbody></table>{% else %}<p class="muted">No evidence manifest on this machine.</p>{% endif %}
+<h2>Rate and dataset imports</h2>{% if manifests %}<table><thead><tr><th>#</th><th>Kind</th><th>Source</th><th>When</th><th>By</th><th>SHA-256</th><th>Result</th></tr></thead><tbody>{% for m in manifests %}<tr><td>{{ m.id }}</td><td>{{ m.kind }}</td><td>{{ m.source_name or '' }}</td><td class="nowrap">{{ m.imported_at }}</td><td>{{ m.imported_by }}</td><td><code>{{ (m.sha256 or '')[:24] }}</code></td><td>{{ tag(m.state) }}</td></tr>{% endfor %}</tbody></table>{% else %}<p class="muted">No imports yet.</p>{% endif %}
+<h2>BOQ imports</h2>{% if boq_imports %}{{ table(boq_imports, [('id','#'),('project_id','Project'),('source_file','File'),('sha256','SHA-256'),('imported_by','By'),('imported_at','When')]) }}{% else %}<p class="muted">No BOQ imports yet.</p>{% endif %}
+<p class="muted">Generated tender packs carry their own manifest and per-document hashes: see the project's Tender pack page.</p>
+
+{% elif tab == 'standards' %}
+<p class="muted">Sources the product may rely on, with edition, clause, access date and verification status. Only what was actually read is marked verified; nothing is reproduced in full and no compliance is claimed.</p>
+<div class="grid">{% for st, n in counts.items() %}<div class="kpi"><b>{{ n }}</b><span>{{ st }}</span></div>{% endfor %}</div>
+<table><thead><tr><th>ID</th><th>Topic</th><th>Title</th><th>Edition</th><th>Accessed</th><th>Clause or page</th><th>Status</th></tr></thead><tbody>
+{% for r in rows %}<tr><td class="nowrap">{{ r.id }}</td><td>{{ r.topic }}</td><td>{% if r.url and r.url.startswith('http') %}<a href="{{ r.url }}" rel="noopener noreferrer">{{ r.title }}</a>{% else %}{{ r.title }}{% endif %}<div class="muted">{{ r.limitations or '' }}</div></td><td>{{ r.edition or '' }}</td><td class="nowrap">{{ r.access_date or '' }}</td><td>{{ r.clause_or_page or '' }}</td><td>{{ tag(r.verification_status.split(' - ')[0]) }}<div class="muted small">{{ r.verification_status.split(' - ')[-1] }}</div></td></tr>{% endfor %}</tbody></table>
+<h2>Still to be obtained by a person</h2>{{ table(todo, [('id','ID'),('title','Title'),('why','Why it matters')]) }}
+<p class="muted">Import or update rows with <code>python -m app.cli standards import FILE --update</code>.</p>
+
+{% elif tab == 'documents' %}
+<div class="docs"><nav class="doclist">{% for g, names in groups %}{% if names %}<h6>{{ g }}</h6>{% for n in names %}<a href="/settings?tab=documents&doc={{ n }}" class="{{ 'on' if n == doc else '' }}">{{ n.replace('_', ' ').title() }}</a>{% endfor %}{% endif %}{% endfor %}</nav>
+<div class="doc">{% if body %}{{ body|safe }}{% else %}<p>Choose a document.</p>{% endif %}</div></div>
+
+{% elif tab == 'sources' %}
+<h2>Source register</h2><p class="muted">Provenance of public data: where each source is, when it was accessed and what may be reused.</p>
+<table><thead><tr><th>ID</th><th>Name</th><th>URL</th><th>Accessed</th><th>Access status</th><th>Licence</th><th>Limitations</th></tr></thead><tbody>
+{% for s in sources %}<tr><td>{{ s.source_id }}</td><td>{{ s.name }}<div class="muted">{{ s.organisation }}</div></td><td>{{ s.url or '' }}</td><td>{{ s.date_accessed or '' }}</td><td>{{ s.access_status }}</td><td>{{ s.licence_reuse_conditions }}</td><td>{{ s.limitations }}</td></tr>{% endfor %}</tbody></table>
+<h2>Rate datasets (staged for validation)</h2><form class="inline" method="post" enctype="multipart/form-data" action="/datasets/stage"><input type="file" name="file" required><input name="source_id" placeholder="Source id, e.g. SRC-004" size="20"><button class="sm">Stage and validate</button></form>
+{{ table(datasets, [('id','#'),('file_name','File'),('status','Status','t'),('imported_by','By'),('imported_at','At')]) }}{% for d in datasets %}<a href="/datasets/{{ d.id }}">Dataset {{ d.id }}</a> {% endfor %}
+<p class="muted">For price lists in Excel use <a href="/rates/workbook">Rates workbook</a>; for public sources and index data use <a href="/rates/updates">Rate updates</a>.</p>
+
+{% elif tab == 'reference' %}
 <h2>Tax categories</h2>{{ table(tax, [('code','Code'),('rate_pct','Rate %'),('valid_from','From'),('valid_to','To'),('status','Status','t'),('verification_note','Verification note')]) }}
-<h2>FX rates (approved only are used)</h2>{{ table(fx, [('id','#'),('from_ccy','From'),('to_ccy','To'),('rate','Rate'),('rate_date','Date'),('source','Source'),('status','Status','t')]) }}
-{{ actform('propose_fx', '/settings', [('from_ccy','USD',none,4), ('to_ccy','SAR',none,4), ('rate','rate',none,7), ('rate_date','YYYY-MM-DD',none,10), ('source','source (required)',none,24)], 'Propose FX rate', 'alt') }}
-<h2>Source register (provenance of public data)</h2>
-<table><thead><tr><th>ID</th><th>Name</th><th>URL</th><th>Accessed</th><th>Access status</th><th>Licence / reuse</th><th>Limitations</th><th>Data collected</th></tr></thead><tbody>
-{% for s in sources %}<tr><td>{{ s.source_id }}</td><td>{{ s.name }}<div class="muted">{{ s.organisation }}</div></td><td style="word-break:break-all">{{ s.url or '' }}</td><td>{{ s.date_accessed or '' }}</td><td>{{ s.access_status }}</td><td>{{ s.licence_reuse_conditions }}</td><td>{{ s.limitations }}</td><td>{{ s.data_collected }}</td></tr>{% endfor %}</tbody></table>
-<h2>Rate datasets (ingestion)</h2><form method="post" enctype="multipart/form-data" action="/datasets/stage" class="inline"><input type="file" name="file" required><input name="source_id" placeholder="source id e.g. SRC-004" size="14"><button class="sm">Stage &amp; validate</button></form>
-{{ table(datasets, [('id','#'),('file_name','File'),('status','Status','t'),('imported_by','By'),('imported_at','At')]) }}{% for d in datasets %}<a href="/datasets/{{ d.id }}">dataset {{ d.id }}</a> {% endfor %}
-<h2>Add cost code (taxonomy)</h2>{{ actform('add_cost_code', '/settings', [('code','code e.g. D.07.01',none,12), ('name','name',none,24), ('parent_code','parent',none,8), ('default_unit','unit',none,5)], 'Add (Administrator)', 'alt') }}
+<h2>FX rates (only approved ones are used)</h2>{{ table(fx, [('id','#'),('from_ccy','From'),('to_ccy','To'),('rate','Rate'),('rate_date','Date'),('source','Source'),('status','Status','t')]) }}
+{{ actform('propose_fx', '/settings?tab=reference', [('from_ccy','From, e.g. USD',none,12), ('to_ccy','To, e.g. SAR',none,12), ('rate','Rate',none,8), ('rate_date','Date, YYYY-MM-DD',none,16), ('source','Source (required)',none,24)], 'Propose FX rate', 'alt') }}
+<h2>Cost codes</h2>{{ actform('add_cost_code', '/settings?tab=reference', [('code','Code, e.g. D.07.01',none,16), ('name','Name',none,24), ('parent_code','Parent',none,10), ('default_unit','Unit',none,8)], 'Add cost code') }}
 <details><summary>Cost-code taxonomy ({{ cost_codes|length }})</summary>{{ table(cost_codes, [('code','Code'),('parent_code','Parent'),('level','Lvl'),('name','Name'),('kind','Kind')]) }}</details>
-<h2>Users</h2>{{ table(users, [('username','User'),('display_name','Name'),('role','Role'),('is_active','Active')]) }}
-<form class="inline" method="post" action="/ui/do/create_user"><input type="hidden" name="_next" value="/settings"><input name="username" placeholder="username" size="12"><input name="display_name" placeholder="display name" size="16">
-<select name="role">{% for r in ['Estimator','Procurement Reviewer','Commercial Approver','Administrator','Viewer'] %}<option>{{ r }}</option>{% endfor %}</select><input type="password" name="password" placeholder="password (8+)" size="14"><button class="sm alt">Add user (Administrator)</button></form>
-<p class="muted">The AI principal ('ai-assistant') has no password, cannot sign in, and can never approve.</p>
-<h2>Backups</h2>{{ actform('create_backup', '/settings', [], 'Create backup now (Administrator)') }}<ul>{% for b in backups %}<li>{{ b }}</li>{% endfor %}</ul><p class="muted">Restore: <code>python -m app.cli restore &lt;file&gt; --yes</code> (command line, with safety backup). See docs/BACKUP_RESTORE.md.</p>
-{% endblock %}
+{% endif %}{% endblock %}
