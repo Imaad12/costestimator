@@ -70,7 +70,7 @@ def test_migration_0015_is_additive_and_forward_only_on_populated_data(tmp_path,
 
 def test_standards_register_rules(seeded, tmp_path):
     rows = standards.list_standards(seeded)
-    assert len(rows) == 13
+    assert len(rows) == 14
     for r in rows:
         if r["verification_status"].startswith("Verified"):
             assert r["url"] and r["access_date"] and r["limitations"], r["id"]
@@ -89,7 +89,7 @@ def test_standards_register_rules(seeded, tmp_path):
     with pytest.raises(ValidationFailed):
         standards.import_register(seeded, f)
     f.write_text(json.dumps({"sources": [dict(base, id="STD-X3", verification_status="Not verified - requires human acquisition")]}))
-    assert standards.import_register(seeded, f, dry_run=True)["new"] == 1 and len(standards.list_standards(seeded)) == 13
+    assert standards.import_register(seeded, f, dry_run=True)["new"] == 1 and len(standards.list_standards(seeded)) == 14
     assert standards.import_register(seeded, f)["new"] == 1 and standards.import_register(seeded, f)["new"] == 0       # insert-only
 
 

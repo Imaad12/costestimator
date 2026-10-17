@@ -48,6 +48,22 @@
    "bytes": 125316,
    "supplied_by": "project owner (Archive_2.zip), 2026-10-17",
    "register_row": "STD-006"
+  },
+  {
+   "file": "KSA_Labor_Law_EN_Bureau_of_Experts_translation_RD_M51.pdf",
+   "original_name": "Labor_Law.pdf",
+   "sha256": "8fd3c9e17f25318b9bdf784827923c53a2666a3d63e49c6d471e8a41987ff3c5",
+   "bytes": 1046528,
+   "supplied_by": "project owner (upload), 2026-10-17",
+   "register_row": "STD-014"
+  },
+  {
+   "file": "KSA_Labor_Law_AR_consolidated_amended_to_1446-2-8H.pdf",
+   "original_name": "labor-law.pdf",
+   "sha256": "cfb8e0e6bb0176ebe045e38aed072fc4f7ce5c2f72ee796f4de0beb216c4b5d6",
+   "bytes": 1141447,
+   "supplied_by": "project owner (upload), 2026-10-17",
+   "register_row": "STD-014"
   }
  ]
 }

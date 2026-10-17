@@ -117,7 +117,7 @@ def _plant_terms(d: dict) -> dict:
 
 @kind("calendar", "Project calendar", {E, C, A},
       "Start date, working weekdays (0=Mon..6=Sun), non-working dates, daily hours, approved reduced-hour windows (e.g. Ramadan) and shutdowns. All of it is entered by the "
-      "estimator from the contract / client calendar - none is assumed; a default Saudi profile is only a starting point that the project must confirm.")
+      "estimator from the contract / client calendar - none is assumed; a default Saudi profile is only a starting point that the project must confirm. Reference only, not a default: Labor Law Art. 104 makes Friday the weekly rest day (employer may substitute another day after notifying the labour office; 24 h paid, no cash in lieu) - see register STD-014.")
 def _calendar(d: dict) -> dict:
     _no_extra(d, {"start_date", "work_weekdays", "holidays", "hours_per_day", "reduced_hours", "shutdowns", "calendar_source", "requires_confirmation"}, "calendar")
     sd = text(d, "start_date")
