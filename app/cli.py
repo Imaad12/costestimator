@@ -112,7 +112,7 @@ def cmd_standards(a) -> int:
     elif a.stcmd == "acquire":
         _print(standards.acquisition_list(db))
     elif a.stcmd == "import":
-        _print(standards.import_register(db, Path(a.file), created_by=_actor(a).username, dry_run=a.dry_run))
+        _print(standards.import_register(db, Path(a.file), created_by=_actor(a).username, dry_run=a.dry_run, update=a.update))
     return 0
 
 
@@ -418,7 +418,7 @@ def main(argv: list[str] | None = None) -> int:
     st_ = s.add_subparsers(dest="stcmd", required=True)
     q = st_.add_parser("list"); q.add_argument("--status"); q.set_defaults(fn=cmd_standards)
     st_.add_parser("acquire").set_defaults(fn=cmd_standards)
-    q = st_.add_parser("import"); q.add_argument("file"); q.add_argument("--dry-run", action="store_true"); q.add_argument("--user"); q.set_defaults(fn=cmd_standards)
+    q = st_.add_parser("import"); q.add_argument("file"); q.add_argument("--dry-run", action="store_true"); q.add_argument("--update", action="store_true", help="update existing rows whose content changed (audited)"); q.add_argument("--user"); q.set_defaults(fn=cmd_standards)
     s = sub.add_parser("param", help="governed parameters: kinds / list / propose / submit / approve / reject")
     ps_ = s.add_subparsers(dest="pcmd3", required=True)
     ps_.add_parser("kinds").set_defaults(fn=cmd_param)

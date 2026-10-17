@@ -21,3 +21,5 @@ projects/*
 practice_test/input/*.pdf
 practice_test/real_document/generated/
 practice_test/real_document/priced_run/
+# third-party standards supplied as evidence (copyrighted): keep locally, commit only the manifest + README
+data/standards/evidence/*.pdf

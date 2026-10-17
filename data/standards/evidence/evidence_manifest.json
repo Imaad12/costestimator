@@ -1,0 +1,53 @@
+{
+ "note": "Local evidence copies of documents the project owner supplied. The PDFs are copyrighted / third-party and are NOT committed (see .gitignore); this manifest lets anyone check they hold the same files. Originals were not modified.",
+ "files": [
+  {
+   "file": "SBC_201-AR-18_General_Building_Code_Arabic_provisions.pdf",
+   "original_name": "SBC 201 A (NOT AR).pdf",
+   "sha256": "64cbbb83f61f32fb4aa64f8ad4c085585f40e753b664168a48fa792d85db3594",
+   "bytes": 11290832,
+   "supplied_by": "project owner (Archive_2.zip), 2026-10-17",
+   "register_row": "STD-013"
+  },
+  {
+   "file": "KSA_Government_Tenders_and_Procurement_Law_EN.pdf",
+   "original_name": "Government_Tenders_and_Procurement_Law.pdf",
+   "sha256": "903c14b7a4090f5597f09249d2e377eac74ee98b38bce4177a275b5432d743d1",
+   "bytes": 500928,
+   "supplied_by": "project owner (Archive_2.zip), 2026-10-17",
+   "register_row": "STD-007"
+  },
+  {
+   "file": "ZATCA_VAT_Implementing_Regulation_Amendments_Guideline_Issue1_Apr2025.pdf",
+   "original_name": "Amendments-to-the-Implementing-Regulation-of-(VAT).pdf",
+   "sha256": "eeaa3369fd32e0791e51c803776962f7c3f2cda9d26fa82e999f97f74f383757",
+   "bytes": 724373,
+   "supplied_by": "project owner (Archive_2.zip), 2026-10-17",
+   "register_row": "STD-005"
+  },
+  {
+   "file": "HRSD_Actually_working_hours_Labor_Law_Arts_98-107_printed_2026-10-17.pdf",
+   "original_name": "Actually working hours _ Ministry of Human Resources and Social Development.pdf",
+   "sha256": "e577023c2d02041a5c151cfb3c85b1c1f42c5c95eca92120ce2a8908b3905fe2",
+   "bytes": 174439,
+   "supplied_by": "project owner (Archive_2.zip), 2026-10-17",
+   "register_row": "STD-003"
+  },
+  {
+   "file": "HRSD_Overtime_hours_printed_2026-10-17.pdf",
+   "original_name": "Overtime Hours _ Ministry of Human Resources and Social Development.pdf",
+   "sha256": "8d4a60aa19ce9c814128a5d421d408f3578e2ccf7ced835da7fd1c38a8b7fd7f",
+   "bytes": 148184,
+   "supplied_by": "project owner (Archive_2.zip), 2026-10-17",
+   "register_row": "STD-003"
+  },
+  {
+   "file": "HRSD_Holidays_and_leaves_printed_2026-10-17.pdf",
+   "original_name": "HOLIDAYS AND LEAVES _ Ministry of Human Resources and Social Development.pdf",
+   "sha256": "48a687315e1e8fcbcacbfac974c0f194a24c027f240dd5bde4e2a88f6b67cc33",
+   "bytes": 125316,
+   "supplied_by": "project owner (Archive_2.zip), 2026-10-17",
+   "register_row": "STD-006"
+  }
+ ]
+}

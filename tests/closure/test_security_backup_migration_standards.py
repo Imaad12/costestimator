@@ -70,16 +70,16 @@ def test_migration_0015_is_additive_and_forward_only_on_populated_data(tmp_path,
 
 def test_standards_register_rules(seeded, tmp_path):
     rows = standards.list_standards(seeded)
-    assert len(rows) == 12
+    assert len(rows) == 13
     for r in rows:
         if r["verification_status"].startswith("Verified"):
             assert r["url"] and r["access_date"] and r["limitations"], r["id"]
         assert len(r["paraphrase"] or "") < 700                                                  # concise paraphrase, never reproduced text
     prod = [r for r in rows if r["topic"] and "productivity" in r["topic"].lower()]
     assert all(r["verification_status"].startswith("Not verified") for r in prod) or not prod
-    assert all(r["verification_status"].startswith("Not verified") for r in rows if r["id"] in ("STD-009", "STD-010", "STD-011", "STD-012", "STD-004", "STD-007"))
+    assert all(r["verification_status"].startswith("Not verified") for r in rows if r["id"] in ("STD-009", "STD-010", "STD-011", "STD-012", "STD-004"))
     todo = standards.acquisition_list(seeded)
-    assert {"STD-004", "STD-007", "STD-009"} <= {x["id"] for x in todo}
+    assert {"STD-004", "STD-009"} <= {x["id"] for x in todo}
     f = tmp_path / "s.json"
     base = {"access_date": "2026-10-14", "title": "t", "topic": "x"}
     f.write_text(json.dumps({"sources": [dict(base, id="STD-X1", verification_status="Verified - primary source read", url=None)]}))
@@ -89,7 +89,7 @@ def test_standards_register_rules(seeded, tmp_path):
     with pytest.raises(ValidationFailed):
         standards.import_register(seeded, f)
     f.write_text(json.dumps({"sources": [dict(base, id="STD-X3", verification_status="Not verified - requires human acquisition")]}))
-    assert standards.import_register(seeded, f, dry_run=True)["new"] == 1 and len(standards.list_standards(seeded)) == 12
+    assert standards.import_register(seeded, f, dry_run=True)["new"] == 1 and len(standards.list_standards(seeded)) == 13
     assert standards.import_register(seeded, f)["new"] == 1 and standards.import_register(seeded, f)["new"] == 0       # insert-only
 
 
@@ -103,3 +103,18 @@ def test_no_secret_material_in_documents_or_logs(tmp_path):
     p = tmp_path / "x.docx"
     model.render_docx(d, meta, p)
     assert key.encode() not in p.read_bytes() and "password" not in model.parse_back(p)["text"].lower()
+
+
+def test_standards_update_is_audited(seeded, tmp_path):
+    f = tmp_path / "u.json"
+    row = dict(id="STD-U1", title="t", topic="x", access_date="2026-10-14", verification_status="Not verified - requires human acquisition")
+    f.write_text(json.dumps({"sources": [row]}))
+    standards.import_register(seeded, f)
+    row.update(verification_status="Verified - primary source read", url="file:evidence/x.pdf")
+    f.write_text(json.dumps({"sources": [row]}))
+    assert standards.import_register(seeded, f)["updated"] == 0                                    # default stays insert-only
+    assert standards.import_register(seeded, f, update=True, dry_run=True)["updated"] == 1
+    assert standards.import_register(seeded, f, update=True, created_by="alice")["updated"] == 1
+    assert standards.import_register(seeded, f, update=True)["updated"] == 0                       # idempotent
+    assert [r for r in standards.list_standards(seeded) if r["id"] == "STD-U1"][0]["verification_status"].startswith("Verified")
+    assert seeded.one("SELECT 1 FROM audit_log WHERE entity_type='standards_register' AND entity_id='STD-U1' AND action='update'")

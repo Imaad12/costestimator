@@ -11,13 +11,14 @@ from pathlib import Path
 from ..core.errors import ValidationFailed
 from ..core.timeutil import now_iso
 from ..database import Database, rows_to_dicts
+from . import audit
 
 STATUSES = ("Verified - primary source read", "Partially verified - secondary source", "Not verified - requires human acquisition")
 
 
-def import_register(db: Database, path: Path, *, created_by: str = "system:seed", dry_run: bool = False) -> dict:
+def import_register(db: Database, path: Path, *, created_by: str = "system:seed", dry_run: bool = False, update: bool = False) -> dict:
     doc = json.loads(Path(path).read_text(encoding="utf-8"))
-    new, skipped, problems = 0, 0, []
+    new, skipped, updated, problems = 0, 0, 0, []
     for s in doc["sources"]:
         sid = s.get("id")
         if s.get("verification_status") not in STATUSES:
@@ -29,8 +30,19 @@ def import_register(db: Database, path: Path, *, created_by: str = "system:seed"
         if not s.get("title") or not s.get("access_date"):
             problems.append(f"{sid}: title and access_date are required")
             continue
-        if db.one("SELECT 1 FROM standards_register WHERE id=?", (sid,)):
-            skipped += 1
+        existing = db.one("SELECT * FROM standards_register WHERE id=?", (sid,))
+        if existing:
+            cols = dict(topic=s.get("topic") or "", title=s["title"], publisher=s.get("publisher"), url=s.get("url"), edition=s.get("edition_or_publication_date"), access_date=s["access_date"],
+                        clause_or_page=s.get("clause_or_page"), scope=s.get("scope"), limitations=s.get("limitations"), verification_status=s["verification_status"], paraphrase=s.get("paraphrase"), notes=s.get("notes"))
+            changes = {k: v for k, v in cols.items() if existing[k] != v}
+            if not update or not changes:
+                skipped += 1
+                continue
+            updated += 1
+            if not dry_run:
+                before = {k: existing[k] for k in changes}
+                db.update("standards_register", changes, "id=?", (sid,))
+                audit.log(db, created_by, "standards_register", sid, "update", before=before, after=changes)
             continue
         new += 1
         if not dry_run:
@@ -39,7 +51,7 @@ def import_register(db: Database, path: Path, *, created_by: str = "system:seed"
                                                  verification_status=s["verification_status"], paraphrase=s.get("paraphrase"), notes=s.get("notes"), created_by=created_by, created_at=now_iso()))
     if problems:
         raise ValidationFailed("standards register import refused: " + "; ".join(problems), code="STANDARDS_IMPORT")
-    return dict(new=new, skipped=skipped, dry_run=dry_run)
+    return dict(new=new, skipped=skipped, updated=updated, dry_run=dry_run)
 
 
 def list_standards(db: Database, status: str | None = None) -> list[dict]:
