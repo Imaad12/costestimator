@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% from "_macros.html" import table %}{% block body %}
+<h1>Audit trail</h1>
+<p class="muted">Every approval and material change writes a hash-chained row. The chain is tamper-<i>evident</i> (editing or deleting a row breaks it from that row on), not tamper-proof: someone with write access to the database file can rewrite it. See <a href="/help/ASSUMPTIONS_GOVERNANCE_AND_SECURITY_AUDIT">the governance audit</a>.</p>
+<form class="filter" method="get"><input name="project" placeholder="project id" value="{{ f_project }}" size="10"><select name="entity"><option value="">all entity types</option>{% for e in etypes %}<option {{ 'selected' if e == f_entity else '' }}>{{ e }}</option>{% endfor %}</select>
+<button class="sm">Filter</button> <a class="btn sm alt" href="/audit?verify=1">Verify hash chain</a></form>
+{% if chain %}<div class="banner {{ 'ok' if chain.ok else 'bad' }}">{% if chain.ok %}Chain verified: {{ chain.checked }} rows intact.{% else %}CHAIN BROKEN at row {{ chain.first_bad_id }} ({{ chain.checked }} rows verified before it).{% endif %}</div>{% endif %}
+{{ table(rows, [('id','#'),('ts','Time'),('actor','Actor'),('actor_role','Role'),('project_id','Project'),('entity_type','Entity'),('entity_id','Id'),('action','Action'),('comment','Comment')]) }}
+<p class="muted">Showing the latest 300 rows.</p>
+{% endblock %}

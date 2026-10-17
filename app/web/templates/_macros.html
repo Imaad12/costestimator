@@ -1,7 +1,10 @@
 {% macro tag(v) %}{% if v is not none %}<span class="tag {{ (v|string).split(' ')[0].replace('—','') }}">{{ v }}</span>{% endif %}{% endmacro %}
 {% macro money(v, dp=2) %}{% if v is none or v == '' %}<span class="muted">—</span>{% else %}{{ ("{:,.2f}" if dp == 2 else "{:,.3f}").format(v|float) }}{% endif %}{% endmacro %}
 {% macro tabs(project, current) %}
-<div class="sub">
+<div class="subgroup"><span>Tender</span>
+{% for key, label in [('tower', 'Control tower'), ('tender', 'Tender desk'), ('queries', 'Queries & RFIs'), ('tender-registers', 'Registers & actions'), ('workforce', 'Workforce & programme'), ('pack', 'Tender pack'), ('readiness', 'Readiness')] %}
+<a href="/projects/{{ project.id }}/{{ key }}" class="{{ 'on' if key == current else '' }}">{{ label }}</a>{% endfor %}</div>
+<div class="subgroup"><span>Estimate</span>
 {% for key, label in [('', 'Overview'), ('boq', 'BOQ import'), ('mapping', 'Mapping'), ('estimate', 'Estimate build-up'), ('assumptions', 'Assumptions'),
  ('procurement', 'Procurement & RFQs'), ('quotes', 'Quotations'), ('commercial', 'Indirects & commercials'), ('registers', 'Clarifications & risk'),
  ('reconciliation', 'Reconciliation'), ('reports', 'Reports & exports'), ('workspace', 'Workspace & documents'), ('completeness', 'Completeness'), ('structure', 'Structure & programme'), ('analysis', 'Analysis & controls'), ('inputs', 'Inputs & parameters')] %}
@@ -22,3 +25,4 @@
 {% else %}<input name="{{ f[0] }}" placeholder="{{ f[1] }}" value="{{ f[2] if (f|length > 2 and f[2] is not none) else '' }}" size="{{ f[3] if f|length > 3 else 14 }}">{% endif %}{% endfor %}
 <button class="sm {{ cls }}">{{ label }}</button></form>
 {% endmacro %}
+{% macro stagechip(st) %}<span class="stchip st-{{ st }}">{{ {'done':'Done','partial':'In progress','blocked':'Blocked','todo':'Not started'}[st] }}</span>{% endmacro %}

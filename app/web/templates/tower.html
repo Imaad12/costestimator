@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, tabs, stagechip %}{% block body %}
+<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'tower') }}
+<div class="card"><b>Where this tender stands</b> — {{ t.done }} of {{ t.total }} workflow stages done · estimate state: {{ tag(t.state) }}
+<div class="bar"><i style="width:{{ (100 * t.done / t.total)|round|int }}%"></i></div>
+<span class="muted">Stages follow the enquiry-to-handover workflow. Counts are read from the database; nothing here approves or changes anything. Amber = work exists but items are open; red = a gate or missing input blocks the next step.</span></div>
+<div class="stages">
+{% for s in t.stages %}<div class="stage s-{{ s.status }}">{{ stagechip(s.status) }}<h3><span class="k">{{ s.key }}</span>{{ s.label }}</h3>
+<div class="head">{{ s.headline }}</div>{% if s.facts %}<ul>{% for f in s.facts %}<li>{{ f }}</li>{% endfor %}</ul>{% endif %}
+{% if s.hint and s.status != "done" %}<div class="muted" style="margin-top:4px">{{ s.hint }}</div>{% endif %}
+<div style="margin-top:6px"><a href="/projects/{{ project.id }}/{{ s.tab }}">Open →</a></div></div>{% endfor %}</div>
+<h2>What stops a submission-ready status</h2>
+{% if t.blockers %}<div class="card"><ul>{% for b in t.blockers %}<li>{{ b }}</li>{% endfor %}</ul>
+<span class="muted">A person must resolve these; the gate cannot be bypassed from the UI. Full reasoning: <a href="/projects/{{ project.id }}/readiness">Readiness</a>.</span></div>
+{% else %}<div class="banner ok">Nothing in the control tower blocks submission. The final gate (registered human approvers, production environment) is evaluated on the <a href="/projects/{{ project.id }}/readiness">Readiness</a> tab.</div>{% endif %}
+{% endblock %}

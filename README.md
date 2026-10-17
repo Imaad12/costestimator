@@ -38,7 +38,7 @@ Helper scripts: `scripts/setup.sh` (venv + install + init), `scripts/run.sh`, `s
 ```
 * Diagrams of what exists and what is missing: [docs/SYSTEM_MAP_BUILT_VS_MISSING.md](docs/SYSTEM_MAP_BUILT_VS_MISSING.md)
 * History, evidence, defect ledger, to-do list and how to keep the project lean: [docs/PROJECT_HISTORY_AND_NEXT_STEPS.md](docs/PROJECT_HISTORY_AND_NEXT_STEPS.md)
-* See it run: the Quick start below, then `python scripts/run_closure_scenario.py /tmp/scn --out /tmp/scn_out` for the whole synthetic tender loop (≈1 min).
+* **See it run:** `scripts/demo_web.sh` (builds the synthetic end-to-end tender on first run, ≈1 min, then serves http://127.0.0.1:8000 — sign in `test-commercial` / `synthetic-only-pw`, open Projects → PRJ-9101 → Control tower). Menu: Overview · Libraries · Governance · System · Help; per project a **Tender** row (Control tower, Tender desk, Queries & RFIs, Registers, Workforce & programme, Tender pack, Readiness) and an **Estimate** row.
 
 ## What is in the box
 
@@ -52,7 +52,7 @@ Helper scripts: `scripts/setup.sh` (venv + install + init), `scripts/run.sh`, `s
 | Excel: 27-sheet master workbook, 11 standalone templates, round-trip import, LibreOffice verification | `app/excel/`, `templates/` |
 | Documents: client pricing schedule, offer letter, estimate report (.docx/.xlsx) | `app/exports/`, `app/services/offers.py` |
 | Optional AI (review-only, schema-validated) and rule-based suggesters | `app/ai/` |
-| Local web UI (16 sections) + REST API | `app/web/`, `app/api/` |
+| Local web UI (sidebar menu, 16 estimating tabs + 7 tender-workflow tabs: control tower, tender desk, queries/RFIs, registers, workforce & programme, tender pack with downloads, readiness; standards, audit trail, help viewer) + REST API | `app/web/`, `app/api/`, `app/reporting/tower.py` |
 | Backup / restore / project packages, CLI | `app/services/backup.py`, `app/cli.py` |
 | Numbered project workspaces (`projects/PRJ-nnnn-slug/` with 10 fixed folders, generated project `CLAUDE.md`), document indexer, frozen estimate input snapshots | `app/services/workspaces.py`, `project_index.py`, `snapshots.py` |
 | Public-source rate updates: provider interface, KAPSARC/GASTAT CCI index import, manual price-list import, web evidence extraction, rate-candidate review queue, normalisation, publication as Pending Review | `app/sources/`, `app/rate_updates/` |

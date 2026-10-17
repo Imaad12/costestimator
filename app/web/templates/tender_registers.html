@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, tabs, table, actform %}{% from "_render.html" import val %}{% block body %}
+<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'tender-registers') }}
+<p class="muted">Bid/no-bid, required inputs, responsibilities, compliance, ITP, method statements, HSE risks, permits, submittals, testing and handover. Skeleton rows are marked <i>TO BE COMPLETED BY A COMPETENT PERSON</i>; nothing here is content the application invented.</p>
+<p>{{ actform('skeleton_registers', '/projects/' ~ project.id ~ '/tender-registers', [('project_id', project.id, 'hidden')], 'Create skeleton rows for the registers this project needs') }}</p>
+{% for reg, items in grouped.items() %}<h2>{{ reg }} <span class="muted" style="font-weight:400">({{ items|length }})</span></h2>
+<table><thead><tr><th>Key</th><th>Content</th><th>Status</th><th>Source</th><th></th></tr></thead><tbody>
+{% for it in items %}<tr><td>{{ it.item_key }}{% if it.is_synthetic %} <span class="tag">SYN</span>{% endif %}</td><td>{{ val(it.data) }}</td><td>{{ tag(it.status) }}</td><td class="muted">{{ it.source_ref or '' }}</td>
+<td class="nowrap">{% if it.status in ('Draft','Rejected') %}{{ actform('submit_register_item', '/projects/' ~ project.id ~ '/tender-registers', [('project_id', project.id, 'hidden'), ('register', reg, 'hidden'), ('item_key', it.item_key, 'hidden')], 'Submit') }}
+{% elif it.status == 'Pending Review' %}{{ actform('approve_register_item', '/projects/' ~ project.id ~ '/tender-registers', [('project_id', project.id, 'hidden'), ('register', reg, 'hidden'), ('item_key', it.item_key, 'hidden')], 'Approve') }}{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% else %}<p class="muted">No register items yet.</p>{% endfor %}
+<details class="form"><summary>Add / update a register item</summary><form method="post" action="/ui/do/upsert_register_item" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/tender-registers"><input type="hidden" name="project_id" value="{{ project.id }}">
+<div class="grid"><div><label>Register</label><select name="register">{% for r in registers %}<option>{{ r }}</option>{% endfor %}</select></div><div><label>Item key</label><input name="item_key" required></div><div><label>Source reference</label><input name="source_ref"></div></div>
+<label>Data (JSON object, e.g. {"item": "…", "status_note": "…"})</label><textarea name="data">{}</textarea><p><button>Save as Draft</button></p></form></details>
+<h2>Open actions &amp; outstanding information</h2>
+<table><thead><tr><th>ID</th><th>Description</th><th>Owner</th><th>Due</th><th>Reference</th><th>Status</th><th></th></tr></thead><tbody>
+{% for a in actions %}<tr><td>{{ a.id }}</td><td>{{ a.description }}</td><td>{{ a.owner or '' }}</td><td>{{ a.due or '' }}</td><td class="muted">{{ a.source_ref or '' }}</td><td>{{ tag(a.status) }}</td>
+<td>{% if a.status == 'Open' %}<form class="inline" method="post" action="/ui/do/close_action"><input type="hidden" name="_next" value="/projects/{{ project.id }}/tender-registers"><input type="hidden" name="action_id" value="{{ a.id }}"><input name="note" placeholder="closing note" size="16" required><button class="sm alt">Close</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="7" class="muted">No open actions.</td></tr>{% endfor %}</tbody></table>
+{{ actform('add_action', '/projects/' ~ project.id ~ '/tender-registers', [('project_id', project.id, 'hidden'), ('description', 'new action or takeoff task', none, 40), ('owner','owner'), ('source_ref', 'drawing / location', none, 22)], 'Add action') }}
+{% endblock %}

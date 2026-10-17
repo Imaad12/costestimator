@@ -11,8 +11,10 @@ Legend: **✅ built and exercised by a test or a run** · **🟡 partly built / 
          │                                                                │
          ▼                                                                ▼
  ┌───────────────────────── ENTRY POINTS (one action registry) ─────────────────────────┐
- │  ✅ Web UI (16 sections)     ✅ REST API     ✅ CLI (`app.cli action NAME 'JSON'`)    │
- │  🟡 forms for the newest records (norms, profiles, activities, baselines) = API/CLI   │
+ │  ✅ Web UI: sidebar menu, 16 estimating tabs + 7 tender tabs, help viewer             │
+ │  ✅ REST API     ✅ CLI (`app.cli action NAME 'JSON'`)                                │
+ │  🟡 no UI forms yet to CREATE norms, profiles, activities (they can be reviewed,      │
+ │     submitted and approved in the UI; creation = API/CLI)                             │
  └───────────────────────────────────────────┬───────────────────────────────────────────┘
                                              ▼
  ┌──────────────────────────────── SERVICES (rules live here) ───────────────────────────┐
@@ -108,5 +110,5 @@ AI can never write a register row, approve, or publish (tested). A missing rate 
 | Standards | SBC, Saudi procurement law and 4 productivity-reference families **not read** (register marks them "requires human acquisition") | a person obtains and imports them |
 | Content | quality / ITP / HSE / compliance content (only skeletons) | competent persons |
 | Security | MFA/SSO, off-box audit anchor, encryption at rest, separated admin duties, pen-test | engineering backlog (SECURITY.md) |
-| Product | forms for norms/profiles/activities/baselines/queries; formula/total-vs-lines detectors; cash flow not in the frozen snapshot; open defect O-1 (a human can approve a document built on an Incomplete estimate; it stays Draft) | code backlog (see next-steps doc) |
+| Product | UI forms to create norms/profiles/activities (review + approval are in the UI); formula/total-vs-lines detectors; cash flow not in the frozen snapshot; open defect O-1 (a human can approve a document built on an Incomplete estimate; it stays Draft) | code backlog (see next-steps doc) |
 | By design, never | OCR / PDF-drawing reading, automatic takeoff, AI approvals, invented prices | — |

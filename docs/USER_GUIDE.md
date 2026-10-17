@@ -79,3 +79,14 @@ All of it is reachable as reports (UI Analysis tab, `GET /api/projects/{id}/repo
 4. Report `applicability` shows which of the 45 documents apply and why. `generate_tender_pack` (needs a frozen estimate version) writes DOCX/PDF/XLSX + `manifest.json`; `validate_pack` checks it; `approve_document` records a document approval.
 5. `generate_handover_pack` works only after `tender_context.award_scenario = hypothetical` is recorded and always says **HYPOTHETICAL**.
 Status words: BLOCKED (missing input), Preliminary (DEMONSTRATION), Draft, For Review, Approved for Submission - see `docs/TENDER_DOCUMENT_APPLICABILITY_MATRIX.md`.
+
+## 10. The tender workflow pages (web UI)
+Open a project: the top row **Tender** has seven tabs.
+* **Control tower** - the eleven workflow stages A-K with their status (done / in progress / blocked / not started), counts read from the database, and a list of what stops a submission-ready status.
+* **Tender desk** - the enquiry, the received-document register (with revision, discipline and Missing documents) and the discipline-by-document completeness matrix.
+* **Queries & RFIs** - run the detectors (drafts only), add a query, approve it to issue, mark it issued (you send it yourself, outside the application), record the customer's response, close or withdraw it.
+* **Registers & actions** - compliance, ITP, method statements, HSE, permits, submittals, testing and handover items (skeleton rows are marked TO BE COMPLETED BY A COMPETENT PERSON) and the open-action / takeoff-task list.
+* **Workforce & programme** - productivity norms and workforce profiles (submit and approve here; creating them is API/CLI today), activities, programme baselines and crew-size comparisons.
+* **Tender pack** - generate the 45-document pack and the hypothetical handover pack, see each document's status and why it is BLOCKED, download DOCX/PDF/XLSX and the manifest, run the validator.
+* **Readiness** - the final gate for a frozen estimate version: classification, every reason it is not submission ready, and the standing of every assumption.
+Global pages: **Standards & evidence**, **Audit trail** (with hash-chain verification) and **Help** (the project documents, including the built-vs-missing diagrams).

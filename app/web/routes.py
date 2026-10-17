@@ -103,7 +103,10 @@ async def do(name: str, request: Request, actor: Actor = Depends(current_actor))
 # ------------------------------------------------------------------ dashboard / projects
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, actor: Actor = Depends(current_actor)):
-    return page(request, "dashboard.html", actor, d=dashboard.dashboard(get_db()), title="Dashboard")
+    from ..reporting import tower
+    d = dashboard.dashboard(get_db())
+    towers = {p["project_id"]: tower.project_tower(get_db(), p["project_id"]) for p in d["projects"]}
+    return page(request, "dashboard.html", actor, d=d, towers=towers, title="Dashboard")
 
 
 @router.get("/projects", response_class=HTMLResponse)

@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, tabs, table, actform %}{% block body %}
+<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'tender') }}
+<h2>Enquiry</h2>
+{% if enq %}<div class="card"><div class="grid"><div><b>Customer</b><br>{{ enq.customer_name }}{% if enq.customer_is_synthetic %} <span class="tag">FICTIONAL / SYNTHETIC</span>{% endif %}</div><div><b>Title</b><br>{{ enq.title }}</div>
+<div><b>Received</b><br>{{ enq.received_date }}</div><div><b>Tender deadline</b><br>{{ enq.tender_deadline or '—' }}</div></div>
+{% if enq.brief %}<p>{{ enq.brief }}</p>{% endif %}{% if enq.submission_instructions %}<p class="muted"><b>Submission instructions:</b> {{ enq.submission_instructions }}</p>{% endif %}</div>
+{% else %}<details class="form" open><summary>Record the enquiry</summary>
+<form method="post" action="/ui/do/create_enquiry" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/tender"><input type="hidden" name="project_id" value="{{ project.id }}">
+<div class="grid"><div><label>Customer *</label><input name="customer_name" required style="width:100%"></div><div><label>Title *</label><input name="title" required style="width:100%"></div>
+<div><label>Received date *</label><input name="received_date" type="date" required></div><div><label>Tender deadline</label><input name="tender_deadline" type="date"></div></div>
+<label>Brief</label><textarea name="brief"></textarea><label>Submission instructions (as stated by the customer)</label><textarea name="submission_instructions"></textarea>
+<p><button>Save enquiry</button></p></form></details>{% endif %}
+<h2>Received documents <span class="muted" style="font-weight:400">— registered, not interpreted</span></h2>
+<table><thead><tr><th>Ref</th><th>Type</th><th>Discipline</th><th>Title</th><th>Rev</th><th>Received</th><th>Status</th><th>Content</th></tr></thead><tbody>
+{% for d in docs %}<tr><td>{{ d.doc_ref }}</td><td>{{ d.doc_type }}</td><td>{{ d.discipline or '—' }}</td><td>{{ d.title }}</td><td>{{ d.revision }}</td><td>{{ d.received_date or '' }}</td>
+<td>{{ tag(d.status) }}</td><td class="muted">{{ d.content_status }}</td></tr>
+{% else %}<tr><td colspan="8" class="muted">No documents registered yet.</td></tr>{% endfor %}</tbody></table>
+<details class="form"><summary>Register a document (received, or referenced but missing)</summary>
+<form method="post" action="/ui/do/register_document" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/tender"><input type="hidden" name="project_id" value="{{ project.id }}">
+<div class="grid"><div><label>Reference *</label><input name="doc_ref" required></div><div><label>Type *</label><select name="doc_type">{% for t in doc_types %}<option>{{ t }}</option>{% endfor %}</select></div>
+<div><label>Discipline</label><select name="discipline"><option value="">(none)</option>{% for t in disciplines %}<option>{{ t }}</option>{% endfor %}</select></div>
+<div><label>Revision *</label><input name="revision" required value="A"></div><div><label>Status</label><select name="status"><option>Current</option><option>Missing</option></select></div>
+<div><label>Received</label><input name="received_date" type="date"></div></div><label>Title *</label><input name="title" required style="width:100%"><label>Source</label><input name="source" style="width:100%">
+<p><button>Register</button> <span class="muted">A new revision of the same reference supersedes the earlier one (kept).</span></p></form></details>
+<h2>Discipline completeness</h2>
+{% if dm.rows %}<table><thead><tr><th>Discipline</th><th>Drawings</th><th>Specification</th><th>Other docs</th><th class="num">BOQ lines</th><th>Gaps</th></tr></thead><tbody>
+{% for r in dm.rows %}<tr><td><b>{{ r.discipline }}</b></td><td>{{ r.drawings.state }} <span class="muted">({{ r.drawings.current }}/{{ r.drawings.missing }})</span></td><td>{{ r.specification.state }} <span class="muted">({{ r.specification.current }}/{{ r.specification.missing }})</span></td>
+<td>{{ r.other.state }}</td><td class="num">{{ r.boq_lines }}</td><td>{% if r.gaps %}<span class="tag Critical">{{ r.gaps|join('; ') }}</span>{% else %}<span class="tag OK">complete</span>{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% if dm.documents_without_discipline %}<p class="muted">Documents without a discipline (cannot be placed): {{ dm.documents_without_discipline|join(', ') }}</p>{% endif %}
+{% else %}<p class="muted">No disciplines yet — set the project's trades, import a BOQ with trades, or register documents with a discipline.</p>{% endif %}
+{% if rep.revision_conflicts %}<h2>Revision conflicts (BOQ vs register)</h2>{{ table(rep.revision_conflicts, [('item_key','BOQ item'),('doc_ref','Document'),('boq_revision','BOQ rev'),('register_revision','Register rev')]) }}{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, tabs, actform %}{% from "_render.html" import val %}{% block body %}
+<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'workforce') }}
+<div class="banner warn">No productivity value, crew, calendar or workforce size ships with the application. Every figure below was entered by a person, is versioned and needs a different person's approval. A programme built on unapproved or synthetic inputs is labelled PROVISIONAL / NOT FOR RELIANCE and cannot be baselined.</div>
+<h2>Productivity norms</h2>
+<table><thead><tr><th>Id</th><th>Ver</th><th>Trade</th><th>Activity</th><th>Basis</th><th class="num">Value</th><th>Unit</th><th>Status</th><th>Evidence</th><th>Source</th><th></th></tr></thead><tbody>
+{% for n in norms %}<tr><td>{{ n.id }}{% if n.is_synthetic %} <span class="tag">SYN</span>{% endif %}</td><td>{{ n.version }}</td><td>{{ n.trade }}</td><td>{{ n.activity }}</td><td>{{ n.basis }}</td><td class="num">{{ n.value }}</td><td>{{ n.output_unit }}</td>
+<td>{{ tag(n.status) }}</td><td class="muted">{{ n.evidence_status }}</td><td class="muted">{{ n.source or '' }}</td>
+<td class="nowrap">{% if n.status == 'Draft' %}{{ actform('submit_norm', '/projects/' ~ project.id ~ '/workforce', [('id', n.id, 'hidden')], 'Submit') }}{% elif n.status in ('Pending Review', 'Proposed', 'Imported - Unverified') %}{{ actform('approve_norm', '/projects/' ~ project.id ~ '/workforce', [('id', n.id, 'hidden')], 'Approve') }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="11" class="muted">No norms entered. Productivity is never defaulted.</td></tr>{% endfor %}</tbody></table>
+<h2>Workforce profiles</h2>
+<table><thead><tr><th>Id</th><th>Ver</th><th>Archetype</th><th>Name</th><th>Shifts</th><th>Attendance %</th><th>Availability %</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in profile_rows %}<tr><td>{{ p.id }}{% if p.is_synthetic %} <span class="tag">SYN</span>{% endif %}</td><td>{{ p.version }}</td><td>{{ p.archetype }}</td><td>{{ p.name }}</td><td>{{ p.shifts }}</td><td>{{ p.attendance_pct }}</td><td>{{ p.availability_pct }}</td><td>{{ tag(p.status) }}</td>
+<td class="nowrap">{% if p.status == 'Draft' %}{{ actform('submit_profile', '/projects/' ~ project.id ~ '/workforce', [('id', p.id, 'hidden')], 'Submit') }}{% elif p.status == 'Pending Review' %}{{ actform('approve_profile', '/projects/' ~ project.id ~ '/workforce', [('id', p.id, 'hidden')], 'Approve') }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="9" class="muted">No profiles. Archetype bands (SME 4–15, mid 15–25, large 26–50, enterprise 51+) are editable planning assumptions, not industry categories.</td></tr>{% endfor %}</tbody></table>
+<h2>Activities (this project)</h2>
+<table><thead><tr><th>Code</th><th>Name</th><th>BOQ item</th><th>Norm</th><th>Crews</th><th>Fronts</th><th>Fixed days</th><th>Predecessors</th><th>Long-lead</th></tr></thead><tbody>
+{% for a in acts %}<tr><td>{{ a.code }}</td><td>{{ a.name }}</td><td>{{ a.boq_item_key }}</td><td>{{ a.norm_id or '—' }}</td><td>{{ a.crews }}</td><td>{{ a.work_fronts }}</td><td>{{ a.fixed_days }}</td><td>{{ a.predecessors }}</td><td>{{ a.long_lead_id or '' }}</td></tr>
+{% else %}<tr><td colspan="9" class="muted">No activities defined. Activities link BOQ items to norms; define them through the API/CLI (<code>action set_activities</code>).</td></tr>{% endfor %}</tbody></table>
+<h2>Programme baselines</h2>
+<table><thead><tr><th>Ver</th><th>Profile</th><th>Working days</th><th>Calendar days</th><th>Finish</th><th>Status</th><th>Claim</th><th></th></tr></thead><tbody>
+{% for b in baselines %}<tr><td>{{ b.version_no }}</td><td>{{ b.profile_id }} v{{ b.profile_version }}</td><td>{{ b.working_days }}</td><td>{{ b.calendar_days }}</td><td>{{ b.finish }}</td><td>{{ tag(b.status) }}{% if b.synthetic %} <span class="tag">SYN</span>{% endif %}{% if b.provisional %} <span class="tag Provisional">provisional</span>{% endif %}</td><td class="muted">{{ b.claims }}</td>
+<td>{% if b.status != 'Approved' %}{{ actform('approve_baseline', '/projects/' ~ project.id ~ '/workforce', [('project_id', project.id, 'hidden'), ('version_no', b.version_no, 'hidden')], 'Approve') }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="8" class="muted">No baseline saved.</td></tr>{% endfor %}</tbody></table>
+{% if acts and profile_rows %}<form class="inline" method="post" action="/ui/do/save_baseline" style="margin-top:6px"><input type="hidden" name="_next" value="/projects/{{ project.id }}/workforce"><input type="hidden" name="project_id" value="{{ project.id }}">
+<select name="profile_id">{% for p in profile_rows %}<option>{{ p.id }}</option>{% endfor %}</select><label class="muted"><input type="checkbox" name="allow_provisional" value="true"> allow provisional (labelled)</label><button class="sm">Save baseline</button></form>{% endif %}
+<h2>Crew-size scenarios</h2>
+{% if profile_rows and acts %}<form class="filter" method="get">{% for p in profile_rows %}<label><input type="checkbox" name="_p" value="{{ p.id }}" {{ 'checked' if p.id in sel else '' }}> {{ p.id }}</label>{% endfor %}
+<input type="hidden" name="profiles" id="profiles" value="{{ sel|join(',') }}"><button class="sm" type="button" onclick="document.getElementById('profiles').value=[...document.querySelectorAll('input[name=_p]:checked')].map(x=>x.value).join(',');this.form.submit()">Compare selected</button></form>{% endif %}
+{% if scen_err %}<div class="banner bad">{{ scen_err }}</div>{% endif %}
+{% if scen %}<p class="muted">Comparisons on person-entered norms (provisional allowed and labelled). Doubling a workforce rarely halves a programme: work fronts, shared equipment and dependencies bind.</p>{{ val(scen) }}{% elif not (profile_rows and acts) %}<p class="muted">Needs at least one profile and the project's activities.</p>{% endif %}
+{% endblock %}

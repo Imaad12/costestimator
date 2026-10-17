@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, tabs, actform %}{% block body %}
+<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'pack') }}
+<p class="muted">45 catalogue documents (D01–D45) are generated from one frozen estimate version and the registers — never typed separately. A document with a missing input is <b>BLOCKED</b>; a pack is never labelled submission-ready unless every gate verifies. Nothing is sent or submitted from here.</p>
+<div class="card"><b>Generate a pack</b>
+<form class="inline" method="post" action="/ui/do/generate_tender_pack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/pack"><input type="hidden" name="project_id" value="{{ project.id }}">
+<input name="issue_date" type="date" required title="issue date"><select name="version_id">{% for v in versions %}<option value="{{ v.id }}">v{{ v.version_no }} — {{ v.label or v.state }} ({{ v.status }})</option>{% endfor %}</select>
+<button {{ 'disabled' if not versions else '' }}>Generate tender pack</button></form>
+{% if not versions %}<span class="muted"> Freeze an estimate version first (Reconciliation tab).</span>{% endif %}
+<form class="inline" method="post" action="/ui/do/generate_handover_pack" style="margin-left:12px"><input type="hidden" name="_next" value="/projects/{{ project.id }}/pack"><input type="hidden" name="project_id" value="{{ project.id }}"><input name="issue_date" type="date" required><button class="alt" title="needs an explicit hypothetical award scenario in the tender context">Generate hypothetical handover pack</button></form></div>
+{% if packs %}<div class="chipset">{% for p in packs %}<a class="btn {{ '' if cur and p.pk == cur.pk else 'alt' }} sm" href="?pack={{ p.pk }}">{{ p.kind }} r{{ p.revision }}</a>{% endfor %}</div>{% endif %}
+{% if cur %}<div class="card"><h3 style="margin:0">{{ cur.kind|capitalize }} pack r{{ cur.revision }} {{ tag(cur.classification) }}</h3><p style="margin:4px 0"><b>{{ cur.status_label }}</b></p>
+<span class="muted">estimate fingerprint {{ (cur.estimate_fingerprint or '')[:16] }} · created {{ cur.created_at }} by {{ cur.created_by }}</span> ·
+<a href="/projects/{{ project.id }}/pack/{{ cur.pk }}/manifest">manifest.json</a> · <a class="btn sm alt" href="?pack={{ cur.pk }}&validate=1">Run the pack validator</a></div>
+{% if val %}<div class="banner {{ 'ok' if val.ok else 'bad' }}">Validator: {{ 'no errors' if val.ok else val.errors|length ~ ' error(s)' }} · {{ val.files_checked }} files checked · {{ val.warnings|length }} warning(s) · {{ val.blocked_documents|length }} BLOCKED document(s)</div>
+{% if val.errors or val.warnings %}<div class="card"><ul>{% for e in val.errors %}<li><b>error:</b> {{ e }}</li>{% endfor %}{% for w in val.warnings %}<li>warning: {{ w }}</li>{% endfor %}</ul></div>{% endif %}
+<p class="muted">"No errors" means the files are well-formed, checksummed and consistent with each other — it does not mean the pack is complete; completeness is the BLOCKED list above and the Readiness tab.</p>{% endif %}
+<table><thead><tr><th>Code</th><th>Document</th><th>Applicability</th><th>Status</th><th>Why blocked / reason</th><th>Files</th></tr></thead><tbody>
+{% for d in docs %}<tr><td>{{ d.doc_code }}</td><td>{{ d.title }}</td><td class="muted">{{ d.applicability }}</td><td>{{ tag(d.status) }}</td><td class="muted">{{ d.blocked_reason or d.applicability_reason or '' }}</td>
+<td class="nowrap">{% for f in d.formats %}<a href="/projects/{{ project.id }}/pack/{{ cur.pk }}/file/{{ d.doc_id }}/{{ f }}">{{ f }}</a> {% endfor %}</td></tr>{% endfor %}</tbody></table>
+{% else %}<p class="muted">No pack generated yet.</p>{% endif %}
+{% if mx %}<h2>Applicability matrix (live)</h2><p class="muted">{{ mx.counts }}</p>
+<details><summary>Show all 45 classifications</summary><table><thead><tr><th>No.</th><th>Code</th><th>Title</th><th>Applicability</th><th>Reason</th></tr></thead><tbody>
+{% for r in mx.rows %}<tr><td>{{ r.n }}</td><td>{{ r.code }}</td><td>{{ r.title }}</td><td>{{ r.applicability }}</td><td class="muted">{{ r.reason }}</td></tr>{% endfor %}</tbody></table></details>{% endif %}
+{% endblock %}

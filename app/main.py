@@ -73,6 +73,8 @@ def create_app() -> FastAPI:
     app.include_router(web_router)
     from .web.routes_ext import router as web_ext_router
     app.include_router(web_ext_router)
+    from .web.routes_tender import router as web_tender_router
+    app.include_router(web_tender_router)
     app.add_middleware(SerializeRequests)
     from .security import Hardening
     app.add_middleware(Hardening)

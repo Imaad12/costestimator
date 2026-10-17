@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% from "_macros.html" import tag, tabs, actform %}{% block body %}
+<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'queries') }}
+<div class="grid"><div class="kpi"><b>{{ total }}</b><span>queries in the register</span></div><div class="kpi"><b>{{ material }}</b><span>unresolved material (block submission)</span></div>
+{% for s, n in counts.items() %}<div class="kpi"><b>{{ n }}</b><span>{{ s }}</span></div>{% endfor %}</div>
+<p class="muted">Every query starts as a <b>Draft</b>. A person releases it, issues it to the customer <b>outside this application</b> (nothing is ever sent from here), then records the customer's response. No response is ever invented.</p>
+<p>{{ actform('generate_queries', '/projects/' ~ project.id ~ '/queries', [('project_id', project.id, 'hidden')], 'Run detectors (creates DRAFT queries from the project records)') }}</p>
+<details class="form"><summary>Add a query</summary><form method="post" action="/ui/do/add_query" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/queries"><input type="hidden" name="project_id" value="{{ project.id }}">
+<div class="grid"><div><label>Register *</label><select name="register">{% for r in registers %}<option>{{ r }}</option>{% endfor %}</select></div><div><label>Discipline</label><input name="discipline"></div>
+<div><label>Responsible party</label><input name="responsible_party" value="Customer / design team"></div><div><label>Response due</label><input name="response_due" type="date"></div></div>
+<label>Exact question *</label><textarea name="question" required></textarea><label>Why it matters</label><textarea name="why"></textarea><p><button>Add as Draft</button></p></form></details>
+<form class="filter" method="get"><select name="register"><option value="">all registers</option>{% for r in registers %}<option {{ 'selected' if r == f_register else '' }}>{{ r }}</option>{% endfor %}</select>
+<select name="status"><option value="">all statuses</option>{% for s in ['Draft','Approved to Issue','Issued','Responded','Closed','Withdrawn'] %}<option {{ 'selected' if s == f_status else '' }}>{{ s }}</option>{% endfor %}</select><button class="sm">Filter</button></form>
+{% for q in qs %}<div class="q"><div><b>{{ q.id }}</b> {{ tag(q.status) }} <span class="tag">{{ q.register }}</span>{% if q.generated_by and q.generated_by.startswith('system') %} <span class="tag">detector</span>{% endif %}
+{% if q.blocks_submission %}<span class="tag Open">blocks submission</span>{% endif %}</div>
+<p style="margin:4px 0">{{ q.question }}</p>{% if q.why %}<div class="meta">Why: {{ q.why }}</div>{% endif %}
+<div class="meta">{% if q.discipline %}Discipline {{ q.discipline }} · {% endif %}To: {{ q.responsible_party or '—' }}{% if q.response_due %} · due {{ q.response_due }}{% endif %}{% if q.related.boq_items %} · BOQ {{ q.related.boq_items|join(', ') }}{% endif %}</div>
+{% if q.response_text %}<div class="card" style="margin:6px 0"><b>Response</b> ({{ q.response_by }}, {{ q.response_date }}): {{ q.response_text }}</div>{% endif %}
+<div style="margin-top:6px">
+{% if q.status == 'Draft' %}{{ actform('release_query', '/projects/' ~ project.id ~ '/queries', [('query_id', q.id, 'hidden')], 'Approve to issue') }}
+{% elif q.status == 'Approved to Issue' %}{{ actform('mark_query_issued', '/projects/' ~ project.id ~ '/queries', [('query_id', q.id, 'hidden')], 'I issued it manually') }}
+{% elif q.status == 'Issued' %}<form class="inline" method="post" action="/ui/do/record_query_response"><input type="hidden" name="_next" value="/projects/{{ project.id }}/queries"><input type="hidden" name="query_id" value="{{ q.id }}">
+<input name="response_text" placeholder="customer's response (as received)" size="34" required><input name="response_by" placeholder="from" size="12" required><input name="response_date" type="date" required><button class="sm">Record response</button></form>{% endif %}
+{% if q.status in ('Draft','Approved to Issue','Issued','Responded') %}<form class="inline" method="post" action="/ui/do/close_query"><input type="hidden" name="_next" value="/projects/{{ project.id }}/queries"><input type="hidden" name="query_id" value="{{ q.id }}"><input name="note" placeholder="closing note (required)" size="22" required>
+<label class="muted"><input type="checkbox" name="withdraw" value="true"> withdraw</label><button class="sm alt">Close</button></form>{% endif %}</div></div>
+{% else %}<p class="muted">No queries match. Use <i>Run detectors</i> to draft queries from the project's records.</p>{% endfor %}
+{% endblock %}

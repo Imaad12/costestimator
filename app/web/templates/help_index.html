@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block body %}
+<h1>Help &amp; documentation</h1>
+<p class="muted">The project's own documents, rendered here. Start with <a href="/help/SYSTEM_MAP_BUILT_VS_MISSING">what is built and what is missing</a>.</p>
+{% for g, names in groups %}{% if names %}<h2>{{ g }}</h2><div class="card"><ul>{% for n in names %}<li><a href="/help/{{ n }}">{{ n.replace('_', ' ').title() }}</a></li>{% endfor %}</ul></div>{% endif %}{% endfor %}
+{% endblock %}

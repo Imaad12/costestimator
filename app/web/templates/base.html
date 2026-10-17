@@ -1,11 +1,21 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ title or "KSA Construction Estimating Suite" }}</title><link rel="stylesheet" href="/static/app.css"><script src="/static/app.js" defer></script></head><body>
 <header><span class="brand">KSA Construction Estimating Suite</span>
-{% if actor %}<a href="/">Dashboard</a><a href="/projects">Projects</a><a href="/libraries">Resource libraries</a><a href="/assumptions">Assumptions</a>
-<a href="/assemblies">Assemblies</a><a href="/rates/updates">Rate updates</a><a href="/approvals">Approvals</a><a href="/settings">Settings &amp; sources</a>
-<span class="who">{{ actor.display_name or actor.username }} · {{ actor.role }} · <a href="/logout">sign out</a></span>{% endif %}</header>
+{% if actor %}<span class="who">{{ actor.display_name or actor.username }} · {{ actor.role }} · <a href="/logout">sign out</a></span>{% endif %}</header>
+<div class="layout">
+{% if actor %}{% set path = request.url.path %}
+<nav class="side" aria-label="Main menu">
+{% macro item(href, label, match=None) %}<a href="{{ href }}" class="{{ 'on' if (path == href or (match and path.startswith(match))) else '' }}">{{ label }}</a>{% endmacro %}
+<h6>Overview</h6>{{ item('/', 'Dashboard') }}{{ item('/projects', 'Projects', '/projects') }}
+<h6>Libraries</h6>{{ item('/libraries', 'Resources & rates', '/libraries') }}{{ item('/assumptions', 'Assumptions', '/assumptions') }}{{ item('/assemblies', 'Assemblies', '/assemblies') }}
+{{ item('/rates/updates', 'Rate updates', '/rates') }}{{ item('/standards', 'Standards & evidence') }}
+<h6>Governance</h6>{{ item('/approvals', 'Approvals') }}{{ item('/audit', 'Audit trail') }}
+<h6>System</h6>{{ item('/settings', 'Settings & sources') }}
+<h6>Help</h6>{{ item('/help/SYSTEM_MAP_BUILT_VS_MISSING', "What's built / missing") }}{{ item('/help/PROJECT_HISTORY_AND_NEXT_STEPS', 'History & next steps') }}{{ item('/help/USER_GUIDE', 'User guide') }}{{ item('/help', 'All documents') }}
+{% if project is defined and project %}<h6>This project</h6><a href="/projects/{{ project.id }}/tower" class="proj">{{ project.id }}<small>{{ project.name[:34] }}</small></a>{% endif %}
+</nav>{% endif %}
 <main>
 {% if ok %}<div class="banner ok">{{ ok }}</div>{% endif %}{% if err %}<div class="banner bad">{{ err }}</div>{% endif %}
 {% if actor and lib and lib.rates_approved_real == 0 %}<div class="banner warn"><b>No approved real rates yet.</b> The global library lists {{ lib.resources }} catalogue resources but contains no approved real Saudi rate: every real price must come from a quotation, dataset or source you import and a human approves (<a href="/rates/updates">Rate updates</a>). Synthetic demo rates, where present, are labelled SYNTHETIC / DEMO / NOT A MARKET QUOTE.</div>{% endif %}
 {% block body %}{% endblock %}
-</main></body></html>
+</main></div></body></html>
