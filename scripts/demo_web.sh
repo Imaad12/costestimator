@@ -3,20 +3,20 @@
 #   scripts/demo_web.sh                 # the SYNTHETIC end-to-end tender (project PRJ-9101) - builds it on first run (~1 min)
 #   scripts/demo_web.sh practice        # the real-document practice test (needs the PDF in practice_test/input/)
 #   scripts/demo_web.sh empty           # a fresh empty database + the small SYNTHETIC demo project (python -m app.cli demo)
-# Environment: PORT (default 8000), HOST (default 127.0.0.1 - keep it local; see docs/SECURITY.md), KSA_DEMO_DIR (default /tmp/ksa_demo).
+# Environment: PORT (first port to try, default 8731 - a rarely used one), HOST (default 127.0.0.1 - keep it local; see docs/SECURITY.md), KSA_DEMO_DIR (default /tmp/ksa_demo).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [ -d .venv ] || python3 -m venv .venv
 . .venv/bin/activate
 pip install -q -e ".[dev]"
-MODE="${1:-synthetic}"; DIR="${KSA_DEMO_DIR:-/tmp/ksa_demo}/$MODE"; PORT="${PORT:-8000}"; HOST="${HOST:-127.0.0.1}"
+MODE="${1:-synthetic}"; DIR="${KSA_DEMO_DIR:-/tmp/ksa_demo}/$MODE"; PORT="${PORT:-8731}"; HOST="${HOST:-127.0.0.1}"
 export KSA_DB_PATH="$DIR/app.db" KSA_WORKSPACES_DIR="$DIR/workspaces" KSA_SECRET_KEY="demo-only-not-a-secret" KSA_ENVIRONMENT=test
 case "$MODE" in
   synthetic)
     if [ ! -f "$DIR/scratch_closure.db" ]; then python scripts/run_closure_scenario.py "$DIR" --out "$DIR-out" > /dev/null; fi
     export KSA_DB_PATH="$DIR/scratch_closure.db"
     echo "SYNTHETIC tender 'Dammam Industrial Utilities' (PRJ-9101). Sign in as test-estimator, test-procurement, test-commercial, test-admin or test-viewer - password: synthetic-only-pw"
-    echo "Open: /  then  Projects > PRJ-9101 > Control tower"
+    echo "Open the printed URL, then Projects > PRJ-9101 > Control tower"
     ;;
   practice)
     if [ ! -f "$DIR/scratch_closure.db" ]; then python scripts/run_real_document_practice_test.py "$DIR" > /dev/null; fi
@@ -30,15 +30,34 @@ case "$MODE" in
     ;;
   *) echo "unknown mode '$MODE'"; exit 2 ;;
 esac
-# Pick a free port (another program may already own 8000) and prove that THIS application answers on it.
-PORT=$(python - "$HOST" "$PORT" <<'PY'
+# Pick a port nobody uses. "Free" is judged conservatively: nothing may answer on it AND it must be bindable on IPv4 and IPv6, on loopback and on the wildcard
+# address - another program (a Docker/WSL/Windows service, an IPv6-only listener, a dashboard bound to 0.0.0.0) can own a port that a plain IPv4 connect test cannot see.
+PORT=$(python - "$PORT" <<'PY'
 import socket, sys
-host, start = sys.argv[1], int(sys.argv[2])
-for port in range(start, start + 50):
-    with socket.socket() as s:
-        s.settimeout(0.3)
-        if s.connect_ex((host, port)) != 0:          # nothing is listening: free
-            print(port); break
+def busy(port):
+    for fam, addr in ((socket.AF_INET, "127.0.0.1"), (socket.AF_INET, "0.0.0.0"), (socket.AF_INET6, "::1"), (socket.AF_INET6, "::")):
+        try:
+            probe = socket.socket(fam, socket.SOCK_STREAM)
+        except OSError:
+            continue                                   # this address family is not available here
+        with probe:
+            probe.settimeout(0.3)
+            if addr not in ("0.0.0.0", "::") and probe.connect_ex((addr, port)) == 0:
+                return f"something answers on {addr}"
+        with socket.socket(fam, socket.SOCK_STREAM) as b:
+            try:
+                b.bind((addr, port))
+            except OSError:
+                return f"cannot bind {addr}"
+    return None
+start = int(sys.argv[1])
+for port in range(start, start + 100):
+    why = busy(port)
+    if why is None:
+        print(port); break
+    print(f"port {port} skipped: {why}", file=sys.stderr)
+else:
+    sys.exit("no free port found")
 PY
 )
 python -m app.cli run --host "$HOST" --port "$PORT" &
