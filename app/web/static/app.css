@@ -47,3 +47,7 @@ pre.diagram{background:#0f1b33;color:#d8e2ff;padding:12px 14px;border-radius:6px
 details.form>summary{font-weight:600}details.form{background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0}
 .Missing,.BLOCKED,.blocked{background:#fde7e5;color:var(--bad);border-color:#f3b8b3}.Current,.Closed,.Done{background:#e4f5ea;color:var(--ok);border-color:#b7e2c4}.Superseded,.Issued,.Withdrawn{background:#eef1f8;color:var(--muted)}
 .Preliminary{background:#fff3df;color:var(--warn);border-color:#f0d7a6}.Not{background:#eef1f8;color:var(--muted)}
+.rowlist .row{display:flex;gap:6px;margin:3px 0;align-items:center}.rowlist .row input{width:auto}
+table.rows td{padding:2px 3px}table.rows input,table.rows select{width:100%;min-width:54px}table.rows input[type=checkbox]{width:auto;min-width:0}
+.hint{color:var(--muted);font-size:12px;margin:2px 0 6px}
+tbody.rowlist tr.row{display:table-row;margin:0}tbody.rowlist .row input,tbody.rowlist .row select{width:100%;min-width:48px}tbody.rowlist .row input[type=checkbox]{width:auto;min-width:0}

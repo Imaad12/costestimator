@@ -10,7 +10,7 @@ import json
 import re
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse
 
 from ..api.deps import current_actor
@@ -74,20 +74,25 @@ def tender_registers(pid: str, request: Request, actor: Actor = Depends(current_
 
 # ------------------------------------------------------------------ workforce and programme
 @router.get("/projects/{pid}/workforce", response_class=HTMLResponse)
-def workforce_page(pid: str, request: Request, profiles: str = "", actor: Actor = Depends(current_actor)):
+def workforce_page(pid: str, request: Request, profiles: list[str] = Query(default=[]), actor: Actor = Depends(current_actor)):
     db = get_db()
     baselines = rows_to_dicts(db.all("SELECT version_no, profile_id, profile_version, status, provisional, created_by, created_at, approved_by, result_json FROM programme_baselines WHERE project_id=? ORDER BY version_no DESC", (pid,)))
     for b in baselines:
         r = json.loads(b.pop("result_json") or "{}")
         b["working_days"], b["calendar_days"], b["finish"], b["synthetic"], b["claims"] = r.get("working_days"), r.get("calendar_days"), r.get("finish_date"), r.get("synthetic"), r.get("claims")
     scen, err = None, None
-    sel = [x for x in profiles.split(",") if x]
+    sel = [y for x in profiles for y in x.split(",") if y]
     if sel:
         try:
             scen = ser(workforce.crew_scenarios(db, pid, sel, allow_provisional=True, allow_unconfirmed_calendar=True))
         except AppError as e:
             err = f"{e.code}: {e.message}"
-    return page(request, "workforce.html", actor, project=_proj(pid), norms=workforce.list_norms(db), profile_rows=workforce.list_profiles(db), acts=workforce.list_activities(db, pid), baselines=baselines,
+    acts = workforce.list_activities(db, pid)
+    for a in acts:
+        a["fx"] = json.loads(a.get("fixed_days_json") or "{}")
+    boq_keys = [r["item_key"] for r in db.all("SELECT item_key FROM boq_items WHERE project_id=? AND item_type='item' ORDER BY id", (pid,))]
+    long_leads = [r["id"] for r in db.all("SELECT id FROM long_lead_items WHERE project_id=? ORDER BY id", (pid,))]
+    return page(request, "workforce.html", actor, project=_proj(pid), boq_keys=boq_keys, long_leads=long_leads, bands=workforce.ARCHETYPE_BANDS, norms=workforce.list_norms(db), profile_rows=workforce.list_profiles(db), acts=acts, baselines=baselines,
                 scen=scen, scen_err=err, sel=sel, title="Workforce & programme", tab="workforce")
 
 

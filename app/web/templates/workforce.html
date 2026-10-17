@@ -7,15 +7,61 @@
 <td>{{ tag(n.status) }}</td><td class="muted">{{ n.evidence_status }}</td><td class="muted">{{ n.source or '' }}</td>
 <td class="nowrap">{% if n.status == 'Draft' %}{{ actform('submit_norm', '/projects/' ~ project.id ~ '/workforce', [('id', n.id, 'hidden')], 'Submit') }}{% elif n.status in ('Pending Review', 'Proposed', 'Imported - Unverified') %}{{ actform('approve_norm', '/projects/' ~ project.id ~ '/workforce', [('id', n.id, 'hidden')], 'Approve') }}{% endif %}</td></tr>
 {% else %}<tr><td colspan="11" class="muted">No norms entered. Productivity is never defaulted.</td></tr>{% endfor %}</tbody></table>
+<details class="form"><summary>Add a productivity norm</summary>
+<form method="post" action="/ui/do/create_norm" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/workforce"><input type="hidden" name="crew">
+<p class="hint">A norm is a person-entered, sourced value — nothing is defaulted. It is created as a <b>Draft</b>; a different person approves it. Use the BOQ's unit (e.g. m3, m2, nr, m) as the output unit: a mismatch excludes the activity.</p>
+<div class="grid"><div><label>Norm id *</label><input name="id" required placeholder="N-EXC"></div><div><label>Trade *</label><input name="trade" required></div><div><label>Activity *</label><input name="activity" required></div>
+<div><label>Output unit *</label><input name="output_unit" required placeholder="m3"></div>
+<div><label>Basis *</label><select name="basis"><option value="crew_output_per_crew_day">crew output per crew-day (units/day)</option><option value="labour_hours_per_unit">labour-hours per unit</option></select></div>
+<div><label>Value *</label><input name="value" required inputmode="decimal"></div></div>
+<label>Crew * (role → head-count; the norm's crew)</label>
+<div id="crewrows" data-json-map="crew" data-int="1"><div class="rowlist"><div class="row"><input class="k" placeholder="role, e.g. skilled"><input class="v" type="number" min="1" placeholder="head-count"><button class="sm alt" data-del-row>×</button></div></div>
+<template><div class="row"><input class="k" placeholder="role"><input class="v" type="number" min="1" placeholder="head-count"><button class="sm alt" data-del-row>×</button></div></template><button class="sm alt" data-add-row="crewrows">+ role</button></div>
+<div class="grid"><div><label>Source (who/what the value comes from) *</label><input name="source"></div><div><label>Evidence</label><input name="evidence"></div>
+<div><label>Evidence status</label><select name="evidence_status"><option>unverified</option><option>verified</option></select></div><div><label>Confidence</label><select name="confidence"><option>Low</option><option>Medium</option><option>High</option></select></div>
+<div><label>Effective from</label><input name="effective_from" type="date"></div><div><label>Review by</label><input name="review_by" type="date"></div></div>
+<label><input type="checkbox" name="includes_productivity_factors" value="true"> value already includes site/productivity factors (further factors would be double counting)</label>
+<label><input type="checkbox" name="is_synthetic" value="true"> SYNTHETIC test value (never treated as verified)</label>
+<p><button>Create norm (Draft)</button></p></form></details>
 <h2>Workforce profiles</h2>
 <table><thead><tr><th>Id</th><th>Ver</th><th>Archetype</th><th>Name</th><th>Shifts</th><th>Attendance %</th><th>Availability %</th><th>Status</th><th></th></tr></thead><tbody>
 {% for p in profile_rows %}<tr><td>{{ p.id }}{% if p.is_synthetic %} <span class="tag">SYN</span>{% endif %}</td><td>{{ p.version }}</td><td>{{ p.archetype }}</td><td>{{ p.name }}</td><td>{{ p.shifts }}</td><td>{{ p.attendance_pct }}</td><td>{{ p.availability_pct }}</td><td>{{ tag(p.status) }}</td>
 <td class="nowrap">{% if p.status == 'Draft' %}{{ actform('submit_profile', '/projects/' ~ project.id ~ '/workforce', [('id', p.id, 'hidden')], 'Submit') }}{% elif p.status == 'Pending Review' %}{{ actform('approve_profile', '/projects/' ~ project.id ~ '/workforce', [('id', p.id, 'hidden')], 'Approve') }}{% endif %}</td></tr>
 {% else %}<tr><td colspan="9" class="muted">No profiles. Archetype bands (SME 4–15, mid 15–25, large 26–50, enterprise 51+) are editable planning assumptions, not industry categories.</td></tr>{% endfor %}</tbody></table>
+<details class="form"><summary>Add a workforce profile</summary>
+<form method="post" action="/ui/do/create_profile" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/workforce"><input type="hidden" name="roles"><input type="hidden" name="indirect"><input type="hidden" name="subcontract_capacity"><input type="hidden" name="role_day_cost">
+<p class="hint">Archetypes are initial company planning profiles, <b>not</b> industry categories. Head-count (direct + indirect, excluding <code>eq:</code> equipment and subcontract capacity) must sit in the band: {% for k, b in bands.items() %}{{ k }} {{ b[0] }}–{{ b[1] if b[1] else '+' }}{{ ', ' if not loop.last }}{% endfor %}, or use <i>custom</i>.</p>
+<div class="grid"><div><label>Profile id *</label><input name="id" required placeholder="WP-MID"></div><div><label>Archetype *</label><select name="archetype">{% for k in bands %}<option>{{ k }}</option>{% endfor %}<option>custom</option></select></div><div><label>Name *</label><input name="name" required></div></div>
+{% macro kv(id, target, label, intval, kph, vph) %}<label>{{ label }}</label><div id="{{ id }}" data-json-map="{{ target }}" data-int="{{ intval }}"><div class="rowlist"><div class="row"><input class="k" placeholder="{{ kph }}"><input class="v" placeholder="{{ vph }}"><button class="sm alt" data-del-row>×</button></div></div>
+<template><div class="row"><input class="k" placeholder="{{ kph }}"><input class="v" placeholder="{{ vph }}"><button class="sm alt" data-del-row>×</button></div></template><button class="sm alt" data-add-row="{{ id }}">+ row</button></div>{% endmacro %}
+{{ kv('rolerows', 'roles', 'Direct roles * (own labour, plant operators, equipment as eq:name)', 1, 'skilled / labourer / eq:crane', 'head-count') }}
+{{ kv('indrows', 'indirect', 'Indirect personnel (supervisors, engineers, QC, HSE)', 1, 'foreman', 'head-count') }}
+{{ kv('subrows', 'subcontract_capacity', 'Subcontract capacity (crews available, as stated by the subcontractor)', 1, 'sub:electrical', 'crews') }}
+{{ kv('costrows', 'role_day_cost', 'Role day-cost in SAR (optional; person-entered; without it cost impact is "not computed")', 0, 'role', 'SAR per day') }}
+<div class="grid"><div><label>Shifts (1–3)</label><input name="shifts" type="number" min="1" max="3" value="1"></div><div><label>Night-shift efficiency % (needed if shifts &gt; 1)</label><input name="night_shift_efficiency_pct"></div>
+<div><label>Attendance % *</label><input name="attendance_pct" required></div><div><label>Availability % *</label><input name="availability_pct" required></div><div><label>Productive hours per worker per shift *</label><input name="productive_hours_per_shift" required></div>
+<div><label>Overtime hours/day</label><input name="overtime_hours_per_day" value="0"></div><div><label>Overtime efficiency %</label><input name="overtime_efficiency_pct" value="0"></div><div><label>Work-front limit</label><input name="work_fronts" type="number" min="1"></div>
+<div><label>Mobilisation (working days)</label><input name="mobilisation_wd" type="number" min="0" value="0"></div><div><label>Source</label><input name="source"></div></div>
+<label><input type="checkbox" name="is_synthetic" value="true"> SYNTHETIC test profile</label>
+<p><button>Create profile (Draft)</button></p></form></details>
 <h2>Activities (this project)</h2>
-<table><thead><tr><th>Code</th><th>Name</th><th>BOQ item</th><th>Norm</th><th>Crews</th><th>Fronts</th><th>Fixed days</th><th>Predecessors</th><th>Long-lead</th></tr></thead><tbody>
-{% for a in acts %}<tr><td>{{ a.code }}</td><td>{{ a.name }}</td><td>{{ a.boq_item_key }}</td><td>{{ a.norm_id or '—' }}</td><td>{{ a.crews }}</td><td>{{ a.work_fronts }}</td><td>{{ a.fixed_days }}</td><td>{{ a.predecessors }}</td><td>{{ a.long_lead_id or '' }}</td></tr>
-{% else %}<tr><td colspan="9" class="muted">No activities defined. Activities link BOQ items to norms; define them through the API/CLI (<code>action set_activities</code>).</td></tr>{% endfor %}</tbody></table>
+{% macro actrow(a) %}<tr class="row"><td><input data-f="code" value="{{ a.code if a else '' }}" size="7"></td><td><input data-f="name" value="{{ a.name if a else '' }}" size="16"></td>
+<td><input data-f="boq_item_key" list="boqkeys" value="{{ a.boq_item_key or '' if a else '' }}" size="7"></td>
+<td><select data-f="norm_id"><option value=""></option>{% for n in norms %}<option {{ 'selected' if a and a.norm_id == n.id else '' }}>{{ n.id }}</option>{% endfor %}</select></td>
+<td><input data-f="crews" value="{{ a.crews if a else 1 }}" size="2"></td><td><input data-f="work_fronts" value="{{ a.work_fronts if a else 1 }}" size="2"></td>
+<td><input data-f="predecessors" value="{{ a.predecessors or '' if a else '' }}" size="8" title="e.g. A-MOB, A-EXC+2 (finish-to-start, +lag days)"></td>
+<td><input data-f="fx.setup" value="{{ a.fx.setup if a and a.fx.setup else '' }}" size="2"></td><td><input data-f="fx.mobilisation" value="{{ a.fx.mobilisation if a and a.fx.mobilisation else '' }}" size="2"></td>
+<td><input data-f="fx.curing" value="{{ a.fx.curing if a and a.fx.curing else '' }}" size="2"></td><td><input data-f="fx.testing" value="{{ a.fx.testing if a and a.fx.testing else '' }}" size="2"></td><td><input data-f="fx.inspection" value="{{ a.fx.inspection if a and a.fx.inspection else '' }}" size="2"></td>
+<td><input type="checkbox" data-f="fx.fixed_only" {{ 'checked' if a and a.fx.fixed_only else '' }}></td>
+<td><select data-f="long_lead_id"><option value=""></option>{% for l in long_leads %}<option {{ 'selected' if a and a.long_lead_id == l else '' }}>{{ l }}</option>{% endfor %}</select></td>
+<td><input data-f="cost_code" value="{{ a.cost_code or '' if a else '' }}" size="5"></td><td><button class="sm alt" data-del-row>×</button></td></tr>{% endmacro %}
+<p class="hint">Activities link BOQ items to norms. <b>Quantity is never typed here</b> — it is read from the human-measured BOQ item when the programme runs. Predecessors are finish-to-start (<code>A,B+2</code> = after A and 2 working days after B). Saving <b>replaces</b> the whole list.</p>
+<datalist id="boqkeys">{% for k in boq_keys %}<option value="{{ k }}">{% endfor %}</datalist>
+<form method="post" action="/ui/do/set_activities" class="stack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/workforce"><input type="hidden" name="project_id" value="{{ project.id }}"><input type="hidden" name="activities">
+<div id="actrows" data-json-list="activities" data-ints="crews,work_fronts"><table class="rows"><thead><tr><th>Code *</th><th>Name *</th><th>BOQ item</th><th>Norm</th><th>Crews</th><th>Fronts</th><th>Predecessors</th><th>Set-up d</th><th>Mobil. d</th><th>Curing d</th><th>Testing d</th><th>Insp. d</th><th>Fixed only</th><th>Long-lead</th><th>Cost code</th><th></th></tr></thead>
+<tbody class="rowlist">{% for a in acts %}{{ actrow(a) }}{% endfor %}</tbody></table>
+<template>{{ actrow(none) }}</template><button class="sm alt" data-add-row="actrows">+ activity</button></div>
+<p><button>Save activities ({{ acts|length }} now)</button></p></form>
 <h2>Programme baselines</h2>
 <table><thead><tr><th>Ver</th><th>Profile</th><th>Working days</th><th>Calendar days</th><th>Finish</th><th>Status</th><th>Claim</th><th></th></tr></thead><tbody>
 {% for b in baselines %}<tr><td>{{ b.version_no }}</td><td>{{ b.profile_id }} v{{ b.profile_version }}</td><td>{{ b.working_days }}</td><td>{{ b.calendar_days }}</td><td>{{ b.finish }}</td><td>{{ tag(b.status) }}{% if b.synthetic %} <span class="tag">SYN</span>{% endif %}{% if b.provisional %} <span class="tag Provisional">provisional</span>{% endif %}</td><td class="muted">{{ b.claims }}</td>
@@ -24,8 +70,7 @@
 {% if acts and profile_rows %}<form class="inline" method="post" action="/ui/do/save_baseline" style="margin-top:6px"><input type="hidden" name="_next" value="/projects/{{ project.id }}/workforce"><input type="hidden" name="project_id" value="{{ project.id }}">
 <select name="profile_id">{% for p in profile_rows %}<option>{{ p.id }}</option>{% endfor %}</select><label class="muted"><input type="checkbox" name="allow_provisional" value="true"> allow provisional (labelled)</label><button class="sm">Save baseline</button></form>{% endif %}
 <h2>Crew-size scenarios</h2>
-{% if profile_rows and acts %}<form class="filter" method="get">{% for p in profile_rows %}<label><input type="checkbox" name="_p" value="{{ p.id }}" {{ 'checked' if p.id in sel else '' }}> {{ p.id }}</label>{% endfor %}
-<input type="hidden" name="profiles" id="profiles" value="{{ sel|join(',') }}"><button class="sm" type="button" onclick="document.getElementById('profiles').value=[...document.querySelectorAll('input[name=_p]:checked')].map(x=>x.value).join(',');this.form.submit()">Compare selected</button></form>{% endif %}
+{% if profile_rows and acts %}<form class="filter" method="get">{% for p in profile_rows %}<label><input type="checkbox" name="profiles" value="{{ p.id }}" {{ 'checked' if p.id in sel else '' }}> {{ p.id }}</label>{% endfor %}<button class="sm">Compare selected</button></form>{% endif %}
 {% if scen_err %}<div class="banner bad">{{ scen_err }}</div>{% endif %}
 {% if scen %}<p class="muted">Comparisons on person-entered norms (provisional allowed and labelled). Doubling a workforce rarely halves a programme: work fronts, shared equipment and dependencies bind.</p>{{ val(scen) }}{% elif not (profile_rows and acts) %}<p class="muted">Needs at least one profile and the project's activities.</p>{% endif %}
 {% endblock %}

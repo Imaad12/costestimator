@@ -86,7 +86,7 @@ Open a project: the top row **Tender** has seven tabs.
 * **Tender desk** - the enquiry, the received-document register (with revision, discipline and Missing documents) and the discipline-by-document completeness matrix.
 * **Queries & RFIs** - run the detectors (drafts only), add a query, approve it to issue, mark it issued (you send it yourself, outside the application), record the customer's response, close or withdraw it.
 * **Registers & actions** - compliance, ITP, method statements, HSE, permits, submittals, testing and handover items (skeleton rows are marked TO BE COMPLETED BY A COMPETENT PERSON) and the open-action / takeoff-task list.
-* **Workforce & programme** - productivity norms and workforce profiles (submit and approve here; creating them is API/CLI today), activities, programme baselines and crew-size comparisons.
+* **Workforce & programme** - productivity norms, workforce profiles and the project's activities (create them with the forms — crew and roles are row editors, activities a table; submit, then a different person approves), programme baselines and crew-size comparisons.
 * **Tender pack** - generate the 45-document pack and the hypothetical handover pack, see each document's status and why it is BLOCKED, download DOCX/PDF/XLSX and the manifest, run the validator.
 * **Readiness** - the final gate for a frozen estimate version: classification, every reason it is not submission ready, and the standing of every assumption.
 Global pages: **Standards & evidence**, **Audit trail** (with hash-chain verification) and **Help** (the project documents, including the built-vs-missing diagrams).

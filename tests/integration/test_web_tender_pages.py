@@ -93,3 +93,37 @@ def test_markdown_viewer_escapes_html_and_renders_tables_and_diagrams():
     assert "<table>" in out and "<b>2</b>" in out and '<pre class="diagram"' in out and "&lt;b&gt;" in out
     assert "javascript:" not in out.replace("javascript:alert(1)", "") or 'href="javascript' not in out
     assert 'href="/help"' in out
+
+
+def test_workforce_forms_post_what_the_row_editors_serialise_and_prefill(client):
+    """The browser's row editors (static/app.js) turn rows into JSON in hidden fields; the shared actions must accept exactly that shape, and the page must prefill the saved rows."""
+    import json
+    _login(client, "est")
+    pid = _project(client)
+    nxt = f"/projects/{pid}/workforce"
+    page = client.get(nxt).text
+    for needle in ('action="/ui/do/create_norm"', 'action="/ui/do/create_profile"', 'action="/ui/do/set_activities"', 'data-json-map="crew"', 'data-json-map="roles"', 'data-json-list="activities"'):
+        assert needle in page, needle
+    import re
+    assert "onclick=" not in page and not re.findall(r"<script(?![^>]*\bsrc=)", page)       # the Content-Security-Policy forbids inline scripts; only the external app.js is loaded
+    r = client.post("/ui/do/create_norm", data={"id": "N-W1", "trade": "Civil", "activity": "Excavation", "output_unit": "m3", "basis": "crew_output_per_crew_day", "value": "60",
+                                                "crew": json.dumps({"skilled": 2, "labourer": 3}), "source": "test entry", "is_synthetic": "true", "_next": nxt}, follow_redirects=False)
+    assert "ok=" in r.headers["location"], r.headers["location"]
+    r = client.post("/ui/do/create_profile", data={"id": "WP-W1", "archetype": "mid", "name": "Mid", "roles": json.dumps({"skilled": 8, "labourer": 10, "eq:excavator": 2}), "indirect": json.dumps({"foreman": 2}),
+                                                   "attendance_pct": "90", "availability_pct": "95", "productive_hours_per_shift": "8", "shifts": "1", "is_synthetic": "true", "_next": nxt}, follow_redirects=False)
+    assert "ok=" in r.headers["location"], r.headers["location"]
+    acts = [{"code": "A-MOB", "name": "Mobilisation", "crews": 1, "work_fronts": 1, "fixed_days": {"setup": 5, "fixed_only": True}}, {"code": "A-EXC", "name": "Excavation", "norm_id": "N-W1", "crews": 2, "work_fronts": 2, "predecessors": "A-MOB"}]
+    r = client.post("/ui/do/set_activities", data={"project_id": pid, "activities": json.dumps(acts), "_next": nxt}, follow_redirects=False)
+    assert "ok=" in r.headers["location"], r.headers["location"]
+    page = client.get(nxt).text
+    assert "N-W1" in page and "WP-W1" in page and 'value="A-MOB"' in page and 'value="A-EXC"' in page and "selected" in page and "checked" in page
+    # a wrong head-count for the archetype is refused by the service, not silently accepted
+    bad = client.post("/ui/do/create_profile", data={"id": "WP-BAD", "archetype": "sme", "name": "x", "roles": json.dumps({"skilled": 60}), "attendance_pct": "90", "availability_pct": "95",
+                                                     "productive_hours_per_shift": "8", "_next": nxt}, follow_redirects=False)
+    assert "ARCHETYPE_BAND" in bad.headers["location"]
+    # reviewer separation: the author cannot approve their own norm
+    client.post("/ui/do/submit_norm", data={"id": "N-W1", "_next": nxt}, follow_redirects=False)
+    own = client.post("/ui/do/approve_norm", data={"id": "N-W1", "_next": nxt}, follow_redirects=False)
+    assert "err=" in own.headers["location"]
+    # crew comparison uses plain checkboxes (no inline script)
+    assert client.get(nxt + "?profiles=WP-W1").status_code == 200
