@@ -121,3 +121,16 @@ document.addEventListener("DOMContentLoaded", function () {
     var n = e.firstChild; if (n && n.nodeType === 3 && /^\s*[a-z]/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/^(\s*)([a-z])/, function (_, a, b) { return a + b.toUpperCase(); });
   });
 });
+/* rates workbook column mapping: turn the per-column "this column is" selects into map_<field>=<column index> form fields */
+document.addEventListener("DOMContentLoaded", function () {
+  var f = document.getElementById("mapform"); if (!f) return;
+  function sync() {
+    var box = document.getElementById("mapvals"); if (!box) return; box.innerHTML = "";
+    var used = {};
+    f.querySelectorAll("select.mapsel").forEach(function (s) {
+      if (!s.value || used[s.value]) return; used[s.value] = 1;
+      var i = document.createElement("input"); i.type = "hidden"; i.name = "map_" + s.value; i.value = s.getAttribute("data-col"); box.appendChild(i);
+    });
+  }
+  f.querySelectorAll("select.mapsel").forEach(function (s) { s.addEventListener("change", sync); }); f.addEventListener("submit", sync); sync();
+});

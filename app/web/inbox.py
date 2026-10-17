@@ -9,6 +9,7 @@ import json
 from typing import Callable
 
 from ..approvals.policy import allowed_roles
+from ..config import get_settings
 from ..database import Database, rows_to_dicts
 from ..models.actor import Actor
 
@@ -237,7 +238,7 @@ def build(db: Database, actor: Actor, only: str = "") -> list[dict]:
         for it in fn(db):
             it["can_approve"] = bool(it["approve"]) and (_can(actor, it["entity"], it["approve_policy"]) or bool(it["extra"].get("provisional") and _can(actor, it["entity"], "approve_provisional")))
             it["can_reject"] = bool(it["reject"]) and _can(actor, it["entity"], "reject")
-            it["own"] = bool(it["raised_by"]) and it["raised_by"] == actor.username
+            it["own"] = bool(it["raised_by"]) and it["raised_by"] == actor.username and not get_settings().allow_self_approval
             it["roles"] = sorted(allowed_roles(it["entity"], it["approve_policy"]) | (allowed_roles(it["entity"], "approve_provisional") if it["extra"].get("provisional") else set()))
             items.append(it)
         if items or only:

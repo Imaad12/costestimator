@@ -3,6 +3,8 @@
 #   scripts/demo_web.sh                 # the SYNTHETIC end-to-end tender (project PRJ-9101) - builds it on first run (~1 min)
 #   scripts/demo_web.sh practice        # the real-document practice test (needs the PDF in practice_test/input/)
 #   scripts/demo_web.sh empty           # a fresh empty database + the small SYNTHETIC demo project (python -m app.cli demo)
+#   scripts/demo_web.sh dev             # YOUR working database (var/dev, kept between runs) and one 'superuser' login (password shown once, or KSA_SUPERUSER_PASSWORD)
+#                                       # add KSA_ALLOW_SELF_APPROVAL=true in front if you want that one login to approve its own work while tuning (off by default)
 # Environment: PORT (first port to try, default 8731 - a rarely used one), HOST (default 127.0.0.1 - keep it local; see docs/SECURITY.md), KSA_DEMO_DIR (default /tmp/ksa_demo).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -27,6 +29,17 @@ case "$MODE" in
     mkdir -p "$DIR"
     if [ ! -f "$KSA_DB_PATH" ]; then python -m app.cli init --demo-users; python -m app.cli demo > /dev/null; fi
     echo "Sign in as estimator / procurement / commercial - password: demo-only-change-me (or admin with the password printed by init)"
+    ;;
+  dev)
+    # Development mode: persistent data and one superuser. A 'test' principal in a 'test' environment, so every export stays DEMONSTRATION. Self-approval is whatever you set in the environment.
+    DIR="${KSA_DEV_DIR:-$PWD/var/dev}"
+    mkdir -p "$DIR"
+    export KSA_DB_PATH="$DIR/app.db" KSA_WORKSPACES_DIR="$DIR/workspaces"
+    [ -f "$DIR/secret" ] || python -c "import secrets;print(secrets.token_hex(24))" > "$DIR/secret"
+    export KSA_SECRET_KEY="$(cat "$DIR/secret")"
+    if [ ! -f "$KSA_DB_PATH" ]; then python -m app.cli init > /dev/null; fi
+    python -m app.cli superuser
+    echo "DEVELOPMENT MODE - data lives in $DIR - self-approval is ${KSA_ALLOW_SELF_APPROVAL:-false}"
     ;;
   *) echo "unknown mode '$MODE'"; exit 2 ;;
 esac

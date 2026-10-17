@@ -42,6 +42,27 @@ def cmd_init(a) -> int:
     return 0
 
 
+def cmd_superuser(a) -> int:
+    """Development convenience: ONE Administrator login for tuning the application. It is a 'test' principal, so nothing it approves can make an export submission-ready.
+    The password is generated (or given with --password / KSA_SUPERUSER_PASSWORD) and shown once. Whether it may approve its own work is NOT decided here: that stays off
+    unless whoever starts the server sets KSA_ALLOW_SELF_APPROVAL=true."""
+    db = get_db()
+    pw = a.password or os.environ.get("KSA_SUPERUSER_PASSWORD") or secrets.token_urlsafe(10)
+    who = f"cli:{getpass.getuser()}"
+    if db.one("SELECT 1 FROM users WHERE username='superuser'"):
+        if not (a.password or os.environ.get("KSA_SUPERUSER_PASSWORD") or a.reset):
+            print("User 'superuser' already exists (use --reset to set a new password).")
+            return 0
+        db.update("users", {"password_hash": auth.hash_password(pw), "role": "Administrator", "is_active": 1, "actor_type": "test"}, "username='superuser'")
+        audit.log(db, who, "user", "superuser", "password_reset")
+        print("Superuser password reset.")
+    else:
+        auth.create_user(db, "superuser", "Super User (development)", "Administrator", pw, creator=who, actor_type="test")
+        print("Created user 'superuser'.")
+    print(f"Sign in as  superuser  /  {pw}      (shown once; development only - replace with real users before any real use)")
+    return 0
+
+
 def cmd_create_user(a) -> int:
     db = get_db()
     pw = a.password or getpass.getpass("Password: ")
@@ -404,6 +425,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("username"); s.add_argument("role"); s.add_argument("--display-name"); s.add_argument("--password"); s.add_argument("--reset", action="store_true")
     s.add_argument("--actor-type", choices=["human", "test"], default="human", help="'test' principals can never satisfy a production approval")
     s.set_defaults(fn=cmd_create_user)
+    s = sub.add_parser("superuser", help="create (or --reset) the single development 'superuser' Administrator (a test principal; password shown once)")
+    s.add_argument("--password"); s.add_argument("--reset", action="store_true"); s.set_defaults(fn=cmd_superuser)
     s = sub.add_parser("run", help="start the local web application")
     s.add_argument("--host"); s.add_argument("--port", type=int)
     s.add_argument("--ssl-certfile", help="serve over TLS (with --ssl-keyfile)"); s.add_argument("--ssl-keyfile")

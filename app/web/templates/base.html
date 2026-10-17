@@ -15,6 +15,7 @@
 {% if project is defined and project %}<h6>This project</h6><a href="/projects/{{ project.id }}/tower" class="proj">{{ project.id }}<small>{{ project.name[:34] }}</small></a>{% endif %}
 </nav>{% endif %}
 <main>
+{% if dev_mode %}<div class="banner warn"><b>Self-approval is switched on for this server</b> (KSA_ALLOW_SELF_APPROVAL), so one person can approve their own work. Use it only while tuning; exports stay labelled DEMONSTRATION when the environment is test.</div>{% endif %}
 {% if ok %}<div class="banner ok">{{ ok }}</div>{% endif %}{% if err %}<div class="banner bad">{{ err }}</div>{% endif %}
 {% if actor and lib and lib.rates_approved_real == 0 %}<div class="banner warn"><b>No approved real rates yet.</b> The global library lists {{ lib.resources }} catalogue resources but contains no approved real Saudi rate: every real price must come from a quotation, dataset or source you import and a human approves (<a href="/rates/updates">Rate updates</a>). Synthetic demo rates, where present, are labelled SYNTHETIC / DEMO / NOT A MARKET QUOTE.</div>{% endif %}
 {% block body %}{% endblock %}

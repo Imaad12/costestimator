@@ -99,3 +99,9 @@ Pick the kind (work calendar, payment terms, plant-hire terms, escalation, produ
 * **Rates workbook** (sidebar): download the Excel template, fill one price per row, upload, read the accepted / rejected preview, then import. Rows become *candidates* in the inbox; publication and rate approval need different people. Originals are stored with a SHA-256 hash.
 * **Settings** holds everything administrative in tabs: General (company, backups, migrations), Users & roles (add users, change roles, reset passwords, deactivate, unlock; Administrator only), Audit trail, Integrity & hashes (hash chain, evidence files and imports re-hashed on demand), Standards & evidence, Rules & documents (do's and don'ts and every guide), Data sources and Reference data (tax, FX, cost codes).
 * There is no bulk "approve all": each approval is an individual, audited decision.
+
+### Rates workbook: your own layout
+If your file does not follow the template, the Rates workbook page shows its columns (heading plus example values) and lets you say which column is the resource id, description, unit, unit price, currency, price date and so on, choose the sheet and header row, and state one currency or date for the whole file. Currency is never assumed: map it or state it. The mapping you used is stored in the import manifest next to the file's SHA-256.
+
+### Development login
+`scripts/demo_web.sh dev` keeps your own database in `var/dev` and creates one `superuser` Administrator (a *test* principal: its approvals never make an export submission-ready). The password is generated and shown once; set `KSA_SUPERUSER_PASSWORD` to choose it, or run `python -m app.cli superuser --reset`. Whether that login may approve its own work is not switched on by the script: start it as `KSA_ALLOW_SELF_APPROVAL=true scripts/demo_web.sh dev` if you want that while tuning. A banner is shown whenever self-approval is on.

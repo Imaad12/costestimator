@@ -48,7 +48,7 @@ def _cell(v: Any) -> Any:
     return None if v in (None, "") else (str(v).strip() if not isinstance(v, (int, float)) else v)
 
 
-def read_rows(path: Path, sheet: str | None = None) -> list[tuple[int, dict]]:
+def read_rows(path: Path, sheet: str | None = None, mapping: dict | None = None, header_row: int | None = None) -> list[tuple[int, dict]]:
     path = Path(path)
     if path.suffix.lower() == ".json":
         try:
@@ -72,6 +72,24 @@ def read_rows(path: Path, sheet: str | None = None) -> list[tuple[int, dict]]:
     from ..imports.readers import list_sheets
     sh = sheet or ("Rate Dataset" if path.suffix.lower() == ".xlsx" and "Rate Dataset" in list_sheets(path) else None)
     rs = read_sheet(path, sh)
+    if mapping is not None:                                           # the person mapped the columns by hand
+        cmap = {f: int(i) for f, i in mapping.items() if i not in (None, "")}
+        if "original_price" not in cmap or not ({"resource_id", "description"} & set(cmap)):
+            raise ValidationFailed("Map at least the unit price column and a resource id or description column.", code="MAPPING_INCOMPLETE")
+        hidx = next((i for i, (rn, _) in enumerate(rs.rows) if rn == header_row), -1) if header_row else -1
+    else:
+        hidx, cmap = _detect(rs)
+        if hidx is None:
+            raise ValidationFailed("No header row found: need a price column and a resource id or description column. Use the column-mapping step to point at the right columns.", code="NO_HEADER")
+    out = []
+    for rn, cells in rs.rows[hidx + 1:]:
+        if all(c in (None, "") for c in cells):
+            continue
+        out.append((rn, {f: _cell(cells[i]) if i < len(cells) else None for f, i in cmap.items()}))
+    return out
+
+
+def _detect(rs) -> tuple[int | None, dict]:
     hidx, cmap = None, {}
     for idx, (rn, cells) in enumerate(rs.rows[:40]):
         m: dict[str, int] = {}
@@ -82,20 +100,53 @@ def read_rows(path: Path, sheet: str | None = None) -> list[tuple[int, dict]]:
                     break
         if "original_price" in m and ("resource_id" in m or "description" in m) and (hidx is None or len(m) >= len(cmap)):
             hidx, cmap = idx, m
-    if hidx is None:
-        raise ValidationFailed("No header row found: need a price column and a resource id or description column.", code="NO_HEADER")
-    out = []
-    for rn, cells in rs.rows[hidx + 1:]:
-        if all(c in (None, "") for c in cells):
-            continue
-        out.append((rn, {f: _cell(cells[i]) if i < len(cells) else None for f, i in cmap.items()}))
-    return out
+    return hidx, cmap
+
+
+MAP_FIELDS = [("resource_id", "Resource ID"), ("description", "Description"), ("specification", "Specification"), ("unit", "Unit"), ("original_price", "Unit price"),
+              ("currency", "Currency"), ("effective_date", "Price date"), ("valid_until", "Valid until"), ("source_url", "Source URL or reference"), ("source_name", "Supplier / source name"),
+              ("tax_basis", "Tax (VAT) basis"), ("delivery_basis", "Delivery basis"), ("installation_included", "Installation included"), ("price_kind", "Price kind"), ("evidence_snippet", "Evidence / notes")]
+
+
+def inspect_file(path: Path, sheet: str | None = None, header_row: int | None = None, max_sample: int = 5) -> dict:
+    """What a person needs to map the columns of any rate file: sheets, the (detected or chosen) header row, each column with sample values and the automatically
+    matched field. Never changes the file."""
+    from ..imports.readers import list_sheets
+    path = Path(path)
+    if path.suffix.lower() == ".json":
+        raise ValidationFailed("Column mapping applies to Excel and CSV files; JSON rows are read by field name.", code="MAPPING_NA")
+    sheets = list_sheets(path)
+    sh = sheet or ("Rate Dataset" if path.suffix.lower() == ".xlsx" and "Rate Dataset" in sheets else None)
+    rs = read_sheet(path, sh)
+    hidx, auto = _detect(rs)
+    if header_row:
+        hidx = next((i for i, (rn, _) in enumerate(rs.rows) if rn == header_row), hidx)
+        auto = {}
+        syn_hit = {}
+        for ci, c in enumerate(rs.rows[hidx][1] if hidx is not None else []):
+            for f, syns in SYN.items():
+                if f not in syn_hit and str(c or "").strip().lower() in syns:
+                    syn_hit[f] = ci
+        auto = syn_hit
+    if hidx is None:                                                  # nothing recognisable: offer the first non-empty row as the header guess
+        hidx = next((i for i, (_, cells) in enumerate(rs.rows) if any(c not in (None, "") for c in cells)), 0)
+    hrow = rs.rows[hidx] if rs.rows else (0, [])
+    width = max((len(c) for _, c in rs.rows[:60]), default=0)
+    body = [c for _, c in rs.rows[hidx + 1:] if any(x not in (None, "") for x in c)]
+    cols = []
+    for i in range(width):
+        head = hrow[1][i] if i < len(hrow[1]) else None
+        cols.append(dict(index=i, header=("" if head is None else str(head)), sample=[_cell(r[i]) for r in body[:max_sample] if i < len(r) and r[i] not in (None, "")][:max_sample],
+                         field=next((f for f, ci in auto.items() if ci == i), "")))
+    return dict(sheets=sheets, sheet=rs.name, header_row=hrow[0], columns=cols, auto=auto, rows=len(body), detected=bool("original_price" in auto and ({"resource_id", "description"} & set(auto))),
+                warnings=list(rs.warnings))
 
 
 def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None = None, source_name: str | None = None, source_url: str | None = None,
                       source_type: str = "Manual dataset", description: str = "", dry_run: bool = False, retrieved_at: str | None = None,
                       sheet: str | None = None, adapter: str = "manual-file", extra_flags: list[str] | None = None,
-                      confidence: str = "Unverified") -> dict:
+                      confidence: str = "Unverified", mapping: dict | None = None, header_row: int | None = None,
+                      default_currency: str | None = None, default_date: str | None = None) -> dict:
     if hasattr(actor, "is_ai"):
         approvals.require_author(actor)
     path = Path(path)
@@ -107,7 +158,7 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
         if basis.startswith("index") or "official statistics" in stype:
             raise ValidationFailed(f"Source {source_id} publishes index/statistical series, not unit prices; its data cannot be imported as rate candidates. Use `index import` "
                                    "(index data is reference only and can never price a line).", code="SOURCE_NOT_PRICE")
-    rows = read_rows(path, sheet)
+    rows = read_rows(path, sheet, mapping, header_row)
     sha = sha256_file(path)
     if not dry_run:
         mf.refuse_duplicate(db, sha, "rates")
@@ -133,6 +184,10 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
         d["evidence_snippet"] = d.get("evidence_snippet") or f"{path.name} row {rn}"
         if not d.get("price_kind"):
             d["price_kind"] = "Quoted" if source_type == "Quotation" else "List price"
+        if default_currency and not d.get("currency"):
+            d["currency"] = default_currency.strip().upper()              # stated explicitly by the person for the whole file (recorded in the manifest), never assumed
+        if default_date and not d.get("effective_date"):
+            d["effective_date"] = default_date
         if not d.get("currency"):
             errors.append({"row": rn, "errors": ["currency is required (never assumed)"]})
             continue
@@ -154,7 +209,8 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
                     ids.append(cand.create_candidate(db, actor, d, manifest_id=None))
                 except (ValidationFailed, Conflict) as e:
                     errors.append({"row": rn, "errors": [e.message]})
-    parsing = {"file": path.name, "format": path.suffix.lstrip("."), "rows_read": len(rows), "source_type": source_type, "columns": sorted({k for _, r in rows for k in r})}
+    parsing = {"file": path.name, "format": path.suffix.lstrip("."), "rows_read": len(rows), "source_type": source_type, "columns": sorted({k for _, r in rows for k in r}),
+               "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date}
     mid = mf.write_manifest(db, actor, kind="rates", adapter=adapter, source_id=source_id, source_name=source_name, source_url=source_url,
                             original_path=str(path), stored_path=stored, sha=sha, description=description, dry_run=dry_run, parsing=parsing,
                             accepted=len(ids) if not dry_run else len(ok_rows), rejected=len(errors), errors=errors, candidate_ids=ids)

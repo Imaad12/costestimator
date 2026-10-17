@@ -133,3 +133,63 @@ def test_placeholders_are_capitalised_in_templates():
         for m in re.finditer(r'placeholder="([a-z][^"]{0,30})', f.read_text(encoding="utf-8")):
             bad.append((f.name, m.group(1)))
     assert not bad, bad[:5]
+
+
+def test_rates_workbook_column_mapping_for_a_file_that_does_not_follow_the_template(client):
+    import io
+    import json as _json
+    db = get_db()
+    rid = rates.create_resource(db, PROC, resource_type="material", description="Mapping test sand (SYNTHETIC)", unit="m3", cost_code="C.07")
+    wb = openpyxl.Workbook(); ws = wb.active; ws.title = "Our prices"
+    ws.append(["Supplier price list - SYNTHETIC"]); ws.append([])
+    ws.append(["Mat Code", "Item name", "Measure", "Cost per unit", "Quote ref"])
+    ws.append([rid, "Sand", "m3", 31.5, "Q-1"]); ws.append(["NOPE", "Gravel", "m3", 40, "Q-2"]); ws.append([rid, "Sand again", "m3", 0, "Q-3"])
+    buf = io.BytesIO(); wb.save(buf)
+    _login(client, "proc")
+    files = {"file": ("theirs.xlsx", buf.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+    src = {"source_name": "SYNTHETIC supplier", "source_type": "Quotation"}
+    pv = client.post("/rates/workbook/preview", files=files, data=src)
+    assert pv.status_code == 200 and "Map the columns of your file" in pv.text and "not recognised automatically" in pv.text and "Mat Code" in pv.text
+    assert "Import " not in re.sub(r"<[^>]+>", " ", pv.text).split("Start again")[0].split("Re-check with this mapping")[-1]     # nothing to import yet
+    stored = re.search(r'name="stored" value="([^"]+)"', pv.text).group(1)
+    form = {**src, "stored": stored, "sheet": "Our prices", "header_row": "3", "map_resource_id": "0", "map_description": "1", "map_unit": "2", "map_original_price": "3", "map_source_url": "4"}
+    nocur = client.post("/rates/workbook/remap", data=form)
+    assert "currency is required" in nocur.text                                                    # never assumed
+    ok = client.post("/rates/workbook/remap", data={**form, "default_currency": "sar"})
+    assert ok.status_code == 200 and "Import 1 row(s) for review" in ok.text and "does not exist" in ok.text and "price must be greater than zero" in ok.text
+    partial = client.post("/rates/workbook/remap", data={**src, "stored": stored, "sheet": "Our prices", "header_row": "3", "map_unit": "2"})
+    assert "Map at least the unit price" in partial.text
+    n = db.scalar("SELECT COUNT(*) FROM rate_candidates")
+    imp = client.post("/rates/workbook/import", data={**form, "default_currency": "sar"}, follow_redirects=False)
+    assert "ok=" in imp.headers["location"], imp.headers["location"]
+    c = db.one("SELECT original_price, original_currency, source_url, status FROM rate_candidates ORDER BY id DESC LIMIT 1")
+    assert db.scalar("SELECT COUNT(*) FROM rate_candidates") == n + 1 and c["original_currency"] == "SAR" and c["source_url"] == "Q-1" and c["status"] == "Pending Review"
+    man = _json.loads(db.scalar("SELECT parsing_json FROM import_manifests WHERE kind='rates' ORDER BY id DESC LIMIT 1"))
+    assert man["mapping"]["original_price"] == 3 and man["default_currency"] == "sar" and man["header_row"] == 3            # the mapping is part of the provenance
+
+
+def test_superuser_is_a_generated_password_test_principal_and_self_approval_stays_opt_in(client, capsys, monkeypatch):
+    import argparse
+    from app import cli
+    from app.config import get_settings
+    monkeypatch.delenv("KSA_SUPERUSER_PASSWORD", raising=False)
+    assert cli.cmd_superuser(argparse.Namespace(password=None, reset=False)) == 0
+    out = capsys.readouterr().out
+    pw = re.search(r"superuser\s+/\s+(\S+)", out).group(1)
+    assert pw != "superuser-dev-pw" and len(pw) >= 10                                              # generated, shown once - never a published default
+    u = get_db().one("SELECT role, actor_type FROM users WHERE username='superuser'")
+    assert (u["role"], u["actor_type"]) == ("Administrator", "test")                               # a test principal can never make an export submission-ready
+    assert cli.cmd_superuser(argparse.Namespace(password=None, reset=False)) == 0 and "already exists" in capsys.readouterr().out
+    assert client.post("/login", data={"username": "superuser", "password": pw}, follow_redirects=False).status_code == 303
+    db = get_db()
+    rid, r = _pending_rate(db)
+    # self-approval off (default): the Administrator cannot approve a rate that same login raised
+    adm = Actor("superuser", "Administrator", "Super User")
+    rid2 = rates.create_resource(db, adm, resource_type="material", description="Own work (SYNTHETIC)", unit="kg", cost_code="C.07")
+    mine = rates.propose_rate(db, adm, rid2, unit_price="5", rate_type="Synthetic Demonstration Rate", price_date="2026-10-01", is_synthetic=True, evidence="SYNTHETIC")
+    rates.submit_rate(db, adm, mine)
+    page = client.get("/approvals?group=rates").text
+    assert "You raised this" in page and "Self-approval is switched on" not in page
+    monkeypatch.setattr(get_settings(), "allow_self_approval", True)                              # only the person running the server can switch it on
+    page = client.get("/approvals?group=rates").text
+    assert "Self-approval is switched on" in page and f'name="rate_id" value="{mine}"' in page and "You raised this" not in page

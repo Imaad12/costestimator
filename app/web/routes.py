@@ -46,6 +46,7 @@ def page(request: Request, name: str, actor: Actor | None, **ctx):
             ctx.setdefault("lib", workspaces.library_versions(get_db()))
         except Exception:
             ctx.setdefault("lib", None)
+        ctx.setdefault("dev_mode", bool(get_settings().allow_self_approval))
         try:
             from . import inbox
             ctx.setdefault("pending_total", sum(inbox.counts(get_db()).values()))

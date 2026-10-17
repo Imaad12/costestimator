@@ -69,35 +69,84 @@ def _rate_args(source_type: str, source_name: str, source_url: str, source_id: s
                 extra_flags=["AWARD_NOT_MARKET_QUOTE"] if source_type == "Public tender award" else None)
 
 
+def _form_args(f) -> dict:
+    """Everything the check / import needs, read from the one form the mapping page posts."""
+    g = lambda k, d="": (f.get(k) or d) if hasattr(f, "get") else d          # noqa: E731
+    mapping = {fld: int(f[f"map_{fld}"]) for fld, _ in rate_importer.MAP_FIELDS if f.get(f"map_{fld}", "") != ""}
+    return dict(stored=Path(g("stored")).name, sheet=g("sheet") or None, header_row=int(g("header_row")) if g("header_row") else None, mapping=mapping or None,
+                default_currency=g("default_currency").strip() or None, default_date=g("default_date").strip() or None,
+                src=dict(source_name=g("source_name"), source_url=g("source_url"), source_id=g("source_id"), source_type=g("source_type", "Manual dataset"), description=g("description")))
+
+
+def _rates_page(request: Request, actor: Actor, a: dict, *, filename: str, dry: dict | None, info: dict | None, warn: str | None = None):
+    db = get_db()
+    recent = rows_to_dicts(db.all("SELECT id, source_name, description, imported_at, imported_by, status, accepted_rows, rejected_rows, sha256 FROM import_manifests WHERE kind='rates' ORDER BY id DESC LIMIT 15"))
+    return page(request, "rates_workbook.html", actor, source_types=rate_candidates.SOURCE_TYPES, register=rows_to_dicts(db.all("SELECT source_id, name FROM sources ORDER BY source_id")),
+                recent=recent, counts=rate_candidates.queue_counts(db), title="Rates workbook", map_fields=rate_importer.MAP_FIELDS, err=warn or None,
+                preview=dict(result=dry, info=info, stored=a["stored"], file=filename, mapping=a["mapping"] or (info or {}).get("auto") or {}, default_currency=a["default_currency"] or "",
+                             default_date=a["default_date"] or "", **a["src"]))
+
+
+def _run(db, actor, a: dict, dry_run: bool) -> dict:
+    path = get_settings().projects_dir / "_uploads" / a["stored"]
+    if not path.exists():
+        raise AppError("The uploaded file is no longer available; please upload it again.", code="FILE_GONE")
+    return rate_importer.import_rates_file(db, actor, path, dry_run=dry_run, sheet=a["sheet"], mapping=a["mapping"], header_row=a["header_row"],
+                                           default_currency=a["default_currency"], default_date=a["default_date"], **_rate_args(**a["src"]))
+
+
 @router.post("/rates/workbook/preview", response_class=HTMLResponse)
 async def rates_preview(request: Request, file: UploadFile = File(...), source_name: str = Form(""), source_url: str = Form(""), source_id: str = Form(""),
-                        source_type: str = Form("Manual dataset"), description: str = Form(""), actor: Actor = Depends(current_actor)):
+                        source_type: str = Form("Manual dataset"), description: str = Form(""), default_currency: str = Form(""), actor: Actor = Depends(current_actor)):
     db = get_db()
     if not source_name.strip() and not source_id:
         return back("/rates/workbook", err="Say where these prices come from: enter a source name (for example 'Supplier X price list, Sep 2026') or pick a Source Register entry.")
     path = save_upload("", file)
+    a = _form_args(dict(stored=path.name, source_name=source_name, source_url=source_url, source_id=source_id, source_type=source_type, description=description, default_currency=default_currency))
     try:
-        r = rate_importer.import_rates_file(db, actor, path, dry_run=True, **_rate_args(source_type, source_name, source_url, source_id, description))
+        info = None if path.suffix.lower() == ".json" else rate_importer.inspect_file(path)
+        dry, warn = None, None
+        if info is None or info["detected"] or default_currency:
+            try:
+                dry = _run(db, actor, a, True)
+            except AppError as e:
+                warn = f"{e.code}: {e.message}"
+        else:
+            warn = "The columns were not recognised automatically. Tell the system which column holds what, below."
     except AppError as e:
         return back("/rates/workbook", err=f"{e.code}: {e.message}")
-    recent = rows_to_dicts(db.all("SELECT id, source_name, description, imported_at, imported_by, status, accepted_rows, rejected_rows, sha256 FROM import_manifests WHERE kind='rates' ORDER BY id DESC LIMIT 15"))
-    return page(request, "rates_workbook.html", actor, source_types=rate_candidates.SOURCE_TYPES, register=rows_to_dicts(db.all("SELECT source_id, name FROM sources ORDER BY source_id")),
-                recent=recent, counts=rate_candidates.queue_counts(db), title="Rates workbook",
-                preview=dict(result=r, stored=path.name, file=file.filename, source_name=source_name, source_url=source_url, source_id=source_id, source_type=source_type, description=description))
+    return _rates_page(request, actor, a, filename=file.filename, dry=dry, info=info, warn=warn)
+
+
+@router.post("/rates/workbook/remap", response_class=HTMLResponse)
+async def rates_remap(request: Request, actor: Actor = Depends(current_actor)):
+    f = await request.form()
+    a = _form_args(f)
+    path = get_settings().projects_dir / "_uploads" / a["stored"]
+    try:
+        info = rate_importer.inspect_file(path, a["sheet"], a["header_row"])
+        dry, warn = None, None
+        try:
+            if a["mapping"] is None:
+                a["mapping"] = info["auto"] or None
+            dry = _run(get_db(), actor, a, True)
+        except AppError as e:
+            warn = f"{e.code}: {e.message}"
+    except AppError as e:
+        return back("/rates/workbook", err=f"{e.code}: {e.message}")
+    info["auto"] = a["mapping"] or info["auto"]
+    return _rates_page(request, actor, a, filename=a["stored"], dry=dry, info=info, warn=warn)
 
 
 @router.post("/rates/workbook/import")
-async def rates_import(stored: str = Form(...), source_name: str = Form(""), source_url: str = Form(""), source_id: str = Form(""), source_type: str = Form("Manual dataset"),
-                       description: str = Form(""), actor: Actor = Depends(current_actor)):
-    path = get_settings().projects_dir / "_uploads" / Path(stored).name
-    if not path.exists():
-        return back("/rates/workbook", err="The uploaded file is no longer available; please upload it again.")
+async def rates_import(request: Request, actor: Actor = Depends(current_actor)):
+    a = _form_args(await request.form())
     try:
-        r = rate_importer.import_rates_file(get_db(), actor, path, dry_run=False, **_rate_args(source_type, source_name, source_url, source_id, description))
+        r = _run(get_db(), actor, a, False)
     except AppError as e:
         return back("/rates/workbook", err=f"{e.code}: {e.message}")
     return back("/approvals?group=candidates", ok=f"{r['accepted']} price row(s) are now candidates awaiting review; {r['rejected']} rejected (manifest #{r['manifest_id']}, SHA-256 {r['sha256'][:12]}...). "
-                "Approve them for publication here, publish, then approve the published rate (a different person).")
+                "Approve them for publication here, publish, then approve the published rate.")
 
 
 # ------------------------------------------------------------------ settings hub
