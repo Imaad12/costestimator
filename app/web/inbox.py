@@ -5,6 +5,7 @@ audit stay in the services; this module only decides which buttons to *show* (mi
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from typing import Callable
 
@@ -18,7 +19,9 @@ REASON = ("reason", "Reason (required)", True)
 
 
 def op(action: str, fields: dict, inputs: list[tuple] | None = None, label: str = "Approve") -> dict:
-    return dict(action=action, fields={k: v for k, v in fields.items() if v is not None}, inputs=inputs if inputs is not None else [COMMENT], label=label)
+    ins = inputs if inputs is not None else [COMMENT]
+    # bulk-capable: nothing to type except one free-text comment/reason that can be shared by every selected item
+    return dict(action=action, fields={k: v for k, v in fields.items() if v is not None}, inputs=ins, label=label, bulk=len(ins) <= 1 and all(len(i) == 3 for i in ins))
 
 
 def _item(title: str, detail: str, *, project_id: str | None = None, raised_by: str | None = None, entity: str, approve: dict | None = None, reject: dict | None = None,
@@ -47,7 +50,7 @@ def _rates(db: Database):
 
 def _assumptions(db: Database):
     for r in rows_to_dicts(db.all("SELECT * FROM assumptions WHERE status='Pending Review' ORDER BY id")):
-        yield _item(f"{r['id']} v{r['version']} - {r['name']}", f"Value {_s(r['default_value'])} {_s(r['unit'])} - family {_s(r['family'])}", raised_by=r["created_by"], entity="assumption",
+        yield _item(f"{r['id']} v{r['version']} - {r['name']}", (f"Default {_s(r['default_value'])} {_s(r['unit'])}".strip() if _s(r["default_value"]) else "No value set - the project supplies it") + f" - family {_s(r['family'])} - source: {_s(r['source'])}", raised_by=r["created_by"], entity="assumption",
                     approve=op("approve_assumption", {"id": r["id"]}), reject=op("reject_assumption", {"id": r["id"]}, [REASON], "Reject"), link="/assumptions", synthetic=bool(r["is_synthetic"]))
 
 
@@ -249,6 +252,8 @@ def build(db: Database, actor: Actor, only: str = "") -> list[dict]:
             continue
         items = []
         for it in fn(db):
+            basis = it["approve"] or it["reject"]
+            it["uid"] = hashlib.sha1((basis["action"] + json.dumps(basis["fields"], sort_keys=True, default=str) if basis else it["title"]).encode()).hexdigest()[:16]
             it["can_fix"] = bool(it["extra"].get("fix")) and _can(actor, it["entity"], "request_changes")
             it["can_approve"] = bool(it["approve"]) and (_can(actor, it["entity"], it["approve_policy"]) or bool(it["extra"].get("provisional") and _can(actor, it["entity"], "approve_provisional")))
             it["can_reject"] = bool(it["reject"]) and _can(actor, it["entity"], "reject")
@@ -262,3 +267,30 @@ def build(db: Database, actor: Actor, only: str = "") -> list[dict]:
 
 def counts(db: Database) -> dict[str, int]:
     return {key: sum(1 for _ in fn(db)) for _, key, fn in GROUPS}
+
+
+def decide_selected(db: Database, actor: Actor, group: str, uids: set[str], decision: str, comment: str, run) -> dict:
+    """Apply one decision to every selected item the actor may decide, through the SAME single-item action (so authorisation, four-eyes and audit are unchanged:
+    one approval record per item, under the actor's name). Items the actor may not decide, raised by the actor, or needing per-item input are skipped and counted."""
+    from ..core.errors import AppError
+    done, skipped, failed, errors = 0, 0, 0, []
+    for g in build(db, actor, only=group):
+        for it in g["items"]:
+            if it["uid"] not in uids:
+                continue
+            o = it["approve"] if decision == "approve" else it["reject"]
+            allowed = it["can_approve"] if decision == "approve" else it["can_reject"]
+            if not o or not allowed or it["own"] or not o["bulk"]:
+                skipped += 1
+                continue
+            params = dict(o["fields"])
+            if o["inputs"]:
+                params[o["inputs"][0][0]] = comment
+            try:
+                run(db, actor, o["action"], params)
+                done += 1
+            except AppError as e:
+                failed += 1
+                if len(errors) < 3:
+                    errors.append(f"{it['title'][:40]}: {e.code}")
+    return dict(done=done, skipped=skipped, failed=failed, errors=errors)

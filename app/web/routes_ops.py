@@ -47,6 +47,28 @@ def approvals_page(request: Request, group: str = "", entity: str = "", log: int
                 log=rows, show_log=bool(log or entity), entity=entity, title="Approvals")
 
 
+@router.post("/approvals/bulk")
+async def approvals_bulk(request: Request, actor: Actor = Depends(current_actor)):
+    from .routes import run as run_action
+    f = await request.form()
+    group, decision, comment = f.get("group", ""), f.get("decision", ""), (f.get("comment") or "").strip()
+    nxt = "/approvals" + (f"?group={group}" if group else "")
+    sel = set(f.getlist("sel"))
+    if decision not in ("approve", "reject"):
+        return back(nxt, err="Choose Approve selected or Reject selected.")
+    if not sel:
+        return back(nxt, err="Select at least one item first.")
+    if decision == "reject" and not comment:
+        return back(nxt, err="Give a reason to reject the selected items.")
+    r = inbox.decide_selected(get_db(), actor, group, sel, decision, comment, run_action)
+    msg = f"{'Approved' if decision == 'approve' else 'Rejected'} {r['done']} item(s), each recorded under your name."
+    if r["skipped"]:
+        msg += f" Skipped {r['skipped']} (your role may not decide them, you raised them, or they need individual input)."
+    if r["failed"]:
+        msg += f" {r['failed']} refused by the rules: " + "; ".join(r["errors"]) + "."
+    return back(nxt, ok=msg) if r["done"] else back(nxt, err=msg)
+
+
 # ------------------------------------------------------------------ rates workbook
 @router.get("/rates/workbook", response_class=HTMLResponse)
 def rates_workbook(request: Request, actor: Actor = Depends(current_actor)):

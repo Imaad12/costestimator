@@ -288,3 +288,28 @@ def test_a_database_rule_violation_is_a_friendly_message_not_a_server_error(clie
     r = client.post("/ui/do/create_norm", data={"id": "N-QA", "trade": "Civil", "activity": "A", "output_unit": "m3", "basis": "crew_output_per_crew_day", "value": "5", "crew": "{}",
                                                   "evidence_status": "QA test", "_next": f"/projects/{pid}/workforce"}, follow_redirects=False)
     assert r.status_code == 303 and "NORM_EVIDENCE" in r.headers["location"]
+
+
+def test_bulk_selection_approves_or_rejects_each_item_individually_and_respects_roles(client):
+    db = get_db()
+    seeded = [r["id"] for r in db.all("SELECT id FROM assumptions WHERE status='Pending Review' ORDER BY id LIMIT 12")]
+    assert len(seeded) == 12                                                                    # the shipped library is Pending Review, never pre-approved
+    _login(client, "com")
+    page = client.get("/approvals?group=assumptions").text
+    assert 'action="/approvals/bulk"' in page and "Approve selected" in page and "Reject selected" in page and page.count('name="sel"') >= 12
+    uids = re.findall(r'name="sel" value="([0-9a-f]{16})" form="bulk-assumptions"', page)[:12]
+    none = client.post("/approvals/bulk", data={"group": "assumptions", "decision": "approve"}, follow_redirects=False)
+    assert "err=" in none.headers["location"]                                                   # nothing selected
+    noreason = client.post("/approvals/bulk", data={"group": "assumptions", "decision": "reject", "sel": uids[:2]}, follow_redirects=False)
+    assert "err=" in noreason.headers["location"]                                               # a reason is mandatory to reject
+    n0 = db.scalar("SELECT COUNT(*) FROM approvals WHERE entity_type='assumption'")
+    ok = client.post("/approvals/bulk", data={"group": "assumptions", "decision": "approve", "comment": "bulk review test", "sel": uids[:8]}, follow_redirects=False)
+    assert "ok=" in ok.headers["location"] and "Approved+8" in ok.headers["location"], ok.headers["location"]
+    assert db.scalar("SELECT COUNT(*) FROM assumptions WHERE status='Approved'") == 8
+    assert db.scalar("SELECT COUNT(*) FROM approvals WHERE entity_type='assumption'") - n0 == 8                      # one audited approval record per item, not one for the batch
+    rej = client.post("/approvals/bulk", data={"group": "assumptions", "decision": "reject", "comment": "not applicable to us", "sel": uids[8:10]}, follow_redirects=False)
+    assert "Rejected+2" in rej.headers["location"]
+    assert db.scalar("SELECT COUNT(*) FROM assumptions WHERE status='Rejected'") == 2
+    _login(client, "view")
+    v = client.post("/approvals/bulk", data={"group": "assumptions", "decision": "approve", "sel": uids[10:12]}, follow_redirects=False)
+    assert "err=" in v.headers["location"] and db.scalar("SELECT COUNT(*) FROM assumptions WHERE status='Approved'") == 8     # a Viewer approves nothing

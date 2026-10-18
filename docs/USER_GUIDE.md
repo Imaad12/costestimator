@@ -105,3 +105,6 @@ If your file does not follow the template, the Rates workbook page shows its col
 
 ### Development login
 `scripts/demo_web.sh dev` keeps your own database in `var/dev` and creates one `superuser` Administrator (a *test* principal: its approvals never make an export submission-ready). The password is generated and shown once; set `KSA_SUPERUSER_PASSWORD` to choose it, or run `python -m app.cli superuser --reset`. Whether that login may approve its own work is not switched on by the script: start it as `KSA_ALLOW_SELF_APPROVAL=true scripts/demo_web.sh dev` if you want that while tuning. A banner is shown whenever self-approval is on.
+
+### Bulk approve or reject
+In Approvals, every list has a tick box per item, "Select all shown", a comment box and **Approve selected** / **Reject selected** (a reason is required to reject). The software applies the decision item by item through the normal approval path, so permissions and the four-eyes rule are unchanged: items your role may not decide, items you raised and items that need individual input (for example a tax category's evidence) are skipped and counted in the result message.

@@ -185,3 +185,5 @@ body{font-feature-settings:"tnum" 1,"cv11" 1}
   .tw{max-width:100%}
 }
 @media(max-width:480px){.grid{grid-template-columns:1fr}}
+.bulkbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin:0 0 10px;box-shadow:var(--shadow)}
+.bulkbar label.chk{font-weight:600;margin:0}.qitem .selbox{padding-top:3px}.qitem .selbox input{width:18px;height:18px;accent-color:var(--accent)}

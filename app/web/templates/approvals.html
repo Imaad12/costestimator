@@ -5,7 +5,14 @@
 {% if not show_log %}
 {% if not groups or total == 0 %}<div class="card empty"><b>Nothing is waiting for approval.</b><div class="muted">New rates, assumptions, quotations and other proposals appear here the moment someone submits them.</div></div>{% endif %}
 {% for g in groups %}{% if g['items'] %}<h2>{{ g['name'] }} <span class="tag">{{ g['items']|length }}</span></h2>
+<form method="post" action="/approvals/bulk" id="bulk-{{ g['key'] }}" class="bulkbar" data-bulk>
+<input type="hidden" name="group" value="{{ group or g['key'] }}">
+<label class="chk"><input type="checkbox" data-selectall="bulk-{{ g['key'] }}"> Select all shown</label> <span class="muted" data-count="bulk-{{ g['key'] }}">0 selected</span>
+<input name="comment" placeholder="Comment for all selected (required to reject)" size="34">
+<button name="decision" value="approve" data-confirm-text="Approve the selected items? Each is recorded individually under your name.">Approve selected</button>
+<button name="decision" value="reject" class="danger" data-confirm-text="Reject the selected items?">Reject selected</button></form>
 <div class="queue">{% for it in (g['items'] if group else g['items'][:6]) %}<div class="qitem">
+<label class="selbox"><input type="checkbox" name="sel" value="{{ it.uid }}" form="bulk-{{ g['key'] }}" {{ 'disabled' if it.own or not (it.can_approve or it.can_reject) else '' }}></label>
 <div class="qmain"><div class="qtitle">{% if it.link %}<a href="{{ it.link }}">{{ it.title }}</a>{% else %}{{ it.title }}{% endif %}{% if it.synthetic %} <span class="tag">SYNTHETIC</span>{% endif %}</div>
 <div class="muted">{{ it.detail }}</div>
 <div class="muted small">{% if it.project_id %}Project <a href="/projects/{{ it.project_id }}">{{ it.project_id }}</a> · {% endif %}Raised by {{ it.raised_by or 'the system' }}{% if it.own %} (you){% endif %}</div></div>

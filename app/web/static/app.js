@@ -145,3 +145,20 @@ document.addEventListener("DOMContentLoaded", function () {
     f.title = "Read-only: a Viewer cannot change data";
   });
 });
+/* approvals: select-all, live count, confirm before a bulk decision */
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("form[data-bulk]").forEach(function (f) {
+    var id = f.id, all = document.querySelector('[data-selectall="' + id + '"]'), cnt = document.querySelector('[data-count="' + id + '"]');
+    function boxes() { return Array.prototype.slice.call(document.querySelectorAll('input[name=sel][form="' + id + '"]:not(:disabled)')); }
+    function upd() { var n = boxes().filter(function (b) { return b.checked; }).length; if (cnt) cnt.textContent = n + " selected"; }
+    if (all) all.addEventListener("change", function () { boxes().forEach(function (b) { b.checked = all.checked; }); upd(); });
+    boxes().forEach(function (b) { b.addEventListener("change", upd); });
+    f.querySelectorAll("button[data-confirm-text]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        var n = boxes().filter(function (b) { return b.checked; }).length;
+        if (!n) { e.preventDefault(); alert("Select at least one item first."); return; }
+        if (!confirm(btn.getAttribute("data-confirm-text") + "\n\n" + n + " item(s).")) e.preventDefault();
+      });
+    });
+  });
+});
