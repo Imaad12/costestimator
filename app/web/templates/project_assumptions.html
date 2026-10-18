@@ -8,7 +8,7 @@
 {% if pending %}<h2>Pending overrides</h2><table><thead><tr><th>Assumption</th><th>Proposed value</th><th>Reason</th><th></th></tr></thead><tbody>
 {% for p in pending %}<tr><td>{{ p.assumption_id }}</td><td>{{ p.override_value }}</td><td>{{ p.reason }}</td><td>
 {{ actform('approve_override', '/projects/'~project.id~'/assumptions', [('project_id', project.id, 'hidden'), ('id', p.assumption_id, 'hidden'), ('comments','comment',none,14)], 'Approve') }}
-{{ actform('reject_override', '/projects/'~project.id~'/assumptions', [('project_id', project.id, 'hidden'), ('id', p.assumption_id, 'hidden'), ('reason','reason',none,14)], 'Reject', 'danger') }}</td></tr>{% endfor %}</tbody></table>{% endif %}
+{{ actform('reject_override', '/projects/'~project.id~'/assumptions', [('project_id', project.id, 'hidden'), ('id', p.assumption_id, 'hidden'), ('reason','reason',none,14)], 'Reject', 'danger alt') }}</td></tr>{% endfor %}</tbody></table>{% endif %}
 <div class="card"><h2 style="margin-top:0">Adopt another assumption</h2><form class="inline" method="post" action="/ui/do/adopt_assumption"><input type="hidden" name="_next" value="/projects/{{ project.id }}/assumptions"><input type="hidden" name="project_id" value="{{ project.id }}">
 <select name="id">{% for a in all_assumptions %}<option value="{{ a.id }}">{{ a.id }} {{ a.name[:60] }}</option>{% endfor %}</select><button class="sm">Adopt</button></form></div>
 {% endblock %}

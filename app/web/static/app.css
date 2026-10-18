@@ -187,3 +187,72 @@ body{font-feature-settings:"tnum" 1,"cv11" 1}
 @media(max-width:480px){.grid{grid-template-columns:1fr}}
 .bulkbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin:0 0 10px;box-shadow:var(--shadow)}
 .bulkbar label.chk{font-weight:600;margin:0}.qitem .selbox{padding-top:3px}.qitem .selbox input{width:18px;height:18px;accent-color:var(--accent)}
+
+/* =====================================================================================================================================================
+   BUTTON AND CONTROL SYSTEM (single source of truth - these rules override anything above)
+   Heights: controls and buttons 36px (default) / 30px (.sm). One radius, one weight, one focus ring, one disabled look.
+   Variants:  (none) primary    .alt secondary (outline)    .danger destructive (solid)    .danger.alt destructive (outline)    .ghost quiet
+   ===================================================================================================================================================== */
+:root{--ctl-h:36px;--ctl-h-sm:30px}
+button,.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  height:var(--ctl-h);min-height:var(--ctl-h);padding:0 16px;box-sizing:border-box;
+  font:inherit;font-size:13.5px;font-weight:600;line-height:1;letter-spacing:.005em;white-space:nowrap;text-decoration:none;
+  color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:8px;cursor:pointer;
+  transition:background .12s,border-color .12s,color .12s,box-shadow .12s;
+}
+button:hover,.btn:hover{background:var(--accent-h);border-color:var(--accent-h);color:#fff}
+button:focus-visible,.btn:focus-visible{outline:0;box-shadow:0 0 0 3px var(--accent-soft),0 0 0 1px var(--accent)}
+button:active,.btn:active{transform:translateY(.5px)}
+button.sm,.btn.sm{height:var(--ctl-h-sm);min-height:var(--ctl-h-sm);padding:0 12px;font-size:12.5px}
+/* secondary */
+button.alt,.btn.alt{background:var(--surface);color:var(--accent);border-color:var(--line2)}
+button.alt:hover,.btn.alt:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+/* destructive: solid, and outline (the Reject look) */
+button.danger,.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+button.danger:hover,.btn.danger:hover{background:color-mix(in srgb,var(--bad) 88%,#000);border-color:color-mix(in srgb,var(--bad) 88%,#000);color:#fff}
+button.danger.alt,.btn.danger.alt{background:var(--surface);color:var(--bad);border-color:var(--bad-line)}
+button.danger.alt:hover,.btn.danger.alt:hover{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+button.danger:focus-visible{box-shadow:0 0 0 3px var(--bad-bg),0 0 0 1px var(--bad)}
+/* quiet */
+button.ghost,.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+button.ghost:hover,.btn.ghost:hover{background:var(--surface2);color:var(--text);border-color:transparent}
+/* disabled (viewer mode, blocked actions) */
+button:disabled,.btn[aria-disabled=true]{background:var(--surface2)!important;color:var(--muted)!important;border-color:var(--line)!important;cursor:not-allowed;opacity:.75;transform:none}
+/* inputs line up with buttons */
+input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]),select{height:var(--ctl-h);padding:0 12px;box-sizing:border-box}
+select{padding-right:30px}
+textarea{padding:8px 12px}
+td input:not([type=checkbox]):not([type=radio]):not([type=file]),td select,.rowlist input:not([type=checkbox]):not([type=radio]),.rowlist select,table.rows input,table.rows select{height:var(--ctl-h-sm);padding:0 8px}
+/* a control row: inputs and buttons share one baseline and one gap */
+form.inline,form.filter,.bulkbar{gap:8px;align-items:center}
+form.inline>*,form.filter>*{margin:0}
+.btn+.btn,button+.btn,.btn+button,button+button{margin-left:0}
+p>button+.btn,p>.btn+button,p>button+button,p>.btn+.btn{margin-left:8px}
+/* the approvals decision block: two aligned rows, equal button width */
+.qact{display:grid;grid-template-columns:minmax(180px,1fr) 108px;gap:8px;align-items:center;max-width:none;width:min(560px,56%)}
+.qact form.opform{display:contents}
+.qact form.opform input,.qact form.opform select{min-width:0;width:100%}
+.qact form.opform button{width:100%}
+.qact .note,.qact>a{grid-column:1/-1}
+.qact .opform.is-reject input{border-color:var(--bad-line)}
+.qact .opform.is-reject input:focus{border-color:var(--bad);box-shadow:0 0 0 3px var(--bad-bg)}
+.bulkbar button{min-width:150px}
+@media(max-width:820px){.qact{width:100%;grid-template-columns:1fr 108px}}
+/* a table cell that holds several actions: each action is its own tidy block (inputs on top, one full-width button) */
+td:has(form.inline + form.inline) form.inline,td.actcell form.inline{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:8px 0;border-bottom:1px dashed var(--line)}
+td:has(form.inline + form.inline) form.inline:last-child,td.actcell form.inline:last-child{border-bottom:0}
+td:has(form.inline + form.inline) form.inline button,td.actcell form.inline button{width:100%}
+td:has(form.inline + form.inline) form.inline:first-child{padding-top:0}
+td:has(form.inline + form.inline){min-width:210px}
+/* narrow screens: nothing may force the page wider than the screen */
+@media(max-width:820px){
+  input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{min-width:0!important;max-width:100%}
+  input[size]{width:100%}
+  form.inline,form.filter,.bulkbar{width:100%;flex-wrap:wrap}
+  form.inline>input,form.inline>select,form.filter>input,form.filter>select{flex:1 1 140px}
+  .qact{grid-template-columns:minmax(0,1fr) 96px}
+  td:has(form.inline + form.inline){min-width:0}
+  .bulkbar button{min-width:0;flex:1 1 120px}
+}
+@media(max-width:820px){button,.btn{white-space:normal;height:auto;padding-top:8px;padding-bottom:8px;line-height:1.25;text-align:center;max-width:100%}button.sm,.btn.sm{padding-top:6px;padding-bottom:6px}}
