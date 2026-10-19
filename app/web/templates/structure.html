@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tabs, actform, table %}{% block body %}
-<h1>{{ project.id }} — Structure, programme &amp; take-off</h1>{{ tabs(project, 'structure') }}
+<h1>{{ section_label('structure') }}</h1>{{ tabs(project, 'structure') }}
 <p class="muted">Structure and human-entered inputs. Quantities are measured by people; nothing here measures a drawing. See <a href="/projects/{{ project.id }}/analysis/rollup">roll-up</a>, <a href="/projects/{{ project.id }}/analysis/schedule">programme</a>,
 <a href="/projects/{{ project.id }}/analysis/loading">loading</a>, <a href="/projects/{{ project.id }}/analysis/manhours">man-hours</a>.</p>
 

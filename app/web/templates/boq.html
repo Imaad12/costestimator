@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>BOQ import</h1>{{ tabs(project, 'boq') }}
+<h1>{{ section_label('boq') }}</h1>{{ tabs(project, 'boq') }}
 <div class="card"><p class="muted">Quantities are measured by the estimator outside this application and imported as-is. The application never measures drawings and never alters imported quantities; changes become pending requests that need approval.</p>
 {% if preview %}
 <h2>Preview: {{ preview_file }}</h2>

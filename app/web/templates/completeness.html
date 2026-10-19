@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs %}{% block body %}
-<h1>{{ project.id }} — Completeness</h1>{{ tabs(project, 'completeness') }}
+<h1>{{ section_label('completeness') }}</h1>{{ tabs(project, 'completeness') }}
 <p class="muted">Counted from the database as of {{ rep.generated }}. <b>{{ rep.blocked }}</b> blocking item(s), <b>{{ rep.open }}</b> open item(s). {{ rep.note }}
 No confidence scores are shown: a rate is either approved, provisional, or missing.</p>
 {% if rep.blocked %}<div class="banner warn">Final approval is blocked until every <b>Blocked</b> row is resolved (and the reconciliation gate passes).</div>{% endif %}

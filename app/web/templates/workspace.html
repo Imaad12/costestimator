@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>{{ project.id }} — Workspace &amp; documents</h1>{{ tabs(project, 'workspace') }}
+<h1>{{ section_label('workspace') }}</h1>{{ tabs(project, 'workspace') }}
 <div class="card"><p><b>Workspace folder:</b> <code>{{ root }}</code></p>
 <p class="muted">This folder holds <i>this project's</i> files only (tender documents, extracts, uploads, quotations, exports). It is separate from the global resource library, which is reusable across projects and lives in the database.
 Originals are never modified or overwritten. <b>Next action:</b>
@@ -30,5 +30,5 @@ Originals are never modified or overwritten. <b>Next action:</b>
 {% else %}<p class="muted">No documents indexed yet.</p>{% endif %}
 <h2>Estimate input snapshots</h2>
 {{ table(snaps, [('version_no','Estimate version'),('created_at','Frozen'),('sha256','Snapshot SHA-256'),('file_path','File (in workspace)')], 'No estimate version frozen yet. Each frozen version stores a reproducible snapshot of the rates, assumptions, assemblies, BOQ and policy it used.') }}
-<h2>Project instructions (CLAUDE.md)</h2><pre style="white-space:pre-wrap;max-height:420px;overflow:auto" class="card">{{ claude_md }}</pre>
+<h2>Project instructions (CLAUDE.md)</h2><pre tabindex="0" style="white-space:pre-wrap;max-height:420px;overflow:auto" class="card">{{ claude_md }}</pre>
 {% endblock %}

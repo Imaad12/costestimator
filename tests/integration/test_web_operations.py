@@ -332,3 +332,46 @@ def test_project_navigation_every_section_loads_marks_itself_active_and_explains
             assert 'class="pagepurpose"' in r.text or k in ("",)                                          # every page says what it is for
     assert "&larr; All projects" in client.get(f"/projects/{pid}/boq").text
     assert "&larr; All projects" not in client.get("/projects").text                                    # outside a project the menu is the global one
+
+
+def test_help_glossary_placeholders_and_normaliser_agree_between_server_and_browser(client):
+    from app.web import helptext
+    js = (Path("app/web/static/help.js")).read_text()
+    for rx in (r"\([^)]*\)", r"[*:·]", r"\d[\d,.]*", r"[^a-z0-9%&\/+ -]"):                      # help.js norm() uses the same four substitutions as helptext.norm()
+        assert rx in js, rx
+    assert helptext.norm("Rate type (e.g. Quote) *:") == "rate type" and helptext.norm("Qty 12.5") == "qty"
+    assert all(k == helptext.norm(k) and v for k, v in helptext.TERMS.items())                     # keys are stored in the normalised form
+    assert len(helptext.TERMS) >= 200
+    _login(client, "est")
+    g = client.get("/glossary.json")
+    assert g.status_code == 200 and "private" in g.headers["cache-control"]
+    data = g.json()
+    assert data["terms"]["vat"] or data["terms"].get("vat basis")
+    for key, (ph, info) in data["placeholders"].items():
+        assert (ph[:1].isupper() or ph.startswith(("e.g. ", "{"))) and not ph.rstrip().endswith("…"), (key, ph)                       # rewritten placeholders are capitalised, short and sentence-like
+        assert len(ph) <= 60, (key, ph)
+    assert client.get("/glossary.json", follow_redirects=False).status_code == 200
+
+
+def test_dark_mode_toggle_theme_script_and_font_are_wired_without_external_assets(client):
+    css = client.get("/static/app.css").text
+    assert ':root[data-theme="dark"]' in css and "prefers-color-scheme:dark" in css and "Plus Jakarta Sans" in css
+    assert client.get("/static/theme.js").status_code == 200 and client.get("/static/help.js").status_code == 200
+    assert client.get("/static/fonts/PlusJakartaSans-latin.woff2").headers["content-type"].startswith("font/woff2") or client.get("/static/fonts/PlusJakartaSans-latin.woff2").status_code == 200
+    _login(client, "est")
+    page = client.get("/projects").text
+    assert 'src="/static/theme.js"' in page and "data-theme-toggle" in page and 'data-theme-set="dark"' in page
+    assert page.index("theme.js") < page.index("app.css") or page.index("theme.js") < page.index("</head>")      # applied before first paint (no flash)
+    assert "https://" not in re.sub(r"<a [^>]*>", "", page)
+
+
+def test_no_template_internals_leak_and_page_headings_come_from_the_one_menu(client):
+    _login(client, "est")
+    pid = client.post("/ui/do/create_project", data={"name": "Leak test (SYNTHETIC)", "_next": "/projects/{result}"}, follow_redirects=False).headers["location"].split("?")[0].split("/")[-1]
+    for k in ("estimate", "pack", "readiness", "workforce", "tender-registers", "inputs"):
+        t = client.get(f"/projects/{pid}/{k}").text
+        assert "&lt;Macro" not in t and "<Macro" not in t and "{{" not in t, k
+        assert len(re.findall(r"<h1[ >]", t)) == 1, k
+    assert "/pack//manifest" not in client.get(f"/projects/{pid}/pack").text
+    ins = client.get(f"/projects/{pid}/inputs").text
+    assert "<code>{" not in ins and 'class="kv"' in ins            # parameters are shown as readable lines, not raw JSON

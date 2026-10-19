@@ -159,7 +159,7 @@ def test_governed_parameter_form_is_schema_driven_and_posts_what_the_browser_bui
     _login(client, "est")
     pid = _project(client)
     page = client.get(f"/projects/{pid}/inputs?kind=calendar").text
-    assert 'id="paramform"' in page and "data-kinds=" in page and 'value="calendar" selected' in page and "&#34;work_weekdays&#34;" in page
+    assert 'id="paramform"' in page and "data-kinds=" in page and 'value="calendar" selected' in page and '"work_weekdays"' in page
     cal = {"start_date": "2027-03-01", "work_weekdays": [0, 1, 2, 3, 4], "holidays": ["2027-03-10"], "hours_per_day": "8", "calendar_source": "test", "requires_confirmation": True,
            "reduced_hours": [{"from": "2027-03-15", "to": "2027-04-14", "hours": "6", "reason": "test window"}]}
     r = client.post("/ui/do/propose_param", data={"kind": "calendar", "code": "CAL-W", "project_id": pid, "source": "test entry", "data": json.dumps(cal), "is_synthetic": "1", "_next": f"/projects/{pid}/inputs"}, follow_redirects=False)

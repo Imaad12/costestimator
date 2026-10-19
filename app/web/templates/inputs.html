@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tabs, actform %}{% block body %}
-<h1>{{ project.id }} — Inputs &amp; parameters</h1>{{ tabs(project, 'inputs') }}
+<h1>{{ section_label('inputs') }}</h1>{{ tabs(project, 'inputs') }}
 <p class="muted"><b>Governed parameters</b> are numbers and rules that the company supplies (productivity factors, hire terms, calendar, escalation, payment terms, benchmark ranges, take-off factors ...).
 The software ships <b>none</b>. Each is validated, needs a stated source, goes Draft → Pending Review → Approved by a permitted human, and an approved value is never edited — a change is a new version.
 Only <i>Approved</i> values affect the strict estimate.</p>
@@ -15,10 +15,10 @@ Only <i>Approved</i> values affect the strict estimate.</p>
 <details><summary>Advanced: edit the raw JSON instead</summary><label>Data (JSON) — if filled, it replaces the fields above</label><textarea name="data_raw" rows="6" style="width:100%;font-family:monospace" placeholder='{"field": "value"}'></textarea></details></form>
 <noscript><p class="banner warn">This form needs JavaScript; without it use the raw JSON box (set the Data field by API/CLI).</p></noscript>
 <details><summary>Fields per kind (no values — names only)</summary>
-{% for k in kinds %}<p><b>{{ k.kind }}</b> — approvers: {{ k.approvers|join(', ') }}<br><span class="muted">{{ k.description }}</span><br><code>{{ k.fields_json }}</code></p>{% endfor %}</details>
+{% for k in kinds %}<p><b>{{ k.kind }}</b> — approvers: {{ k.approvers|join(', ') }}<br><span class="muted">{{ k.description }}</span><br><span class="kv">{{ k.fields_json|readable }}</span></p>{% endfor %}</details>
 <h2>Parameters in this project and company-wide</h2>
 {% if params %}<table><thead><tr><th>Kind</th><th>Code</th><th>v</th><th>Scope</th><th>Status</th><th>Data</th><th>Source</th><th>By</th><th></th></tr></thead><tbody>
-{% for p in params %}<tr><td>{{ p.kind }}</td><td>{{ p.code }}</td><td>{{ p.version }}</td><td>{{ p.scope }}</td><td>{{ p.status }}</td><td><code>{{ p.data_text }}</code></td><td>{{ p.source or '' }}</td><td>{{ p.created_by }}{% if p.approved_by %} → {{ p.approved_by }}{% endif %}</td>
+{% for p in params %}<tr><td>{{ p.kind }}</td><td>{{ p.code }}</td><td>{{ p.version }}</td><td>{{ p.scope }}</td><td>{{ p.status }}</td><td><div class="kv">{{ p.data_text|readable }}</div></td><td>{{ p.source or '' }}</td><td>{{ p.created_by }}{% if p.approved_by %} → {{ p.approved_by }}{% endif %}</td>
 <td>{% if p.status == 'Draft' %}{{ actform('submit_param', '/projects/' ~ project.id ~ '/inputs', [('param_id', p.id, 'hidden')], 'Submit') }}
 {% elif p.status == 'Pending Review' %}{{ actform('approve_param', '/projects/' ~ project.id ~ '/inputs', [('param_id', p.id, 'hidden'), ('comments', 'comment')], 'Approve') }}
 {{ actform('reject_param', '/projects/' ~ project.id ~ '/inputs', [('param_id', p.id, 'hidden'), ('comments', 'reason (required)')], 'Reject', 'alt') }}{% endif %}</td></tr>{% endfor %}</tbody></table>

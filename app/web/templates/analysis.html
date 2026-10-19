@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tabs %}{% block body %}
-<h1>{{ project.id }} — Analysis &amp; controls</h1>{{ tabs(project, 'analysis') }}
+<h1>{{ section_label('analysis') }}</h1>{{ tabs(project, 'analysis') }}
 <p class="muted">Read-only analyses over the estimate and the project's inputs. They <b>never change an estimate and never approve anything</b>; a figure that matters is carried into the estimate only by a person through the normal approval route.
 Numbers come from the company's own approved inputs (see <a href="/projects/{{ project.id }}/inputs">Inputs &amp; parameters</a>); nothing is assumed.</p>
 {% for group, reps in groups.items() %}<h2>{{ group }}</h2>

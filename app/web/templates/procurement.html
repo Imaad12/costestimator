@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>Procurement &amp; RFQs</h1>{{ tabs(project, 'procurement') }}
+<h1>{{ section_label('procurement') }}</h1>{{ tabs(project, 'procurement') }}
 <div class="card"><p class="muted">Missing, expired, unapproved, region-mismatched and index-only rates become procurement requirements. RFQs are drafted here; the application never sends emails and never invents supplier contacts.</p>
 {{ actform('detect_needs', '/projects/'~project.id~'/procurement', [('project_id', project.id, 'hidden')], 'Detect procurement needs (from strict estimate)') }}</div>
 <h2>Procurement register ({{ register|length }})</h2>

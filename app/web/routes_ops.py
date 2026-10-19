@@ -33,6 +33,14 @@ SETTINGS_TABS = (("general", "General"), ("users", "Users & roles"), ("audit", "
                  ("documents", "Rules & documents"), ("sources", "Data sources"), ("reference", "Reference data"))
 
 
+# ------------------------------------------------------------------ plain-language help (the (i) icons)
+@router.get("/glossary.json")
+def glossary(actor: Actor = Depends(current_actor)):
+    from fastapi.responses import JSONResponse
+    from . import helptext
+    return JSONResponse({"terms": helptext.TERMS, "placeholders": {k: list(v) for k, v in helptext.PLACEHOLDERS.items()}}, headers={"Cache-Control": "private, max-age=600"})
+
+
 # ------------------------------------------------------------------ approvals inbox
 @router.get("/approvals", response_class=HTMLResponse)
 def approvals_page(request: Request, group: str = "", entity: str = "", log: int = 0, actor: Actor = Depends(current_actor)):

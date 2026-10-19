@@ -23,5 +23,24 @@ How the application was exercised as different people, what broke and what was f
 ## Final sweep
 After the fixes: 1,309 form submissions in a real browser across the five roles (estimator 218, procurement 247, commercial 275, administrator 307, viewer 262), no server error, no unexpected error, no browser exception; all pages load for every role; no page scrolls sideways at phone width.
 
+## UX audit as a first-time user (light and dark)
+Method: an automated pass over 41 pages (every project section, rates, libraries, approvals, every Settings tab) as the Administrator in light and dark, checking page structure (one h1, named controls, leaked template text, empty states) plus axe-core (WCAG 2 A/AA and best-practice), followed by a read-through for "can I tell what this is, what to do next and why?".
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 | 518 form controls had no accessible name (axe: label, select-name, label-title-only) | Names from label / column heading / field name, added in `app.js`; icon-only header cells named |
+| 2 | Contrast below 4.5:1 for muted text and green status tags (1,527 nodes, light) | Darker `--muted` and `--ok`; dark theme passed |
+| 3 | **Navigation redesign leaked a template variable:** the sidebar's `cur` shadowed the tender-pack page's own `cur`, so the pack page showed an empty pack ("pack r") and a broken manifest link | Renamed to `navcur`; test added |
+| 4 | Estimate page printed `<Macro 'item'>` in a heading (macro named `item` shadowed a page variable) | Macro renamed `navlink`; test added |
+| 5 | Heading levels skipped (h6 menu labels, h3 under h1) | Menu labels are not headings; stage/readiness/pack titles are h2 |
+| 6 | Links in running text distinguishable by colour only | Underlined |
+| 7 | Scrollable code boxes not keyboard reachable; white box in dark mode | `tabindex=0`; token colours |
+| 8 | Inputs & parameters page showed raw JSON | Readable "Field: value" lines |
+| 9 | Several pages still had `PRJ-xxxx - Section` headings | One title per section from the menu definition |
+| 10 | Empty lists said only "No records." | Friendlier, explains that records appear as they are added |
+| 11 | Jargon without explanation | 254 glossary terms behind ⓘ icons; placeholders reduced to examples |
+
+After the fixes the same audit reports **0 axe-core violations on all 41 pages in both light and dark**. The five remaining notes are intentional: three tables that show only headers until data exists, an empty-state message that already tells the person what to do, and the word "undefined" inside a sentence about unclear scope. Not covered: screen-reader testing by a person, Microsoft Edge/Safari rendering.
+
 ## Not covered
 Microsoft Excel itself, live public sources, real rates and real users: see `KNOWN_LIMITATIONS.md`.

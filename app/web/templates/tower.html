@@ -4,7 +4,7 @@
 <div class="bar"><i style="width:{{ (100 * t.done / t.total)|round|int }}%"></i></div>
 <span class="muted">Stages follow the enquiry-to-handover workflow. Counts are read from the database; nothing here approves or changes anything. Amber = work exists but items are open; red = a gate or missing input blocks the next step.</span></div>
 <div class="stages">
-{% for s in t.stages %}<div class="stage s-{{ s.status }}">{{ stagechip(s.status) }}<h3><span class="k">{{ s.key }}</span>{{ s.label }}</h3>
+{% for s in t.stages %}<div class="stage s-{{ s.status }}">{{ stagechip(s.status) }}<h2 class="h3"><span class="k">{{ s.key }}</span>{{ s.label }}</h2>
 <div class="head">{{ s.headline }}</div>{% if s.facts %}<ul>{% for f in s.facts %}<li>{{ f }}</li>{% endfor %}</ul>{% endif %}
 {% if s.hint and s.status != "done" %}<div class="muted" style="margin-top:4px">{{ s.hint }}</div>{% endif %}
 <div style="margin-top:6px"><a href="/projects/{{ project.id }}/{{ s.tab }}">Open →</a></div></div>{% endfor %}</div>

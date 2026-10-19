@@ -38,8 +38,32 @@ from . import projnav as _projnav  # noqa: E402
 templates.env.globals["PROJECT_NAV"] = _projnav.GROUPS
 templates.env.globals["project_section"] = _projnav.current
 templates.env.globals["section_label"] = _projnav.label
+
+
+def _readable(value) -> str:
+    """JSON text -> 'Field name: value' lines for people (null shown as 'not set')."""
+    import json as _json
+    try:
+        data = _json.loads(value) if isinstance(value, str) else value
+    except ValueError:
+        return str(value)
+    if not isinstance(data, dict):
+        return str(value)
+
+    def show(v):
+        if v is None:
+            return "not set"
+        if isinstance(v, (list, tuple)):
+            return ", ".join(show(x) for x in v) or "none"
+        if isinstance(v, dict):
+            return ", ".join(f"{k.replace('_', ' ')} {show(x)}" for k, x in v.items()) or "none"
+        return str(v)
+    return "\n".join(f"{k.replace('_', ' ').capitalize()}: {show(v)}" for k, v in data.items())
+
+
+templates.env.filters["readable"] = _readable
 # cache-busting: a changed stylesheet / script gets a new URL, so browsers never show a stale UI
-templates.env.globals["asset_v"] = "".join(str(int((Path(__file__).parent / "static" / f).stat().st_mtime)) for f in ("app.css", "app.js"))[-12:]
+templates.env.globals["asset_v"] = "".join(str(int((Path(__file__).parent / "static" / f).stat().st_mtime)) for f in ("app.css", "app.js", "help.js", "theme.js"))[-12:]
 
 
 def page(request: Request, name: str, actor: Actor | None, **ctx):

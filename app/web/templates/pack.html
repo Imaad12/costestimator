@@ -8,7 +8,7 @@
 {% if not versions %}<span class="muted"> Freeze an estimate version first (Reconciliation tab).</span>{% endif %}
 <form class="inline" method="post" action="/ui/do/generate_handover_pack" style="margin-left:12px"><input type="hidden" name="_next" value="/projects/{{ project.id }}/pack"><input type="hidden" name="project_id" value="{{ project.id }}"><input name="issue_date" type="date" required><button class="alt" title="needs an explicit hypothetical award scenario in the tender context">Generate hypothetical handover pack</button></form></div>
 {% if packs %}<div class="chipset">{% for p in packs %}<a class="btn {{ '' if cur and p.pk == cur.pk else 'alt' }} sm" href="?pack={{ p.pk }}">{{ p.kind }} r{{ p.revision }}</a>{% endfor %}</div>{% endif %}
-{% if cur %}<div class="card"><h3 style="margin:0">{{ cur.kind|capitalize }} pack r{{ cur.revision }} {{ tag(cur.classification) }}</h3><p style="margin:4px 0"><b>{{ cur.status_label }}</b></p>
+{% if cur %}<div class="card"><h2 class="h3" style="margin:0">{{ cur.kind|capitalize }} pack r{{ cur.revision }} {{ tag(cur.classification) }}</h2><p style="margin:4px 0"><b>{{ cur.status_label }}</b></p>
 <span class="muted">estimate fingerprint {{ (cur.estimate_fingerprint or '')[:16] }} · created {{ cur.created_at }} by {{ cur.created_by }}</span> ·
 <a href="/projects/{{ project.id }}/pack/{{ cur.pk }}/manifest">manifest.json</a> · <a class="btn sm alt" href="?pack={{ cur.pk }}&validate=1">Run the pack validator</a></div>
 {% if val %}<div class="banner {{ 'ok' if val.ok else 'bad' }}">Validator: {{ 'no errors' if val.ok else val.errors|length ~ ' error(s)' }} · {{ val.files_checked }} files checked · {{ val.warnings|length }} warning(s) · {{ val.blocked_documents|length }} BLOCKED document(s)</div>

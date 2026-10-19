@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>Reconciliation</h1>{{ tabs(project, 'reconciliation') }}
+<h1>{{ section_label('reconciliation') }}</h1>{{ tabs(project, 'reconciliation') }}
 <div class="card">{{ actform('run_reconciliation', '/projects/'~project.id~'/reconciliation', [('project_id', project.id, 'hidden')], 'Run reconciliation now') }}
 <span class="muted">Critical findings block final approval and can never be waived. High findings need a documented exception by a Commercial Approver (if the rule permits).</span></div>
 {% if run %}<p>Run #{{ run.id }} at {{ run.ts }} — open by severity: <b>{{ run.summary.open_by_severity }}</b> · blocking: <b>{{ 'YES' if run.summary.blocking else 'no' }}</b> · estimate state {{ run.summary.state }}</p>

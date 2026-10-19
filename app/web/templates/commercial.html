@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>Indirect costs &amp; commercials</h1>{{ tabs(project, 'commercial') }}
+<h1>{{ section_label('commercial') }}</h1>{{ tabs(project, 'commercial') }}
 <h2>Project duration</h2><p class="muted">Duration must be approved by a human before duration-based indirects calculate. AI-proposed durations remain proposals.</p>
 {{ table(durations, [('id','#'),('months','Months','n'),('source_type','Source'),('basis_note','Basis'),('status','Status','t'),('proposed_by','Proposed by')]) }}
 {% for d in durations %}{% if d.status == 'Pending Review' %}{{ actform('approve_duration', '/projects/'~project.id~'/commercial', [('duration_id', d.id, 'hidden'), ('comments','comment',none,16)], 'Approve duration #'~d.id) }}{% endif %}{% endfor %}
@@ -15,7 +15,7 @@
 <input name="code" placeholder="Code" size="7"><input name="category" placeholder="Category" size="14"><input name="description" placeholder="Description" size="24"><select name="method">{% for m in ['fixed','percent_of_direct','per_day','per_week','per_month','per_duration_month'] %}<option>{{ m }}</option>{% endfor %}</select>
 <input name="amount" placeholder="Rate/amount" size="9"><input name="quantity" value="1" size="4"><select name="allocation_method"><option>pro_rata_direct</option><option>separate_line</option><option>direct_trade</option></select><input name="allocation_target" placeholder="Trade code" size="6"><label><input type="checkbox" name="included_in_subcontract" value="1"> included in subcontract</label><button class="sm">Add draft</button></form></details>
 <h2>Commercial policy</h2><p>Assigned: <b>{{ est.commercial.policy_name if est.commercial else 'none' }}</b> {{ tag(est.commercial.policy_status) if est.commercial }}</p>
-{% if policy_json %}<pre style="background:#fff;border:1px solid var(--line);padding:8px">{{ policy_json }}</pre>{% endif %}
+{% if policy_json %}<pre class="card" tabindex="0" style="padding:8px">{{ policy_json }}</pre>{% endif %}
 {{ table(policies, [('id','#'),('code','Code'),('version','Ver'),('name','Name'),('status','Status','t')]) }}
 {% for p in policies %}{% if p.status == 'Draft' %}{{ actform('submit_policy', '/projects/'~project.id~'/commercial', [('policy_id', p.id, 'hidden')], 'Submit policy #'~p.id) }}{% elif p.status == 'Pending Review' %}{{ actform('approve_policy', '/projects/'~project.id~'/commercial', [('policy_id', p.id, 'hidden'), ('comments','comment',none,14)], 'Approve policy #'~p.id) }}{% endif %}{% endfor %}
 <details><summary>Create / revise a commercial policy (JSON; start from data/commercial_rules/policy_template.json)</summary>

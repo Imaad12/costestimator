@@ -5,11 +5,11 @@
 {% if project.is_demo %}<div class="synth">Demonstration project - synthetic data - not a market quote</div>{% endif %}
 {% if project.status == 'Archived' %}<div class="banner warn">Project is archived (read-only).</div>{% endif %}
 {% endmacro %}
-{% macro table(rows, cols, empty="No records.") %}
+{% macro table(rows, cols, empty="Nothing here yet. Records appear here as they are added or imported.") %}
 {% if rows %}<table><thead><tr>{% for c in cols %}<th>{{ c[1] }}</th>{% endfor %}</tr></thead><tbody>
 {% for r in rows %}<tr>{% for c in cols %}{% set v = r[c[0]] %}<td class="{{ 'num' if c[2:3] == ('n',) else '' }}">
 {% if c[2:3] == ('t',) %}{{ tag(v) }}{% elif c[2:3] == ('n',) %}{{ money(v) }}{% else %}{{ v if v is not none else '' }}{% endif %}</td>{% endfor %}</tr>{% endfor %}
-</tbody></table>{% else %}<p class="muted">{{ empty }}</p>{% endif %}
+</tbody></table>{% else %}<p class="empty">{{ empty }}</p>{% endif %}
 {% endmacro %}
 {% macro actform(action, next, fields, label, cls="", confirm=None) %}
 <form class="inline" method="post" action="/ui/do/{{ action }}" {% if confirm %}data-confirm="{{ confirm }}"{% endif %}>

@@ -119,7 +119,8 @@ document.addEventListener("DOMContentLoaded", function () {
     o.textContent = cap(t.trim()).replace(/_/g, " ");
   });
   document.querySelectorAll("button,summary,label,th").forEach(function (e) {
-    var n = e.firstChild; if (n && n.nodeType === 3 && /^\s*[a-z]/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/^(\s*)([a-z])/, function (_, a, b) { return a + b.toUpperCase(); });
+    var n = e.firstChild; while (n && n.nodeType === 3 ? !n.nodeValue.trim() : (n && n.nodeType === 1 && /^(INPUT|SELECT)$/.test(n.tagName))) n = n.nextSibling;   // skip a leading checkbox/field
+    if (n && n.nodeType === 3 && /^\s*[a-z]/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/^(\s*)([a-z])/, function (_, a, b) { return a + b.toUpperCase(); });
   });
 });
 /* rates workbook column mapping: turn the per-column "this column is" selects into map_<field>=<column index> form fields */
@@ -162,3 +163,58 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+/* appearance: light / dark / follow the system. theme.js applies the saved choice before first paint. */
+(function () {
+  var root = document.documentElement;
+  function effective() { var t = root.getAttribute("data-theme"); return t || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); }
+  function set(mode) {
+    try { if (mode === "system") { localStorage.removeItem("ksa-theme"); } else { localStorage.setItem("ksa-theme", mode); } } catch (e) {}
+    if (mode === "system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", mode);
+    mark();
+  }
+  function mark() {
+    var saved = null; try { saved = localStorage.getItem("ksa-theme"); } catch (e) {}
+    document.querySelectorAll("[data-theme-set]").forEach(function (b) { var on = b.getAttribute("data-theme-set") === (saved || "system"); b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-theme-toggle]"); if (b) { set(effective() === "dark" ? "light" : "dark"); return; }
+    var s = e.target.closest && e.target.closest("[data-theme-set]"); if (s) set(s.getAttribute("data-theme-set"));
+  });
+  document.addEventListener("DOMContentLoaded", mark);
+})();
+/* accessibility: every control gets a name a screen reader (and a tooltip) can use, taken from its label, column heading or field name */
+(function () {
+  function clean(el) { var c = el.cloneNode(true); c.querySelectorAll(".info,.sr-only,script").forEach(function (x) { x.remove(); }); return (c.textContent || "").replace(/\s+/g, " ").trim(); }
+  function human(n) { n = (n || "").replace(/[_\-.]+/g, " ").trim(); return n ? n.charAt(0).toUpperCase() + n.slice(1) : ""; }
+  function named(el) {
+    if (el.getAttribute("aria-label") || el.getAttribute("aria-labelledby")) return true;
+    if (el.id && document.querySelector('label[for="' + el.id.replace(/"/g, '\\"') + '"]')) return true;
+    var l = el.closest("label"); return !!(l && clean(l).length > 1);
+  }
+  function nameFor(el) {
+    var td = el.closest("td"), tr = el.closest("tr");
+    if (td && tr) {
+      var table = td.closest("table"), idx = Array.prototype.indexOf.call(tr.children, td), th = table && table.tHead && table.tHead.rows[0] && table.tHead.rows[0].cells[idx];
+      var h = th ? clean(th) : "";
+      if (el.type === "checkbox") { var first = tr.querySelector("td:not(:first-child)"); return "Select " + (first ? clean(first).slice(0, 50) : "row"); }
+      if (h) return h;
+    }
+    if (el.type === "checkbox") return "Select";
+    var p = el.previousElementSibling;
+    if (p && /^(LABEL|B|SPAN|STRONG)$/.test(p.tagName) && clean(p) && clean(p).length < 60) return clean(p);
+    var t = el.getAttribute("title"); if (t && !/^e\.g\./i.test(t)) return t;
+    return human(el.getAttribute("name") || el.getAttribute("data-f") || el.getAttribute("placeholder"));
+  }
+  function run(root) {
+    (root || document).querySelectorAll("input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=image]),select,textarea").forEach(function (el) {
+      if (named(el)) return; var n = nameFor(el); if (n) el.setAttribute("aria-label", n);
+    });
+    (root || document).querySelectorAll("th").forEach(function (th) {
+      if (clean(th) || th.querySelector("input,button")) return;
+      var tr = th.parentElement, idx = Array.prototype.indexOf.call(tr.children, th), t = th.closest("table"), body = t && t.tBodies[0] && t.tBodies[0].rows[0], c = body && body.cells[idx];
+      var s = document.createElement("span"); s.className = "sr-only"; s.textContent = c && c.querySelector("input[type=checkbox]") ? "Select" : "Actions"; th.appendChild(s);
+    });
+  }
+  window.nameControls = run;
+  document.addEventListener("DOMContentLoaded", function () { run(); setTimeout(run, 300); });
+})();

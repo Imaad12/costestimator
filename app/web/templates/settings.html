@@ -56,7 +56,7 @@
 <p class="muted">Import or update rows with <code>python -m app.cli standards import FILE --update</code>.</p>
 
 {% elif tab == 'documents' %}
-<div class="docs"><nav class="doclist">{% for g, names in groups %}{% if names %}<h6>{{ g }}</h6>{% for n in names %}<a href="/settings?tab=documents&doc={{ n }}" class="{{ 'on' if n == doc else '' }}">{{ n.replace('_', ' ').title() }}</a>{% endfor %}{% endif %}{% endfor %}</nav>
+<div class="docs"><nav class="doclist">{% for g, names in groups %}{% if names %}<div class="navh">{{ g }}</div>{% for n in names %}<a href="/settings?tab=documents&doc={{ n }}" class="{{ 'on' if n == doc else '' }}">{{ n.replace('_', ' ').title() }}</a>{% endfor %}{% endif %}{% endfor %}</nav>
 <div class="doc">{% if body %}{{ body|safe }}{% else %}<p>Choose a document.</p>{% endif %}</div></div>
 
 {% elif tab == 'sources' %}
