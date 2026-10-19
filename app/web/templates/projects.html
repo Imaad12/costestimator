@@ -1,8 +1,8 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, table %}{% block body %}
 <h1>Projects</h1>
-<table><thead><tr><th>ID</th><th>Name</th><th>Client</th><th>Region</th><th>Status</th><th>Demo</th></tr></thead><tbody>
-{% for p in projects %}<tr><td><a href="/projects/{{ p.id }}">{{ p.id }}</a></td><td>{{ p.name }}</td><td>{{ p.client }}</td><td>{{ p.region }}</td><td>{{ tag(p.status) }}</td><td>{{ 'SYNTHETIC' if p.is_demo else '' }}</td></tr>{% endfor %}</tbody></table>
-<div class="card" style="margin-top:14px"><h2>New project</h2>
+<table><thead><tr><th>ID</th><th>Name</th><th>Client</th><th>Region</th><th>Status</th><th>Demo</th><th></th></tr></thead><tbody>
+{% for p in projects %}<tr><td class="nowrap"><a href="/projects/{{ p.id }}/tower"><b>{{ p.id }}</b></a></td><td><a class="plink" href="/projects/{{ p.id }}/tower">{{ p.name }}</a></td><td>{{ p.client }}</td><td>{{ p.region }}</td><td>{{ tag(p.status) }}</td><td>{{ tag('Synthetic') if p.is_demo else '' }}</td><td class="right"><a class="btn sm" href="/projects/{{ p.id }}/tower">Open</a></td></tr>{% endfor %}</tbody></table>
+<details class="card newproj" {{ 'open' if not projects else '' }}><summary><b>Create a new project</b></summary>
 <form method="post" action="/ui/do/create_project" class="stack"><input type="hidden" name="_next" value="/projects/{result}/workspace">
 <div class="grid"><div><label>Name *</label><input name="name" required style="width:100%"></div><div><label>Client</label><input name="client" style="width:100%"></div>
 <div><label>Location</label><input name="location" style="width:100%"></div>
@@ -11,5 +11,5 @@
 <div><label>Project type</label><input name="project_type" placeholder="E.g. Office fit-out" style="width:100%"></div>
 <div><label>Applicable trades (comma-separated division/trade names)</label><input name="trades" placeholder="Architectural, HVAC, Electrical" style="width:100%"></div>
 <div><label>Approved drawing revision(s)</label><input name="drawing_revision" style="width:100%"></div><div><label>Approved specification revision(s)</label><input name="spec_revision" style="width:100%"></div>
-<div><label>Default tax category</label><input name="tax_category" value="VAT-STD" style="width:100%"></div></div><p><button>Create project</button></p></form></div>
+<div><label>Default tax category</label><input name="tax_category" value="VAT-STD" style="width:100%"></div></div><p><button>Create project</button></p></form></details>
 {% endblock %}

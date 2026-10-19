@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs, table, actform %}{% block body %}
-<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'tender') }}
+<h1>{{ section_label('tender') }}</h1>{{ tabs(project, 'tender') }}
 <h2>Enquiry</h2>
 {% if enq %}<div class="card"><div class="grid"><div><b>Customer</b><br>{{ enq.customer_name }}{% if enq.customer_is_synthetic %} <span class="tag">FICTIONAL / SYNTHETIC</span>{% endif %}</div><div><b>Title</b><br>{{ enq.title }}</div>
 <div><b>Received</b><br>{{ enq.received_date }}</div><div><b>Tender deadline</b><br>{{ enq.tender_deadline or '—' }}</div></div>

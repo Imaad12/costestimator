@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>Indirect costs &amp; commercials — {{ project.id }}</h1>{{ tabs(project, 'commercial') }}
+<h1>Indirect costs &amp; commercials</h1>{{ tabs(project, 'commercial') }}
 <h2>Project duration</h2><p class="muted">Duration must be approved by a human before duration-based indirects calculate. AI-proposed durations remain proposals.</p>
 {{ table(durations, [('id','#'),('months','Months','n'),('source_type','Source'),('basis_note','Basis'),('status','Status','t'),('proposed_by','Proposed by')]) }}
 {% for d in durations %}{% if d.status == 'Pending Review' %}{{ actform('approve_duration', '/projects/'~project.id~'/commercial', [('duration_id', d.id, 'hidden'), ('comments','comment',none,16)], 'Approve duration #'~d.id) }}{% endif %}{% endfor %}

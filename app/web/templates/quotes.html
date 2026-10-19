@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>Vendor quotations &amp; levelling — {{ project.id }}</h1>{{ tabs(project, 'quotes') }}
+<h1>Vendor quotations &amp; levelling</h1>{{ tabs(project, 'quotes') }}
 <div class="card"><h2 style="margin-top:0">New quotation</h2>
 <form class="inline" method="post" action="/ui/do/create_quotation"><input type="hidden" name="_next" value="/projects/{{ project.id }}/quotes"><input type="hidden" name="project_id" value="{{ project.id }}">
 <select name="supplier_id">{% for s in suppliers %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select>

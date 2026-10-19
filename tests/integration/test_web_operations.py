@@ -313,3 +313,22 @@ def test_bulk_selection_approves_or_rejects_each_item_individually_and_respects_
     _login(client, "view")
     v = client.post("/approvals/bulk", data={"group": "assumptions", "decision": "approve", "sel": uids[10:12]}, follow_redirects=False)
     assert "err=" in v.headers["location"] and db.scalar("SELECT COUNT(*) FROM assumptions WHERE status='Approved'") == 8     # a Viewer approves nothing
+
+
+def test_project_navigation_every_section_loads_marks_itself_active_and_explains_itself(client):
+    from app.web import projnav
+    _login(client, "est")
+    pid = client.post("/ui/do/create_project", data={"name": "Nav test (SYNTHETIC)", "_next": "/projects/{result}"}, follow_redirects=False).headers["location"].split("?")[0].split("/")[2]
+    keys = [k for g in projnav.GROUPS for (k, _, _) in g["items"]]
+    assert len(keys) == len(set(keys)) and len(projnav.GROUPS) == 7 and len(keys) == 23           # one menu, no duplicates, grouped in workflow order
+    for g in projnav.GROUPS:
+        for k, label, desc in g["items"]:
+            url = f"/projects/{pid}" + (f"/{k}" if k else "")
+            r = client.get(url)
+            assert r.status_code == 200, url
+            href = url
+            assert re.search(r'<a href="%s" title="[^"]*" class="on">%s</a>' % (re.escape(href), re.escape(label.replace("&", "&amp;"))), r.text), (url, "active menu item")
+            assert f"<b>{label.replace('&', '&amp;')}</b>" in r.text and g["title"].replace("&", "&amp;") in r.text            # breadcrumb: Projects > id > group > page
+            assert 'class="pagepurpose"' in r.text or k in ("",)                                          # every page says what it is for
+    assert "&larr; All projects" in client.get(f"/projects/{pid}/boq").text
+    assert "&larr; All projects" not in client.get("/projects").text                                    # outside a project the menu is the global one

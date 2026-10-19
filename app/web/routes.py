@@ -34,6 +34,10 @@ from ..services import (assemblies, assumptions, audit, auth, backup, boq, comme
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
+from . import projnav as _projnav  # noqa: E402
+templates.env.globals["PROJECT_NAV"] = _projnav.GROUPS
+templates.env.globals["project_section"] = _projnav.current
+templates.env.globals["section_label"] = _projnav.label
 # cache-busting: a changed stylesheet / script gets a new URL, so browsers never show a stale UI
 templates.env.globals["asset_v"] = "".join(str(int((Path(__file__).parent / "static" / f).stat().st_mtime)) for f in ("app.css", "app.js"))[-12:]
 

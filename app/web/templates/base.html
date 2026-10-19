@@ -8,16 +8,25 @@
 {% if actor %}{% set path = request.url.path %}
 <nav class="side" aria-label="Main menu">
 {% macro item(href, label, match=None) %}<a href="{{ href }}" class="{{ 'on' if (path == href or (match and path.startswith(match))) else '' }}">{{ label }}</a>{% endmacro %}
+{% if project is defined and project %}{% set cur = project_section(path, project.id) %}
+<a class="back" href="/projects">&larr; All projects</a>
+<div class="pcard"><div class="pid">{{ project.id }}{% if project.is_demo %} <span class="tag">Demo</span>{% endif %}{% if project.status == 'Archived' %} <span class="tag Rejected">Archived</span>{% endif %}</div><div class="pname">{{ project.name }}</div></div>
+{% for g in PROJECT_NAV %}<details class="pgroup" {{ 'open' if (cur and cur[3] == g.title) or (not cur and loop.first) else '' }}><summary><span class="gn">{{ loop.index }}</span>{{ g.title }}</summary>
+{% for k, lbl, desc in g['items'] %}<a href="/projects/{{ project.id }}{{ '/' ~ k if k else '' }}" title="{{ desc }}" class="{{ 'on' if cur and cur[0] == k else '' }}">{{ lbl }}</a>{% endfor %}</details>{% endfor %}
+<details class="pgroup glob"><summary>Everywhere else</summary>
+{{ item('/', 'Dashboard') }}{{ item('/projects', 'All projects') }}<a href="/approvals">Approvals{% if pending_total %}<span class="badge">{{ pending_total }}</span>{% endif %}</a>{{ item('/rates/workbook', 'Rates workbook') }}{{ item('/libraries', 'Resources & rates', '/libraries') }}{{ item('/assumptions', 'Assumptions library') }}{{ item('/assemblies', 'Assemblies', '/assemblies') }}{{ item('/settings', 'Settings', '/settings') }}</details>
+{% else %}
 <h6>Overview</h6>{{ item('/', 'Dashboard') }}{{ item('/projects', 'Projects', '/projects') }}
 <h6>Work</h6><a href="/approvals" class="{{ 'on' if path.startswith('/approvals') else '' }}">Approvals{% if pending_total %}<span class="badge">{{ pending_total }}</span>{% endif %}</a>{{ item('/rates/workbook', 'Rates workbook') }}
 <h6>Libraries</h6>{{ item('/libraries', 'Resources & rates', '/libraries') }}{{ item('/assumptions', 'Assumptions', '/assumptions') }}{{ item('/assemblies', 'Assemblies', '/assemblies') }}{{ item('/rates/updates', 'Rate updates', '/rates/updates') }}
 <h6>System</h6>{{ item('/settings', 'Settings', '/settings') }}
-{% if project is defined and project %}<h6>This project</h6><a href="/projects/{{ project.id }}/tower" class="proj">{{ project.id }}<small>{{ project.name[:34] }}</small></a>{% endif %}
+{% endif %}
 </nav>{% endif %}
 <main>
+{% if actor and project is defined and project %}{% set cur2 = project_section(request.url.path, project.id) %}<nav class="crumbs" aria-label="Breadcrumb"><a href="/projects">Projects</a><i>&rsaquo;</i><a href="/projects/{{ project.id }}/tower">{{ project.id }}</a>{% if cur2 %}<i>&rsaquo;</i><span>{{ cur2[3] }}</span><i>&rsaquo;</i><b>{{ cur2[1] }}</b>{% endif %}</nav>{% endif %}
 {% if actor and actor.role == 'Viewer' %}<div class="banner warn"><b>Read-only.</b> You are signed in as a Viewer, so you can look at everything but cannot change or approve anything.</div>{% endif %}
 {% if dev_mode %}<div class="banner warn"><b>Self-approval is switched on for this server</b> (KSA_ALLOW_SELF_APPROVAL), so one person can approve their own work. Use it only while tuning; exports stay labelled DEMONSTRATION when the environment is test.</div>{% endif %}
 {% if ok %}<div class="banner ok">{{ ok }}</div>{% endif %}{% if err %}<div class="banner bad">{{ err }}</div>{% endif %}
-{% if actor and lib and lib.rates_approved_real == 0 %}<div class="banner warn"><b>No approved real rates yet.</b> The global library lists {{ lib.resources }} catalogue resources but contains no approved real Saudi rate: every real price must come from a quotation, dataset or source you import and a human approves (<a href="/rates/updates">Rate updates</a>). Synthetic demo rates, where present, are labelled SYNTHETIC / DEMO / NOT A MARKET QUOTE.</div>{% endif %}
+{% if actor and lib and lib.rates_approved_real == 0 %}<div class="banner warn slim"><b>No approved real rates yet.</b> <span>All {{ lib.resources }} catalogue resources are unpriced or synthetic. Real prices come from a quotation or price list you import and a person approves.</span> <a href="/rates/workbook">Import rates</a></div>{% endif %}
 {% block body %}{% endblock %}
 </main></div></body></html>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs, actform %}{% block body %}
-<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'queries') }}
+<h1>{{ section_label('queries') }}</h1>{{ tabs(project, 'queries') }}
 <div class="grid"><div class="kpi"><b>{{ total }}</b><span>queries in the register</span></div><div class="kpi"><b>{{ material }}</b><span>unresolved material (block submission)</span></div>
 {% for s, n in counts.items() %}<div class="kpi"><b>{{ n }}</b><span>{{ s }}</span></div>{% endfor %}</div>
 <p class="muted">Every query starts as a <b>Draft</b>. A person releases it, issues it to the customer <b>outside this application</b> (nothing is ever sent from here), then records the customer's response. No response is ever invented.</p>

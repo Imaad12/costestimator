@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs, table, actform %}{% block body %}
-<h1>Assumptions — {{ project.id }}</h1>{{ tabs(project, 'assumptions') }}
+<h1>Assumptions</h1>{{ tabs(project, 'assumptions') }}
 <p class="muted">Assumptions adopted by this project. A project override NEVER changes the global library; it needs approval to take effect. Values marked * are used in the calculation.</p>
 <table><thead><tr><th>ID</th><th>Name</th><th>Effective value</th><th>Unit</th><th>Status</th><th>Origin</th><th>Override reason</th><th>Propose override / impact</th></tr></thead><tbody>
 {% for r in rows %}<tr><td>{{ r.id }}{% if r.id in used or r.engine_key %}*{% endif %}</td><td>{{ r.name }}</td><td>{{ r.value if r.value is not none else '—' }}</td><td>{{ r.unit or '' }}</td><td>{{ tag(r.status) }}</td><td>{{ r.origin }}</td><td>{{ r.reason or '' }}</td><td>

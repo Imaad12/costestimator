@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs, actform %}{% block body %}
-<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'pack') }}
+<h1>{{ section_label('pack') }}</h1>{{ tabs(project, 'pack') }}
 <p class="muted">45 catalogue documents (D01–D45) are generated from one frozen estimate version and the registers — never typed separately. A document with a missing input is <b>BLOCKED</b>; a pack is never labelled submission-ready unless every gate verifies. Nothing is sent or submitted from here.</p>
 <div class="card"><b>Generate a pack</b>
 <form class="inline" method="post" action="/ui/do/generate_tender_pack"><input type="hidden" name="_next" value="/projects/{{ project.id }}/pack"><input type="hidden" name="project_id" value="{{ project.id }}">

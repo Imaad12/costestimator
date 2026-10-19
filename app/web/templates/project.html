@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, '') }}
+<h1>{{ section_label('') }}</h1>{{ tabs(project, '') }}
 <div class="card"><div class="grid">
 <div><b>Client</b><br>{{ project.client }}</div><div><b>Location / region</b><br>{{ project.location }} / {{ project.region }}</div>
 <div><b>Estimate state</b><br>{{ tag(est.state) }}</div><div><b>Tax category</b><br>{{ project.tax_category }}</div></div></div>

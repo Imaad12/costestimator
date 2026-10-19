@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs, table %}{% block body %}
-<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'readiness') }}
+<h1>{{ section_label('readiness') }}</h1>{{ tabs(project, 'readiness') }}
 {% if not v %}<div class="banner warn">No estimate version is frozen yet. Freeze one on the Reconciliation tab to evaluate readiness.</div>{% else %}
 <form class="filter" method="get">Estimate version <select name="version" onchange="this.form.submit()">{% for x in versions %}<option value="{{ x.id }}" {{ 'selected' if x.id == v.id else '' }}>v{{ x.version_no }} — {{ x.status }}</option>{% endfor %}</select></form>
 <div class="banner {{ 'ok' if r.production_ready else 'bad' }}" style="font-size:15px">Classification: {{ r.classification|upper }} — {{ 'production ready' if r.production_ready else 'NOT submission ready' }}</div>

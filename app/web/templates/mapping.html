@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>Cost-code &amp; assembly mapping — {{ project.id }}</h1>{{ tabs(project, 'mapping') }}
+<h1>Cost-code &amp; assembly mapping</h1>{{ tabs(project, 'mapping') }}
 <div class="card"><p class="muted">Mapping a BOQ item to an approved assembly is an estimator decision. Suggestions from the keyword matcher or AI stay <b>Suggested</b> until a human approves them.</p>
 <form class="inline" method="post" action="/ui/do/heuristic_mapping"><input type="hidden" name="_next" value="/projects/{{ project.id }}/mapping"><input type="hidden" name="project_id" value="{{ project.id }}"><button class="alt sm">Suggest mappings (keyword match, no AI)</button></form>
 <form class="inline" method="post" action="/ui/do/ai_suggest_mappings" style="margin-left:8px"><input type="hidden" name="_next" value="/projects/{{ project.id }}/mapping"><input type="hidden" name="project_id" value="{{ project.id }}"><button class="alt sm">Suggest mappings with AI (needs AI configured)</button></form></div>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs, stagechip %}{% block body %}
-<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'tower') }}
+<h1>{{ section_label('tower') }}</h1>{{ tabs(project, 'tower') }}
 <div class="card"><b>Where this tender stands</b> — {{ t.done }} of {{ t.total }} workflow stages done · estimate state: {{ tag(t.state) }}
 <div class="bar"><i style="width:{{ (100 * t.done / t.total)|round|int }}%"></i></div>
 <span class="muted">Stages follow the enquiry-to-handover workflow. Counts are read from the database; nothing here approves or changes anything. Amber = work exists but items are open; red = a gate or missing input blocks the next step.</span></div>

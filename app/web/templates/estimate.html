@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>Estimate build-up — {{ project.id }}</h1>{{ tabs(project, 'estimate') }}
+<h1>Estimate build-up</h1>{{ tabs(project, 'estimate') }}
 <div class="banner {{ 'ok' if est.state == 'Complete' else 'warn' }}">Estimate state: <b>{{ est.state }}</b>{% if est.flags.synthetic %} · contains SYNTHETIC data{% endif %}{% if est.flags.provisional %} · contains PROVISIONAL inputs{% endif %}{% if prelim %} · <b>PRELIMINARY VIEW: unapproved rates/assumptions are included and flagged — not for submission</b>{% endif %}</div>
 {% for b in est.blockers %}<div class="muted">• {{ b }}</div>{% endfor %}
 <div class="sub" style="margin-top:8px"><a href="?preliminary=0" class="{{ '' if prelim else 'on' }}">Strict (approved inputs only)</a><a href="?preliminary=1" class="{{ 'on' if prelim else '' }}">Preliminary view (include unapproved, flagged)</a></div>

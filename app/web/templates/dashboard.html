@@ -15,7 +15,7 @@
 <p class="muted">The optional demonstration project is clearly marked SYNTHETIC: run <code>python -m app.cli demo</code>.</p></div>{% endif %}
 <h2>Estimates</h2>
 {% for p in d.projects %}
-<div class="card"><h3 style="margin:0 0 6px"><a href="/projects/{{ p.project_id }}">{{ p.project_id }} — {{ p.name }}</a>
+<div class="card"><h3 style="margin:0 0 6px"><a href="/projects/{{ p.project_id }}/tower">{{ p.project_id }} — {{ p.name }}</a>
 {{ tag(p.state) }} {% if p.demo %}<span class="tag">DEMO / SYNTHETIC</span>{% endif %} {% if p.provisional %}<span class="tag Provisional">provisional inputs</span>{% endif %}</h3>
 {% set tw = towers[p.project_id] %}<div style="margin:2px 0 10px"><a href="/projects/{{ p.project_id }}/tower"><b>Tender workflow: {{ tw.done }} of {{ tw.total }} stages done</b></a> · {{ tw.blockers|length }} thing(s) stop a submission-ready status
 <div class="bar" style="max-width:420px"><i style="width:{{ (100 * tw.done / tw.total)|round|int }}%"></i></div></div>

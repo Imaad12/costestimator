@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, money, tabs, table, actform %}{% block body %}
-<h1>Reports &amp; exports — {{ project.id }}</h1>{{ tabs(project, 'reports') }}
+<h1>Reports &amp; exports</h1>{{ tabs(project, 'reports') }}
 <div class="card"><h2 style="margin-top:0">Preliminary outputs (always watermarked)</h2>
 <p>{{ actform('preliminary_export', '/projects/'~project.id~'/reports', [('project_id', project.id, 'hidden')], 'Generate preliminary pricing schedule + estimate report') }}
 <a class="btn alt" href="/projects/{{ project.id }}/workbook">Download master workbook (XLSX)</a>

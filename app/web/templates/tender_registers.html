@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_macros.html" import tag, tabs, table, actform %}{% from "_render.html" import val %}{% block body %}
-<h1>{{ project.id }} — {{ project.name }}</h1>{{ tabs(project, 'tender-registers') }}
+<h1>{{ section_label('tender-registers') }}</h1>{{ tabs(project, 'tender-registers') }}
 <p class="muted">Bid/no-bid, required inputs, responsibilities, compliance, ITP, method statements, HSE risks, permits, submittals, testing and handover. Skeleton rows are marked <i>TO BE COMPLETED BY A COMPETENT PERSON</i>; nothing here is content the application invented.</p>
 <p>{{ actform('skeleton_registers', '/projects/' ~ project.id ~ '/tender-registers', [('project_id', project.id, 'hidden')], 'Create skeleton rows for the registers this project needs') }}</p>
 {% for reg, items in grouped.items() %}<h2>{{ reg }} <span class="muted" style="font-weight:400">({{ items|length }})</span></h2>
