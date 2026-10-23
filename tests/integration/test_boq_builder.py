@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import io
+import re
 
 import openpyxl
 
@@ -59,3 +60,22 @@ def test_builder_adds_lines_to_a_project_boq(client):
     assert row is not None and row["quantity"] in ("7", "7.0")
     no_proj = client.post("/boq-builder/build", data={"mode": "project", "q_MAT-A-001": "1"}, follow_redirects=False)
     assert "Choose+the+project" in no_proj.headers["location"]
+
+
+def test_boq_upload_reads_a_workbook_and_creates_the_project_from_its_details(client, tmp_path):
+    from tests.imports.test_boq_workbook import make
+    f = make(tmp_path / "w.xlsx").read_bytes()
+    mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    _login(client, "est")
+    assert "BOQ upload" in client.get("/boq-upload").text
+    r = client.post("/boq-upload/analyse", data={"project": ""}, files={"file": ("w.xlsx", f, mime)})
+    assert r.status_code == 200 and "Totals only" in r.text and "swapped" in r.text and 'value="TEST WAREHOUSE (SYNTHETIC)"' in r.text
+    stored = re.search(r'name="stored" value="([^"]+)"', r.text).group(1)
+    nothing = client.post("/boq-upload/import", data={"stored": stored, "project": "", "new_name": "X"}, follow_redirects=False)
+    assert "Tick+at+least+one+sheet" in nothing.headers["location"]
+    done = client.post("/boq-upload/import", data={"stored": stored, "project": "", "new_name": "Test Warehouse (Synthetic)", "new_client": "Fictional Owner Co", "sheet": ["PLUMBING", "FIRE ALARM"]}, follow_redirects=False)
+    loc = done.headers["location"]
+    assert re.match(r"/projects/PRJ-\d+/boq\?ok=Imported\+8\+new", loc), loc
+    pid = loc.split("/")[2]
+    assert get_db().scalar("SELECT COUNT(*) FROM boq_items WHERE project_id=? AND item_type='item'", (pid,)) == 8
+    assert client.post("/boq-upload/analyse", data={"project": ""}, files={"file": ("w.pdf", b"%PDF", "application/pdf")}, follow_redirects=False).headers["location"].startswith("/boq-upload?err=")

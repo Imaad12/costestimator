@@ -8,11 +8,11 @@ m3,cubic metre,volume,1,m3|m³|cum|cu.m|cu m|cubic metre|cubic meter|m^3,cm
 l,litre,volume,0.001,l|ltr|litre|liter|litres|liters,
 kg,kilogram,mass,1,kg|kgs|kilogram|kilo,
 t,tonne (metric),mass,1000,t|tonne|tonnes|mt|metric ton|metric tonne,ton|tons
-nr,number,count,1,nr|no|no.|nos|nos.|number|ea|each|pc|pcs|piece|unit|units,
+nr,number,count,1,nr|no|no.|nos|nos.|number|ea|each|pc|pcs|psc|piece|unit|units,
 pair,pair,pair,1,pair|pairs,
 set,set,set,1,set|sets,
 item,item,item,1,item|items,
-ls,lump sum,lump,1,ls|l.s.|l/s|lump sum|lumpsum|lump-sum,sum
+ls,lump sum,lump,1,ls|l.s.|l/s|lump sum|lumpsum|lump-sum|lot,sum
 point,point (outlet),point,1,point|points|pt|pts|outlet,
 roll,roll,roll,1,roll|rolls,
 bag,bag,bag,1,bag|bags,

@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% block body %}
+<h1>BOQ upload</h1>
+<p class="muted">Upload a client's Bill of Quantities as one Excel workbook, even when each trade has its own sheet. The system reads every sheet, tells you what it found, and imports the ones you tick. Quantities are taken exactly as written; nothing is measured, changed or filled in.</p>
+{% if not analysis %}
+<div class="steps">
+<div class="step"><span class="n">1</span><b>Choose the file</b><div class="muted">An .xlsx or .csv. Cover pages, summaries and stacked two-line headings are handled.</div></div>
+<div class="step"><span class="n">2</span><b>Check what was found</b><div class="muted">Each sheet is shown with its number of items, so you can see it matches the file.</div></div>
+<div class="step"><span class="n">3</span><b>Import</b><div class="muted">Lines land in the project as drafts. Anything odd (unknown unit, missing quantity) is listed for you, never dropped quietly.</div></div></div>
+<form method="post" enctype="multipart/form-data" action="/boq-upload/analyse" class="card stack">
+<div class="filter"><label>BOQ workbook <input type="file" name="file" accept=".xlsx,.xlsm,.csv" required></label>
+<label>Put it in <select name="project"><option value="">A new project made from the file's details</option>{% for p in projects %}<option value="{{ p.id }}" {{ 'selected' if p.id == project }}>{{ p.id }} - {{ p.name }}</option>{% endfor %}</select></label>
+<button class="btn">Read the workbook</button></div></form>
+{% else %}
+<h2>What was found in {{ analysis.file }}</h2>
+<form method="post" action="/boq-upload/import" class="stack"><input type="hidden" name="stored" value="{{ stored }}"><input type="hidden" name="project" value="{{ project }}">
+<table><thead><tr><th>Import</th><th>Sheet</th><th>What it is</th><th>Items</th><th>Headings</th><th>Heading row</th><th>Notes</th></tr></thead><tbody>
+{% for s in analysis.sheets %}<tr><td>{% if s.role == 'boq' %}<input type="checkbox" name="sheet" value="{{ s.name }}" checked aria-label="Import sheet {{ s.name }}">{% else %}<span class="muted">skip</span>{% endif %}</td>
+<td><b>{{ s.name }}</b></td><td>{% if s.role == 'boq' %}BOQ lines{% else %}<span class="muted">Not imported</span>{% endif %}</td><td>{{ s['items'] if s.role == 'boq' else '' }}</td><td>{{ s.headings if s.role == 'boq' else '' }}</td><td>{{ s.header_row or '' }}</td>
+<td>{% if s.reason %}<span class="muted">{{ s.reason }}</span>{% endif %}{% for w in s.warnings %}<div class="banner warn">{{ w }}</div>{% endfor %}{% if s.sample %}<details><summary>First lines</summary><table>{% for r in s.sample %}<tr>{% for c in r %}<td>{{ c if c is not none else '' }}</td>{% endfor %}</tr>{% endfor %}</table></details>{% endif %}</td></tr>{% endfor %}
+</tbody></table>
+{% if not analysis.importable %}<div class="banner warn">No sheet in this file has a table with a description, a unit and a quantity. If your columns have unusual names, use the project's BOQ page to upload a single sheet and say which column is which.</div>{% endif %}
+<div class="card stack">
+{% if not project %}<h3>New project</h3><p class="muted small">Details found in the file - correct them if needed.</p>
+<div class="filter"><label>Project name <input name="new_name" value="{{ analysis.project_info.get('name', '') }}" size="34" required></label>
+<label>Client / owner <input name="new_client" value="{{ analysis.project_info.get('client', '') }}" size="34"></label>
+<label>Location <input name="new_location" value="{{ analysis.project_info.get('location', '') }}" size="34"></label></div>{% endif %}
+<div class="filter"><label>Revision (optional) <input name="revision" placeholder="E.g. R5" size="10"></label>
+<button class="btn" {{ 'disabled' if not analysis.importable }}>Import the ticked sheets</button> <a class="btn alt" href="/boq-upload{{ '?project=' ~ project if project }}">Start again</a></div></div>
+</form>{% endif %}
+{% endblock %}

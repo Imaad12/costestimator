@@ -38,7 +38,7 @@ All trades: preliminaries, civil/earthworks, infrastructure, structural, archite
 | `app/security.py` | same-origin (CSRF) check + security headers; sign-in lockout is in `services/auth.py` | `docs/SECURITY.md` |
 | `app/api/actions.py` | single action registry used by UI + REST | `docs/ARCHITECTURE.md` |
 | `app/web/` , `app/cli.py`, `app/main.py` | UI templates, CLI, FastAPI factory | `docs/USER_GUIDE.md` |
-| `app/migrations/*.sql` | forward-only schema (0001–0016) | `docs/DATA_MODEL.md` |
+| `app/migrations/*.sql` | forward-only schema (0001–0018) | `docs/DATA_MODEL.md` |
 | `data/` | seed CSVs (taxonomy, catalogues **without prices**, assumptions, assemblies, source register), `public_data/` evidence samples | `docs/DATA_MODEL.md` |
 | `projects/` | per-project numbered workspaces (git-ignored, never commit client files) | `docs/PROJECT_WORKSPACES.md` |
 | `var/` | runtime: SQLite DB, backups, `imports/` originals + manifests, source cache (git-ignored) | |

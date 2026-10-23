@@ -11,7 +11,8 @@
 <label>Revision</label><input name="revision" value=""> <button>Import with this mapping</button></form>
 <h3>Sample rows</h3><table>{% for r in preview.sample_rows %}<tr>{% for c in r %}<td>{{ c if c is not none else '' }}</td>{% endfor %}</tr>{% endfor %}</table>
 {% else %}
-<form method="post" enctype="multipart/form-data" action="/projects/{{ project.id }}/boq/preview" class="inline"><b>Upload BOQ (.xlsx / .csv):</b> <input type="file" name="file" required> <button>Preview &amp; map columns</button></form>
+<form method="post" enctype="multipart/form-data" action="/boq-upload/analyse" class="inline"><input type="hidden" name="project" value="{{ project.id }}"><b>Upload BOQ workbook (.xlsx / .csv):</b> <input type="file" name="file" required> <button>Read the workbook</button></form>
+<details class="form"><summary>One sheet with unusual column names? Say which column is which</summary><form method="post" enctype="multipart/form-data" action="/projects/{{ project.id }}/boq/preview" class="inline"><input type="file" name="file" required aria-label="File with unusual column names"> <button class="alt">Preview &amp; map columns</button></form></details>
 <form method="post" enctype="multipart/form-data" action="/projects/{{ project.id }}/takeoff/import" class="inline" style="margin-left:20px"><b>Resource take-off (.xlsx/.csv):</b> <input type="file" name="file" required> <button class="alt">Import</button></form>
 {% endif %}</div>
 {% if changes %}<h2>Pending change requests (need approval)</h2>

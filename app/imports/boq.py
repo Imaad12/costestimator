@@ -80,31 +80,64 @@ def mapping_from_row(cells: list[Any]) -> dict[str, int | None]:
     return mapping
 
 
+def _header_like(cells: list[Any]) -> bool:
+    """A row that could be (part of) a column-heading row: some text, every cell short and non-numeric."""
+    vals = [c for c in cells if c is not None and str(c).strip() != ""]
+    return bool(vals) and all(isinstance(c, str) and len(c.strip()) <= 24 and not re.fullmatch(r"[\d.,\s-]+", c.strip()) for c in vals)
+
+
+def _merged(upper: list[Any], lower: list[Any]) -> list[Any]:
+    """Two stacked heading rows (e.g. 'BOQ' over 'QTY.'): the lower label wins, the upper fills the gaps."""
+    n = max(len(upper), len(lower))
+    out: list[Any] = []
+    for i in range(n):
+        lo = lower[i] if i < len(lower) else None
+        up = upper[i] if i < len(upper) else None
+        out.append(lo if lo is not None and str(lo).strip() != "" else up)
+    return out
+
+
+def header_view(rows: list[tuple[int, list[Any]]], hidx: int) -> list[Any]:
+    """The column labels to show for the header row at index `hidx` (merged with the row above when that is a stacked heading)."""
+    cells = rows[hidx][1]
+    if hidx > 0 and rows[hidx - 1][0] == rows[hidx][0] - 1 and _header_like(rows[hidx - 1][1]) and _header_like(cells):
+        m = _merged(rows[hidx - 1][1], cells)
+        if sum(1 for f, syns in HEADER_SYNONYMS.items() if any(_norm_header(c) in syns for c in m)) > sum(
+                1 for f, syns in HEADER_SYNONYMS.items() if any(_norm_header(c) in syns for c in cells)):
+            return m
+    return cells
+
+
+def _map_cells(cells: list[Any]) -> tuple[dict[str, int | None], int]:
+    mapping: dict[str, int | None] = {}
+    used: set[int] = set()
+    score = 0
+    for f, syns in HEADER_SYNONYMS.items():
+        hit = None
+        for ci, c in enumerate(cells):
+            if ci in used:
+                continue
+            if _norm_header(c) in syns:
+                hit = ci
+                break
+        mapping[f] = hit
+        if hit is not None:
+            used.add(hit)
+            score += 1
+    return mapping, score
+
+
 def detect_header(rows: list[tuple[int, list[Any]]], scan: int = 40) -> tuple[int | None, dict[str, int | None], list[str]]:
     best = (0, None, {})
     ambiguous: list[str] = []
-    for idx, (rn, cells) in enumerate(rows[:scan]):
-        mapping: dict[str, int | None] = {}
-        used = set()
-        score = 0
-        for f, syns in HEADER_SYNONYMS.items():
-            hit = None
-            for ci, c in enumerate(cells):
-                if ci in used:
-                    continue
-                if _norm_header(c) in syns:
-                    hit = ci
-                    break
-            mapping[f] = hit
-            if hit is not None:
-                used.add(hit)
-                score += 1
+    for idx in range(min(scan, len(rows))):
+        mapping, score = _map_cells(header_view(rows, idx))
         if score > best[0]:
             best = (score, idx, mapping)
     if best[0] < 2 or best[1] is None:
         return None, {f: None for f in FIELDS}, []
     # columns whose header matches several fields (e.g. 'no' vs 'item') are reported
-    cells = rows[best[1]][1]
+    cells = header_view(rows, best[1])
     for ci, c in enumerate(cells):
         matches = [f for f, syns in HEADER_SYNONYMS.items() if _norm_header(c) in syns]
         if len(matches) > 1:
@@ -112,16 +145,56 @@ def detect_header(rows: list[tuple[int, list[Any]]], scan: int = 40) -> tuple[in
     return best[1], best[2], ambiguous
 
 
+def _is_num(v: Any) -> bool:
+    if isinstance(v, bool):
+        return False
+    if isinstance(v, (int, float, Decimal)):
+        return True
+    try:
+        D(str(v).replace(",", ""))
+        return True
+    except Exception:
+        return False
+
+
+def fix_swapped_qty_unit(rs: RawSheet, mapping: dict[str, int | None], header_row: int | None) -> tuple[dict[str, int | None], str | None]:
+    """Some files label the quantity column 'UNIT' and the unit column 'QTY'. When the data says so (the 'quantity' column is text, the 'unit' column is numbers) swap them and say so."""
+    qi, ui = mapping.get("quantity"), mapping.get("unit")
+    if qi is None or ui is None or header_row is None:
+        return mapping, None
+    q_vals, u_vals = [], []
+    for rn, cells in rs.rows:
+        if rn <= header_row:
+            continue
+        q = cells[qi] if qi < len(cells) else None
+        u = cells[ui] if ui < len(cells) else None
+        if q not in (None, "") and u not in (None, ""):
+            q_vals.append(q), u_vals.append(u)
+    if len(q_vals) < 3:
+        return mapping, None
+    q_num = sum(_is_num(v) for v in q_vals) / len(q_vals)
+    u_num = sum(_is_num(v) for v in u_vals) / len(u_vals)
+    if q_num < 0.3 and u_num > 0.7:
+        out = dict(mapping, quantity=ui, unit=qi)
+        return out, "The columns headed 'quantity' and 'unit' look swapped (the 'quantity' column holds words, the 'unit' column holds numbers), so they were swapped back. Check the sample rows."
+    return mapping, None
+
+
 def preview(path: Path, sheet: str | None = None, max_rows: int = 15) -> Preview:
     sheets = list_sheets(Path(path))
     rs = read_sheet(Path(path), sheet)
     hidx, mapping, amb = detect_header(rs.rows)
-    cols = [str(c) if c is not None else "" for c in (rs.rows[hidx][1] if hidx is not None else [])]
+    cols = [str(c) if c is not None else "" for c in (header_view(rs.rows, hidx) if hidx is not None else [])]
     sample = [r for _, r in rs.rows[(hidx + 1 if hidx is not None else 0):][:max_rows]]
     missing = [f for f in REQUIRED if mapping.get(f) is None]
     warns = list(rs.warnings)
     if hidx is None:
         warns.append("Could not detect a header row; map columns manually.")
+    else:
+        mapping, swap = fix_swapped_qty_unit(rs, mapping, rs.rows[hidx][0])
+        missing = [f for f in REQUIRED if mapping.get(f) is None]
+        if swap:
+            warns.append(swap)
     return Preview(sheets, rs.name, rs.rows[hidx][0] if hidx is not None else None, cols, mapping, sample, missing, amb, warns)
 
 
@@ -157,6 +230,7 @@ def parse_rows(rs: RawSheet, mapping: dict[str, int | None], header_row_number: 
     for rn, cells in rs.rows:
         if rn == header_row_number:
             header_cells = [str(c) if c is not None else f"col{i + 1}" for i, c in enumerate(cells)]
+    parent: str | None = None            # last code that contains a digit: lettered sub-items (a., b., ...) are stored as '<parent>.a' so they stay unique
     for rn, cells in rs.rows:
         if header_row_number is not None and rn <= header_row_number:
             continue
@@ -166,6 +240,13 @@ def parse_rows(rs: RawSheet, mapping: dict[str, int | None], header_row_number: 
             out.append(ParsedRow(rn, "blank", {}, [], raw))
             continue
         d: dict[str, Any] = {f: _cell(cells, mapping.get(f)) for f in FIELDS}
+        code = None if d["item_code"] is None else str(d["item_code"]).strip()
+        if code:
+            letter = re.fullmatch(r"\(?([A-Za-z]{1,3})\)?[.)]?", code)
+            if letter and parent:
+                d["item_code"] = f"{parent}.{letter.group(1).lower()}"
+            elif re.search(r"\d", code):
+                parent = code.rstrip(". ")
         issues: list[dict] = []
         desc = d["description"]
         qty_raw, unit_raw = d["quantity"], d["unit"]
@@ -179,6 +260,9 @@ def parse_rows(rs: RawSheet, mapping: dict[str, int | None], header_row_number: 
             continue
         # ---- quantity
         qty: Decimal | None = None
+        if not has_qty and re.match(r"^\s*(to\s+bill\s+summary|total|sub-?total|carried|brought)", str(desc or d["item_code"] or ""), re.IGNORECASE):
+            out.append(ParsedRow(rn, "total", d, [], raw))            # a total / carry-forward line of the source sheet: counted, not an item, not an error
+            continue
         if not has_qty:
             out.append(ParsedRow(rn, "rejected", d, [], raw, "MISSING_QUANTITY",
                                  "Row has a unit/price but no quantity."))
@@ -222,8 +306,8 @@ def _clean(v):
 
 def import_boq(db: Database, actor: Actor, project_id: str, path: Path, *, mapping: dict[str, int | None] | None = None,
                sheet: str | None = None, header_row: int | None = None, revision: str | None = None,
-               allow_negative: bool = False, derived_from: dict | None = None) -> dict:
-    """Import a measured BOQ. Returns an import summary. Source file is copied (never moved/modified).
+               allow_negative: bool = False, derived_from: dict | None = None, key_prefix: str = "", trade_default: str | None = None) -> dict:
+    """Import a measured BOQ. `key_prefix` / `trade_default` are used when one workbook holds several sheets (one per trade): keys become '<sheet>/<code>' so codes may repeat across sheets. Returns an import summary. Source file is copied (never moved/modified).
 
     The application does not read PDFs or images (by design: no OCR / PDF-table extraction). A person - or any outside tool - extracts the table into CSV/XLSX and imports THAT file;
     `derived_from` records where it came from: {'source_file', 'source_sha256', 'method', 'note'?}. Such an import is flagged as an UNVERIFIED TRANSCRIPTION until a second person records a check
@@ -245,11 +329,17 @@ def import_boq(db: Database, actor: Actor, project_id: str, path: Path, *, mappi
             raise ValidationFailed("No header row detected. Provide an explicit column mapping.", code="NO_HEADER")
         mapping = mapping or auto_map
         header_row = header_row if header_row is not None else (rs.rows[hidx][0] if hidx is not None else None)
+        if mapping is auto_map:
+            mapping, _swap = fix_swapped_qty_unit(rs, mapping, header_row)
     missing = [f for f in REQUIRED if mapping.get(f) is None]
     if missing:
         raise ValidationFailed(f"Required column(s) not mapped: {missing}. Provide a mapping.", code="MAPPING_INCOMPLETE",
                                details={"missing": missing})
     parsed = parse_rows(rs, mapping, header_row, reg, allow_negative=allow_negative)
+    if trade_default:
+        for pr in parsed:
+            if pr.kind in ("item", "heading") and not pr.data.get("trade"):
+                pr.data["trade"] = trade_default
     sha = sha256_file(path)
     updir = projects.project_dir(project_id, "uploads")
     stored = updir / f"{sha[:10]}_{path.name}"
@@ -260,7 +350,7 @@ def import_boq(db: Database, actor: Actor, project_id: str, path: Path, *, mappi
                                             stored_path=str(stored), sha256=sha, sheet=rs.name,
                                             mapping_json=json.dumps(mapping), status="Imported",
                                             imported_by=actor.username, imported_at=now_iso()))
-        summary = _persist(db, actor, project_id, iid, path.name, rs.name, parsed, revision)
+        summary = _persist(db, actor, project_id, iid, path.name, rs.name, parsed, revision, key_prefix)
         summary["warnings"] = rs.warnings
         summary["mapping"] = mapping
         summary["sha256"] = sha
@@ -294,7 +384,7 @@ def record_transcription_check(db: Database, actor: Actor, import_id: int, comme
 
 
 def _persist(db: Database, actor: Actor, pid: str, iid: int, fname: str, sheet: str, parsed: list[ParsedRow],
-             revision: str | None) -> dict:
+             revision: str | None, key_prefix: str = "") -> dict:
     s = dict(rows_read=len(parsed), blank=0, headings=0, items=0, items_new=0, items_unchanged=0, rejected=0,
              needs_review=0, duplicates=0, change_requests=0, missing_in_revision=0, rejected_rows=[],
              total_client_amount="0", by_trade={})
@@ -306,10 +396,13 @@ def _persist(db: Database, actor: Actor, pid: str, iid: int, fname: str, sheet: 
         if p.kind == "blank":
             s["blank"] += 1
             continue
+        if p.kind == "total":
+            s["totals_skipped"] = s.get("totals_skipped", 0) + 1
+            continue
         if p.kind == "heading":
             s["headings"] += 1
             section = _clean(p.data.get("description")) or _clean(p.data.get("item_code"))
-            hkey = f"H{p.source_row}:{_clean(p.data.get('item_code')) or ''}"
+            hkey = f"{key_prefix}H{p.source_row}:{_clean(p.data.get('item_code')) or ''}"
             if not db.one("SELECT 1 FROM boq_items WHERE project_id=? AND item_key=?", (pid, hkey)):
                 db.insert("boq_items", dict(project_id=pid, import_id=iid, item_key=hkey, item_code=_clean(p.data.get("item_code")),
                                             item_type="heading", description=_clean(p.data.get("description")),
@@ -328,7 +421,7 @@ def _persist(db: Database, actor: Actor, pid: str, iid: int, fname: str, sheet: 
         s["items"] += 1
         d = p.data
         code = _clean(d.get("item_code"))
-        base_key = code or f"R{p.source_row}"
+        base_key = key_prefix + (code or f"R{p.source_row}")
         key = base_key
         issues = list(p.issues)
         if base_key in seen_codes:
@@ -393,7 +486,7 @@ def _persist(db: Database, actor: Actor, pid: str, iid: int, fname: str, sheet: 
     # items that existed before but are absent from this file
     if db.scalar("SELECT COUNT(*) FROM boq_imports WHERE project_id=?", (pid,)) > 1:
         for r in db.all("SELECT id, item_key FROM boq_items WHERE project_id=? AND item_type='item' AND import_id<>? "
-                        "AND status_in_revision='Current'", (pid, iid)):
+                        "AND status_in_revision='Current'" + (" AND source_sheet=?" if key_prefix else ""), (pid, iid, sheet) if key_prefix else (pid, iid)):
             if r["item_key"] not in keys_in_file:
                 db.update("boq_items", {"status_in_revision": "Missing in latest revision"}, "id=?", (r["id"],))
                 s["missing_in_revision"] += 1
@@ -478,3 +571,85 @@ def import_takeoff_resources(db: Database, actor: Actor, project_id: str, path: 
         audit.log(db, actor, "takeoff_import", Path(path).name, "import",
                   after={"lines": added, "rejected": len(rejected), "items": len(touched)}, project_id=project_id)
     return {"lines_added": added, "items_priced_from_takeoff": len(touched), "rejected": rejected}
+
+
+# ----------------------------------------------------------------------------- whole workbooks (one sheet per trade)
+_INFO_LINE = re.compile(r"^\s*(PROJECT|OWNER|CLIENT|LOCATION|SITE)\s*[:\-]\s*(.+?)\s*$", re.IGNORECASE)
+
+
+def _project_info(rs_list: list[RawSheet]) -> dict[str, str]:
+    """Project / owner / location lines such as 'PROJECT : X' found in the first rows of any sheet. Offered to the person, never applied silently."""
+    info: dict[str, str] = {}
+    for rs in rs_list:
+        for rn, cells in rs.rows[:12]:
+            for c in cells:
+                m = _INFO_LINE.match(str(c)) if isinstance(c, str) else None
+                if m:
+                    key = {"PROJECT": "name", "OWNER": "client", "CLIENT": "client", "LOCATION": "location", "SITE": "location"}[m.group(1).upper()]
+                    info.setdefault(key, re.sub(r"\s+", " ", m.group(2)))
+    return info
+
+
+def analyse_workbook(path: Path) -> dict:
+    """Look at every sheet of a workbook and say what each one is, so a whole multi-trade BOQ can be imported in one go.
+
+    role 'boq' = has a header with description + unit + quantity and at least one row with a quantity; anything else is 'skip' with the reason (cover pages, summaries of totals).
+    Nothing is stored."""
+    path = Path(path)
+    sheets, rs_list = [], []
+    for name in list_sheets(path):
+        rs = read_sheet(path, name)
+        rs_list.append(rs)
+        hidx, mapping, amb = detect_header(rs.rows)
+        entry: dict[str, Any] = dict(name=name, rows=len(rs.rows), header_row=None, mapping={}, items=0, headings=0, role="skip", reason="", warnings=list(rs.warnings), ambiguous=amb, sample=[])
+        if hidx is None:
+            entry["reason"] = "No table of items found (looks like a cover page or notes)."
+        else:
+            hrow = rs.rows[hidx][0]
+            mapping, swap = fix_swapped_qty_unit(rs, mapping, hrow)
+            if swap:
+                entry["warnings"].append(swap)
+            missing = [f for f in REQUIRED if mapping.get(f) is None]
+            entry.update(header_row=hrow, mapping=mapping, columns=[str(c) if c is not None else "" for c in header_view(rs.rows, hidx)])
+            if missing:
+                entry["reason"] = ("Totals only - the system calculates totals itself, so nothing to import." if "quantity" in missing and "unit" in missing
+                                   else f"Missing column(s): {', '.join(missing)}.")
+            else:
+                items = heads = 0
+                sample = []
+                for rn, cells in rs.rows:
+                    if rn <= hrow:
+                        continue
+                    q, u = _cell(cells, mapping["quantity"]), _cell(cells, mapping["unit"])
+                    if q is not None and _is_num(q):
+                        items += 1
+                        if len(sample) < 5:
+                            sample.append([_cell(cells, mapping.get("item_code")), _cell(cells, mapping["description"]), q, u])
+                    elif _cell(cells, mapping["description"]) or _cell(cells, mapping.get("item_code")):
+                        heads += 1
+                entry.update(items=items, headings=heads, sample=sample)
+                if items:
+                    entry["role"] = "boq"
+                else:
+                    entry["reason"] = "A table with the right columns but no quantities in it."
+        sheets.append(entry)
+    return dict(file=path.name, sheets=sheets, project_info=_project_info(rs_list), importable=[s["name"] for s in sheets if s["role"] == "boq"])
+
+
+def import_workbook(db: Database, actor: Actor, project_id: str, path: Path, *, sheets: list[str] | None = None, revision: str | None = None) -> dict:
+    """Import every chosen sheet (default: every sheet that holds a BOQ table). Each sheet is its own import, keyed '<sheet>/<code>' and tagged with the sheet as its trade.
+    A sheet that fails is reported and the others still go in; nothing is hidden."""
+    approvals.require_author(actor)
+    info = analyse_workbook(path)
+    chosen = sheets if sheets is not None else info["importable"]
+    out: dict[str, Any] = dict(file=info["file"], sheets=[], items_new=0, items_unchanged=0, rejected=0, needs_review=0, change_requests=0, errors=[])
+    for name in chosen:
+        try:
+            s = import_boq(db, actor, project_id, path, sheet=name, revision=revision, key_prefix=f"{name}/", trade_default=name)
+        except ValidationFailed as e:
+            out["errors"].append(f"{name}: {e.message}")
+            continue
+        out["sheets"].append(dict(name=name, **{k: s[k] for k in ("items_new", "items_unchanged", "rejected", "needs_review", "change_requests", "headings")}))
+        for k in ("items_new", "items_unchanged", "rejected", "needs_review", "change_requests"):
+            out[k] += s[k]
+    return out

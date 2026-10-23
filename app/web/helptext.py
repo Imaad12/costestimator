@@ -274,6 +274,8 @@ _RAW_TERMS: dict[str, str] = {
     "approval chain checked": "Whether every approval on this estimate was made by a registered, accountable person.",
     "dashboard": "Your starting point: what is open, what needs approval and how each tender stands.",
     "approvals": "Everything waiting for a person's decision. You can only decide what your role allows, never your own work.",
+    "boq upload": "Upload a client's Bill of Quantities workbook (one sheet per trade is fine). The system reads every sheet, shows what it found and imports the ones you tick.",
+    "put it in": "The project the lines go into. Leave it on 'a new project' to create one from the project, owner and location written in the file.",
     "boq builder": "Pick catalogue items, type your own quantities and get a Bill of Quantities as an Excel file, or add the lines to a project's BOQ.",
     "boq title": "The name printed at the top of the BOQ document, for example the package or block it covers.",
     "project": "The project this BOQ belongs to. Choose one to add the lines to its BOQ; leave it empty to only download the document.",
