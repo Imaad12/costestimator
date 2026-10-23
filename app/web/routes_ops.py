@@ -94,6 +94,14 @@ def rates_template(actor: Actor = Depends(current_actor)):
     return Response(data, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": 'attachment; filename="rates_workbook_template.xlsx"'})
 
 
+@router.get("/rates/workbook/price-list.xlsx")
+def rates_price_list(actor: Actor = Depends(current_actor)):
+    with tempfile.TemporaryDirectory() as d:
+        p = xl_templates.price_list_workbook(Path(d) / "price_list.xlsx", get_db())
+        data = p.read_bytes()
+    return Response(data, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": 'attachment; filename="price_list_all_resources.xlsx"'})
+
+
 def _rate_args(source_type: str, source_name: str, source_url: str, source_id: str, description: str) -> dict:
     return dict(source_id=source_id or None, source_name=source_name or None, source_url=source_url or None, source_type=source_type, description=description or "",
                 extra_flags=["AWARD_NOT_MARKET_QUOTE"] if source_type == "Public tender award" else None)

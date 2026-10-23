@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block body %}
+<h1>BOQ builder</h1>
+<p class="muted">Pick the items you need, type your quantities, and get a Bill of Quantities as an Excel file, or add the lines straight into a project's BOQ. Quantities are yours: the software never measures drawings or suggests a quantity.</p>
+<div class="steps">
+<div class="step"><span class="n">1</span><b>Pick</b><div class="muted">Open a trade below and type a quantity next to every item you need. Leave the rest empty.</div></div>
+<div class="step"><span class="n">2</span><b>Name it</b><div class="muted">Give the BOQ a title and, if you like, choose the project it belongs to.</div></div>
+<div class="step"><span class="n">3</span><b>Create</b><div class="muted">Download the BOQ document, or add the lines to the project and map them to assemblies.</div></div></div>
+<form method="post" action="/boq-builder/build" id="builder" class="stack">
+<div class="card stack" id="bbar">
+<div class="filter">
+<label>BOQ title<input name="title" placeholder="E.g. Block A - MEP package" size="34"></label>
+<label>Project (optional)<select name="project"><option value="">No project - just give me the document</option>{% for p in projects %}<option value="{{ p.id }}" {{ 'selected' if p.id == project }}>{{ p.id }} - {{ p.name }}</option>{% endfor %}</select></label>
+<label>Find an item <input type="search" id="bfind" placeholder="E.g. cable, chiller, concrete" size="26" autocomplete="off"></label>
+</div>
+<div class="filter"><span id="bcount" class="muted" aria-live="polite">0 items selected</span>
+<button class="btn" name="mode" value="download">Create BOQ document (.xlsx)</button>
+<button class="btn alt" name="mode" value="project">Add to the project's BOQ</button></div>
+</div>
+<p class="muted small">{{ total }} items in the catalogue. A unit rate appears only where an approved rate exists; work items (assemblies) are priced later by the estimate. Items with no rate stay blank in the document - they are never given a made-up price.</p>
+{% for d in divisions %}<details class="card bdiv" {{ 'open' if divisions|length == 1 }}><summary><b>{{ d.code }}. {{ d.name }}</b> <span class="muted">({{ d['items']|length }})</span></summary>
+<table><thead><tr><th>Quantity</th><th>Item</th><th>Description</th><th>Unit</th><th>Type</th><th>Approved rate</th></tr></thead><tbody>
+{% for it in d['items'] %}<tr data-text="{{ (it.key ~ ' ' ~ it.description)|lower }}"><td><input type="text" inputmode="decimal" name="q_{{ it.key }}" aria-label="Quantity of {{ it.description }}" placeholder="0" size="8"></td><td class="nowrap">{{ it.key }}</td><td>{{ it.description }}{% if it.synthetic and not it.rate %} <span class="tag">SYNTHETIC</span>{% endif %}</td><td>{{ it.unit }}</td><td>{{ kinds[it.kind] }}</td><td>{% if it.rate %}{{ it.rate.price }} {{ it.rate.currency }}{% if it.synthetic %} <span class="tag">SYNTHETIC</span>{% endif %}{% else %}<span class="muted">none yet</span>{% endif %}</td></tr>{% endfor %}
+</tbody></table></details>{% endfor %}
+</form>
+<script src="/static/boq_builder.js"></script>
+{% endblock %}

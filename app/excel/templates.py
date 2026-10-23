@@ -102,3 +102,57 @@ def rate_workbook(path: Path, db: Database | None = None) -> Path:
         ws.column_dimensions["A"].width, ws.column_dimensions["B"].width = 18, 70
         wb.save(path)
     return path
+
+
+PRICE_LIST_HEADERS = ["Resource ID", "Description (for new resources)", "Unit", "Unit price", "Currency", "Rate type", "Region", "Price date", "Valid until",
+                      "Source ID (Source Register)", "Supplier ID", "Tax basis", "Delivery basis", "Evidence / reference"]
+PRICE_LIST_REFERENCE = ["Trade", "Type", "Category", "Specification (read only)"]
+
+
+def price_list_workbook(path: Path, db: Database) -> Path:
+    """One row per active catalogue resource (materials, labour, plant, equipment, subcontract packages), ordered by trade, with the price columns left BLANK for a person to fill.
+    Same headers as the 'Rate Dataset' so it uploads as-is; rows left without a price are skipped on import (the rate stays missing)."""
+    from openpyxl.styles import Alignment, PatternFill
+    from openpyxl.utils import get_column_letter
+    from openpyxl.worksheet.datavalidation import DataValidation
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Rate Dataset"
+    intro = ["Price list - every resource in the catalogue (no prices supplied).",
+             "Fill the yellow cells for the items you have prices for: Unit price + Currency (required, never assumed). Add the price date, tax basis and where the price came from. Leave a row blank if you have no price - it simply stays missing.",
+             "Do not change Resource ID or the grey columns. Then upload this file on the Rates workbook page - every priced row becomes a candidate that a different person approves."]
+    for i, t in enumerate(intro, 1):
+        ws.cell(i, 1, t).font = Font(bold=(i == 1), size=12 if i == 1 else 10)
+        ws.merge_cells(start_row=i, start_column=1, end_row=i, end_column=10)
+        ws.cell(i, 1).alignment = Alignment(wrap_text=True, vertical="top")
+    ws.row_dimensions[2].height = ws.row_dimensions[3].height = 30
+    hdr = 5
+    for c, h in enumerate(PRICE_LIST_HEADERS + PRICE_LIST_REFERENCE, 1):
+        cell = ws.cell(hdr, c, h)
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill("solid", fgColor="DDE3F5" if c <= len(PRICE_LIST_HEADERS) else "E7E7E7")
+        cell.alignment = Alignment(wrap_text=True, vertical="center")
+    rows = db.all("SELECT r.id, r.description, r.unit, r.resource_type, r.cost_code, r.category, r.specification, c.name AS trade FROM resources r "
+                  "LEFT JOIN cost_codes c ON c.code = r.cost_code WHERE r.is_active=1 ORDER BY r.cost_code, r.resource_type, r.id")
+    yellow, grey = PatternFill("solid", fgColor="FFF8D6"), PatternFill("solid", fgColor="F2F2F2")
+    for n, r in enumerate(rows, hdr + 1):
+        vals = {1: r["id"], 2: r["description"], 3: r["unit"], 15: f'{r["cost_code"] or ""} {r["trade"] or ""}'.strip(), 16: r["resource_type"], 17: r["category"], 18: r["specification"]}
+        for c in range(1, len(PRICE_LIST_HEADERS) + len(PRICE_LIST_REFERENCE) + 1):
+            cell = ws.cell(n, c, vals.get(c))
+            cell.fill = yellow if 4 <= c <= 14 else grey
+        ws.cell(n, 4).number_format = "#,##0.00"
+        ws.cell(n, 8).number_format = ws.cell(n, 9).number_format = "yyyy-mm-dd"
+    last = hdr + len(rows)
+    ws.freeze_panes = ws.cell(hdr + 1, 3)
+    ws.auto_filter.ref = f"A{hdr}:{get_column_letter(len(PRICE_LIST_HEADERS) + len(PRICE_LIST_REFERENCE))}{last}"
+    for c, w in enumerate([14, 46, 8, 14, 10, 24, 12, 13, 13, 16, 12, 14, 18, 34, 30, 12, 18, 40], 1):
+        ws.column_dimensions[get_column_letter(c)].width = w
+    dv = DataValidation(type="list", formula1='"Included,Excluded"', allow_blank=True)
+    ws.add_data_validation(dv)
+    dv.add(f"L{hdr + 1}:L{last}")
+    dv2 = DataValidation(type="list", formula1='"Verified Supplier Quote,Published Market Price,Official Index or Benchmark,Historical Actual"', allow_blank=True)
+    ws.add_data_validation(dv2)
+    dv2.add(f"F{hdr + 1}:F{last}")
+    wb.save(path)
+    return path

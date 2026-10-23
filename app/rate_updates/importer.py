@@ -204,8 +204,12 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
     errors: list[dict] = []
     ok_rows: list[tuple[int, dict]] = []
     seen: set[str] = set()
+    not_filled = 0
     for rn, r in rows:
         d = dict(r)
+        if d.get("resource_id") and str(d.get("original_price") if d.get("original_price") is not None else "").strip() == "":
+            not_filled += 1                                   # a pre-listed resource whose price was left blank: stays missing, is not a candidate and not an error
+            continue
         d.setdefault("source_type", source_type)
         d["source_type"] = source_type
         d["source_name"] = d.get("source_name") or source_name
@@ -246,12 +250,12 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
                 except (ValidationFailed, Conflict) as e:
                     errors.append({"row": rn, "errors": [e.message]})
     parsing = {"file": path.name, "format": path.suffix.lstrip("."), "rows_read": len(rows), "source_type": source_type, "columns": sorted({k for _, r in rows for k in r}),
-               "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date, "default_tax_basis": default_tax_basis}
+               "not_filled_rows": not_filled, "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date, "default_tax_basis": default_tax_basis}
     mid = mf.write_manifest(db, actor, kind="rates", adapter=adapter, source_id=source_id, source_name=source_name, source_url=source_url,
                             original_path=str(path), stored_path=stored, sha=sha, description=description, dry_run=dry_run, parsing=parsing,
                             accepted=len(ids) if not dry_run else len(ok_rows), rejected=len(errors), errors=errors, candidate_ids=ids)
     if ids:
         db.execute(f"UPDATE rate_candidates SET manifest_id=? WHERE id IN ({','.join('?' * len(ids))})", [mid, *ids])
     return {"manifest_id": mid, "dry_run": dry_run, "rows_read": len(rows), "accepted": len(ids) if not dry_run else len(ok_rows),
-            "rejected": len(errors), "errors": errors, "candidate_ids": ids, "sha256": sha,
+            "rejected": len(errors), "not_filled": not_filled, "errors": errors, "candidate_ids": ids, "sha256": sha,
             "needs_vat": sum(1 for _, d in ok_rows if d.get("tax_basis") not in ("Included", "Excluded"))}
