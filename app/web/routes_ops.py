@@ -111,7 +111,11 @@ def _form_args(f) -> dict:
     """Everything the check / import needs, read from the one form the mapping page posts."""
     g = lambda k, d="": (f.get(k) or d) if hasattr(f, "get") else d          # noqa: E731
     mapping = {fld: int(f[f"map_{fld}"]) for fld, _ in rate_importer.MAP_FIELDS if f.get(f"map_{fld}", "") != ""}
-    return dict(stored=Path(g("stored")).name, sheet=g("sheet") or None, header_row=int(g("header_row")) if g("header_row") else None, mapping=mapping or None,
+    if g("sheet") == "*":                       # every trade sheet of the workbook: each sheet's own header is detected, so no single mapping applies
+        mapping, g_sheet, g_header = {}, None, None
+    else:
+        g_sheet, g_header = g("sheet") or None, int(g("header_row")) if g("header_row") else None
+    return dict(stored=Path(g("stored")).name, sheet=g_sheet, header_row=g_header, mapping=mapping or None,
                 default_currency=g("default_currency").strip() or None, default_date=g("default_date").strip() or None, default_tax_basis=g("default_tax_basis").strip() or None,
                 src=dict(source_name=g("source_name"), source_url=g("source_url"), source_id=g("source_id"), source_type=g("source_type", "Manual dataset"), description=g("description")))
 
@@ -170,7 +174,7 @@ async def rates_remap(request: Request, actor: Actor = Depends(current_actor)):
         info = rate_importer.inspect_file(path, a["sheet"], a["header_row"])
         dry, warn = None, None
         try:
-            if a["mapping"] is None:
+            if a["mapping"] is None and f.get("sheet") != "*":
                 a["mapping"] = info["auto"] or None
             dry = _run(get_db(), actor, a, True)
         except AppError as e:

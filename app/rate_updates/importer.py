@@ -70,6 +70,23 @@ def read_rows(path: Path, sheet: str | None = None, mapping: dict | None = None,
             out.append((i, norm))
         return out
     from ..imports.readers import list_sheets
+    if sheet is None and mapping is None and path.suffix.lower() == ".xlsx" and "Rate Dataset" not in list_sheets(path):        # a sheet named 'Rate Dataset' is the ingestion sheet of the shipped template
+        found = []                                                    # every sheet that has a price column and a resource id / description column (one sheet per trade is the norm)
+        for n in list_sheets(path):
+            rs_n = read_sheet(path, n)
+            h, c = _detect(rs_n)
+            if h is not None:
+                found.append((n, rs_n, h, c))
+        if len(found) > 1:
+            out_all = []
+            for n, rs_n, h, c in found:
+                for rn, cells in rs_n.rows[h + 1:]:
+                    if all(x in (None, "") for x in cells):
+                        continue
+                    out_all.append((f"{n}!{rn}", {f: _cell(cells[i]) if i < len(cells) else None for f, i in c.items()}))
+            return out_all
+        if found:
+            sheet = found[0][0]
     sh = sheet or ("Rate Dataset" if path.suffix.lower() == ".xlsx" and "Rate Dataset" in list_sheets(path) else None)
     rs = read_sheet(path, sh)
     if mapping is not None:                                           # the person mapped the columns by hand
@@ -146,7 +163,11 @@ def inspect_file(path: Path, sheet: str | None = None, header_row: int | None = 
     if path.suffix.lower() == ".json":
         raise ValidationFailed("Column mapping applies to Excel and CSV files; JSON rows are read by field name.", code="MAPPING_NA")
     sheets = list_sheets(path)
-    sh = sheet or ("Rate Dataset" if path.suffix.lower() == ".xlsx" and "Rate Dataset" in sheets else None)
+    sh = sheet
+    if sh is None and path.suffix.lower() == ".xlsx" and "Rate Dataset" not in sheets:
+        sh = next((n for n in sheets if _detect(read_sheet(path, n))[0] is not None), "Rate Dataset" if "Rate Dataset" in sheets else None)      # first sheet that holds a price table
+    if sh is None and "Rate Dataset" in sheets:
+        sh = "Rate Dataset"
     rs = read_sheet(path, sh)
     hidx, auto = _detect(rs)
     if header_row:
@@ -171,7 +192,8 @@ def inspect_file(path: Path, sheet: str | None = None, header_row: int | None = 
         head = hrow[1][i] if i < len(hrow[1]) else None
         cols.append(dict(index=i, header=("" if head is None else str(head)), sample=[_cell(r[i]) for r in body[:max_sample] if i < len(r) and r[i] not in (None, "")][:max_sample],
                          field=next((f for f, ci in auto.items() if ci == i), "")))
-    return dict(sheets=sheets, sheet=rs.name, header_row=hrow[0], columns=cols, auto=auto, rows=len(body), suggested=suggested,
+    price_sheets = [n for n in sheets if path.suffix.lower() == ".xlsx" and "Rate Dataset" not in sheets and _detect(read_sheet(path, n))[0] is not None]
+    return dict(price_sheets=price_sheets, multi=len(price_sheets) > 1, sheets=sheets, sheet=rs.name, header_row=hrow[0], columns=cols, auto=auto, rows=len(body), suggested=suggested,
                 detected=bool(not suggested and "original_price" in auto and ({"resource_id", "description"} & set(auto))),
                 warnings=list(rs.warnings))
 
@@ -204,7 +226,8 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
     errors: list[dict] = []
     ok_rows: list[tuple[int, dict]] = []
     seen: set[str] = set()
-    not_filled = 0
+    not_filled = unchanged = replaces = 0
+    replace_map: dict = {}
     for rn, r in rows:
         d = dict(r)
         if d.get("resource_id") and str(d.get("original_price") if d.get("original_price") is not None else "").strip() == "":
@@ -240,22 +263,31 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
             errors.append({"row": rn, "errors": ["duplicate row within this file"]})
             continue
         seen.add(key)
+        verdict, prior_ids = cand.compare_with_earlier_upload(db, d)
+        if verdict == "unchanged":
+            unchanged += 1                                              # the same price from the same source was already uploaded: nothing to do
+            continue
+        replaces += len(prior_ids)
         ok_rows.append((rn, d))
+        replace_map[rn] = prior_ids
     ids: list[int] = []
     if not dry_run:
         with db.tx():
             for rn, d in ok_rows:
                 try:
-                    ids.append(cand.create_candidate(db, actor, d, manifest_id=None))
+                    new_id = cand.create_candidate(db, actor, d, manifest_id=None)
+                    ids.append(new_id)
+                    for old_id in replace_map.get(rn, []):
+                        cand.supersede(db, actor, old_id, new_id)
                 except (ValidationFailed, Conflict) as e:
                     errors.append({"row": rn, "errors": [e.message]})
     parsing = {"file": path.name, "format": path.suffix.lstrip("."), "rows_read": len(rows), "source_type": source_type, "columns": sorted({k for _, r in rows for k in r}),
-               "not_filled_rows": not_filled, "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date, "default_tax_basis": default_tax_basis}
+               "not_filled_rows": not_filled, "unchanged_rows": unchanged, "replaced_rows": replaces, "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date, "default_tax_basis": default_tax_basis}
     mid = mf.write_manifest(db, actor, kind="rates", adapter=adapter, source_id=source_id, source_name=source_name, source_url=source_url,
                             original_path=str(path), stored_path=stored, sha=sha, description=description, dry_run=dry_run, parsing=parsing,
                             accepted=len(ids) if not dry_run else len(ok_rows), rejected=len(errors), errors=errors, candidate_ids=ids)
     if ids:
         db.execute(f"UPDATE rate_candidates SET manifest_id=? WHERE id IN ({','.join('?' * len(ids))})", [mid, *ids])
     return {"manifest_id": mid, "dry_run": dry_run, "rows_read": len(rows), "accepted": len(ids) if not dry_run else len(ok_rows),
-            "rejected": len(errors), "not_filled": not_filled, "errors": errors, "candidate_ids": ids, "sha256": sha,
+            "rejected": len(errors), "not_filled": not_filled, "unchanged": unchanged, "replaces": replaces, "errors": errors, "candidate_ids": ids, "sha256": sha,
             "needs_vat": sum(1 for _, d in ok_rows if d.get("tax_basis") not in ("Included", "Excluded"))}

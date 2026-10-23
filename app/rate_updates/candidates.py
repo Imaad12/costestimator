@@ -152,6 +152,43 @@ def create_candidate(db: Database, actor: Actor | str, d: dict, *, manifest_id: 
     return cid
 
 
+OPEN_FOR_REPLACEMENT = ("Pending Review", "Needs Verification")
+
+
+def compare_with_earlier_upload(db: Database, d: dict) -> tuple[str, list[int]]:
+    """The latest upload from a source is the source of truth for the items it prices. -> ('unchanged', []) when the same price from the same source is already on file,
+    ('replaces', [ids]) when earlier still-open candidates of that source for the resource carry a different price, ('new', []) otherwise.
+    A blank price in a later upload never retracts an earlier one. Candidates a person has already approved for publication are never touched."""
+    if not (d.get("source_name") and d.get("resource_id")) or D_opt(d.get("original_price")) is None:
+        return "new", []
+    price, cur = D_opt(d["original_price"]), (d.get("currency") or "").upper()
+    unit = d.get("unit")
+    if unit:
+        ur = registry(db).resolve(str(unit))
+        unit = ur.code if ur.status == "ok" else unit
+    replace: list[int] = []
+    for o in db.all("SELECT id, status, original_price, original_currency, original_unit, effective_date, tax_basis FROM rate_candidates "
+                    "WHERE source_name=? AND resource_id=? AND status IN ('Pending Review','Needs Verification','Approved for Publication') ORDER BY id DESC", (d["source_name"], d["resource_id"])):
+        same = (D_opt(o["original_price"]) == price and (o["original_currency"] or "") == cur and (not unit or (o["original_unit"] or "") == unit)
+                and (not d.get("effective_date") or str(o["effective_date"])[:10] == str(d["effective_date"])[:10])
+                and (d.get("tax_basis") not in ("Included", "Excluded") or o["tax_basis"] == d["tax_basis"]))
+        if same:
+            return "unchanged", []
+        if o["status"] in OPEN_FOR_REPLACEMENT:
+            replace.append(o["id"])
+    return ("replaces", replace) if replace else ("new", [])
+
+
+def supersede(db: Database, actor: Actor | str, old_id: int, new_id: int) -> None:
+    """Retire an earlier still-open candidate because a later upload from the same source gave a new price for the same item. The record stays (status Rejected, reason names the replacement)."""
+    old, new = get(db, old_id), get(db, new_id)
+    if old["status"] not in OPEN_FOR_REPLACEMENT:
+        return
+    db.update("rate_candidates", {"status": "Rejected", "reviewer": "system:importer", "reviewed_at": now_iso(),
+                                  "review_comments": f"Superseded by {new['candidate_ref']}: a later upload from the same source priced this item again (latest upload is the source of truth)."}, "id=?", (old_id,))
+    audit.log(db, actor, "rate_candidate", old["candidate_ref"], "superseded", before={"price": old["original_price"]}, after={"by": new["candidate_ref"], "price": new["original_price"]})
+
+
 def get(db: Database, cid: int) -> dict:
     r = db.one("SELECT * FROM rate_candidates WHERE id=? OR candidate_ref=?", (cid if str(cid).isdigit() else -1, str(cid)))
     if not r:

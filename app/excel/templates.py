@@ -110,49 +110,79 @@ PRICE_LIST_REFERENCE = ["Trade", "Type", "Category", "Specification (read only)"
 
 
 def price_list_workbook(path: Path, db: Database) -> Path:
-    """One row per active catalogue resource (materials, labour, plant, equipment, subcontract packages), ordered by trade, with the price columns left BLANK for a person to fill.
-    Same headers as the 'Rate Dataset' so it uploads as-is; rows left without a price are skipped on import (the rate stays missing)."""
+    """The price list, one sheet per trade division (A-L). One row per active catalogue resource with the price columns left BLANK for a person to fill.
+    Every trade sheet has the 'Rate Dataset' headers, so the file uploads as-is; the upload reads every trade sheet, skips rows without a price, and treats the latest upload from a
+    source as the source of truth, so the sheets can be filled in parts and uploaded again."""
+    import re
+
     from openpyxl.styles import Alignment, PatternFill
     from openpyxl.utils import get_column_letter
     from openpyxl.worksheet.datavalidation import DataValidation
 
     wb = Workbook()
-    ws = wb.active
-    ws.title = "Rate Dataset"
-    intro = ["Price list - every resource in the catalogue (no prices supplied).",
-             "Fill the yellow cells for the items you have prices for: Unit price + Currency (required, never assumed). Add the price date, tax basis and where the price came from. Leave a row blank if you have no price - it simply stays missing.",
-             "Do not change Resource ID or the grey columns. Then upload this file on the Rates workbook page - every priced row becomes a candidate that a different person approves."]
-    for i, t in enumerate(intro, 1):
-        ws.cell(i, 1, t).font = Font(bold=(i == 1), size=12 if i == 1 else 10)
-        ws.merge_cells(start_row=i, start_column=1, end_row=i, end_column=10)
-        ws.cell(i, 1).alignment = Alignment(wrap_text=True, vertical="top")
-    ws.row_dimensions[2].height = ws.row_dimensions[3].height = 30
-    hdr = 5
-    for c, h in enumerate(PRICE_LIST_HEADERS + PRICE_LIST_REFERENCE, 1):
-        cell = ws.cell(hdr, c, h)
-        cell.font = Font(bold=True)
-        cell.fill = PatternFill("solid", fgColor="DDE3F5" if c <= len(PRICE_LIST_HEADERS) else "E7E7E7")
-        cell.alignment = Alignment(wrap_text=True, vertical="center")
-    rows = db.all("SELECT r.id, r.description, r.unit, r.resource_type, r.cost_code, r.category, r.specification, c.name AS trade FROM resources r "
-                  "LEFT JOIN cost_codes c ON c.code = r.cost_code WHERE r.is_active=1 ORDER BY r.cost_code, r.resource_type, r.id")
-    yellow, grey = PatternFill("solid", fgColor="FFF8D6"), PatternFill("solid", fgColor="F2F2F2")
-    for n, r in enumerate(rows, hdr + 1):
-        vals = {1: r["id"], 2: r["description"], 3: r["unit"], 15: f'{r["cost_code"] or ""} {r["trade"] or ""}'.strip(), 16: r["resource_type"], 17: r["category"], 18: r["specification"]}
-        for c in range(1, len(PRICE_LIST_HEADERS) + len(PRICE_LIST_REFERENCE) + 1):
-            cell = ws.cell(n, c, vals.get(c))
-            cell.fill = yellow if 4 <= c <= 14 else grey
-        ws.cell(n, 4).number_format = "#,##0.00"
-        ws.cell(n, 8).number_format = ws.cell(n, 9).number_format = "yyyy-mm-dd"
-    last = hdr + len(rows)
-    ws.freeze_panes = ws.cell(hdr + 1, 3)
-    ws.auto_filter.ref = f"A{hdr}:{get_column_letter(len(PRICE_LIST_HEADERS) + len(PRICE_LIST_REFERENCE))}{last}"
-    for c, w in enumerate([14, 46, 8, 14, 10, 24, 12, 13, 13, 16, 12, 14, 18, 34, 30, 12, 18, 40], 1):
-        ws.column_dimensions[get_column_letter(c)].width = w
-    dv = DataValidation(type="list", formula1='"Included,Excluded"', allow_blank=True)
-    ws.add_data_validation(dv)
-    dv.add(f"L{hdr + 1}:L{last}")
-    dv2 = DataValidation(type="list", formula1='"Verified Supplier Quote,Published Market Price,Official Index or Benchmark,Historical Actual"', allow_blank=True)
-    ws.add_data_validation(dv2)
-    dv2.add(f"F{hdr + 1}:F{last}")
+    start = wb.active
+    start.title = "Start here"
+    divs = {r["code"]: r["name"] for r in db.all("SELECT code, name FROM cost_codes WHERE level=1 ORDER BY code")}
+    rows = db.all("SELECT r.id, r.description, r.unit, r.resource_type, r.cost_code, r.category, r.specification FROM resources r WHERE r.is_active=1 ORDER BY r.cost_code, r.resource_type, r.id")
+    by_div: dict[str, list] = {}
+    for r in rows:
+        by_div.setdefault((r["cost_code"] or "?")[:1] or "?", []).append(r)
+    yellow, grey, blue = PatternFill("solid", fgColor="FFF8D6"), PatternFill("solid", fgColor="F2F2F2"), PatternFill("solid", fgColor="DDE3F5")
+    used: set[str] = set()
+    index = []
+    for code in sorted(by_div):
+        name = divs.get(code, "Other")
+        title = re.sub(r"[\[\]:*?/\\]", " ", f"{code} {name}")[:31].strip()
+        while title in used:
+            title = title[:28] + "..."
+        used.add(title)
+        ws = wb.create_sheet(title)
+        intro = [f"Price list - {code}. {name}",
+                 "Fill the yellow cells for the items you have prices for: Unit price + Currency (required, never assumed), then the price date, tax basis and where the price came from. Leave a row blank if you have no price - it stays missing.",
+                 "Do not change Resource ID or the grey columns. Fill any sheets, in any order, in as many rounds as you like: upload the workbook each time with the same Source name - the latest upload is the source of truth for the items it prices."]
+        for n, t in enumerate(intro, 1):
+            ws.cell(n, 1, t).font = Font(bold=(n == 1), size=12 if n == 1 else 10)
+            ws.merge_cells(start_row=n, start_column=1, end_row=n, end_column=10)
+            ws.cell(n, 1).alignment = Alignment(wrap_text=True, vertical="top")
+        ws.row_dimensions[2].height = ws.row_dimensions[3].height = 30
+        hdr = 5
+        for c, h in enumerate(PRICE_LIST_HEADERS + PRICE_LIST_REFERENCE, 1):
+            cell = ws.cell(hdr, c, h)
+            cell.font, cell.alignment = Font(bold=True), Alignment(wrap_text=True, vertical="center")
+            cell.fill = blue if c <= len(PRICE_LIST_HEADERS) else PatternFill("solid", fgColor="E7E7E7")
+        for n, r in enumerate(by_div[code], hdr + 1):
+            vals = {1: r["id"], 2: r["description"], 3: r["unit"], 15: f'{r["cost_code"] or ""}', 16: r["resource_type"], 17: r["category"], 18: r["specification"]}
+            for c in range(1, len(PRICE_LIST_HEADERS) + len(PRICE_LIST_REFERENCE) + 1):
+                cell = ws.cell(n, c, vals.get(c))
+                cell.fill = yellow if 4 <= c <= 14 else grey
+            ws.cell(n, 4).number_format = "#,##0.00"
+            ws.cell(n, 8).number_format = ws.cell(n, 9).number_format = "yyyy-mm-dd"
+        last = hdr + len(by_div[code])
+        ws.freeze_panes = ws.cell(hdr + 1, 3)
+        ws.auto_filter.ref = f"A{hdr}:{get_column_letter(len(PRICE_LIST_HEADERS) + len(PRICE_LIST_REFERENCE))}{last}"
+        for c, w in enumerate([14, 46, 8, 14, 10, 24, 12, 13, 13, 16, 12, 14, 18, 34, 12, 12, 18, 40], 1):
+            ws.column_dimensions[get_column_letter(c)].width = w
+        dv = DataValidation(type="list", formula1='"Included,Excluded"', allow_blank=True)
+        dv2 = DataValidation(type="list", formula1='"Verified Supplier Quote,Published Market Price,Official Index or Benchmark,Historical Actual"', allow_blank=True)
+        ws.add_data_validation(dv)
+        ws.add_data_validation(dv2)
+        dv.add(f"L{hdr + 1}:L{last}")
+        dv2.add(f"F{hdr + 1}:F{last}")
+        index.append((title, name, len(by_div[code])))
+    lines = [("Price list - all trades", "h"),
+             ("One sheet per trade. Open a trade, type the prices you have (Unit price + Currency), leave the rest blank. Yellow = you fill it, grey = reference, do not change.", ""),
+             ("You can fill it in parts: save, upload, come back later, fill more sheets, upload again. Use the SAME Source name each time. For every item you price again the latest upload replaces the earlier price (the earlier one is kept in the history); items you leave blank keep whatever was uploaded before.", ""),
+             ("Nothing becomes a rate on upload: each price is a candidate that a different person approves.", ""), ("", "")]
+    for n, (t, k) in enumerate(lines, 1):
+        start.cell(n, 1, t).font = Font(bold=(k == "h"), size=14 if k == "h" else 10)
+        start.cell(n, 1).alignment = Alignment(wrap_text=True, vertical="top")
+        start.merge_cells(start_row=n, start_column=1, end_row=n, end_column=4)
+        start.row_dimensions[n].height = 20 if k == "h" else 34
+    start.append(["Sheet", "Trade", "Items"])
+    for c in start[len(lines) + 1]:
+        c.font = Font(bold=True)
+    for t, n, k in index:
+        start.append([t, n, k])
+    start.column_dimensions["A"].width, start.column_dimensions["B"].width, start.column_dimensions["C"].width = 32, 48, 10
     wb.save(path)
     return path
