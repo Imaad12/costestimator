@@ -105,14 +105,17 @@ def rate_workbook(path: Path, db: Database | None = None) -> Path:
 
 
 PRICE_LIST_HEADERS = ["Resource ID", "Description (for new resources)", "Unit", "Unit price", "Currency", "Rate type", "Region", "Price date", "Valid until",
-                      "Source ID (Source Register)", "Supplier ID", "Tax basis", "Delivery basis", "Evidence / reference"]
+                      "Source ID (Source Register)", "Supplier ID", "Tax basis", "Delivery basis", "Evidence / reference",
+                      "Source type", "Source URL", "Supplier / source name", "Retrieval date"]
 PRICE_LIST_REFERENCE = ["Trade", "Type", "Category", "Specification (read only)"]
 
 
-def price_list_workbook(path: Path, db: Database) -> Path:
+def price_list_workbook(path: Path, db: Database, prefill: dict[str, list[dict]] | None = None) -> Path:
     """The price list, one sheet per trade division (A-L). One row per active catalogue resource with the price columns left BLANK for a person to fill.
     Every trade sheet has the 'Rate Dataset' headers, so the file uploads as-is; the upload reads every trade sheet, skips rows without a price, and treats the latest upload from a
-    source as the source of truth, so the sheets can be filled in parts and uploaded again."""
+    source as the source of truth, so the sheets can be filled in parts and uploaded again.
+    `prefill` (optional) maps a resource id to one or more dicts keyed by the header names above; each becomes a row (the extra ones right under the resource), used to hand over prices
+    that were gathered from published sources, with their source URL and evidence, for a person to verify."""
     import re
 
     from openpyxl.styles import Alignment, PatternFill
@@ -150,24 +153,33 @@ def price_list_workbook(path: Path, db: Database) -> Path:
             cell = ws.cell(hdr, c, h)
             cell.font, cell.alignment = Font(bold=True), Alignment(wrap_text=True, vertical="center")
             cell.fill = blue if c <= len(PRICE_LIST_HEADERS) else PatternFill("solid", fgColor="E7E7E7")
-        for n, r in enumerate(by_div[code], hdr + 1):
-            vals = {1: r["id"], 2: r["description"], 3: r["unit"], 15: f'{r["cost_code"] or ""}', 16: r["resource_type"], 17: r["category"], 18: r["specification"]}
-            for c in range(1, len(PRICE_LIST_HEADERS) + len(PRICE_LIST_REFERENCE) + 1):
-                cell = ws.cell(n, c, vals.get(c))
-                cell.fill = yellow if 4 <= c <= 14 else grey
-            ws.cell(n, 4).number_format = "#,##0.00"
-            ws.cell(n, 8).number_format = ws.cell(n, 9).number_format = "yyyy-mm-dd"
-        last = hdr + len(by_div[code])
+        nh = len(PRICE_LIST_HEADERS)
+        n = hdr
+        for r in by_div[code]:
+            for k, fill_row in enumerate((prefill or {}).get(r["id"]) or [{}]):
+                n += 1
+                vals = {1: r["id"], 2: r["description"], 3: r["unit"], nh + 1: f'{r["cost_code"] or ""}', nh + 2: r["resource_type"], nh + 3: r["category"], nh + 4: r["specification"]}
+                for hname, v in fill_row.items():
+                    vals[PRICE_LIST_HEADERS.index(hname) + 1] = v
+                for c in range(1, nh + len(PRICE_LIST_REFERENCE) + 1):
+                    cell = ws.cell(n, c, vals.get(c))
+                    cell.fill = yellow if 4 <= c <= nh else grey
+                ws.cell(n, 4).number_format = "#,##0.00"
+                ws.cell(n, 8).number_format = ws.cell(n, 9).number_format = "yyyy-mm-dd"
+        last = n
         ws.freeze_panes = ws.cell(hdr + 1, 3)
         ws.auto_filter.ref = f"A{hdr}:{get_column_letter(len(PRICE_LIST_HEADERS) + len(PRICE_LIST_REFERENCE))}{last}"
-        for c, w in enumerate([14, 46, 8, 14, 10, 24, 12, 13, 13, 16, 12, 14, 18, 34, 12, 12, 18, 40], 1):
+        for c, w in enumerate([14, 46, 8, 14, 10, 24, 12, 13, 13, 16, 12, 14, 18, 60, 18, 44, 26, 13, 12, 12, 18, 40], 1):
             ws.column_dimensions[get_column_letter(c)].width = w
         dv = DataValidation(type="list", formula1='"Included,Excluded"', allow_blank=True)
         dv2 = DataValidation(type="list", formula1='"Verified Supplier Quote,Published Market Price,Official Index or Benchmark,Historical Actual"', allow_blank=True)
         ws.add_data_validation(dv)
         ws.add_data_validation(dv2)
+        dv3 = DataValidation(type="list", formula1='"Manual dataset,Supplier website,Manufacturer website,Quotation,Public tender award,Historical project"', allow_blank=True)
+        ws.add_data_validation(dv3)
         dv.add(f"L{hdr + 1}:L{last}")
         dv2.add(f"F{hdr + 1}:F{last}")
+        dv3.add(f"O{hdr + 1}:O{last}")
         index.append((title, name, len(by_div[code])))
     lines = [("Price list - all trades", "h"),
              ("One sheet per trade. Open a trade, type the prices you have (Unit price + Currency), leave the rest blank. Yellow = you fill it, grey = reference, do not change.", ""),

@@ -144,3 +144,24 @@ def test_rates_upload_page_imports_every_trade_sheet_of_the_price_list(client):
     stored = re.search(r'name="stored" value="([^"]+)"', chk.text).group(1)
     done = client.post("/rates/workbook/import", data={**meta, "stored": stored, "sheet": "*", "header_row": "5"}, follow_redirects=False)
     assert "2+price+row" in done.headers["location"], done.headers["location"]
+
+
+def test_prefilled_price_list_keeps_each_rows_own_source_url_type_and_date(client, tmp_path):
+    """Prices gathered from published sources travel with their own URL / source type / retrieval date and arrive as candidates in Pending Review, never as rates."""
+    from app.excel import templates as T
+    from app.models.actor import Actor
+    from app.rate_updates import importer
+    db = get_db()
+    a, b = [r["id"] for r in db.all("SELECT id FROM resources WHERE is_active=1 ORDER BY cost_code, id")][:2]
+    pre = {a: [{"Unit price": 12.5, "Currency": "SAR", "Source type": "Supplier website", "Source URL": "https://shop.example.invalid/a", "Supplier / source name": "Shop A (SYNTHETIC)",
+                "Retrieval date": "2026-10-24", "Evidence / reference": "quote 12.50", "Tax basis": "Included"},
+               {"Unit price": 14, "Currency": "SAR", "Source type": "Manufacturer website", "Source URL": "https://maker.example.invalid/a", "Supplier / source name": "Maker A (SYNTHETIC)",
+                "Retrieval date": "2026-10-24"}]}
+    f = T.price_list_workbook(tmp_path / "pre.xlsx", db, prefill=pre)
+    r = importer.import_rates_file(db, Actor("proc", "Procurement Reviewer", "proc"), f, source_name="Web research test (SYNTHETIC)", source_type="Manual dataset")
+    assert (r["accepted"], r["rejected"]) == (2, 0)
+    rows = {x["source_url"]: x for x in db.all("SELECT * FROM rate_candidates WHERE manifest_id=?", (r["manifest_id"],))}
+    assert rows["https://shop.example.invalid/a"]["source_type"] == "Supplier website" and rows["https://shop.example.invalid/a"]["source_name"] == "Shop A (SYNTHETIC)"
+    assert rows["https://maker.example.invalid/a"]["source_type"] == "Manufacturer website" and rows["https://maker.example.invalid/a"]["status"] == "Pending Review"
+    assert rows["https://shop.example.invalid/a"]["tax_basis"] == "Included" and str(rows["https://shop.example.invalid/a"]["retrieved_at"]).startswith("2026-10-24")
+    assert db.scalar("SELECT COUNT(*) FROM resource_rates WHERE resource_id=? AND unit_price IN ('12.5','12.50','14')", (a,)) == 0              # no rate was created

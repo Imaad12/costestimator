@@ -35,7 +35,7 @@ def _s(v) -> str:
 
 
 def _rates(db: Database):
-    for r in rows_to_dicts(db.all("SELECT * FROM resource_rates WHERE status='Pending Review' ORDER BY id LIMIT 200")):
+    for r in rows_to_dicts(db.all("SELECT * FROM resource_rates WHERE status='Pending Review' ORDER BY id LIMIT 5000")):
         title = f"{r['resource_id']} - {r['unit_price']} {r['currency']}/{_s(r['unit'])}"
         detail = f"{r['rate_type']} - v{r['version']}" + (f" - project {r['project_id']} (project-only)" if r["project_id"] else " - global library")
         a = op("approve_rate", {"rate_id": r["id"]})
@@ -154,7 +154,7 @@ def _versions(db: Database):
 
 def _candidates(db: Database):
     from ..rate_updates import candidates as rc
-    for r in rows_to_dicts(db.all("SELECT * FROM rate_candidates WHERE status IN ('Pending Review','Needs Verification','Approved for Publication') ORDER BY id LIMIT 200")):
+    for r in rows_to_dicts(db.all("SELECT * FROM rate_candidates WHERE status IN ('Pending Review','Needs Verification','Approved for Publication') ORDER BY id LIMIT 5000")):
         title = f"{r['candidate_ref']} - {_s(r['description'])[:60]}"
         detail = f"{_s(r['original_price'])} {_s(r['original_currency'])}/{_s(r['original_unit'])} - {_s(r['source_name'])} - {r['status']}"
         link = f"/rates/updates/{r['candidate_ref']}"

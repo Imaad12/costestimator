@@ -30,7 +30,8 @@ SYN = {
     "retrieved_at": ["retrieved_at", "retrieved", "retrieval date", "date retrieved", "accessed"],
     "source_published_at": ["publication date", "published", "published_at", "date published"],
     "source_url": ["source_url", "source url", "url", "link", "source"],
-    "source_name": ["source_name", "source name", "supplier", "vendor", "publisher"],
+    "source_name": ["source_name", "source name", "supplier", "vendor", "publisher", "supplier / source name"],
+    "source_type": ["source type"],
     "tax_basis": ["tax_basis", "tax basis", "vat", "vat basis", "vat treatment"],
     "delivery_basis": ["delivery_basis", "delivery basis", "delivery", "incoterm"],
     "installation_included": ["installation_included", "installation", "installed"],
@@ -233,8 +234,7 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
         if d.get("resource_id") and str(d.get("original_price") if d.get("original_price") is not None else "").strip() == "":
             not_filled += 1                                   # a pre-listed resource whose price was left blank: stays missing, is not a candidate and not an error
             continue
-        d.setdefault("source_type", source_type)
-        d["source_type"] = source_type
+        d["source_type"] = d["source_type"] if d.get("source_type") in cand.SOURCE_TYPES else source_type          # a 'Source type' column in the file wins; otherwise the one chosen for the upload
         d["source_name"] = d.get("source_name") or source_name
         d["source_id"] = source_id
         d["source_url"] = d.get("source_url") or source_url or ref

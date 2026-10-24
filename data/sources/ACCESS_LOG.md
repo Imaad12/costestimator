@@ -70,6 +70,7 @@ Date of research: 2026-10-12. Register: `source_register.csv` (27 sources, SRC-0
 | 41 | firecrawl_scrape | KAPSARC .../records?limit=100&where=time_period=date'2026-04-01'&order_by=... | OK - 39 records; saved verbatim to data/public_data/gastat_cci/kapsarc_cci_2026-04.records.json. |
 | 42 | curl (HEAD, one attempt each) | https://www.stats.gov.sa, https://datasaudi.sa, https://opendata.stats.gov.sa, https://datasource.kapsarc.org, https://data.gov.sa, https://tenders.etimad.sa | ALL FAILED from the sandbox (curl exit/HTTP code 000 via the agent proxy). Recorded as blocked from the environment; not retried. |
 | 43 | application HTTP client (`python -m app.cli sources refresh --provider kapsarc-gastat-cci`), twice | datasource.kapsarc.org/robots.txt then the records endpoint | BLOCKED - `URLError: Tunnel connection failed: 403 Forbidden` reading robots.txt; no data request made (conservative). Logged in `source_access_log`. First attempt (before the message was clarified) showed the same refusal. |
+| 44 | firecrawl_search / firecrawl_scrape (5 research agents + manual spot checks), ~190 calls in total, rate-limited by the plan, no retry loops | 32 public retail / supplier / price-guide sites (see SRC-028 onward) | OK for public pages; swsg.co, youmats.com blocked (403/CAPTCHA) and left; gccpricing.com read but judged unreliable (wrong currency/units) and excluded; CEIC (paywalled) and the SCA report (written permission needed) excluded; 6 of 6 sampled prices re-fetched and matched the live page (2026-10-24). |
 
 ## Reuse assessment (short)
 

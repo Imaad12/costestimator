@@ -80,7 +80,7 @@ def test_tax_and_fx_seeds_are_pending_until_a_human_verifies(seeded):
     vat = seeded.one("SELECT * FROM tax_categories WHERE code='VAT-STD'")
     assert vat["status"] == "Pending Review" and vat["rate_pct"] == "15" and "verify" in vat["verification_note"].lower()
     assert seeded.scalar("SELECT status FROM fx_rates WHERE from_ccy='USD'") == "Pending Review"
-    assert seeded.scalar("SELECT COUNT(*) FROM sources") == 27
+    assert seeded.scalar("SELECT COUNT(*) FROM sources") == 59          # 27 + 32 public web price sites added 24 Oct 2026
 
 
 def test_circular_assemblies_are_prevented(seeded):
