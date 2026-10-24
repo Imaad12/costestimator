@@ -101,4 +101,4 @@ MIT (see `LICENSE`). Commercial and contractual outputs (offer letters, schedule
 
 
 ## Using the web application
-Start it with `scripts/demo_web.sh` and sign in. Day-to-day work happens in **Approvals** (one inbox with approve/reject buttons), **Rates workbook** (Excel template, upload, preview, import) and **Settings** (users, audit trail, integrity hashes, standards, rules and documents). See `docs/USER_GUIDE.md` section 11 and `docs/DOS_AND_DONTS.md`.
+Start it with `scripts/demo_web.sh` and sign in. Day-to-day work happens in **Approvals** (one inbox with approve/reject buttons), **BOQ upload** (a client's whole multi-sheet BOQ workbook in one go), **BOQ builder** (pick catalogue items, type quantities, get a BOQ document or add the lines to a project), **Rates workbook** (price list with one sheet per trade, upload in parts - the latest upload from a source wins - preview, import) and **Settings** (users, audit trail, integrity hashes, standards, rules and documents). See `docs/USER_GUIDE.md` section 11 and `docs/DOS_AND_DONTS.md`.

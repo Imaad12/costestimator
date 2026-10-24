@@ -1,6 +1,6 @@
 # Data model and source-of-truth rules
 
-SQLite (`var/ksa_estimator.db`), schema = numbered SQL files in `app/migrations/` (0001 core … 0015 end-to-end closure, 0016 project basis flag). Decimals are stored as exact TEXT.
+SQLite (`var/ksa_estimator.db`), schema = numbered SQL files in `app/migrations/` (0001 core … 0015 end-to-end closure, 0016 project basis flag, 0017 document discipline, 0018 unit spellings). Decimals are stored as exact TEXT.
 Everything below is **implemented** unless marked otherwise.
 
 ## The eleven data classes and where each lives
@@ -68,6 +68,9 @@ Forward-only numbered SQL (`app/migrations`), applied once, recorded in `schema_
 * Programme: `productivity_norms` (versioned, 7 states, origin, evidence status), `workforce_profiles` (archetype, roles, shifts, attendance, fronts, role costs), `work_activities` (project activities; quantity read from `boq_items`), `programme_baselines` (saved results + fingerprint + approval).
 * Tender: `tender_enquiries`, `tender_documents` (received documents, revisions, content status), `tender_queries` (8 registers, draft-only workflow), `tender_register_items` (compliance, ITP, method statement, HSE, permit, submittal, testing, NCR structure, bid/no-bid, context ...), `open_actions`.
 * Output: `tender_packs` (kind tender/handover, revision, classification, manifest hash), `generated_documents` (doc id, template id/version, status, applicability + reason, checksum, facts printed, references). `standards_register` holds source references.
+
+## Unit spellings (migration 0018)
+Reference data only: adds the spellings `psc` (number) and `lot` (lump sum) to existing unit synonyms so real BOQs resolve; no unit is added or redefined. Existing databases get it by migration, new ones from `data/units/units.csv`.
 
 ## Project basis flag (migration 0016)
 `projects.basis_defaulted` = 1 when a project was created without an explicit region and currency (KSA-ALL / SAR were applied as defaults). It blocks production readiness and prints a banner until `projects.confirm_basis` (action `confirm_project_basis`) is called by a person.

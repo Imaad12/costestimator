@@ -42,5 +42,18 @@ Method: an automated pass over 41 pages (every project section, rates, libraries
 
 After the fixes the same audit reports **0 axe-core violations on all 41 pages in both light and dark**. The five remaining notes are intentional: three tables that show only headers until data exists, an empty-state message that already tells the person what to do, and the word "undefined" inside a sentence about unclear scope. Not covered: screen-reader testing by a person, Microsoft Edge/Safari rendering.
 
+## BOQ upload, BOQ builder, price list (24 Oct 2026)
+Run in a browser as estimator and procurement, plus the full suite (508 tests).
+
+| # | Found | Fix |
+|---|---|---|
+| 1 | Approve / Needs verification buttons clipped on candidate rows (desktop and phone) | Button column sizes to its content; single column on phones |
+| 2 | A real 6-trade client BOQ imported 0 lines (two-row headings, QTY/UNIT headings swapped, repeated `a.`/`b.` codes, total lines, PSC/LOT units) | Importer reads stacked headings, swaps back with a warning, composes sub-item codes, skips total lines, new unit spellings; 177 lines, matches an independent cell count |
+| 3 | BOQ builder form (about 1,040 boxes) refused by the server's 1,000-field limit | Limit raised; page sends only filled boxes |
+| 4 | Rates upload form posted a single sheet, so a per-trade price list imported only the first trade | "All trade sheets" option; covered by a test |
+| 5 | Approvals inbox cut the rate-candidate queue at 200 | Limit 5,000 |
+
+Not covered: real-world price quality. Web-sourced prices are indicative and unverified (see `KNOWN_LIMITATIONS.md`).
+
 ## Not covered
 Microsoft Excel itself, live public sources, real rates and real users: see `KNOWN_LIMITATIONS.md`.
