@@ -165,3 +165,31 @@ def test_prefilled_price_list_keeps_each_rows_own_source_url_type_and_date(clien
     assert rows["https://maker.example.invalid/a"]["source_type"] == "Manufacturer website" and rows["https://maker.example.invalid/a"]["status"] == "Pending Review"
     assert rows["https://shop.example.invalid/a"]["tax_basis"] == "Included" and str(rows["https://shop.example.invalid/a"]["retrieved_at"]).startswith("2026-10-24")
     assert db.scalar("SELECT COUNT(*) FROM resource_rates WHERE resource_id=? AND unit_price IN ('12.5','12.50','14')", (a,)) == 0              # no rate was created
+
+
+def test_upload_can_create_the_catalogue_item_a_row_asks_for_and_reuses_it_next_time(client, tmp_path):
+    """'New item type' is the uploader's explicit, per-row instruction: the item is created (once), the price is a High-confidence candidate in Pending Review - never a rate."""
+    from openpyxl import Workbook
+    from app.models.actor import Actor
+    from app.rate_updates import importer
+    db = get_db()
+    H = ["Description (for new resources)", "Unit", "Unit price", "Currency", "Source type", "Source URL", "Supplier / source name", "New item type", "Trade code", "Confidence"]
+
+    def make(name, rows):
+        wb = Workbook(); ws = wb.active; ws.append(H)
+        for r in rows:
+            ws.append(r)
+        p = tmp_path / name; wb.save(p); return p
+    base = ["Test plaster 20 mm installed (SYNTHETIC)", "m2", 40.38, "SAR", "Historical project", "uploaded-file:test.pdf#page=1", "Test priced BOQ (SYNTHETIC)", "subcontract", "D.03", "High"]
+    proc = Actor("proc", "Procurement Reviewer", "proc")
+    r1 = importer.import_rates_file(db, proc, make("a.xlsx", [base, ["Bad row", "m2", 5, "SAR", "Historical project", "uploaded-file:test.pdf#page=1", "Test priced BOQ (SYNTHETIC)", "nonsense", "D.03", "High"]]),
+                                    source_name="Test priced BOQ (SYNTHETIC)", source_type="Manual dataset")
+    assert (r1["accepted"], r1["rejected"], r1["new_items"]) == (1, 1, 1) and "needs a type" in r1["errors"][0]["errors"][0]
+    rid = db.scalar("SELECT id FROM resources WHERE description=?", (base[0],))
+    assert rid and rid.startswith("SUB-D-") and db.scalar("SELECT cost_code FROM resources WHERE id=?", (rid,)) == "D.03"
+    c = db.one("SELECT * FROM rate_candidates WHERE resource_id=?", (rid,))
+    assert c["confidence"] == "High" and c["status"] == "Pending Review" and c["source_type"] == "Historical project" and c["original_price"] == "40.38"
+    r2 = importer.import_rates_file(db, proc, make("b.xlsx", [base[:2] + [41.5] + base[3:]]), source_name="Test priced BOQ (SYNTHETIC)", source_type="Manual dataset")      # a later upload: same item reused, newer price replaces the open one
+    assert (r2["accepted"], r2["new_items"], r2["replaces"]) == (1, 0, 1)
+    assert db.scalar("SELECT COUNT(*) FROM resources WHERE description=?", (base[0],)) == 1
+    assert db.scalar("SELECT COUNT(*) FROM resource_rates WHERE resource_id=? AND unit_price IS NOT NULL", (rid,)) == 0                                                          # no rate exists

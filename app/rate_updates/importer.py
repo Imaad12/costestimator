@@ -15,6 +15,8 @@ from ..core.errors import Conflict, ValidationFailed
 from ..core.timeutil import today_iso
 from ..database import Database
 from ..imports.readers import read_sheet, sha256_file
+from ..core.units import registry
+from ..services import rates as rates_svc
 from . import candidates as cand
 from . import manifest as mf
 
@@ -32,6 +34,9 @@ SYN = {
     "source_url": ["source_url", "source url", "url", "link", "source"],
     "source_name": ["source_name", "source name", "supplier", "vendor", "publisher", "supplier / source name"],
     "source_type": ["source type"],
+    "new_item_type": ["new item type"],
+    "cost_code": ["trade code", "cost code"],
+    "confidence": ["confidence"],
     "tax_basis": ["tax_basis", "tax basis", "vat", "vat basis", "vat treatment"],
     "delivery_basis": ["delivery_basis", "delivery basis", "delivery", "incoterm"],
     "installation_included": ["installation_included", "installation", "installed"],
@@ -123,7 +128,8 @@ def _detect(rs) -> tuple[int | None, dict]:
 
 MAP_FIELDS = [("resource_id", "Resource ID"), ("description", "Description"), ("specification", "Specification"), ("unit", "Unit"), ("original_price", "Unit price"),
               ("currency", "Currency"), ("effective_date", "Price date"), ("valid_until", "Valid until"), ("source_url", "Source URL or reference"), ("source_name", "Supplier / source name"),
-              ("tax_basis", "Tax (VAT) basis"), ("delivery_basis", "Delivery basis"), ("installation_included", "Installation included"), ("price_kind", "Price kind"), ("evidence_snippet", "Evidence / notes")]
+              ("tax_basis", "Tax (VAT) basis"), ("delivery_basis", "Delivery basis"), ("installation_included", "Installation included"), ("price_kind", "Price kind"), ("evidence_snippet", "Evidence / notes"),
+              ("source_type", "Source type"), ("new_item_type", "New item type (create a catalogue item)"), ("cost_code", "Trade code (cost code)"), ("confidence", "Confidence")]
 
 
 # Keyword suggestions for headings that are not an exact synonym (never used to import by themselves: the person confirms the mapping).
@@ -229,18 +235,35 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
     seen: set[str] = set()
     not_filled = unchanged = replaces = 0
     replace_map: dict = {}
+    new_items: dict = {}
     for rn, r in rows:
         d = dict(r)
         if d.get("resource_id") and str(d.get("original_price") if d.get("original_price") is not None else "").strip() == "":
             not_filled += 1                                   # a pre-listed resource whose price was left blank: stays missing, is not a candidate and not an error
             continue
+        new_item = None
+        if not d.get("resource_id") and d.get("new_item_type"):                       # the person asked, row by row, for a new catalogue item to be created for this price
+            nt = str(d["new_item_type"]).strip().lower()
+            ures = registry(db).resolve(d.get("unit"))
+            if nt not in rates_svc.RESOURCE_TYPES or not d.get("description") or ures.status != "ok":
+                errors.append({"row": rn, "errors": ["a new item needs a type (material, labour, plant, equipment or subcontract), a description and a unit the system understands"]})
+                continue
+            if d.get("cost_code") and not db.one("SELECT 1 FROM cost_codes WHERE code=?", (d["cost_code"],)):
+                errors.append({"row": rn, "errors": [f"trade code '{d['cost_code']}' is not a known cost code"]})
+                continue
+            found = db.one("SELECT id FROM resources WHERE is_active=1 AND resource_type=? AND description=? AND unit=?", (nt, d["description"], ures.code))
+            if found:
+                d["resource_id"] = found["id"]                                      # the same item was created by an earlier upload: reuse it
+            else:
+                new_item = (nt, d["description"], ures.code, d.get("cost_code") or None)
+        d.pop("new_item_type", None)
         d["source_type"] = d["source_type"] if d.get("source_type") in cand.SOURCE_TYPES else source_type          # a 'Source type' column in the file wins; otherwise the one chosen for the upload
         d["source_name"] = d.get("source_name") or source_name
         d["source_id"] = source_id
         d["source_url"] = d.get("source_url") or source_url or ref
         d["retrieved_at"] = d.get("retrieved_at") or retrieved
         d["extraction_method"] = f"File import ({path.suffix.lstrip('.').upper()}) row {rn}"
-        d["confidence"] = confidence
+        d["confidence"] = d["confidence"] if d.get("confidence") in ("High", "Medium", "Low", "Unverified") else confidence
         d["flags"] = list(extra_flags or [])
         d["evidence_snippet"] = d.get("evidence_snippet") or f"{path.name} row {rn}"
         if not d.get("price_kind"):
@@ -270,11 +293,16 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
         replaces += len(prior_ids)
         ok_rows.append((rn, d))
         replace_map[rn] = prior_ids
+        if new_item:
+            new_items[rn] = new_item
     ids: list[int] = []
     if not dry_run:
         with db.tx():
             for rn, d in ok_rows:
                 try:
+                    if rn in new_items:
+                        nt, desc, un, cc = new_items[rn]
+                        d["resource_id"] = rates_svc.create_resource(db, actor, resource_type=nt, description=desc, unit=un, cost_code=cc)
                     new_id = cand.create_candidate(db, actor, d, manifest_id=None)
                     ids.append(new_id)
                     for old_id in replace_map.get(rn, []):
@@ -282,12 +310,12 @@ def import_rates_file(db: Database, actor, path: Path, *, source_id: str | None 
                 except (ValidationFailed, Conflict) as e:
                     errors.append({"row": rn, "errors": [e.message]})
     parsing = {"file": path.name, "format": path.suffix.lstrip("."), "rows_read": len(rows), "source_type": source_type, "columns": sorted({k for _, r in rows for k in r}),
-               "not_filled_rows": not_filled, "unchanged_rows": unchanged, "replaced_rows": replaces, "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date, "default_tax_basis": default_tax_basis}
+               "not_filled_rows": not_filled, "unchanged_rows": unchanged, "new_items": len(new_items), "replaced_rows": replaces, "mapping": mapping, "header_row": header_row, "default_currency": default_currency, "default_date": default_date, "default_tax_basis": default_tax_basis}
     mid = mf.write_manifest(db, actor, kind="rates", adapter=adapter, source_id=source_id, source_name=source_name, source_url=source_url,
                             original_path=str(path), stored_path=stored, sha=sha, description=description, dry_run=dry_run, parsing=parsing,
                             accepted=len(ids) if not dry_run else len(ok_rows), rejected=len(errors), errors=errors, candidate_ids=ids)
     if ids:
         db.execute(f"UPDATE rate_candidates SET manifest_id=? WHERE id IN ({','.join('?' * len(ids))})", [mid, *ids])
     return {"manifest_id": mid, "dry_run": dry_run, "rows_read": len(rows), "accepted": len(ids) if not dry_run else len(ok_rows),
-            "rejected": len(errors), "not_filled": not_filled, "unchanged": unchanged, "replaces": replaces, "errors": errors, "candidate_ids": ids, "sha256": sha,
+            "rejected": len(errors), "not_filled": not_filled, "unchanged": unchanged, "replaces": replaces, "new_items": len(new_items), "errors": errors, "candidate_ids": ids, "sha256": sha,
             "needs_vat": sum(1 for _, d in ok_rows if d.get("tax_basis") not in ("Included", "Excluded"))}
